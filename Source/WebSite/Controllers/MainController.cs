@@ -26,7 +26,7 @@ using openSPM.Models;
 
 namespace openSPM.Controllers
 {
-    public class HomeController : Controller
+    public class MainController : Controller
     {
         #region [ Members ]
 
@@ -38,7 +38,7 @@ namespace openSPM.Controllers
 
         #region [ Constructors ]
 
-        public HomeController()
+        public MainController()
         {
             // Set default model for pages used by layout
             ViewData.Model = MvcApplication.DefaultModel;
@@ -53,7 +53,7 @@ namespace openSPM.Controllers
         #region [ Methods ]
 
         /// <summary>
-        /// Releases the unmanaged resources used by the <see cref="HomeController"/> object and optionally releases the managed resources.
+        /// Releases the unmanaged resources used by the <see cref="MainController"/> object and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
@@ -74,7 +74,12 @@ namespace openSPM.Controllers
         }
 
         /* [Authorize(Roles = "Administrator")] */
-        public ActionResult Index()
+        public ActionResult Home()
+        {
+            return View();
+        }
+
+        public ActionResult OpenPatch()
         {
             return View();
         }

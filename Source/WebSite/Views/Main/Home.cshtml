@@ -20,10 +20,25 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF
+@using openSPM.Models
+@using Page = openSPM.Models.Page
 @{
-        // Define page name as defined in openSPM database Page table
-        ViewBag.PageName = "home";
+    // Define page name as defined in openSPM database Page table
+    ViewBag.PageName = "home";
+
+    DataContext dataContext = ViewBag.DataContext;
+
+    int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
+    Page page = dataContext.QueryRecord<Page>(pageID);
+
+    Dictionary<string, string> serverConfiguration = (page?.serverConfiguration ?? "").ParseKeyValuePairs();
+    string pageImagePath;
+
+    if (!serverConfiguration.TryGetValue("pageImagePath", out pageImagePath)) {
+        pageImagePath = MvcApplication.GlobalSettings["pageImagePath"].Replace("{pageName}", ViewBag.PageName);
     }
+}
 @section StyleSheets {
     @* Include any page specific style sheets here, these will be added to page header *@
 }

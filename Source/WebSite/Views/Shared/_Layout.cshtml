@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using System.Linq
+@using GSF
 @using openSPM.Models
 @using Page = openSPM.Models.Page
 @{
@@ -28,8 +29,19 @@
     DataContext dataContext = ViewBag.DataContext;
     int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
     Page page = dataContext.QueryRecord<Page>(pageID);
+    Dictionary<string, string> serverConfiguration = (page?.serverConfiguration ?? "").ParseKeyValuePairs();
+    string menuImagePath;
+
+    if (!serverConfiguration.TryGetValue("menuImagePath", out menuImagePath))
+    {
+        menuImagePath = MvcApplication.GlobalSettings["menuImagePath"];
+    }
+
+    menuImagePath = menuImagePath.EnsureEnd('/');
+
     MenuItem[] menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE PageID={0} AND enabled <> 0 ORDER BY sortOrder", pageID).ToArray();
     ViewBag.Title = page?.title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
+
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -98,7 +110,7 @@
                     @*<a href="/" class="navbar-brand" style="margin-left: -30px; font-size: larger; color: white" data-toggle="tooltip" data-placement="bottom" title="@Model.ApplicationDescription">@Model.ApplicationName</a>*@
                 </li>
                 @foreach (MenuItem menuItem in menuItems) {
-                    <li><a href="@menuItem.link"><img src="@menuItem.image" alt="@menuItem.imageAlt">@menuItem.text</a></li>
+                    <li><a href="@menuItem.link"><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</a></li>
                 }
             </ul>
             <footer id="footer">

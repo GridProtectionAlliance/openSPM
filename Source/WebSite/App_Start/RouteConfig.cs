@@ -18,8 +18,8 @@ namespace openSPM
                 url: "{controller}/{action}/{id}",
                 defaults: new
                 {
-                    controller = "Home",
-                    action = "Index",
+                    controller = "Main",
+                    action = "Home",
                     id = UrlParameter.Optional
                 }
             );

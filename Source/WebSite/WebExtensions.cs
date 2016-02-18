@@ -27,6 +27,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Web;
 using GSF;
+using openSPM.Models;
 
 namespace openSPM
 {
@@ -78,6 +79,19 @@ namespace openSPM
         public static Dictionary<string, string> QueryParameters(this HttpRequestMessage request)
         {
             return request.GetQueryNameValuePairs().ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
+        public static Dictionary<string, string> LoadDatabaseSettings(this DataContext dataContext, string scope)
+        {
+            Dictionary<string, string> settings = new Dictionary<string, string>();
+
+            foreach (Settings setting in dataContext.QueryRecords<Settings>("SELECT ID FROM Settings WHERE Scope={0}", scope))
+            {
+                if (!string.IsNullOrEmpty(setting.Name))
+                    settings.Add(setting.Name, setting.Value);
+            }
+
+            return settings;
         }
     }
 }

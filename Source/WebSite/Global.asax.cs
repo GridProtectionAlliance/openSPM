@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -46,6 +47,11 @@ namespace openSPM
         /// </summary>
         public static IHubConnectionContext<dynamic> HubClients => s_clients.Value;
 
+        /// <summary>
+        /// Gets the loaded global settings.
+        /// </summary>
+        public static readonly Dictionary<string, string> GlobalSettings = new Dictionary<string, string>();
+
         private static readonly Lazy<IHubConnectionContext<dynamic>> s_clients = new Lazy<IHubConnectionContext<dynamic>>(() => GlobalHost.ConnectionManager.GetHubContext<DataHub>().Clients);
 
         protected void Application_Start()
@@ -64,11 +70,20 @@ namespace openSPM
             systemSettings.Add("DateTimeFormat", "yyyy-MM-dd HH:mm.ss.fff", "The date/time format to use when rendering timestamps.");
             systemSettings.Add("BootstrapTheme", "/Content/bootstrap.min.css", "Path to Bootstrap CSS to use for rendering styles.");
 
+            using (DataContext dataContext = new DataContext())
+            {
+                // Load global web settings
+                Dictionary<string, string> globalSettings = dataContext.LoadDatabaseSettings("web.global");
+
+                foreach (KeyValuePair<string, string> item in globalSettings)
+                    GlobalSettings.Add(item.Key, item.Value);
+            }
+
             // Load default model settings
             DefaultModel.CompanyName = systemSettings["CompanyName"].Value;
             DefaultModel.CompanyAcronym = systemSettings["CompanyAcronym"].Value;
             DefaultModel.ApplicationName = "openSPM";
-            DefaultModel.ApplicationDescription = "open Secure Patch Management";
+            DefaultModel.ApplicationDescription = "open Security Patch Management";
             DefaultModel.ApplicationKeywords = "open source, utility, software, patch, management";
             DefaultModel.DateTimeFormat = systemSettings["DateTimeFormat"].Value;
             DefaultModel.BootstrapTheme = systemSettings["BootstrapTheme"].Value;

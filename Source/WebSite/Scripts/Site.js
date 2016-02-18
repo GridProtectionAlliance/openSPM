@@ -152,6 +152,10 @@ $(function () {
 
     $("#dismissInfoMsg").click(hideInfoMessage);
     $("#dismissErrorMsg").click(hideErrorMessage);
+    $("#toggleMenu").click(function() {
+        toggleSideBar();
+        $("#toggleIcon").toggleClass("glyphicon-rotate-180");
+    });
 
     // Set initial state of hub dependent controls
     updateHubDependentControlState(false);

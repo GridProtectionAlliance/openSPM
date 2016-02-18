@@ -1,6 +1,7 @@
 ﻿body {
     padding-top: 0;
     padding-bottom: 0;
+    padding-right: 15px;
 }
 
 #pageHeader {
@@ -13,6 +14,19 @@
 
 #error-msg-block {
     margin-top: 20px;
+}
+
+#pageContentWrapper {
+    padding-right: 0;
+    padding-left: 15px;
+}
+
+#footer {   
+    position: fixed;
+    left: 15px;
+    bottom: 0px;
+    height: 30px;
+    color: #cccccc;
 }
 
 /* Override the default bootstrap behavior where horizontal description lists 

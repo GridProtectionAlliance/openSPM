@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  Help.cshtml - Gbtc
+//  Home.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,11 +16,14 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  01/22/2016 - J. Ritchie Carroll
+//  02/18/2016 - Ritchie Carroll
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
 @{
-    ViewBag.PageName = "help";
+    ViewBag.PageName = "adminHome";
 }
-<p>System overview detail.</p>
+<ul class="list-group">
+    <li class="list-group-item">@Html.ActionLink("Edit Pages", "Pages", "Admin")</li>
+    <li class="list-group-item">Edit Value Lists</li>
+</ul>

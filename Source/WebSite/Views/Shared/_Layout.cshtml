@@ -27,8 +27,8 @@
     // Lookup page info based on defined page name
     DataContext dataContext = ViewBag.DataContext;
     int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
-    Page page = dataContext.Table<Page>().LoadRecord(pageID);
-    MenuItem[] menuItems = dataContext.QueryRecords<MenuItem>("SELECT * FROM MenuItem WHERE PageID={0} AND enabled <> 0 ORDER BY sortOrder", pageID).ToArray();
+    Page page = dataContext.QueryRecord<Page>(pageID);
+    MenuItem[] menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE PageID={0} AND enabled <> 0 ORDER BY sortOrder", pageID).ToArray();
     ViewBag.Title = page?.title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
 }
 <!DOCTYPE html>
@@ -95,7 +95,7 @@
             <ul class="sidebar-nav">
                 <li class="sidebar-brand">
                     <img class="pull-left" style="padding: 12px 10px 10px 20px" alt="@Model.ApplicationName" src="/Images/@(Model.ApplicationName).png">
-                    <a href="/" class="navbar-brand" style="margin-left: -30px; font-size: larger; color: white" data-toggle="tooltip" data-placement="bottom" title="@Model.ApplicationDescription">@Model.ApplicationName</a>
+                    @*<a href="/" class="navbar-brand" style="margin-left: -30px; font-size: larger; color: white" data-toggle="tooltip" data-placement="bottom" title="@Model.ApplicationDescription">@Model.ApplicationName</a>*@
                 </li>
                 @foreach (MenuItem menuItem in menuItems) {
                     <li><a href="@menuItem.link"><img src="@menuItem.image" alt="@menuItem.imageAlt">@menuItem.text</a></li>
@@ -106,7 +106,7 @@
             </footer>
         </div>
         <!-- /#sidebarWrapper -->
-        <button type="button" class="btn btn-link btn-lg" id="toggleMenu"><span class="glyphicon glyphicon-expand glyphicon-rotate-180" id="toggleIcon"></span></button>
+        <button type="button" class="btn btn-link btn-sm" id="toggleMenu" title="Toggle Menu"><span class="glyphicon glyphicon-expand glyphicon-flip-horizontal" id="toggleIcon"></span></button>
         <!--#pageContentWrapper -->
         <div class="container theme-showcase" role="main" id="pageContentWrapper">
             <div class="page-header" id="pageHeader">

@@ -95,9 +95,9 @@ function showInfoMessage(message, timeout) {
 function calculateRemainingBodyHeight() {
     // Calculation based on content in _Layout.cshtml
     return $(window).height() -
+        $("#pageWrapper").paddingHeight() -
         $("#pageContentWrapper").paddingHeight() -
-        $("#pageHeader").outerHeight(true) -
-        ($(window).width() < 768 ? 30 : 5);
+        $("#pageHeader").outerHeight(true) - 85;
 }
 
 function hubConnected() {
@@ -154,7 +154,6 @@ $(function () {
     $("#dismissErrorMsg").click(hideErrorMessage);
     $("#toggleMenu").click(function() {
         toggleSideBar();
-        $("#toggleIcon").toggleClass("glyphicon-rotate-180");
     });
 
     // Set initial state of hub dependent controls
@@ -202,6 +201,19 @@ $(function () {
     $.connection.hub.start().done(function () {
         hubConnected();
     });
+
+    // Create hub client functions for message control
+    dataHubClient.sendInfoMessage = function (message, timeout) {
+        // Html encode message
+        const encodedMessage = $("<div />").text(message).html();
+        showInfoMessage(encodedMessage, timeout);
+    }
+
+    dataHubClient.sendErrorMessage = function (message, timeout) {
+        // Html encode message
+        const encodedMessage = $("<div />").text(message).html();
+        showErrorMessage(encodedMessage, timeout);
+    }
 
     $(window).on("beforeunload", function () {
         if (!hubIsConnected || hubIsConnecting)

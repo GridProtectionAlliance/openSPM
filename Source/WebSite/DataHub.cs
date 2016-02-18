@@ -21,6 +21,8 @@
 //
 //******************************************************************************************************
 
+using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using GSF.Data;
 using GSF.Identity;
@@ -75,6 +77,9 @@ namespace openSPM
 
         public override Task OnConnected()
         {
+            // Store the current connection ID for this thread
+            s_connectionID.Value = Context.ConnectionId;
+
             s_connectCount++;
             MvcApplication.LogStatusMessage($"DataHub connect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
             return base.OnConnected();
@@ -90,6 +95,82 @@ namespace openSPM
 
             return base.OnDisconnected(stopCalled);
         }
+
+        #region [ Page Table Operations ]
+
+        public int QueryPageCount()
+        {
+            return m_dataContext.Table<Page>().QueryRecordCount();
+        }
+
+        public IEnumerable<Page> QueryPages(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<Page>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        public void DeletePage(int id)
+        {
+            m_dataContext.Table<Page>().DeleteRecord(id);
+        }
+
+        public Page NewPage()
+        {
+            return new Page();
+        }
+
+        public void AddNewPage(Page page)
+        {
+            m_dataContext.Table<Page>().AddNewRecord(page);
+        }
+
+        public void UpdatePage(Page page)
+        {
+            m_dataContext.Table<Page>().UpdateRecord(page);
+        }
+
+        #endregion
+
+        #region [ MenuItem Table Operations ]
+
+        public IEnumerable<MenuItem> QueryMenuItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "PageID = {0}",
+                Parameters = new object[] { parentID }
+            });
+        }
+
+        public int QueryMenuItemCount(int parentID)
+        {
+            return m_dataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction
+            {
+                FilterExpression = "PageID = {0}",
+                Parameters = new object[] { parentID }
+            });
+        }
+
+        public void DeleteMenuItem(int id)
+        {
+            m_dataContext.Table<MenuItem>().DeleteRecord(id);
+        }
+
+        public MenuItem NewMenuItem()
+        {
+            return new MenuItem();
+        }
+
+        public void AddNewMenuItem(MenuItem menuItem)
+        {
+            m_dataContext.Table<MenuItem>().AddNewRecord(menuItem);
+        }
+
+        public void UpdateMenuItem(MenuItem menuItem)
+        {
+            m_dataContext.Table<MenuItem>().UpdateRecord(menuItem);
+        }
+
+        #endregion
 
         // Example DataHub Table Operations
         #region [ Company Table Operations ]
@@ -135,8 +216,14 @@ namespace openSPM
 
         #region [ Static ]
 
+        /// <summary>
+        /// Gets the hub connection ID for the current thread.
+        /// </summary>
+        public static string CurrentConnectionID => s_connectionID.Value;
+
         // Static Fields
         private static volatile int s_connectCount;
+        private static readonly ThreadLocal<string> s_connectionID = new ThreadLocal<string>();
 
         #endregion
     }

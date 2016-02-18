@@ -22,11 +22,14 @@
 //******************************************************************************************************
 
 using System;
+using System.Threading;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using GSF;
 using GSF.Configuration;
+using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
 
 namespace openSPM
@@ -37,6 +40,13 @@ namespace openSPM
         /// Gets the default model used for the application.
         /// </summary>
         public static readonly AppModel DefaultModel = new AppModel();
+
+        /// <summary>
+        /// Gets the list of currently connected hub clients.
+        /// </summary>
+        public static IHubConnectionContext<dynamic> HubClients => s_clients.Value;
+
+        private static readonly Lazy<IHubConnectionContext<dynamic>> s_clients = new Lazy<IHubConnectionContext<dynamic>>(() => GlobalHost.ConnectionManager.GetHubContext<DataHub>().Clients);
 
         protected void Application_Start()
         {
@@ -71,7 +81,28 @@ namespace openSPM
         /// <param name="type">Type of message to log.</param>
         public static void LogStatusMessage(string message, UpdateType type = UpdateType.Information)
         {
-            //DisplayStatusMessage(message, type);
+            ThreadPool.QueueUserWorkItem(state =>
+            {
+                string connectionID = state as string;
+
+                if (!string.IsNullOrEmpty(connectionID))
+                {
+                    if (type == UpdateType.Information)
+                        HubClients.Client(connectionID).sendInfoMessage(message, 3000);
+                    else
+                        HubClients.Client(connectionID).sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
+                }
+#if DEBUG
+                else
+                {
+                    Thread.Sleep(1500);
+                    if (type == UpdateType.Information)
+                        HubClients.All.sendInfoMessage(message, 3000);
+                    else
+                        HubClients.All(connectionID).sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
+                }
+#endif
+            }, DataHub.CurrentConnectionID);
         }
 
         /// <summary>
@@ -80,8 +111,22 @@ namespace openSPM
         /// <param name="ex">Exception to log.</param>
         public static void LogException(Exception ex)
         {
-            //base.LogException(ex);
-            //DisplayStatusMessage($"{ex.Message}", UpdateType.Alarm);
+            ThreadPool.QueueUserWorkItem(state =>
+            {
+                string connectionID = state as string;
+
+                if (!string.IsNullOrEmpty(connectionID))
+                {
+                    HubClients.Client(connectionID).sendErrorMessage(ex.Message, -1);
+                }
+#if DEBUG
+                else
+                {
+                    Thread.Sleep(1500);
+                    HubClients.All.sendErrorMessage(ex.Message, -1);
+                }
+#endif
+            }, DataHub.CurrentConnectionID);
         }
     }
 }

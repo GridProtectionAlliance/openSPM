@@ -37,24 +37,34 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Required]
         [StringLength(32)]
         public string name
         {
             get; set;
         }
 
+        [Required]
         [StringLength(32)]
         public string title
         {
             get; set;
         }
+
+        [Required]
         public int minViewLevel
         {
             get; set;
         }
 
-        [StringLength(512)]
-        public string configurationString
+        [StringLength(1024)]
+        public string serverConfiguration
+        {
+            get; set;
+        }
+
+        [StringLength(1024)]
+        public string clientConfiguration
         {
             get; set;
         }

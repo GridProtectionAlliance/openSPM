@@ -28,6 +28,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Web;
+using System.Web.Hosting;
 using GSF;
 using GSF.Collections;
 using GSF.Data;
@@ -96,12 +97,12 @@ namespace openSPM.Models
         /// <summary>
         /// Gets the input field razor template file name.
         /// </summary>
-        public string AddInputFieldTemplate => m_addInputFieldTemplate ?? (m_addInputFieldTemplate = VirtualPathUtility.ToAbsolute("~/Views/Shared/AddInputField.cshtml"));
+        public string AddInputFieldTemplate => m_addInputFieldTemplate ?? (m_addInputFieldTemplate = HostingEnvironment.MapPath("~/Views/Shared/AddInputField.cshtml"));
 
         /// <summary>
         /// Gets the select field razor template file name.
         /// </summary>
-        public string AddSelectFieldTemplate => m_addSelectFieldTemplate ?? (m_addSelectFieldTemplate = VirtualPathUtility.ToAbsolute("~/Views/Shared/AddSelectField.cshtml"));
+        public string AddSelectFieldTemplate => m_addSelectFieldTemplate ?? (m_addSelectFieldTemplate = HostingEnvironment.MapPath("~/Views/Shared/AddSelectField.cshtml"));
 
         /// <summary>
         /// Gets validation pattern and error message for rendered fields, if any.
@@ -116,6 +117,17 @@ namespace openSPM.Models
         public TableOperations<T> Table<T>() where T : class, new()
         {
             return m_tableOperations.GetOrAdd(typeof(T), type => new TableOperations<T>(Connection)) as TableOperations<T>;
+        }
+
+        /// <summary>
+        /// Queries a new modeled table record using the specified <paramref name="primaryKeys"/>.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <param name="primaryKeys">Primary keys values of the record to load.</param>
+        /// <returns>New modeled table record queried from the specified <paramref name="primaryKeys"/>.</returns>
+        public T QueryRecord<T>(params object[] primaryKeys) where T : class, new()
+        {
+            return Table<T>().LoadRecord(primaryKeys);
         }
 
         /// <summary>

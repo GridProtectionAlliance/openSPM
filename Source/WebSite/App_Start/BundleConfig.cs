@@ -48,7 +48,7 @@ namespace openSPM
                         "~/Scripts/respond.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/signalR").Include(
-                        "~/Scripts/jquery.signalR-{version}.min.js"));
+                        "~/Scripts/jquery.signalR-2.2.0.min.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/gsf.web.client").Include(
                         "~/Scripts/gsf.web.client.js"));
@@ -59,7 +59,7 @@ namespace openSPM
             bundles.Add(new ScriptBundle("~/js.bundle/pagedViewModel").Include(
                         "~/Scripts/bootstrap-toolkit.min.js",
                         "~/Scripts/knockout-3.4.0.js",
-                        "~/Scripts/knockout.mapping.js",
+                        "~/Scripts/knockout.mapping-latest.js",
                         "~/Scripts/knockout.validation.min.js",
                         "~/Scripts/ko-reactor.min.js",
                         "~/Scripts/ko.observableDictionary.js",

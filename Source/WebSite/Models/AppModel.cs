@@ -23,7 +23,7 @@
 
 namespace openSPM.Models
 {
-    // Custom models should inherit from or at least contain the same properties as AppModel,
+    // Custom view models should inherit from or at least contain the same properties as AppModel as
     // these properties are used by _Layout.cshtml.
     public class AppModel
     {

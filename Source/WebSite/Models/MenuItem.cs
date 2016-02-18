@@ -36,16 +36,19 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Required]
         public int PageID
         {
             get; set;
         }
 
+        [Required]
         public int minViewLevel
         {
             get; set;
         }
 
+        [Required]
         [StringLength(256)]
         public string image
         {
@@ -58,6 +61,7 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Required]
         [StringLength(20)]
         public string text
         {

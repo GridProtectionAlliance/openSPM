@@ -26,7 +26,23 @@
     left: 15px;
     bottom: 0px;
     height: 30px;
-    color: #cccccc;
+    color: #A8A8A8;
+}
+
+#toggleMenu {
+    position: fixed;
+    top: -2px;
+    right: 0;
+    z-index: 9999;
+    color: #A8A8A8;
+    padding: 0;
+    margin: 0;
+    border: 0px solid transparent;
+    outline: none !important;
+}
+
+#pageControlsRow {
+    padding-bottom: 10px
 }
 
 /* Override the default bootstrap behavior where horizontal description lists 
@@ -149,24 +165,21 @@ label.disabled {
 
 /* Style for controls to fill page height minus spacing header and possible messages */
 .fill-height {
-    height: calc(100% - 35px);
-    height: -o-calc(100% - 35px);
-    height: -webkit-calc(100% - 35px);
-    height: -moz-calc(100% - 35px);
+    height: 100%;
 }
 
 .fill-height-one-message {
-    height: calc(100% - 108px);
-    height: -o-calc(100% - 108px);
-    height: -webkit-calc(100% - 108px);
-    height: -moz-calc(100% - 108px);
+    height: calc(100% - 73px);
+    height: -o-calc(100% - 73px);
+    height: -webkit-calc(100% - 73px);
+    height: -moz-calc(100% - 73px);
 }
 
 .fill-height-two-messages {
-    height: calc(100% - 180px);
-    height: -o-calc(100% - 180px);
-    height: -webkit-calc(100% - 180px);
-    height: -moz-calc(100% - 180px);
+    height: calc(100% - 145px);
+    height: -o-calc(100% - 145px);
+    height: -webkit-calc(100% - 145px);
+    height: -moz-calc(100% - 145px);
 }
 
 /* Style for content wells with dynamic content, e.g., variable rows */

@@ -24,6 +24,8 @@
 @using System.Collections.Generic
 @using System.Text
 @using GSF
+@using openSPM.Models
+@using Page = openSPM.Models.Page
 @{
     StringBuilder pageControlScripts = ViewBag.PageControlScripts;
 
@@ -143,7 +145,7 @@
                     <span data-bind="visible: recordMode()===RecordMode.View">View</span>
                     <span data-bind="visible: recordMode()===RecordMode.Edit">Edit</span>
                     <span data-bind="visible: recordMode()===RecordMode.AddNew">Add New</span>
-                    @SingularForm(ViewBag.Title)
+                    @SingularForm(ViewBag.Title ?? "")
                 </h4>
             </div>
             <div class="modal-body auto-height"  data-bind="with: currentRecord, validationOptions: {messageTemplate: 'validationMessageTemplate'}, css: {'modal-readonly': recordMode()===RecordMode.View}">

@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Hosting;
 using RazorEngine;
 using RazorEngine.Configuration;
 using RazorEngine.Templating;
@@ -172,14 +173,14 @@ namespace openSPM.Models
             {
                 Language = languageType.TargetLanguage,
                 CachingProvider = cachingProvider,
-                TemplateManager = new WatchingResolvePathTemplateManager(new[] { VirtualPathUtility.ToAbsolute("~/Views/Shared/") }, cachingProvider),
+                TemplateManager = new WatchingResolvePathTemplateManager(new[] { HostingEnvironment.MapPath("~/Views/Shared/") }, cachingProvider),
                 Debug = true
             });
 #else
             s_engineService = RazorEngineService.Create(new TemplateServiceConfiguration
             {
                 Language  = languageType.TargetLanguage,
-                TemplateManager = new ResolvePathTemplateManager(new[] { VirtualPathUtility.ToAbsolute("~/Views/Shared/") }),
+                TemplateManager = new ResolvePathTemplateManager(new[] { HostingEnvironment.MapPath("~/Views/Shared/") }),
                 Debug = false
             });
 #endif

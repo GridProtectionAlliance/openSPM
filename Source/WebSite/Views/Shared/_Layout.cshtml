@@ -34,10 +34,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>openSPM - @ViewBag.Title</title>
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -49,10 +45,10 @@
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
     <link href="@Model.BootstrapTheme" rel="stylesheet">
     @if (Model.BootstrapTheme.EndsWith("bootstrap.min.css")) {
-    <link href="/Content/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="~/Content/bootstrap-theme.min.css" rel="stylesheet">
     }
-    <link href="/Content/bootstrap-sidebar.css" rel="stylesheet" />
-    <link href="/Content/Site.css" rel="stylesheet" />
+    @Styles.Render("~/css.bundle/bootstrap")
+    @Styles.Render("~/css.bundle/site")
     @RenderSection("StyleSheets", false)
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -80,7 +76,7 @@
     <meta name="msapplication-square150x150logo" content="/Images/Icons/mstile-150x150.png" />
     <meta name="msapplication-wide310x150logo" content="/Images/Icons/mstile-310x150.png" />
     <meta name="msapplication-square310x310logo" content="/Images/Icons/mstile-310x310.png" />
-    @Scripts.Render("~/bundles/modernizr")
+    @Scripts.Render("~/js.bundle/modernizr")
     <script>
         const DateTimeFormat = "@Model.DateTimeFormat";
     </script>
@@ -139,14 +135,12 @@
         </footer>
     </div>
     <!-- /#pageWrapper -->
-    @Scripts.Render("~/bundles/jquery")
-    <script src="/Scripts/bootstrap.min.js"></script>
-    <script src="/Scripts/ie10-viewport-bug-workaround.js"></script>
-    <script src="/Scripts/respond.js"></script>
-    <script src="/Scripts/jquery.signalR-2.2.0.min.js"></script>
-    <script src="/Scripts/gsf.web.client.js"></script>
+    @Scripts.Render("~/js.bundle/jquery")
+    @Scripts.Render("~/js.bundle/bootstrap")
+    @Scripts.Render("~/js.bundle/signalR")
+    @Scripts.Render("~/js.bundle/gsf.web.client")
     <script src="/signalr/hubs"></script>
-    <script src="/Scripts/Site.js"></script>
+    @Scripts.Render("~/js.bundle/site")
     @RenderSection("Scripts", false)
 </body>
 </html>

@@ -27,15 +27,9 @@
 @{
     StringBuilder pageControlScripts = ViewBag.PageControlScripts;
 
+    pageControlScripts.Append(Scripts.Render("~/js.bundle/pagedViewModel"));
+
     pageControlScripts.Append(@"
-    <script src=""Scripts/bootstrap-toolkit.min.js""></script>
-    <script src=""Scripts/knockout-3.4.0.js""></script>
-    <script src=""Scripts/knockout.mapping.js""></script>
-    <script src=""Scripts/knockout.validation.min.js""></script>
-    <script src=""Scripts/ko-reactor.min.js""></script>
-    <script src=""Scripts/ko.observableDictionary.js""></script>
-    <script src=""Scripts/js.cookie.js""></script>
-    <script src=""Scripts/pagedViewModel.js""></script>
     <script id=""validationMessageTemplate"" type=""text/html""><!--
         --><em class=""validationPrompt"" data-bind=""validationMessage: field""></em>
     </script>

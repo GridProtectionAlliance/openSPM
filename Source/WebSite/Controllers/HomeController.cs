@@ -31,7 +31,7 @@ namespace openSPM.Controllers
         #region [ Members ]
 
         // Fields
-        private DataContext m_dataContext;
+        private readonly DataContext m_dataContext;
         private bool m_disposed;
 
         #endregion

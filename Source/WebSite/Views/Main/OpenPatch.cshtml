@@ -21,9 +21,25 @@
 //
 //*****************************************************************************************************@
 @using openSPM.Models
+@using System.Data
+
 @model AppModel
 @{
-    ViewBag.PageName = "openPatch";
+  
+    ViewBag.PageName = "OpenPatch";
+    DataContext dataContext = ViewBag.DataContext;
+    int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
+
+    DataTable testtable = dataContext.Connection.RetrieveData("SELECT * from fn_ListValues('impact')");
+
+
+
+
 }
 
-<span>Do stuff here...</span>
+<span>@pageID</span><br />
+
+@foreach (DataRow item in testtable.Rows)
+{
+    @item["name"]<br />
+}

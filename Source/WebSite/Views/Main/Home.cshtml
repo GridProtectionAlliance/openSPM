@@ -26,7 +26,7 @@
 @model AppModel
 @{
     // Define page name as defined in openSPM database Page table
-    ViewBag.PageName = "home";
+    ViewBag.PageName = "Home";
 
 
     // DataContext is the "database connection" that is available for the page, you can
@@ -44,7 +44,7 @@
     string imagePath;
 
     if (!serverConfiguration.TryGetValue("imagePath", out imagePath)) {
-        if (Model.Global.PageDefaults.TryGetValue("imagePath", out imagePath) && !string.IsNullOrEmpty(imagePath)) {
+        if (Model.Global.PageDefaultSettings.TryGetValue("imagePath", out imagePath) && !string.IsNullOrEmpty(imagePath)) {
             imagePath = imagePath.Replace("{pageName}", ViewBag.PageName ?? "");
         }
         else {

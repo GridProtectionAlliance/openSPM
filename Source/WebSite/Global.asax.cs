@@ -76,17 +76,17 @@ namespace openSPM
             using (DataContext dataContext = new DataContext())
             {
                 // Load global web settings
-                Dictionary<string, string> appGlobals = dataContext.LoadDatabaseSettings("app.global");
-                global.ApplicationName = appGlobals["applicationName"];
-                global.ApplicationDescription = appGlobals["applicationDescription"];
-                global.ApplicationKeywords = appGlobals["applicationKeywords"];
-                global.BootstrapTheme = appGlobals["bootstrapTheme"];
+                Dictionary<string, string> appSetting = dataContext.LoadDatabaseSettings("app.setting");
+                global.ApplicationName = appSetting["applicationName"];
+                global.ApplicationDescription = appSetting["applicationDescription"];
+                global.ApplicationKeywords = appSetting["applicationKeywords"];
+                global.BootstrapTheme = appSetting["bootstrapTheme"];
 
                 // Load default page settings
                 Dictionary<string, string> pageDefaults = dataContext.LoadDatabaseSettings("page.default");
 
                 foreach (KeyValuePair<string, string> item in pageDefaults)
-                    global.PageDefaults.Add(item.Key, item.Value);
+                    global.PageDefaultSettings.Add(item.Key, item.Value);
             }
         }
 

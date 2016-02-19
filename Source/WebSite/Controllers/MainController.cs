@@ -84,6 +84,11 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult UpdatePatch()
+        {
+            return View();
+        }
+
         public ActionResult Help()
         {
             return View();

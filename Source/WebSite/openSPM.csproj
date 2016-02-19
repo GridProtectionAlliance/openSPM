@@ -190,6 +190,7 @@
     </Compile>
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\DataContext.cs" />
+    <Compile Include="Models\GlobalSettings.cs" />
     <Compile Include="Models\MenuItem.cs" />
     <Compile Include="Models\ModelExtensions.cs" />
     <Compile Include="Models\Page.cs" />

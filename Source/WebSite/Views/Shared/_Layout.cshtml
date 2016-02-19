@@ -24,24 +24,54 @@
 @using GSF
 @using openSPM.Models
 @using Page = openSPM.Models.Page
+@model AppModel
 @{
     // Lookup page info based on defined page name
     DataContext dataContext = ViewBag.DataContext;
     int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
     Page page = dataContext.QueryRecord<Page>(pageID);
-    Dictionary<string, string> serverConfiguration = (page?.serverConfiguration ?? "").ParseKeyValuePairs();
-    string menuImagePath;
 
-    if (!serverConfiguration.TryGetValue("menuImagePath", out menuImagePath))
-    {
-        menuImagePath = MvcApplication.GlobalSettings["menuImagePath"];
+    // Load layout settings
+    Dictionary<string, string> layoutSettings = dataContext.LoadDatabaseSettings("layout.setting");
+    string pageTitle, menuImagePath, copyrightText, copyrightUrl, setting;
+    bool showCopyright;
+
+    showCopyright = (layoutSettings.TryGetValue("showCopyright", out setting) && setting.ParseBoolean());
+
+    if (!layoutSettings.TryGetValue("copyrightText", out copyrightText)) {
+        copyrightText = "Copyright © 2016, Grid Protection Alliance";
+    }
+
+    if (!layoutSettings.TryGetValue("copyrightUrl", out copyrightUrl)) {
+        copyrightUrl = "/Main/Contact";
+    }
+
+    // Lookup desired menuImagePath for current page
+    Dictionary<string, string> serverConfiguration = (page?.serverConfiguration ?? "").ParseKeyValuePairs();
+
+    // Look for overridden menuImagePath from server configuration string, otherwise use page default
+    if (!serverConfiguration.TryGetValue("menuImagePath", out menuImagePath)) {
+        if (!layoutSettings.TryGetValue("menuImagePath", out menuImagePath)) {
+            menuImagePath = "/Images/Menu/";
+        }
     }
 
     menuImagePath = menuImagePath.EnsureEnd('/');
 
+    // Load menu items for this page from database table
     MenuItem[] menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE PageID={0} AND enabled <> 0 ORDER BY sortOrder", pageID).ToArray();
-    ViewBag.Title = page?.title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
 
+    // Define ViewBag.CustomTitle in page code for custom page titles
+    if (ViewBag.CustomTitle == null) {
+        ViewBag.Title = page?.title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
+        pageTitle = ViewBag.Title;
+    }
+    else {
+        pageTitle = ViewBag.CustomTitle;
+    }
+
+    // Add ViewBag.ShowMenu = false to page code to hide side-bar menu
+    bool showMenu = ViewBag.ShowMenu ?? true;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -50,13 +80,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     @* The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags *@
-    <title>@Model.ApplicationName - @ViewBag.Title</title>
-    <meta name="application-name" content="@Model.ApplicationName" />
-    <meta name="description" content="@Model.ApplicationDescription" />
-    <meta name="keywords" content="@Model.ApplicationKeywords" />
+    <title>@Model.Global.ApplicationName - @pageTitle</title>
+    <meta name="application-name" content="@Model.Global.ApplicationName" />
+    <meta name="description" content="@Model.Global.ApplicationDescription" />
+    <meta name="keywords" content="@Model.Global.ApplicationKeywords" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <link href="@Model.BootstrapTheme" rel="stylesheet">
-    @if (Model.BootstrapTheme.EndsWith("bootstrap.min.css")) {
+    <link href="@Model.Global.BootstrapTheme" rel="stylesheet">
+    @if (Model.Global.BootstrapTheme.EndsWith("bootstrap.min.css")) {
     <link href="~/Content/bootstrap-theme.min.css" rel="stylesheet">
     }
     @Styles.Render("~/css.bundle/bootstrap")
@@ -90,34 +120,37 @@
     <meta name="msapplication-square310x310logo" content="/Images/Icons/mstile-310x310.png" />
     @Scripts.Render("~/js.bundle/modernizr")
     <script>
-        const DateTimeFormat = "@Model.DateTimeFormat";
+        const DateTimeFormat = "@Model.Global.DateTimeFormat";
     </script>
 </head>
 <body>
     <!-- #pageWrapper -->
-    <div id="pageWrapper">
-        <!-- #sidebarWrapper -->
-        <div id="sidebarWrapper">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <ul class="sidebar-nav">
-                <li class="sidebar-brand" title="@Model.ApplicationDescription">
-                    <a href="/" class="navbar-brand" style="margin-top: -5px"><img class="pull-left" style="padding: 12px 10px 10px 20px" alt="@Model.ApplicationName" src="/Images/@(Model.ApplicationName).png"></a>
-                </li>
-                @foreach (MenuItem menuItem in menuItems) {
-                    <li><a href="@menuItem.link"><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</a></li>
-                }
-            </ul>
-            <footer id="footer">
-                <p>&copy; @DateTime.Now.Year - @Html.ActionLink("Grid Protection Alliance", "Contact", "Home")</p>
-            </footer>
-        </div>
-        <!-- /#sidebarWrapper -->
-        <button type="button" class="btn btn-link btn-sm" id="toggleMenu" title="Toggle Menu"><span class="glyphicon glyphicon-expand glyphicon-flip-horizontal" id="toggleIcon"></span></button>
+    <div id="pageWrapper"@Html.Raw(showMenu ? "" : " class=\"toggled\"")>
+        @if (showMenu) {
+            <!-- #sidebarWrapper -->
+            <div id="sidebarWrapper">
+                <ul class="sidebar-nav">
+                    <li class="sidebar-brand" title="@Model.Global.ApplicationDescription">
+                        <a href="/" class="navbar-brand" style="margin-top: -5px"><img class="pull-left" style="padding: 12px 10px 10px 20px" alt="@Model.Global.ApplicationName" src="/Images/@(Model.Global.ApplicationName).png"></a>
+                    </li>
+                    @foreach (MenuItem menuItem in menuItems) {
+                        <li><a href="@menuItem.link"><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</a></li>
+                    }
+                </ul>
+                @* TODO: Move this button to inside-right of side-bar and float-left on close *@
+                <button type="button" class="btn btn-link btn-sm" id="toggleMenu" title="Toggle Menu"><span class="glyphicon glyphicon-expand glyphicon-flip-horizontal" id="toggleIcon"></span></button>
+                <footer id="footer">
+                    @if (showCopyright) {
+                        <p><a href="@copyrightUrl">@copyrightText</a>
+                        </p>
+                    }
+                </footer>
+            </div>
+            <!-- /#sidebarWrapper -->
+        }
+        else {
+            <div id="sidebarWrapper" style="display: none"></div>
+        }
         <!--#pageContentWrapper -->
         <div class="container theme-showcase" role="main" id="pageContentWrapper">
             <div class="page-header" id="pageHeader">
@@ -137,9 +170,10 @@
                     <span id="error-msg-text"></span>
                 </div>
                 <h3>
-                    @ViewBag.Title <small class="pull-right" id="titleText" style="margin-top: 8px"></small>
+                    @pageTitle <small class="pull-right" id="titleText" style="margin-top: 8px"></small>
                 </h3>
             </div>
+            @* ReSharper disable once PossibleNullReferenceException *@
             <!-- Page Body for @Request.Url.AbsolutePath -->
             @RenderBody()
 
@@ -151,6 +185,7 @@
     @Scripts.Render("~/js.bundle/bootstrap")
     @Scripts.Render("~/js.bundle/signalR")
     @Scripts.Render("~/js.bundle/gsf.web.client")
+    @* ReSharper disable once Html.PathError *@
     <script src="/signalr/hubs"></script>
     @Scripts.Render("~/js.bundle/site")
     @RenderSection("Scripts", false)

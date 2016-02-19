@@ -22,26 +22,28 @@
 //*****************************************************************************************************@
 @using System
 @using System.Collections.Generic
+@using System.Collections.Specialized
 @using System.Net.Http
 @using System.Text
 @using GSF
 @using GSF.Identity
 @using openSPM.Models
 @using Page = System.Web.UI.Page
+@model AppModel
 @{
-    ViewBag.Title = "MenuItem";
-    ViewBag.PageName = "adminMenuItem";
-
-    var parameters = Request.QueryString;
+    NameValueCollection parameters = Request.QueryString;
     int parentID = int.Parse(parameters["ID"]);
 
-    ViewBag.Title = parameters["Name"] + " Menu Items";
+    ViewBag.CustomTitle = "Edit Menu Items for \"" + parameters["Name"] + "\" Page";
+    ViewBag.Title = "Page Menu Item";
+    ViewBag.ShowMenu = false;
     ViewBag.PageControlScripts = new StringBuilder();
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { null, "Image", "text-center valign-middle" },
-        new[] { "text", "Text", "text-center" },
+        new[] { "text", "Menu Text", "text-left" },
+        new[] { "link", "URL", "text-left" },
+        new[] { "sortOrder", "Sort&nbsp;Order", "text-center" },
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -49,8 +51,9 @@
 }
 @helper BodyRows()
 {
-    <td width="5%" class="text-center valign-middle"><img data-bind="attr: {src: deriveImageSource(image), title: imageAlt}"></td>
-    <td width="90%" class="text-left"><button type="button" class="btn btn-link" data-bind="text: text, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left valign-middle" nowrap><img data-bind="attr: {src: deriveImageSource(image), title: imageAlt}">&nbsp;<button type="button" class="btn btn-link" data-bind="text: text, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(link)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(link, 2)"></div></a></td>
+    <td width="15%" class="text-center valign-middle" data-bind="text: sortOrder"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -59,11 +62,10 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("title", inputLabel: "Title"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("text", inputLabel: "Menu Text"))
         @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("minViewLevel", "number", "Minimum View Level"))
         @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("image", inputLabel: "Image Source"))
         @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("imageAlt", inputLabel: "Image Alternate Text"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("text", inputLabel: "Menu Text"))
     </div>
     <div class="col-md-6">
         @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("link", "url", "URL"))
@@ -119,20 +121,21 @@
         });
 
         function deriveImageSource(imageFileName) {
-            return "@(MvcApplication.GlobalSettings["menuImagePath"].EnsureEnd('/').JavaScriptEncode())" + imageFileName;
+            // TODO: Lookup proper images path...
+            return "/Images/Menu/" + imageFileName;
         }
 
         $(function() {
             $("#addNewEditDialog").on("shown.bs.modal", function () {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#editTasksDialog", window.parent.document).find("button[data-dismiss]");
+                const dismissButtons = $("#editMenuItemDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.prop("disabled", true);
                 dismissButtons.invisible();
             });
 
             $("#addNewEditDialog").on("hidden.bs.modal", function () {
                 // On add/edit dialog hidden, re-enable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#editTasksDialog", window.parent.document).find("button[data-dismiss]");
+                const dismissButtons = $("#editMenuItemDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.visible();
                 dismissButtons.prop("disabled", false);
             });

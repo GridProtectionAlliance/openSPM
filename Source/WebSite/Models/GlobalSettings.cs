@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  AppModel.cs - Gbtc
+//  GlobalSettings.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,24 +16,59 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/17/2016 - J. Ritchie Carroll
+//  02/19/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
+using System.Collections.Generic;
+
 namespace openSPM.Models
 {
-    // Custom view models should inherit from AppModel because the "Global" property is used by _Layout.cshtml
-    public class AppModel
+    public class GlobalSettings
     {
-        public AppModel()
-        {
-            Global = MvcApplication.DefaultModel != null ? MvcApplication.DefaultModel.Global : new GlobalSettings();
-        }
-
-        public GlobalSettings Global
+        public string CompanyName
         {
             get;
+            set;
         }
+
+        public string CompanyAcronym
+        {
+            get;
+            set;
+        }
+
+        public string ApplicationName
+        {
+            get;
+            set;
+        }
+
+        public string ApplicationDescription
+        {
+            get;
+            set;
+        }
+
+        public string ApplicationKeywords
+        {
+            get;
+            set;
+        }
+
+        public string DateTimeFormat
+        {
+            get;
+            set;
+        }
+
+        public string BootstrapTheme
+        {
+            get;
+            set;
+        }
+
+        public readonly Dictionary<string, string> PageDefaults = new Dictionary<string, string>();
     }
 }

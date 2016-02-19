@@ -81,7 +81,8 @@ namespace openSPM
             s_connectionID.Value = Context.ConnectionId;
 
             s_connectCount++;
-            MvcApplication.LogStatusMessage($"DataHub connect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
+
+            //MvcApplication.LogStatusMessage($"DataHub connect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
             return base.OnConnected();
         }
 
@@ -90,7 +91,8 @@ namespace openSPM
             if (stopCalled)
             {
                 s_connectCount--;
-                MvcApplication.LogStatusMessage($"DataHub disconnect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
+
+                //MvcApplication.LogStatusMessage($"DataHub disconnect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
             }
 
             return base.OnDisconnected(stopCalled);

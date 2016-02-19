@@ -47,11 +47,6 @@ namespace openSPM
         /// </summary>
         public static IHubConnectionContext<dynamic> HubClients => s_clients.Value;
 
-        /// <summary>
-        /// Gets the loaded global settings.
-        /// </summary>
-        public static readonly Dictionary<string, string> GlobalSettings = new Dictionary<string, string>();
-
         private static readonly Lazy<IHubConnectionContext<dynamic>> s_clients = new Lazy<IHubConnectionContext<dynamic>>(() => GlobalHost.ConnectionManager.GetHubContext<DataHub>().Clients);
 
         protected void Application_Start()
@@ -61,32 +56,38 @@ namespace openSPM
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
+            GlobalSettings global = DefaultModel.Global;
 
-            // Make sure openSPM specific default service settings exist
+            // Make sure openSPM specific default config file service settings exist
             CategorizedSettingsElementCollection systemSettings = ConfigurationFile.Current.Settings["systemSettings"];
 
+            systemSettings.Add("ConnectionString", "Data Source=DBSERVERNAME; Initial Catalog=openSPM; Integrated Security=SSPI", "Configuration connection string.");
+            systemSettings.Add("DataProviderString", "AssemblyName={System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089}; ConnectionType=System.Data.SqlClient.SqlConnection; AdapterType=System.Data.SqlClient.SqlDataAdapter", "Configuration database ADO.NET data provider assembly type creation string used");
             systemSettings.Add("CompanyName", "Grid Protection Alliance", "The name of the company who owns this instance of the openMIC.");
             systemSettings.Add("CompanyAcronym", "GPA", "The acronym representing the company who owns this instance of the openMIC.");
             systemSettings.Add("DateTimeFormat", "yyyy-MM-dd HH:mm.ss.fff", "The date/time format to use when rendering timestamps.");
-            systemSettings.Add("BootstrapTheme", "/Content/bootstrap.min.css", "Path to Bootstrap CSS to use for rendering styles.");
 
+            // Load default configuration file based model settings
+            global.CompanyName = systemSettings["CompanyName"].Value;
+            global.CompanyAcronym = systemSettings["CompanyAcronym"].Value;
+            global.DateTimeFormat = systemSettings["DateTimeFormat"].Value;
+
+            // Load database driven model settings
             using (DataContext dataContext = new DataContext())
             {
                 // Load global web settings
-                Dictionary<string, string> globalSettings = dataContext.LoadDatabaseSettings("web.global");
+                Dictionary<string, string> appGlobals = dataContext.LoadDatabaseSettings("app.global");
+                global.ApplicationName = appGlobals["applicationName"];
+                global.ApplicationDescription = appGlobals["applicationDescription"];
+                global.ApplicationKeywords = appGlobals["applicationKeywords"];
+                global.BootstrapTheme = appGlobals["bootstrapTheme"];
 
-                foreach (KeyValuePair<string, string> item in globalSettings)
-                    GlobalSettings.Add(item.Key, item.Value);
+                // Load default page settings
+                Dictionary<string, string> pageDefaults = dataContext.LoadDatabaseSettings("page.default");
+
+                foreach (KeyValuePair<string, string> item in pageDefaults)
+                    global.PageDefaults.Add(item.Key, item.Value);
             }
-
-            // Load default model settings
-            DefaultModel.CompanyName = systemSettings["CompanyName"].Value;
-            DefaultModel.CompanyAcronym = systemSettings["CompanyAcronym"].Value;
-            DefaultModel.ApplicationName = "openSPM";
-            DefaultModel.ApplicationDescription = "open Security Patch Management";
-            DefaultModel.ApplicationKeywords = "open source, utility, software, patch, management";
-            DefaultModel.DateTimeFormat = systemSettings["DateTimeFormat"].Value;
-            DefaultModel.BootstrapTheme = systemSettings["BootstrapTheme"].Value;
         }
 
         /// <summary>

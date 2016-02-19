@@ -23,23 +23,33 @@
 @using GSF
 @using openSPM.Models
 @using Page = openSPM.Models.Page
+@model AppModel
 @{
     // Define page name as defined in openSPM database Page table
     ViewBag.PageName = "home";
 
 
-    // TODO: If all pages need this functionality, move code to "_Layout.cshtml" and store result in ViewBag, e.g., ViewBag.PageImagePath
-
+    // DataContext is the "database connection" that is available for the page, you can
+    // use direct database calls, e.g., dataContect.Connection.RetrieveData(...) or you
+    // can use model based table operations, e.g., dataContext.QueryRecord<Page>(id)
     DataContext dataContext = ViewBag.DataContext;
 
+    // TODO: Determine if the following "imagePath" logic needs to be in all pages...
+    // If all pages need the following functionality, move code to "_Layout.cshtml" and
+    // store result in ViewBag, e.g., ViewBag.ImagePath
     int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
     Page page = dataContext.QueryRecord<Page>(pageID);
 
     Dictionary<string, string> serverConfiguration = (page?.serverConfiguration ?? "").ParseKeyValuePairs();
-    string pageImagePath;
+    string imagePath;
 
-    if (!serverConfiguration.TryGetValue("pageImagePath", out pageImagePath)) {
-        pageImagePath = MvcApplication.GlobalSettings["pageImagePath"].Replace("{pageName}", ViewBag.PageName);
+    if (!serverConfiguration.TryGetValue("imagePath", out imagePath)) {
+        if (Model.Global.PageDefaults.TryGetValue("imagePath", out imagePath) && !string.IsNullOrEmpty(imagePath)) {
+            imagePath = imagePath.Replace("{pageName}", ViewBag.PageName ?? "");
+        }
+        else {
+            imagePath = $"/Images/{ViewBag.PageName ?? ""}";
+        }
     }
 }
 @section StyleSheets {
@@ -48,9 +58,14 @@
 @section Scripts {
     @* Include any page specific scripts here, these will be added to scripts at bottom of page *@
 }
+@* Bootstrap "row" consists of 12-columns by default *@
 <div class="row">
+    @* Bootstrap "column" with default targeting for medium sized screens, spanning 4 columns *@
     <div class="col-md-4">
+        @* Bootstrap "button" with "primary" styling *@
         <button class="btn btn-primary" onclick="showInfoMessage('Test Info Message!', -1)">Info Test</button>
+
+        @* Bootstrap "button" with "danger" styling *@
         <button class="btn btn-danger" onclick="showErrorMessage('Test Error Message!', -1)">Error Test</button>
 
         <h2>Getting started</h2>
@@ -62,12 +77,14 @@
         <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a>
         </p>
     </div>
+    @* Bootstrap "column" with default targeting for medium sized screens, spanning 4 columns *@
     <div class="col-md-4">
         <h2>Get more libraries</h2>
         <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
         <p><a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a>
         </p>
     </div>
+    @* Bootstrap "column" with default targeting for medium sized screens, spanning 4 columns *@
     <div class="col-md-4">
         <h2>Web Hosting</h2>
         <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>

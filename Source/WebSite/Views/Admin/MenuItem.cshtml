@@ -32,8 +32,7 @@
     ViewBag.Title = "MenuItem";
     ViewBag.PageName = "adminMenuItem";
 
-    HttpRequestMessage request = ViewBag.Request;
-    Dictionary<string, string> parameters = request.QueryParameters();
+    var parameters = Request.QueryString;
     int parentID = int.Parse(parameters["ID"]);
 
     ViewBag.Title = parameters["Name"] + " Menu Items";
@@ -42,7 +41,7 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { null, "Image", "text-center valign-middle" },
-        new[] { "text", "Text", "text-left" },
+        new[] { "text", "Text", "text-center" },
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -50,8 +49,8 @@
 }
 @helper BodyRows()
 {
-    <td width="35%" class="text-left valign-middle"><img data-bind="attr: {src: image, title: imageAlt}"></td>
-    <td width="60%" class="text-center"><button type="button" class="btn btn-link" data-bind="text: text, click: $parent.viewPageRecord"></button></td>
+    <td width="5%" class="text-center valign-middle"><img data-bind="attr: {src: deriveImageSource(image), title: imageAlt}"></td>
+    <td width="90%" class="text-left"><button type="button" class="btn btn-link" data-bind="text: text, click: $parent.viewPageRecord"></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -61,14 +60,20 @@
 {
     <div class="col-md-6">
         @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("title", inputLabel: "Title"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("minViewLevel", "number", "Minimum View Level"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("minViewLevel", "number", "Minimum View Level"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("image", inputLabel: "Image Source"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("imageAlt", inputLabel: "Image Alternate Text"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("text", inputLabel: "Menu Text"))
     </div>
     <div class="col-md-6">
-    </div>
-    <div class="col-md-12">
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("link", "url", "URL"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("sortOrder", "number", "Sort Order"))
         <div class="form-group">
-            <label for="textConnectionString">Task Settings:</label>
-            <textarea class="form-control" rows="2" data-bind="text: Settings" id="textConnectionString" readonly></textarea>
+            <label for="textDescription">Description:</label>
+            <textarea class="form-control" rows="2" data-bind="text: description, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="textDescription"></textarea>
+        </div>
+        <div class="checkbox">
+            <label><input type="checkbox" data-bind="checked: enabled, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Enabled</label>
         </div>
     </div>
 }
@@ -112,6 +117,10 @@
             // Initialize selected connection profile ID
             observableRecord.PageID(@parentID);
         });
+
+        function deriveImageSource(imageFileName) {
+            return "@(MvcApplication.GlobalSettings["menuImagePath"].EnsureEnd('/').JavaScriptEncode())" + imageFileName;
+        }
 
         $(function() {
             $("#addNewEditDialog").on("shown.bs.modal", function () {

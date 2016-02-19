@@ -84,6 +84,11 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult MenuItem()
+        {
+            return View();
+        }
+
         #endregion
     }
 }

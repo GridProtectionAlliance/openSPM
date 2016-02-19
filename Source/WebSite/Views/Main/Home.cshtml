@@ -27,6 +27,9 @@
     // Define page name as defined in openSPM database Page table
     ViewBag.PageName = "home";
 
+
+    // TODO: If all pages need this functionality, move code to "_Layout.cshtml" and store result in ViewBag, e.g., ViewBag.PageImagePath
+
     DataContext dataContext = ViewBag.DataContext;
 
     int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;

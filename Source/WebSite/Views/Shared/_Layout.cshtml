@@ -127,6 +127,7 @@
     <div id="pageWrapper"@Html.Raw(pageHasMenu ? "" : " class=\"toggled\"")>
         @if (pageHasMenu) {
             <!-- #sidebarWrapper -->
+            <button type="button" class="btn btn-link btn-sm" id="toggleMenuButton" title="Toggle Menu"><span class="glyphicon glyphicon-expand" id="toggleMenuIcon"></span></button>
             <div id="sidebarWrapper">
                 <ul class="sidebar-nav">
                     <li class="sidebar-brand" title="@Model.Global.ApplicationDescription">
@@ -141,8 +142,6 @@
                         }
                     }
                 </ul>
-                @* TODO: Move this button to inside-right of side-bar and float-left on close, or make only visible when sidebar is closed *@
-                <button type="button" class="btn btn-link btn-sm" id="toggleMenu" title="Toggle Menu"><span class="glyphicon glyphicon-expand" id="toggleIcon"></span></button>
                 <footer id="footer">
                     @if (showCopyright) {
                         <p class="small"><a href="@copyrightUrl">@copyrightText</a></p>

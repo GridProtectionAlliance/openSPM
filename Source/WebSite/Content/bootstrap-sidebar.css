@@ -3,7 +3,7 @@
  * Code licensed under the Apache License v2.0.
  * For details, see http://www.apache.org/licenses/LICENSE-2.0.
  *
- * JRC: Modified tagged ID labels during openSPM inclusion
+ * JRC: Modified tagged ID labels and added toggle menu button/icon behaviors
  */
 
 /* Toggle Styles */
@@ -47,41 +47,46 @@
     margin-right: -250px;
 }
 
-#toggleMenu {
+#toggleMenuButton {
     position: fixed;
     z-index: 9999;
     top: -1px;
-    right: 0px;
+    left: 1px;
     color: #A8A8A8;
     padding: 0;
     margin: 0;
     border: 0px solid transparent;
     outline: none !important;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
-#pageWrapper.toggled #toggleMenu {
-    position: absolute;
-    z-index: 9999;
-    top: -2px;
-    right: 1px;
+#pageWrapper.toggled #toggleMenuButton {
+    left: 235px;
 }
 
-#toggleIcon {
-  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
-  -webkit-transform: scale(1, -1);
-  -moz-transform: scale(1, -1);
-  -ms-transform: scale(1, -1);
-  -o-transform: scale(1, -1);
-  transform: scale(1, -1);
+#toggleMenuIcon {
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
+    -webkit-transform: scale(1, -1);
+    -moz-transform: scale(1, -1);
+    -ms-transform: scale(1, -1);
+    -o-transform: scale(1, -1);
+    transform: scale(1, -1);
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
-#pageWrapper.toggled #toggleIcon {
-  filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1);
-  -webkit-transform: scale(-1, 1);
-  -moz-transform: scale(-1, 1);
-  -ms-transform: scale(-1, 1);
-  -o-transform: scale(-1, 1);
-  transform: scale(-1, 1);
+#pageWrapper.toggled #toggleMenuIcon {
+    filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1);
+    -webkit-transform: scale(-1, 1);
+    -moz-transform: scale(-1, 1);
+    -ms-transform: scale(-1, 1);
+    -o-transform: scale(-1, 1);
+    transform: scale(-1, 1);
 }
 
 /* Sidebar Styles */
@@ -141,35 +146,30 @@
         padding-left: 0;
     }
 
-    #toggleMenu {
-        position: absolute;
-        top: -2px;
-        right: 1px;
+    #toggleMenuButton {
+        left: 235px;
+    }
+    
+    #pageWrapper.toggled #toggleMenuButton {
+        left: 1px;
     }
 
-    #pageWrapper.toggled #toggleMenu {
-        position: fixed;
-        z-index: 9999;
-        top: -1px;
-        right: 0px;
+    #toggleMenuIcon {
+        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1);
+        -webkit-transform: scale(-1, 1);
+        -moz-transform: scale(-1, 1);
+        -ms-transform: scale(-1, 1);
+        -o-transform: scale(-1, 1);
+        transform: scale(-1, 1);
     }
 
-    #toggleIcon {
-      filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=0, mirror=1);
-      -webkit-transform: scale(-1, 1);
-      -moz-transform: scale(-1, 1);
-      -ms-transform: scale(-1, 1);
-      -o-transform: scale(-1, 1);
-      transform: scale(-1, 1);
-    }
-
-    #pageWrapper.toggled #toggleIcon {
-      filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
-      -webkit-transform: scale(1, -1);
-      -moz-transform: scale(1, -1);
-      -ms-transform: scale(1, -1);
-      -o-transform: scale(1, -1);
-      transform: scale(1, -1);
+    #pageWrapper.toggled #toggleMenuIcon {
+        filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=2, mirror=1);
+        -webkit-transform: scale(1, -1);
+        -moz-transform: scale(1, -1);
+        -ms-transform: scale(1, -1);
+        -o-transform: scale(1, -1);
+        transform: scale(1, -1);
     }
 
     #sidebarWrapper {

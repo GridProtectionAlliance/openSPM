@@ -152,7 +152,7 @@ $(function () {
 
     $("#dismissInfoMsg").click(hideInfoMessage);
     $("#dismissErrorMsg").click(hideErrorMessage);
-    $("#toggleMenu").click(function() {
+    $("#toggleMenuButton").click(function () {
         toggleSideBar();
     });
 

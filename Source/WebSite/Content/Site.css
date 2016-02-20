@@ -5,7 +5,7 @@
 }
 
 #pageHeader {
-    margin-top: -30px;
+    margin-top: -20px;
 }
 
 #info-msg-block {
@@ -16,29 +16,12 @@
     margin-top: 20px;
 }
 
-#pageContentWrapper {
-    padding-right: 0;
-    padding-left: 15px;
-}
-
 #footer {   
     position: fixed;
     left: 15px;
     bottom: 0px;
     height: 30px;
     color: #A8A8A8;
-}
-
-#toggleMenu {
-    position: fixed;
-    top: -2px;
-    right: 0;
-    z-index: 9999;
-    color: #A8A8A8;
-    padding: 0;
-    margin: 0;
-    border: 0px solid transparent;
-    outline: none !important;
 }
 
 #pageControlsRow {

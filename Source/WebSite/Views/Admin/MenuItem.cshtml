@@ -36,7 +36,7 @@
 
     ViewBag.CustomTitle = "Edit Menu Items for \"" + parameters["Name"] + "\" Page";
     ViewBag.Title = "Page Menu Item";
-    ViewBag.ShowMenu = false;
+    ViewBag.PageHasMenu = false;
     ViewBag.PageControlScripts = new StringBuilder();
 
     ViewBag.HeaderColumns = new[]
@@ -62,21 +62,16 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("text", inputLabel: "Menu Text"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("minViewLevel", "number", "Minimum View Level"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("image", inputLabel: "Image Source"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("imageAlt", inputLabel: "Image Alternate Text"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("text"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("minViewLevel"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("image"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("imageAlt"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("link", "url", "URL"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("sortOrder", "number", "Sort Order"))
-        <div class="form-group">
-            <label for="textDescription">Description:</label>
-            <textarea class="form-control" rows="2" data-bind="text: description, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="textDescription"></textarea>
-        </div>
-        <div class="checkbox">
-            <label><input type="checkbox" data-bind="checked: enabled, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Enabled</label>
-        </div>
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("link", inputType: "url"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<MenuItem>("sortOrder"))
+        @Html.Raw(ViewBag.DataContext.AddTextAreaField<MenuItem>("description", rows: 3))
+        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<MenuItem>("enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")

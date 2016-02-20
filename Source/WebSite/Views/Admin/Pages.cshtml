@@ -26,10 +26,6 @@
 @model AppModel
 @section StyleSheets {
     <style>
-        html, body {
-            height: 100%;
-        }
-
         .popup-ok-button {
             position: absolute;
             right: 8px;
@@ -47,9 +43,9 @@
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "name", "Name", "text-left" },
+        new[] { "ID", "ID", "text-center" },
+        new[] { "name", "&nbsp;&nbsp;&nbsp;Name", "text-left" },
         new[] { "title", "Title", "text-left" },
-        new[] { "Description", "Description", "text-left" },
         new[] { null, "Menu&nbsp;Items", "text-center" }
     };
 
@@ -58,10 +54,10 @@
 }
 @helper BodyRows()
 {
-    <td width="20%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: name, click: $parent.viewPageRecord"></button></td>
-    <td width="30%" class="text-left valign-middle"data-bind="text: title"></td>
-    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(description, 2), attr: {title: description}"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openMenuItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'menuItemMode' + ID}">Add</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getMenuItemCount(ID), attr: {id: 'menuItemCount' + ID}">0</span></button></td>
+    <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
+    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: name, click: $parent.viewPageRecord"></button></td>
+    <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(title, 1.5), attr: {title: title}"></div></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openMenuItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'menuItemMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getMenuItemCount(ID), attr: {id: 'menuItemCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -70,22 +66,15 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("name", inputLabel: "Name"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("title", inputLabel: "Title"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("minViewLevel", "number", "Minimum View Level"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("serverConfiguration", inputLabel: "Server-side Configuration Parameters"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("name"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("title"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("minViewLevel"))
+        @Html.Raw(ViewBag.DataContext.AddTextAreaField<Page>("serverConfiguration"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("clientConfiguration", inputLabel: "Client-side Configuration Parameters"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("description", inputLabel: "Description"))
-
-        <div class="form-group">
-            <label for="textDescription">Description:</label>
-            <textarea class="form-control" rows="2" data-bind="text: description, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="textDescription"></textarea>
-        </div>
-        <div class="checkbox">
-            <label><input type="checkbox" data-bind="checked: enabled, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Enabled</label>
-        </div>
+        @Html.Raw(ViewBag.DataContext.AddTextAreaField<Page>("clientConfiguration"))
+        @Html.Raw(ViewBag.DataContext.AddTextAreaField<Page>("description", rows: 3))
+        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<Page>("enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -136,18 +125,29 @@
         function getMenuItemCount(pageID) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.queryMenuItemCount(pageID).done(function (count) {
-                    $("#menuItemMode" + pageID).text(count > 0 ? "Edit" : "Add");
-                    $("#menuItemCount" + pageID).text(count);
+                    const menuItemMode = $("#menuItemMode" + pageID);
+                    const menuItemCount = $("#menuItemCount" + pageID);
+                    const modeText = count > 0 ? "Edit" : "Add";
+
+                    if (menuItemMode.text() !== modeText)
+                        menuItemMode.text(modeText);
+
+                    if (menuItemCount.text() !== count.toString())
+                        menuItemCount.text(count.toString());
                 });
             }
 
             return "0";
         }
 
-        $(window).resize(function () {
-            setTimeout(function () {
-                $("#editMenuItemFrame").attr("height", ($("#contentWell").outerHeight(true) - 50) + "px");
-            }, 1500);
+        //$(window).resize(function () {
+        //    setTimeout(function () {
+        //        $("#editMenuItemFrame").attr("height", ($("#contentWell").outerHeight(true) - 50) + "px");
+        //    }, 1500);
+        //});
+
+        $(viewModel).on("pageRecordsQueried", function (event) {
+            $("#editMenuItemFrame").attr("height", ($("#contentWell").outerHeight(true) - 50) + "px");
         });
 
         function openMenuItemEditor(record) {

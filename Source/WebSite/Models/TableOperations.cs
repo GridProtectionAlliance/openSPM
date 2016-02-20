@@ -335,6 +335,21 @@ namespace openSPM.Models
             return null;
         }
 
+        /// <summary>
+        /// Gets the <see cref="Type"/> for the specified field.
+        /// </summary>
+        /// <param name="fieldName">Field name to retrieve.</param>
+        /// <returns>Field <see cref="Type"/> or <c>null</c> if field is not found.</returns>
+        public Type GetFieldType(string fieldName)
+        {
+            PropertyInfo property;
+
+            if (s_properties.TryGetValue(fieldName, out property))
+                return property.PropertyType;
+
+            return null;
+        }
+
         #endregion
 
         #region [ Static ]

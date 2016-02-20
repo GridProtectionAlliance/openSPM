@@ -38,6 +38,7 @@ namespace openSPM.Models
         }
 
         [Required]
+        [Label("Name")]
         [StringLength(32)]
         public string name
         {
@@ -45,40 +46,44 @@ namespace openSPM.Models
         }
 
         [Required]
+        [Label("Title")]
         [StringLength(32)]
         public string title
         {
             get; set;
         }
 
-        [Required]
+        [Label("Minimum View Level")]
         public int minViewLevel
         {
             get; set;
         }
 
+        [Label("Server-side Configuration Parameters")]
         [StringLength(1024)]
         public string serverConfiguration
         {
             get; set;
         }
 
+        [Label("Client-side Configuration Parameters")]
         [StringLength(1024)]
         public string clientConfiguration
         {
             get; set;
         }
 
+        [Label("Description")]
         [StringLength(512)]
         public string description
         {
             get; set;
         }
 
+        [Label("Enabled")]
         public bool enabled
         {
             get; set;
         }
-
     }
 }

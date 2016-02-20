@@ -584,6 +584,7 @@ $.fn.paddingWidth = function () {
     return this.outerWidth(true) - this.width();
 }
 
+// Cell truncations should only be used with .table-cell-hard-wrap style
 $.fn.truncateToWidth = function (text, rows) {
     if (isEmpty(text))
         return "";
@@ -597,7 +598,7 @@ $.fn.truncateToWidth = function (text, rows) {
     var textWidth = textMetrics.measureText(text).width;
 
     if (rows > 1)
-        targetWidth *= ((isIE ? 0.65 : 0.90) * rows);
+        targetWidth *= ((isIE ? 0.45 : 0.75) * rows);
 
     var limit = Math.min(text.length, Math.ceil(targetWidth / (textWidth / text.length)));
 

@@ -34,9 +34,8 @@
     // Load layout settings
     Dictionary<string, string> layoutSettings = dataContext.LoadDatabaseSettings("layout.setting");
     string pageTitle, menuImagePath, copyrightText, copyrightUrl, setting;
-    bool showCopyright;
 
-    showCopyright = (layoutSettings.TryGetValue("showCopyright", out setting) && setting.ParseBoolean());
+    bool showCopyright = (layoutSettings.TryGetValue("showCopyright", out setting) && setting.ParseBoolean());
 
     if (!layoutSettings.TryGetValue("copyrightText", out copyrightText)) {
         copyrightText = "Copyright © 2016, Grid Protection Alliance";
@@ -70,8 +69,8 @@
         pageTitle = ViewBag.CustomTitle;
     }
 
-    // Add ViewBag.ShowMenu = false to page code to hide side-bar menu
-    bool showMenu = ViewBag.ShowMenu ?? true;
+    // Add ViewBag.PageHasMenu = false to page code to disable side-bar menu on page
+    bool pageHasMenu = ViewBag.PageHasMenu ?? true;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -125,8 +124,8 @@
 </head>
 <body>
     <!-- #pageWrapper -->
-    <div id="pageWrapper"@Html.Raw(showMenu ? "" : " class=\"toggled\"")>
-        @if (showMenu) {
+    <div id="pageWrapper"@Html.Raw(pageHasMenu ? "" : " class=\"toggled\"")>
+        @if (pageHasMenu) {
             <!-- #sidebarWrapper -->
             <div id="sidebarWrapper">
                 <ul class="sidebar-nav">
@@ -134,11 +133,16 @@
                         <a href="/" class="navbar-brand" style="margin-top: -5px"><img class="pull-left" style="padding: 12px 10px 10px 20px" alt="@Model.Global.ApplicationName" src="/Images/@(Model.Global.ApplicationName).png"></a>
                     </li>
                     @foreach (MenuItem menuItem in menuItems) {
-                        <li><a href="@menuItem.link"><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</a></li>
+                        if (string.IsNullOrEmpty(menuItem.link)) {
+                            <li><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</li>
+                        }
+                        else {
+                            <li><a href="@menuItem.link"><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</a></li>
+                        }
                     }
                 </ul>
-                @* TODO: Move this button to inside-right of side-bar and float-left on close *@
-                <button type="button" class="btn btn-link btn-sm" id="toggleMenu" title="Toggle Menu"><span class="glyphicon glyphicon-expand glyphicon-flip-horizontal" id="toggleIcon"></span></button>
+                @* TODO: Move this button to inside-right of side-bar and float-left on close, or make only visible when sidebar is closed *@
+                <button type="button" class="btn btn-link btn-sm" id="toggleMenu" title="Toggle Menu"><span class="glyphicon glyphicon-expand" id="toggleIcon"></span></button>
                 <footer id="footer">
                     @if (showCopyright) {
                         <p class="small"><a href="@copyrightUrl">@copyrightText</a></p>

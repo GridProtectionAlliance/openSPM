@@ -197,6 +197,7 @@
     <Compile Include="Models\PagedList.cs" />
     <Compile Include="Models\Patch.cs" />
     <Compile Include="Models\PrimaryKeyAttribute.cs" />
+    <Compile Include="Models\LabelAttribute.cs" />
     <Compile Include="Models\RazorView.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\TableOperations.cs" />
@@ -327,6 +328,8 @@
     <Content Include="Views\Admin\MenuItem.cshtml" />
     <Content Include="Views\Main\OpenPatch.cshtml" />
     <Content Include="Views\Main\UpdatePatch.cshtml" />
+    <Content Include="Views\Shared\AddTextAreaField.cshtml" />
+    <Content Include="Views\Shared\AddCheckBoxField.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

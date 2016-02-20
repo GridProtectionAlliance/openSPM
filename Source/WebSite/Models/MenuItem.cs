@@ -42,13 +42,14 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Required]
+        [Label("Minimum View Level")]
         public int minViewLevel
         {
             get; set;
         }
 
         [Required]
+        [Label("Image Source")]
         [StringLength(256)]
         public string image
         {
@@ -56,35 +57,42 @@ namespace openSPM.Models
         }
 
         [StringLength(32)]
+        [Label("Image Alternate Text")]
         public string imageAlt
         {
             get; set;
         }
 
         [Required]
+        [Label("Menu Text")]
         [StringLength(20)]
         public string text
         {
             get; set;
         }
 
+        [Label("URL")]
         [StringLength(256)]
+        [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
         public string link
         {
             get; set;
         }
 
+        [Label("Sort Order")]
         public int sortOrder
         {
             get; set;
         }
 
+        [Label("Description")]
         [StringLength(512)]
         public string description
         {
             get; set;
         }
 
+        [Label("Enabled")]
         public bool enabled
         {
             get; set;

@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  PrimaryKeyAttribute.cs - Gbtc
+//  LabelAttribute.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -28,18 +28,13 @@ using System;
 namespace openSPM.Models
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class PrimaryKeyAttribute : Attribute
+    public class LabelAttribute : Attribute
     {
-        public readonly bool IsIdentity;
+        public readonly string Label;
 
-        public PrimaryKeyAttribute()
+        public LabelAttribute(string label)
         {
-            IsIdentity = false;
-        }
-
-        public PrimaryKeyAttribute(bool isIdentity)
-        {
-            IsIdentity = isIdentity;
+            Label = label;
         }
     }
 }

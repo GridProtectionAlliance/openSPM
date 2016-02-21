@@ -57,6 +57,18 @@ namespace openSPM.Models
             set;
         }
 
+        public string DateFormat
+        {
+            get;
+            set;
+        }
+
+        public string TimeFormat
+        {
+            get;
+            set;
+        }
+
         public string DateTimeFormat
         {
             get;

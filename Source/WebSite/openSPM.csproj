@@ -190,7 +190,9 @@
     </Compile>
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\DataContext.cs" />
+    <Compile Include="Models\InitialValueAttribute.cs" />
     <Compile Include="Models\GlobalSettings.cs" />
+    <Compile Include="Models\FieldNameAttribute.cs" />
     <Compile Include="Models\MenuItem.cs" />
     <Compile Include="Models\ModelExtensions.cs" />
     <Compile Include="Models\Page.cs" />
@@ -201,11 +203,15 @@
     <Compile Include="Models\RazorView.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\TableOperations.cs" />
+    <Compile Include="Models\ValueList.cs" />
+    <Compile Include="Models\ValueListGroup.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="WebExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\bootstrap-datepicker3.css" />
+    <Content Include="Content\bootstrap-datepicker3.min.css" />
     <Content Include="Content\bootstrap-theme-cerulean.css" />
     <Content Include="Content\bootstrap-theme-cosmo.css" />
     <Content Include="Content\bootstrap-theme-cyborg.css" />
@@ -262,6 +268,8 @@
     <Content Include="Images\StatusLights\magentalight.png" />
     <Content Include="Images\StatusLights\redlight.png" />
     <Content Include="Images\StatusLights\yellowlight.png" />
+    <Content Include="Scripts\bootstrap-datepicker.js" />
+    <Content Include="Scripts\bootstrap-datepicker.min.js" />
     <Content Include="Scripts\bootstrap-toolkit.js" />
     <Content Include="Scripts\bootstrap-toolkit.min.js" />
     <Content Include="Scripts\bootstrap.js" />
@@ -320,16 +328,18 @@
     <Content Include="Views\Main\Contact.cshtml" />
     <Content Include="Views\Main\Home.cshtml" />
     <Content Include="Scripts\knockout.validation.min.js.map" />
-    <Content Include="Views\Shared\AddInputField.cshtml" />
-    <Content Include="Views\Shared\AddSelectField.cshtml" />
+    <Content Include="Views\Shared\Templates\AddInputField.cshtml" />
+    <Content Include="Views\Shared\Templates\AddSelectField.cshtml" />
     <Content Include="Views\Shared\PagedViewModel.cshtml" />
     <Content Include="Views\Admin\Pages.cshtml" />
     <Content Include="Views\Admin\Home.cshtml" />
     <Content Include="Views\Admin\MenuItem.cshtml" />
     <Content Include="Views\Main\OpenPatch.cshtml" />
     <Content Include="Views\Main\UpdatePatch.cshtml" />
-    <Content Include="Views\Shared\AddTextAreaField.cshtml" />
-    <Content Include="Views\Shared\AddCheckBoxField.cshtml" />
+    <Content Include="Views\Shared\Templates\AddTextAreaField.cshtml" />
+    <Content Include="Views\Shared\Templates\AddCheckBoxField.cshtml" />
+    <Content Include="Views\Main\Patches.cshtml" />
+    <Content Include="Views\Shared\Templates\AddDateField.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

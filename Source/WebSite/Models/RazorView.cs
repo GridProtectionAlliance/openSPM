@@ -21,11 +21,15 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Hosting;
+using GSF;
+using GSF.Configuration;
+using GSF.IO;
 using RazorEngine;
 using RazorEngine.Configuration;
 using RazorEngine.Templating;
@@ -157,10 +161,20 @@ namespace openSPM.Models
         // Static Fields
         private static readonly IRazorEngineService s_engineService;
 
+        /// <summary>
+        /// Defines default settings path for template files.
+        /// </summary>
+        public static readonly string TemplatePath;
+
         // Static Constructor
         static RazorView()
         {
             T languageType = new T();
+
+            // Get configured template path
+            CategorizedSettingsElementCollection systemSettings = ConfigurationFile.Current.Settings["systemSettings"];
+            systemSettings.Add("TemplatePath", "~/Views/Shared/Templates/", "Path for data context based field templates.");
+            TemplatePath = HostingEnvironment.MapPath(systemSettings["TemplatePath"].Value).EnsureEnd('/');
 
 #if DEBUG
             // The watching resolve path template manager should not be used in production since
@@ -173,17 +187,35 @@ namespace openSPM.Models
             {
                 Language = languageType.TargetLanguage,
                 CachingProvider = cachingProvider,
-                TemplateManager = new WatchingResolvePathTemplateManager(new[] { HostingEnvironment.MapPath("~/Views/Shared/") }, cachingProvider),
+                TemplateManager = new WatchingResolvePathTemplateManager(new[] { TemplatePath }, cachingProvider),
                 Debug = true
             });
 #else
             s_engineService = RazorEngineService.Create(new TemplateServiceConfiguration
             {
                 Language  = languageType.TargetLanguage,
-                TemplateManager = new ResolvePathTemplateManager(new[] { HostingEnvironment.MapPath("~/Views/Shared/") }),
+                TemplateManager = new ResolvePathTemplateManager(new[] { TemplatePath }),
                 Debug = false
             });
 #endif
+            Task.Run(() =>
+            {
+                string webRootFolder = FilePath.AddPathSuffix(TemplatePath);
+                string[] razorFiles = FilePath.GetFileList($"{webRootFolder}*.{(languageType.TargetLanguage == Language.CSharp ? "cs" : "vb")}html");
+
+                foreach (string fileName in razorFiles)
+                {
+                    try
+                    {
+                        MvcApplication.LogStatusMessage($"Pre-compiling razor template \"{fileName}\"...");
+                        s_engineService.Compile(FilePath.GetFileName(fileName), typeof(AppModel));
+                    }
+                    catch (Exception ex)
+                    {
+                        MvcApplication.LogException(new InvalidOperationException($"Failed to pre-compile razor template \"{fileName}\": {ex.Message}", ex));
+                    }
+                }
+            });
         }
 
         #endregion

@@ -21,10 +21,10 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using GSF.Data;
 using GSF.Identity;
 using Microsoft.AspNet.SignalR;
 using openSPM.Models;
@@ -174,43 +174,43 @@ namespace openSPM
 
         #endregion
 
-        // Example DataHub Table Operations
-        #region [ Company Table Operations ]
+        #region [ Patch Table Operations ]
 
-        //public int QueryCompanyCount()
-        //{
-        //    return m_dataContext.Table<Company>().QueryRecordCount();
-        //}
+        public int QueryPatchCount()
+        {
+            return m_dataContext.Table<Patch>().QueryRecordCount();
+        }
 
-        //public IEnumerable<Company> QueryCompanies(string sortField, bool ascending, int page, int pageSize)
-        //{
-        //    return m_dataContext.Table<Company>().QueryRecords(sortField, ascending, page, pageSize);
-        //}
+        public IEnumerable<Patch> QueryPatches(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+        }
 
-        //public void DeleteCompany(int id)
-        //{
-        //    m_dataContext.Table<Company>().DeleteRecord(id);
-        //}
+        public void DeletePatch(int id)
+        {
+            m_dataContext.Table<Patch>().DeleteRecord(id);
+        }
 
-        //public Company NewCompany()
-        //{
-        //    return new Company();
-        //}
+        public Patch NewPatch()
+        {
+            return new Patch();
+        }
 
-        //public void AddNewCompany(Company company)
-        //{
-        //    company.CreatedBy = UserInfo.CurrentUserID;
-        //    company.CreatedOn = DateTime.UtcNow;
-        //    company.UpdatedBy = company.CreatedBy;
-        //    company.UpdatedOn = company.CreatedOn;
+        public void AddNewPatch(Patch patch)
+        {
+            patch.CreatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
+            patch.CreatedOn = DateTime.UtcNow;
+            patch.UpdatedBy = patch.CreatedBy;
+            patch.UpdatedOn = patch.CreatedOn;
+            m_dataContext.Table<Patch>().AddNewRecord(patch);
+        }
 
-        //    m_dataContext.Table<Company>().AddNewRecord(company);
-        //}
-
-        //public void UpdateCompany(Company company)
-        //{
-        //    m_dataContext.Table<Company>().UpdateRecord(company);
-        //}
+        public void UpdatePatch(Patch patch)
+        {
+            patch.UpdatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
+            patch.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Patch>().UpdateRecord(patch);
+        }
 
         #endregion
 

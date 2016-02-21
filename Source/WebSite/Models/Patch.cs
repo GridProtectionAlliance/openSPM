@@ -37,41 +37,50 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Label("Parent Patch")]
         public int ParentID
         {
             get; set;
         }
 
         [Required]
+        [Label("Source Patch")]
         public int SourceID
         {
             get; set;
         }
 
         [Required]
+        [Label("SPM ID")]
         [StringLength(64)]
         public string SPMidentifier
         {
             get; set;
         }
 
+        [Label("Source ID")]
         [StringLength(64)]
         public string SourceIdentifier
         {
             get; set;
         }
 
+        [Label("Source Date")]
+        [InitialValue("(new Date()) + 30")] // <-- Example set inital value to 30 days from now
         public DateTime dtSource
         {
             get; set;
         }
 
-        [Required]
+        [Label("Impact Value")]
         public int ImpactValue
         {
             get; set;
         }
 
+        [Required]
+        [Label("Submission Date")]
+        [InitialValue("new Date()")]
         public DateTime dtSubmitted
         {
             get; set;
@@ -79,6 +88,12 @@ namespace openSPM.Models
 
         [StringLength(80)]
         public string Title
+        {
+            get; set;
+        }
+
+        [StringLength(512)]
+        public string Target
         {
             get; set;
         }
@@ -100,56 +115,62 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Label("Work Around")]
         [StringLength(1024)]
-        public string WorkAround
+        public string WorkArounds
         {
             get; set;
         }
 
         [StringLength(512)]
+        [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
         public string Link
         {
             get; set;
         }
 
-        [Required]
+        [Label("Alarm Critical Days")]
         public int AlarmCriticalDays
         {
             get; set;
         }
 
         [Required]
+        [Label("Close Out Notes")]
         public string CloseOutNotes
         {
             get; set;
         }
 
+        [Label("Not In Compliance")]
         public bool isNotCompliance
         {
             get; set;
         }
 
         [Required]
-        public DateTime dtCreated
+        public DateTime CreatedOn
         {
             get; set;
         }
 
         [Required]
-        public string CreatedByID
+        [StringLength(184)]
+        public string CreatedBy
         {
             get; set;
         }
 
 
         [Required]
-        public DateTime dtUpdated
+        public DateTime UpdatedOn
         {
             get; set;
         }
 
         [Required]
-        public string UpdatedByID
+        [StringLength(184)]
+        public string UpdatedBy
         {
             get; set;
         }

@@ -167,11 +167,11 @@ namespace openSPM.Models
                 {
                     try
                     {
-                        property.SetValue(record, row.ConvertField(property.Name, property.PropertyType), null);
+                        property.SetValue(record, row.ConvertField(s_fieldNames[property.Name], property.PropertyType), null);
                     }
                     catch (Exception ex)
                     {
-                        MvcApplication.LogException(new InvalidOperationException($"Exception during record load field assignment for \"{typeof(T).Name}.{property.Name} = {row[property.Name]}\": {ex.Message}", ex));
+                        MvcApplication.LogException(new InvalidOperationException($"Exception during record load field assignment for \"{typeof(T).Name}.{property.Name} = {row[s_fieldNames[property.Name]]}\": {ex.Message}", ex));
                     }
                 }
 
@@ -273,7 +273,7 @@ namespace openSPM.Models
                 List<object> values = new List<object>();
 
                 foreach (PropertyInfo property in s_primaryKeyProperties)
-                    values.Add(row[property.Name]);
+                    values.Add(row[s_fieldNames[property.Name]]);
 
                 return values.ToArray();
             }
@@ -293,9 +293,10 @@ namespace openSPM.Models
         /// <returns><c>true</c> if attribute was found; otherwise, <c>false</c>.</returns>
         public bool TryGetFieldAttribute<TAttribute>(string fieldName, out TAttribute attribute) where TAttribute : Attribute
         {
+            string propertyName;
             PropertyInfo property;
 
-            if (s_properties.TryGetValue(fieldName, out property) && property.TryGetAttribute(out attribute))
+            if (s_propertyNames.TryGetValue(fieldName, out propertyName) && s_properties.TryGetValue(propertyName, out property) && property.TryGetAttribute(out attribute))
                 return true;
 
             attribute = default(TAttribute);
@@ -310,10 +311,11 @@ namespace openSPM.Models
         /// <returns><c>true</c> if field has attribute; otherwise, <c>false</c>.</returns>
         public bool FieldHasAttribute<TAttribute>(string fieldName) where TAttribute : Attribute
         {
+            string propertyName;
             PropertyInfo property;
             HashSet<Type> attributes;
 
-            if (s_properties.TryGetValue(fieldName, out property) && s_attributes.TryGetValue(property, out attributes))
+            if (s_propertyNames.TryGetValue(fieldName, out propertyName) && s_properties.TryGetValue(propertyName, out property) && s_attributes.TryGetValue(property, out attributes))
                 return attributes.Contains(typeof(TAttribute));
 
            return false;
@@ -327,9 +329,10 @@ namespace openSPM.Models
         /// <returns>Field value or <c>null</c> if field is not found.</returns>
         public object GetFieldValue(T record, string fieldName)
         {
+            string propertyName;
             PropertyInfo property;
 
-            if (s_properties.TryGetValue(fieldName, out property))
+            if (s_propertyNames.TryGetValue(fieldName, out propertyName) && s_properties.TryGetValue(propertyName, out property))
                 return property.GetValue(record);
 
             return null;
@@ -342,9 +345,10 @@ namespace openSPM.Models
         /// <returns>Field <see cref="Type"/> or <c>null</c> if field is not found.</returns>
         public Type GetFieldType(string fieldName)
         {
+            string propertyName;
             PropertyInfo property;
 
-            if (s_properties.TryGetValue(fieldName, out property))
+            if (s_propertyNames.TryGetValue(fieldName, out propertyName) && s_properties.TryGetValue(propertyName, out property))
                 return property.PropertyType;
 
             return null;
@@ -356,6 +360,8 @@ namespace openSPM.Models
 
         // Static Fields
         private static readonly Dictionary<string, PropertyInfo> s_properties;
+        private static readonly Dictionary<string, string> s_fieldNames;
+        private static readonly Dictionary<string, string> s_propertyNames;
         private static readonly Dictionary<PropertyInfo, HashSet<Type>> s_attributes;
         private static readonly PropertyInfo[] s_addNewProperties;
         private static readonly PropertyInfo[] s_updateProperties;
@@ -388,10 +394,13 @@ namespace openSPM.Models
                 .Where(property => property.CanRead && property.CanWrite)
                 .ToDictionary(property => property.Name, StringComparer.OrdinalIgnoreCase);
 
+            s_fieldNames = s_properties.ToDictionary(kvp => kvp.Key, kvp => GetFieldName(kvp.Value), StringComparer.OrdinalIgnoreCase);
+            s_propertyNames = s_fieldNames.ToDictionary(kvp => kvp.Value, kvp => kvp.Key, StringComparer.OrdinalIgnoreCase);
             s_attributes = new Dictionary<PropertyInfo, HashSet<Type>>();
 
             foreach (PropertyInfo property in s_properties.Values)
             {
+                string fieldName = s_fieldNames[property.Name];
                 PrimaryKeyAttribute primaryKeyAttribute;
                 property.TryGetAttribute(out primaryKeyAttribute);
 
@@ -399,20 +408,20 @@ namespace openSPM.Models
                 {
                     if (!primaryKeyAttribute.IsIdentity)
                     {
-                        addNewFields.Append($"{(addNewFields.Length > 0 ? ", " : "")}{property.Name}");
+                        addNewFields.Append($"{(addNewFields.Length > 0 ? ", " : "")}{fieldName}");
                         addNewFormat.Append($"{(addNewFormat.Length > 0 ? ", " : "")}{{{addNewFieldIndex++}}}");
                         addNewProperties.Add(property);
                     }
 
-                    whereFormat.Append($"{(whereFormat.Length > 0 ? "AND " : "")}{property.Name}={{{primaryKeyIndex++}}}");
-                    primaryKeyFields.Append($"{(primaryKeyFields.Length > 0 ? ", " : "")}{property.Name}");
+                    whereFormat.Append($"{(whereFormat.Length > 0 ? "AND " : "")}{fieldName}={{{primaryKeyIndex++}}}");
+                    primaryKeyFields.Append($"{(primaryKeyFields.Length > 0 ? ", " : "")}{fieldName}");
                     primaryKeyProperties.Add(property);
                 }
                 else
                 {
-                    addNewFields.Append($"{(addNewFields.Length > 0 ? ", " : "")}{property.Name}");
+                    addNewFields.Append($"{(addNewFields.Length > 0 ? ", " : "")}{fieldName}");
                     addNewFormat.Append($"{(addNewFormat.Length > 0 ? ", " : "")}{{{addNewFieldIndex++}}}");
-                    updateFormat.Append($"{(updateFormat.Length > 0 ? ", " : "")}{property.Name}={{{updateFieldIndex++}}}");
+                    updateFormat.Append($"{(updateFormat.Length > 0 ? ", " : "")}{fieldName}={{{updateFieldIndex++}}}");
                     addNewProperties.Add(property);
                     updateproperties.Add(property);
                 }
@@ -439,6 +448,16 @@ namespace openSPM.Models
         }
 
         // Static Methods
+        private static string GetFieldName(PropertyInfo property)
+        {
+            FieldNameAttribute fieldNameAttribute;
+            property.TryGetAttribute(out fieldNameAttribute);
+
+            return !string.IsNullOrEmpty(fieldNameAttribute?.FieldName)
+                ? fieldNameAttribute.FieldName
+                : property.Name;
+        }
+
         private static string KeyList(IReadOnlyList<object> primaryKeys)
         {
             StringBuilder delimitedString = new StringBuilder();

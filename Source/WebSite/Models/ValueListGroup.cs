@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  ModelExtensions.cs - Gbtc
+//  ValueListGroup.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,27 +16,50 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  01/25/2016 - J. Ritchie Carroll
+//  02/21/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
 using System;
-using System.Reflection;
-using GSF.Reflection;
-
-// TODO: Move into GSF
+using System.ComponentModel.DataAnnotations;
 
 namespace openSPM.Models
 {
-    static class ModelExtensions
+    /// <summary>
+    /// Model for openSPM.ValueListGroup table.
+    /// </summary>
+    public class ValueListGroup
     {
-        public static void CopyProperties<T>(this T source, T target)
+        [PrimaryKey(true)]
+        public int ID
         {
-            Type type = typeof(T);
+            get; set;
+        }
 
-            foreach (PropertyInfo property in type.GetProperties())
-                property.SetValue(target, property.GetValue(source, null), null);
+        [Label("Name")]
+        [StringLength(32)]
+        public string name
+        {
+            get; set;
+        }
+
+        [Label("Description")]
+        [StringLength(512)]
+        public string description
+        {
+            get; set;
+        }
+
+        [Label("Enabled")]
+        public bool enabled
+        {
+            get; set;
+        }
+
+        public DateTime dtCreated
+        {
+            get; set;
         }
     }
 }

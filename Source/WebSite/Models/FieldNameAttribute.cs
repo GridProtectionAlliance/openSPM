@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  ModelExtensions.cs - Gbtc
+//  FieldNameAttribute.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,27 +16,25 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  01/25/2016 - J. Ritchie Carroll
+//  01/30/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
 using System;
-using System.Reflection;
-using GSF.Reflection;
 
 // TODO: Move into GSF
 
 namespace openSPM.Models
 {
-    static class ModelExtensions
+    [AttributeUsage(AttributeTargets.Property)]
+    public class FieldNameAttribute : Attribute
     {
-        public static void CopyProperties<T>(this T source, T target)
-        {
-            Type type = typeof(T);
+        public readonly string FieldName;
 
-            foreach (PropertyInfo property in type.GetProperties())
-                property.SetValue(target, property.GetValue(source, null), null);
+        public FieldNameAttribute(string fieldName)
+        {
+            FieldName = fieldName;
         }
     }
 }

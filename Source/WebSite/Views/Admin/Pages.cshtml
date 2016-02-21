@@ -140,12 +140,6 @@
             return "0";
         }
 
-        //$(window).resize(function () {
-        //    setTimeout(function () {
-        //        $("#editMenuItemFrame").attr("height", ($("#contentWell").outerHeight(true) - 50) + "px");
-        //    }, 1500);
-        //});
-
         $(viewModel).on("pageRecordsQueried", function (event) {
             $("#editMenuItemFrame").attr("height", ($("#contentWell").outerHeight(true) - 50) + "px");
         });

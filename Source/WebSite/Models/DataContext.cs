@@ -27,7 +27,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Linq;
 using System.Text;
-using System.Web.Hosting;
 using GSF;
 using GSF.Collections;
 using GSF.Data;
@@ -48,8 +47,11 @@ namespace openSPM.Models
         private AdoDataConnection m_connection;
         private readonly Dictionary<Type, object> m_tableOperations;
         private readonly Dictionary<string, Tuple<string, string>> m_fieldValidationParameters;
+        private readonly List<Tuple<string, string>> m_initialValueInitializers; 
+        private readonly List<string> m_definedDateFields; 
         private readonly string m_settingsCategory;
         private readonly bool m_disposeConnection;
+        private string m_addDateFieldTemplate;
         private string m_addInputFieldTemplate;
         private string m_addTextAreaFieldTemplate;
         private string m_addSelectFieldTemplate;
@@ -70,6 +72,8 @@ namespace openSPM.Models
             m_connection = connection;
             m_tableOperations = new Dictionary<Type, object>();
             m_fieldValidationParameters = new Dictionary<string, Tuple<string, string>>();
+            m_initialValueInitializers = new List<Tuple<string, string>>();
+            m_definedDateFields = new List<string>();
             m_settingsCategory = "systemSettings";
             m_disposeConnection = disposeConnection || connection == null;
         }
@@ -96,29 +100,44 @@ namespace openSPM.Models
         public AdoDataConnection Connection => m_connection ?? (m_connection = new AdoDataConnection(m_settingsCategory));
 
         /// <summary>
+        /// Gets the date field razor template file name.
+        /// </summary>
+        public string AddDateFieldTemplate => m_addDateFieldTemplate ?? (m_addDateFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddDateField.cshtml");
+
+        /// <summary>
         /// Gets the input field razor template file name.
         /// </summary>
-        public string AddInputFieldTemplate => m_addInputFieldTemplate ?? (m_addInputFieldTemplate = HostingEnvironment.MapPath("~/Views/Shared/AddInputField.cshtml"));
+        public string AddInputFieldTemplate => m_addInputFieldTemplate ?? (m_addInputFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddInputField.cshtml");
 
         /// <summary>
         /// Gets the text area field razor template file name.
         /// </summary>
-        public string AddTextAreaFieldTemplate => m_addTextAreaFieldTemplate ?? (m_addTextAreaFieldTemplate = HostingEnvironment.MapPath("~/Views/Shared/AddTextAreaField.cshtml"));
+        public string AddTextAreaFieldTemplate => m_addTextAreaFieldTemplate ?? (m_addTextAreaFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddTextAreaField.cshtml");
 
         /// <summary>
         /// Gets the select field razor template file name.
         /// </summary>
-        public string AddSelectFieldTemplate => m_addSelectFieldTemplate ?? (m_addSelectFieldTemplate = HostingEnvironment.MapPath("~/Views/Shared/AddSelectField.cshtml"));
+        public string AddSelectFieldTemplate => m_addSelectFieldTemplate ?? (m_addSelectFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddSelectField.cshtml");
 
         /// <summary>
         /// Gets the check box field razor template file name.
         /// </summary>
-        public string AddCheckBoxFieldTemplate => m_addCheckBoxFieldTemplate ?? (m_addCheckBoxFieldTemplate = HostingEnvironment.MapPath("~/Views/Shared/AddCheckBoxField.cshtml"));
+        public string AddCheckBoxFieldTemplate => m_addCheckBoxFieldTemplate ?? (m_addCheckBoxFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddCheckBoxField.cshtml");
 
         /// <summary>
         /// Gets validation pattern and error message for rendered fields, if any.
         /// </summary>
         public Dictionary<string, Tuple<string, string>> FieldValidationParameters => m_fieldValidationParameters;
+
+        /// <summary>
+        /// Gets initial value initializers, if any.
+        /// </summary>
+        public List<Tuple<string, string>> InitialValueInitializers => m_initialValueInitializers;
+
+        /// <summary>
+        /// Gets defined date fields, if any.
+        /// </summary>
+        public List<string> DefinedDateFields => m_definedDateFields;
 
         /// <summary>
         /// Gets the table operations for the specified modeled table <typeparamref name="T"/>.
@@ -173,28 +192,48 @@ namespace openSPM.Models
         }
 
         /// <summary>
-        /// Generates template based input text field based on reflected modeled table field attributes.
+        /// Adds a new initial value initializer.
+        /// </summary>
+        /// <param name="fieldName">Field name (as defined in model).</param>
+        /// <param name="initialValue">Javascript based initial value for field.</param>
+        public void AddInitialValueInitializer(string fieldName, string initialValue = null)
+        {
+            m_initialValueInitializers.Add(new Tuple<string, string>(fieldName, initialValue ?? "\"\""));
+        }
+
+        /// <summary>
+        /// Adds a new initial value initializer based on modeled table field attributes.
+        /// </summary>
+        /// <param name="fieldName">Field name (as defined in model).</param>
+        public void AddInitialValueInitializer<T>(string fieldName) where T : class, new()
+        {
+            TableOperations<T> tableOperations = Table<T>();
+            InitialValueAttribute initialValueAttribute;
+
+            if (Table<T>().TryGetFieldAttribute(fieldName, out initialValueAttribute))
+                AddInitialValueInitializer(fieldName, initialValueAttribute.InitialValue);
+        }
+
+        /// <summary>
+        /// Generates template based input date field based on reflected modeled table field attributes.
         /// </summary>
         /// <typeparam name="T">Modeled table.</typeparam>
-        /// <param name="fieldName">Field name for input text field.</param>
+        /// <param name="fieldName">Field name for input date field.</param>
         /// <param name="inputType">Input field type, defaults to text.</param>
-        /// <param name="fieldLabel">Label name for input text field, defaults to <paramref name="fieldName"/>.</param>
-        /// <param name="fieldID">ID to use for input field; defaults to input + <paramref name="fieldName"/>.</param>
+        /// <param name="fieldLabel">Label name for input date field, defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldID">ID to use for input field; defaults to date + <paramref name="fieldName"/>.</param>
         /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
         /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
         /// <param name="requiredDataBinding">Boolean data-bind operation to apply to required state, if any.</param>
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
-        /// <returns>Generated HTML for new input field based on modeled table field attributes.</returns>
-        public string AddInputField<T>(string fieldName, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
+        /// <returns>Generated HTML for new date based input field based on modeled table field attributes.</returns>
+        public string AddDateField<T>(string fieldName, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
         {
             TableOperations<T> tableOperations = Table<T>();
             StringLengthAttribute stringLengthAttribute;
             RegularExpressionAttribute regularExpressionAttribute;
-
-            if (string.IsNullOrEmpty(inputType) && IsNumericType(tableOperations.GetFieldType(fieldName)))
-                inputType = "number";
 
             if (string.IsNullOrEmpty(fieldLabel))
             {
@@ -218,6 +257,107 @@ namespace openSPM.Models
 
                 AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
             }
+
+            AddInitialValueInitializer<T>(fieldName);
+
+            return AddDateField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
+                stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
+        }
+
+        /// <summary>
+        /// Generates template based input date field based on specified parameters.
+        /// </summary>
+        /// <param name="fieldName">Field name for input date field.</param>
+        /// <param name="required">Determines if field name is required.</param>
+        /// <param name="maxLength">Defines maximum input field length.</param>
+        /// <param name="inputType">Input field type, defaults to text.</param>
+        /// <param name="fieldLabel">Label name for input date field, defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldID">ID to use for input field; defaults to date + <paramref name="fieldName"/>.</param>
+        /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
+        /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
+        /// <param name="requiredDataBinding">Boolean data-bind operation to apply to required state, if any.</param>
+        /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
+        /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
+        /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <returns>Generated HTML for new date based input field based on specified parameters.</returns>
+        public string AddDateField(string fieldName, bool required, int maxLength = 0, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null)
+        {
+            RazorView<CSharp> addDateFieldTemplate = new RazorView<CSharp>(AddDateFieldTemplate, MvcApplication.DefaultModel);
+            DynamicViewBag viewBag = addDateFieldTemplate.ViewBag;
+
+            viewBag.AddValue("FieldName", fieldName);
+            viewBag.AddValue("Required", required);
+            viewBag.AddValue("MaxLength", maxLength);
+            viewBag.AddValue("InputType", inputType ?? "text");
+            viewBag.AddValue("FieldLabel", fieldLabel ?? fieldName);
+            viewBag.AddValue("FieldID", fieldID ?? $"date{fieldName}");
+            viewBag.AddValue("GroupDataBinding", groupDataBinding);
+            viewBag.AddValue("LabelDataBinding", labelDataBinding);
+            viewBag.AddValue("RequiredDataBinding", requiredDataBinding);
+            viewBag.AddValue("CustomDataBinding", customDataBinding);
+            viewBag.AddValue("DependencyFieldName", dependencyFieldName);
+            viewBag.AddValue("ToolTip", toolTip);
+
+            m_definedDateFields.Add(fieldName);
+
+            return addDateFieldTemplate.Execute();
+        }
+
+        /// <summary>
+        /// Generates template based input text field based on reflected modeled table field attributes.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <param name="fieldName">Field name for input text field.</param>
+        /// <param name="inputType">Input field type, defaults to text.</param>
+        /// <param name="fieldLabel">Label name for input text field, defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldID">ID to use for input field; defaults to input + <paramref name="fieldName"/>.</param>
+        /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
+        /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
+        /// <param name="requiredDataBinding">Boolean data-bind operation to apply to required state, if any.</param>
+        /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
+        /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
+        /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <returns>Generated HTML for new input field based on modeled table field attributes.</returns>
+        public string AddInputField<T>(string fieldName, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
+        {
+            TableOperations<T> tableOperations = Table<T>();
+            StringLengthAttribute stringLengthAttribute;
+            RegularExpressionAttribute regularExpressionAttribute;
+
+            if (string.IsNullOrEmpty(inputType))
+            {
+                Type fieldType = tableOperations.GetFieldType(fieldName);
+
+                if (IsNumericType(fieldType))
+                    inputType = "number";
+                else if (fieldType == typeof(DateTime))
+                    inputType = "date";
+            } 
+
+            if (string.IsNullOrEmpty(fieldLabel))
+            {
+                LabelAttribute labelAttribute;
+
+                if (tableOperations.TryGetFieldAttribute(fieldName, out labelAttribute))
+                    fieldLabel = labelAttribute.Label;
+            }
+
+            tableOperations.TryGetFieldAttribute(fieldName, out stringLengthAttribute);
+            tableOperations.TryGetFieldAttribute(fieldName, out regularExpressionAttribute);
+
+            if (!string.IsNullOrEmpty(regularExpressionAttribute?.ErrorMessage))
+            {
+                string observableReference;
+
+                if (string.IsNullOrEmpty(groupDataBinding))
+                    observableReference = $"viewModel.currentRecord().{fieldName}";
+                else // "with: $root.connectionString"
+                    observableReference = $"viewModel.{groupDataBinding.Substring(groupDataBinding.IndexOf('.') + 1)}";
+
+                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
+            }
+
+            AddInitialValueInitializer<T>(fieldName);
 
             return AddInputField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
                 stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
@@ -304,6 +444,8 @@ namespace openSPM.Models
                 AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
             }
 
+            AddInitialValueInitializer<T>(fieldName);
+
             return AddTextAreaField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
                 stringLengthAttribute?.MaximumLength ?? 0, rows, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
         }
@@ -353,6 +495,7 @@ namespace openSPM.Models
         /// <param name="fieldName">Field name for value of select field.</param>
         /// <param name="optionValueFieldName">Field name for ID of option data.</param>
         /// <param name="optionLabelFieldName">Field name for label of option data, defaults to <paramref name="optionValueFieldName"/></param>
+        /// <param name="optionSortFieldName">Field name for sort order of option data, defaults to <paramref name="optionLabelFieldName"/></param>
         /// <param name="fieldLabel">Label name for select field, defaults to <paramref name="fieldName"/>.</param>
         /// <param name="fieldID">ID to use for select field; defaults to select + <paramref name="fieldName"/>.</param>
         /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
@@ -362,7 +505,7 @@ namespace openSPM.Models
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>Generated HTML for new text field based on modeled table field attributes.</returns>
-        public string AddSelectField<TSelect, TOption>(string fieldName, string optionValueFieldName, string optionLabelFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, RecordRestriction restriction = null) where TSelect : class, new() where TOption : class, new()
+        public string AddSelectField<TSelect, TOption>(string fieldName, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, RecordRestriction restriction = null) where TSelect : class, new() where TOption : class, new()
         {
             if (string.IsNullOrEmpty(fieldLabel))
             {
@@ -372,8 +515,10 @@ namespace openSPM.Models
                     fieldLabel = labelAttribute.Label;
             }
 
+            AddInitialValueInitializer<TSelect>(fieldName);
+
             return AddSelectField<TOption>(fieldName, Table<TSelect>().FieldHasAttribute<RequiredAttribute>(fieldName),
-                optionValueFieldName, optionLabelFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, restriction);
+                optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, restriction);
         }
 
         /// <summary>
@@ -384,6 +529,7 @@ namespace openSPM.Models
         /// <param name="required">Determines if field name is required.</param>
         /// <param name="optionValueFieldName">Field name for ID of option data.</param>
         /// <param name="optionLabelFieldName">Field name for label of option data, defaults to <paramref name="optionValueFieldName"/></param>
+        /// <param name="optionSortFieldName">Field name for sort order of option data, defaults to <paramref name="optionLabelFieldName"/></param>
         /// <param name="fieldLabel">Label name for select field, defaults to <paramref name="fieldName"/>.</param>
         /// <param name="fieldID">ID to use for select field; defaults to select + <paramref name="fieldName"/>.</param>
         /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
@@ -393,7 +539,7 @@ namespace openSPM.Models
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>Generated HTML for new text field based on specified parameters.</returns>
-        public string AddSelectField<TOption>(string fieldName, bool required, string optionValueFieldName, string optionLabelFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, RecordRestriction restriction = null) where TOption : class, new()
+        public string AddSelectField<TOption>(string fieldName, bool required, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, RecordRestriction restriction = null) where TOption : class, new()
         {
             RazorView<CSharp> addSelectFieldTemplate = new RazorView<CSharp>(AddSelectFieldTemplate, MvcApplication.DefaultModel);
             DynamicViewBag viewBag = addSelectFieldTemplate.ViewBag;
@@ -402,6 +548,7 @@ namespace openSPM.Models
             string optionTableName = typeof(TOption).Name;
 
             optionLabelFieldName = optionLabelFieldName ?? optionValueFieldName;
+            optionSortFieldName = optionSortFieldName ?? optionLabelFieldName;
             fieldLabel = fieldLabel ?? optionTableName;
 
             viewBag.AddValue("FieldName", fieldName);
@@ -415,11 +562,21 @@ namespace openSPM.Models
             viewBag.AddValue("ToolTip", toolTip);
 
             if (restriction == null)
-                foreach (TOption record in QueryRecords<TOption>($"SELECT {optionValueFieldName} FROM {optionTableName} ORDER BY {optionLabelFieldName}"))
-                    options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));
+            {
+                foreach (TOption record in QueryRecords<TOption>($"SELECT * FROM {optionTableName} ORDER BY {optionSortFieldName}"))
+                {
+                    if (record != null)
+                        options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));
+                }
+            }
             else
-                foreach (TOption record in QueryRecords<TOption>($"SELECT {optionValueFieldName} FROM {optionTableName} WHERE {restriction.FilterExpression} ORDER BY {optionLabelFieldName}", restriction.Parameters))
-                    options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));
+            {
+                foreach (TOption record in QueryRecords<TOption>($"SELECT * FROM {optionTableName} WHERE {restriction.FilterExpression} ORDER BY {optionSortFieldName}", restriction.Parameters))
+                {
+                    if (record != null)
+                        options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));
+                }
+            }
 
             viewBag.AddValue("Options", options);
 
@@ -448,6 +605,8 @@ namespace openSPM.Models
                 if (Table<T>().TryGetFieldAttribute(fieldName, out labelAttribute))
                     fieldLabel = labelAttribute.Label;
             }
+
+            AddInitialValueInitializer<T>(fieldName);
 
             return AddCheckBoxField(fieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip);
         }

@@ -45,7 +45,8 @@ namespace openSPM
             bundles.Add(new ScriptBundle("~/js.bundle/bootstrap").Include(
                         "~/Scripts/bootstrap.min.js",
                         "~/Scripts/ie10-viewport-bug-workaround.js",
-                        "~/Scripts/respond.js"));
+                        "~/Scripts/respond.js",
+                        "~/Scripts/bootstrap-datepicker.min.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/signalR").Include(
                         "~/Scripts/jquery.signalR-2.2.0.min.js"));
@@ -67,6 +68,7 @@ namespace openSPM
                         "~/Scripts/pagedViewModel.js"));
 
             bundles.Add(new StyleBundle("~/css.bundle/bootstrap").Include(
+                        "~/Content/bootstrap-datepicker3.min.css",
                         "~/Content/bootstrap-sidebar.css"));
 
             bundles.Add(new StyleBundle("~/css.bundle/site").Include(

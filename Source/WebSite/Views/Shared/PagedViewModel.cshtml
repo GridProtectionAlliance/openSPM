@@ -169,7 +169,9 @@
     </div>
 </div>
 @{
-        pageControlScripts.Append(@"
+    DataContext dataContext = ViewBag.DataContext;
+
+    pageControlScripts.Append(@"
             $(""#addRecordButton"").click(function () {
                 viewModel.addPageRecord();
             });
@@ -200,16 +202,55 @@
             });
         });
     ");
+
     pageControlScripts.AppendFormat("\r\n        viewModel.modelName = \"{0}\";\r\n", RemoveSpaces(ViewBag.Title));
 
-    if (ViewBag.DataContext.FieldValidationParameters.Count > 0) {
+    if (dataContext.InitialValueInitializers.Count > 0)
+    {
+        pageControlScripts.AppendFormat(@"
+            $(viewModel).on(""newRecord"", function(event, newRecord) {{
+                // Set initial field values");
+
+        foreach (Tuple<string, string> initialValue in dataContext.InitialValueInitializers) {
+            pageControlScripts.AppendFormat("\r\n            newRecord.{0} = {1};",
+                initialValue.Item1, initialValue.Item2.JavaScriptEncode());
+        }
+
+        pageControlScripts.Append("\r\n        });");
+    }
+
+    if (dataContext.DefinedDateFields.Count > 0)
+    {
+        pageControlScripts.AppendFormat(@"
+            $(viewModel).on(""derivingObservableRecord"", function(event, observableRecord) {{
+                // Convert date objects to strings");
+
+        foreach (string dataField in dataContext.DefinedDateFields) {
+            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().formatDate(DateFormat));",
+                dataField);
+        }
+
+        pageControlScripts.Append("\r\n        });");
+
+        pageControlScripts.AppendFormat(@"
+            $(viewModel).on(""derivingJSRecord"", function(event, observableRecord) {{
+                // Convert date strings back to date objects before serializaton");
+
+        foreach (string dataField in dataContext.DefinedDateFields) {
+            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().toDate());",
+                dataField);
+        }
+
+        pageControlScripts.Append("\r\n        });");
+    }
+
+    if (dataContext.FieldValidationParameters.Count > 0) {
         pageControlScripts.Append("\r\n        viewModel.setApplyValidationParameters(function () {");
 
-        foreach (KeyValuePair<string, Tuple<string, string>> fieldValidation in ViewBag.DataContext.FieldValidationParameters)
-        {
-            pageControlScripts.AppendFormat("\r\n            {0}.extend({{ pattern: {{ message: \"{1}\", params: \"{2}\" }} }});", 
-                fieldValidation.Key, 
-                fieldValidation.Value.Item2.JavaScriptEncode(), 
+        foreach (KeyValuePair<string, Tuple<string, string>> fieldValidation in dataContext.FieldValidationParameters) {
+            pageControlScripts.AppendFormat("\r\n            {0}.extend({{ pattern: {{ message: \"{1}\", params: \"{2}\" }} }});",
+                fieldValidation.Key,
+                fieldValidation.Value.Item2.JavaScriptEncode(),
                 fieldValidation.Value.Item1.JavaScriptEncode());
         }
 

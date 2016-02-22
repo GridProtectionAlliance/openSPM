@@ -122,17 +122,18 @@ namespace openSPM
 
         public void AddNewPatch(Patch patch)
         {
-            patch.CreatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
-            patch.CreatedOn = DateTime.UtcNow;
-            patch.UpdatedBy = patch.CreatedBy;
-            patch.UpdatedOn = patch.CreatedOn;
+            //TODO: fix defaults
+            patch.createdByID = 1;
+            patch.dtCreated = DateTime.UtcNow;
+            patch.updatedByID = 1;
+            patch.dtUpdated = patch.dtCreated;
             m_dataContext.Table<Patch>().AddNewRecord(patch);
         }
 
         public void UpdatePatch(Patch patch)
         {
-            patch.UpdatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
-            patch.UpdatedOn = DateTime.UtcNow;
+            patch.updatedByID = 1;
+            patch.dtUpdated = DateTime.UtcNow;
             m_dataContext.Table<Patch>().UpdateRecord(patch);
         }
 

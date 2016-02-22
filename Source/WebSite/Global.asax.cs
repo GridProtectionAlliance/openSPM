@@ -37,7 +37,6 @@ using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
 
-// ReSharper disable ObjectCreationAsStatement
 namespace openSPM
 {
     public class MvcApplication : System.Web.HttpApplication
@@ -45,7 +44,7 @@ namespace openSPM
         /// <summary>
         /// Gets the default model used for the application.
         /// </summary>
-        public static readonly AppModel DefaultModel;
+        public static readonly AppModel DefaultModel = new AppModel();
 
         /// <summary>
         /// Gets the list of currently connected hub clients.
@@ -77,9 +76,8 @@ namespace openSPM
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;
             global.CompanyAcronym = systemSettings["CompanyAcronym"].Value;
-            global.DateFormat = systemSettings["DateFormat"].Value;
-            global.TimeFormat = systemSettings["TimeFormat"].Value;
-            global.DateTimeFormat = $"{global.DateFormat} {global.TimeFormat}";
+            global.DateTimeFormat = systemSettings["DateTimeFormat"].Value;
+
 
             // Load database driven model settings
             using (DataContext dataContext = new DataContext())
@@ -103,16 +101,6 @@ namespace openSPM
                 foreach (KeyValuePair<string, string> item in pageDefaults)
                     global.PageDefaultSettings.Add(item.Key, item.Value);
             }
-        }
-
-        static MvcApplication()
-        {
-            // Initialize default application model instance
-            DefaultModel = new AppModel();
-
-            // Initialize RazorView for target languages - this invokes static constructors which will pre-compile templates
-            new RazorView<CSharp>();
-            new RazorView<VisualBasic>();
         }
 
         /// <summary>

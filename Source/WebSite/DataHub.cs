@@ -98,6 +98,46 @@ namespace openSPM
             return base.OnDisconnected(stopCalled);
         }
 
+        #region [ Patch Table Operations ]
+
+        public int QueryPatchCount()
+        {
+            return m_dataContext.Table<Patch>().QueryRecordCount();
+        }
+
+        public IEnumerable<Patch> QueryPatches(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        public void DeletePatch(int id)
+        {
+            m_dataContext.Table<Patch>().DeleteRecord(id);
+        }
+
+        public Patch NewPatch()
+        {
+            return new Patch();
+        }
+
+        public void AddNewPatch(Patch patch)
+        {
+            patch.CreatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
+            patch.CreatedOn = DateTime.UtcNow;
+            patch.UpdatedBy = patch.CreatedBy;
+            patch.UpdatedOn = patch.CreatedOn;
+            m_dataContext.Table<Patch>().AddNewRecord(patch);
+        }
+
+        public void UpdatePatch(Patch patch)
+        {
+            patch.UpdatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
+            patch.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Patch>().UpdateRecord(patch);
+        }
+
+        #endregion
+
         #region [ Page Table Operations ]
 
         public int QueryPageCount()
@@ -174,42 +214,79 @@ namespace openSPM
 
         #endregion
 
-        #region [ Patch Table Operations ]
+        #region [ ValueListGroup Table Operations ]
 
-        public int QueryPatchCount()
+        public int QueryValueListGroupCount()
         {
-            return m_dataContext.Table<Patch>().QueryRecordCount();
+            return m_dataContext.Table<ValueListGroup>().QueryRecordCount();
         }
 
-        public IEnumerable<Patch> QueryPatches(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<ValueListGroup> QueryValueListGroups(string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+            return m_dataContext.Table<ValueListGroup>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
-        public void DeletePatch(int id)
+        public void DeleteValueListGroup(int id)
         {
-            m_dataContext.Table<Patch>().DeleteRecord(id);
+            m_dataContext.Table<ValueListGroup>().DeleteRecord(id);
         }
 
-        public Patch NewPatch()
+        public ValueListGroup NewValueListGroup()
         {
-            return new Patch();
+            return new ValueListGroup();
         }
 
-        public void AddNewPatch(Patch patch)
+        public void AddNewValueListGroup(ValueListGroup valueListGroup)
         {
-            patch.CreatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
-            patch.CreatedOn = DateTime.UtcNow;
-            patch.UpdatedBy = patch.CreatedBy;
-            patch.UpdatedOn = patch.CreatedOn;
-            m_dataContext.Table<Patch>().AddNewRecord(patch);
+            valueListGroup.dtCreated = DateTime.UtcNow;
+            m_dataContext.Table<ValueListGroup>().AddNewRecord(valueListGroup);
         }
 
-        public void UpdatePatch(Patch patch)
+        public void UpdateValueListGroup(ValueListGroup valueListGroup)
         {
-            patch.UpdatedBy = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
-            patch.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Patch>().UpdateRecord(patch);
+            m_dataContext.Table<ValueListGroup>().UpdateRecord(valueListGroup);
+        }
+
+        #endregion
+
+        #region [ ValueList Table Operations ]
+
+        public IEnumerable<ValueList> QueryValueListItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "GroupID = {0}",
+                Parameters = new object[] { parentID }
+            });
+        }
+
+        public int QueryValueListCount(int parentID)
+        {
+            return m_dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction
+            {
+                FilterExpression = "GroupID = {0}",
+                Parameters = new object[] { parentID }
+            });
+        }
+
+        public void DeleteValueList(int id)
+        {
+            m_dataContext.Table<ValueList>().DeleteRecord(id);
+        }
+
+        public ValueList NewValueList()
+        {
+            return new ValueList();
+        }
+
+        public void AddNewValueList(ValueList valueList)
+        {
+            m_dataContext.Table<ValueList>().AddNewRecord(valueList);
+        }
+
+        public void UpdateValueList(ValueList valueList)
+        {
+            m_dataContext.Table<ValueList>().UpdateRecord(valueList);
         }
 
         #endregion

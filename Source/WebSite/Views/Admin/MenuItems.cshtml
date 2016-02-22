@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  MenuItem.cshtml - Gbtc
+//  MenuItems.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -111,7 +111,7 @@
         });
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
-            // Initialize selected connection profile ID
+            // Initialize selected menu item record
             observableRecord.PageID(@parentID);
         });
 

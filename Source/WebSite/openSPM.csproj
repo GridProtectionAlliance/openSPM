@@ -333,13 +333,15 @@
     <Content Include="Views\Shared\PagedViewModel.cshtml" />
     <Content Include="Views\Admin\Pages.cshtml" />
     <Content Include="Views\Admin\Home.cshtml" />
-    <Content Include="Views\Admin\MenuItem.cshtml" />
+    <Content Include="Views\Admin\MenuItems.cshtml" />
     <Content Include="Views\Main\OpenPatch.cshtml" />
     <Content Include="Views\Main\UpdatePatch.cshtml" />
     <Content Include="Views\Shared\Templates\AddTextAreaField.cshtml" />
     <Content Include="Views\Shared\Templates\AddCheckBoxField.cshtml" />
     <Content Include="Views\Main\Patches.cshtml" />
     <Content Include="Views\Shared\Templates\AddDateField.cshtml" />
+    <Content Include="Views\Admin\ValueListGroups.cshtml" />
+    <Content Include="Views\Admin\ValueListItems.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

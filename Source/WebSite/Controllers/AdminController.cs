@@ -84,7 +84,17 @@ namespace openSPM.Controllers
             return View();
         }
 
-        public ActionResult MenuItem()
+        public ActionResult MenuItems()
+        {
+            return View();
+        }
+
+        public ActionResult ValueListGroups()
+        {
+            return View();
+        }
+
+        public ActionResult ValueListItems()
         {
             return View();
         }

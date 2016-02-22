@@ -88,7 +88,7 @@
 else
 {
     <div class="form-group"@Raw(groupDataBinding)@Raw(toolTip)>
-        <label for="@Raw(fieldID)" @Raw(labelDataBinding)>@Raw(fieldLabel):</label>
+        <label for="@Raw(fieldID)"@Raw(labelDataBinding)>@Raw(fieldLabel):</label>
         <div class="input-group date" data-provide="datepicker">
             <input type="@Raw(inputType)" class="form-control" data-bind="textInput: @Raw(fieldName), attr: {'readonly': ($root.recordMode()===RecordMode.View ? true : undefined)}@Raw(customDataBinding)" id="@Raw(fieldID)"@Raw(inputSizeRestriction)>
             <span class="input-group-addon" data-bind="style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}"><i class="glyphicon glyphicon-calendar"></i></span>

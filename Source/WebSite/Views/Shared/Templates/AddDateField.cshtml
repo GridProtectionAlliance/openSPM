@@ -79,8 +79,8 @@
         <label for="@Raw(fieldID)"@Raw(labelDataBinding)>@Raw(fieldLabel):</label>
         <div class="input-group date" data-provide="datepicker">
             <input type="@Raw(inputType)" class="form-control" data-bind="textInput: @Raw(fieldName), attr: {'readonly': ($root.recordMode()===RecordMode.View ? true : undefined)}@Raw(customDataBinding)" id="@Raw(fieldID)"@Raw(inputSizeRestriction)@(string.IsNullOrEmpty(requiredDataBinding) ? " required" : "")><span 
-                class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
-            <span class="glyphicon glyphicon-remove form-control-feedback" data-bind="visible: isEmpty(@(Raw(fieldName))())@(Raw(requiredDataBinding))"></span>
+            class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+            <span class="glyphicon glyphicon-remove form-control-feedback" style="right: 36px" data-bind="visible: isEmpty(@(Raw(fieldName))())@(Raw(requiredDataBinding))"></span>
         </div>
     </div>
     @Raw(string.IsNullOrEmpty(groupDataBinding) ? "" : "</div>\r\n")

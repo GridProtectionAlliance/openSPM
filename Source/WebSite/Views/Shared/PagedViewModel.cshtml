@@ -194,6 +194,13 @@
 
             $(""#addNewEditDialog"").modal({show: false, backdrop: ""static"", keyboard: false});
 
+            $(""#addNewEditDialog"").on(""shown.bs.modal"", function () {
+                $(""#addNewEditDialog .input-group.date"").datepicker({
+                    todayBtn: ""linked"",
+                    autoclose: true
+                });
+            });
+
             $(window).on(""beforeunload"", function () {
                 if ($(""#addNewEditDialog"").hasClass(""in"") && viewModel.isDirty())
                     return ""There are unsaved changes to this record."";
@@ -203,17 +210,18 @@
         });
     ");
 
-    pageControlScripts.AppendFormat("\r\n        viewModel.modelName = \"{0}\";\r\n", RemoveSpaces(ViewBag.Title));
+    pageControlScripts.AppendFormat("\r\n        viewModel.modelName = \"{0}\";", RemoveSpaces(ViewBag.Title));
 
     if (dataContext.InitialValueInitializers.Count > 0)
     {
         pageControlScripts.AppendFormat(@"
-            $(viewModel).on(""newRecord"", function(event, newRecord) {{
-                // Set initial field values");
+
+        $(viewModel).on(""newRecord"", function(event, newRecord) {{
+            // Set initial field values");
 
         foreach (Tuple<string, string> initialValue in dataContext.InitialValueInitializers) {
             pageControlScripts.AppendFormat("\r\n            newRecord.{0} = {1};",
-                initialValue.Item1, initialValue.Item2.JavaScriptEncode());
+                initialValue.Item1,initialValue.Item2.JavaScriptEncode());
         }
 
         pageControlScripts.Append("\r\n        });");
@@ -222,30 +230,30 @@
     if (dataContext.DefinedDateFields.Count > 0)
     {
         pageControlScripts.AppendFormat(@"
-            $(viewModel).on(""derivingObservableRecord"", function(event, observableRecord) {{
-                // Convert date objects to strings");
+
+        $(viewModel).on(""derivingObservableRecord"", function(event, observableRecord) {{
+            // Convert date objects to strings");
 
         foreach (string dataField in dataContext.DefinedDateFields) {
-            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().formatDate(DateFormat));",
-                dataField);
+            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().formatDate(DateFormat));", dataField);
         }
 
         pageControlScripts.Append("\r\n        });");
 
         pageControlScripts.AppendFormat(@"
-            $(viewModel).on(""derivingJSRecord"", function(event, observableRecord) {{
-                // Convert date strings back to date objects before serializaton");
+
+        $(viewModel).on(""derivingJSRecord"", function(event, observableRecord) {{
+            // Convert date strings back to date objects before serializaton");
 
         foreach (string dataField in dataContext.DefinedDateFields) {
-            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().toDate());",
-                dataField);
+            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().toDate());", dataField);
         }
 
         pageControlScripts.Append("\r\n        });");
     }
 
     if (dataContext.FieldValidationParameters.Count > 0) {
-        pageControlScripts.Append("\r\n        viewModel.setApplyValidationParameters(function () {");
+        pageControlScripts.Append("\r\n\r\n        viewModel.setApplyValidationParameters(function () {");
 
         foreach (KeyValuePair<string, Tuple<string, string>> fieldValidation in dataContext.FieldValidationParameters) {
             pageControlScripts.AppendFormat("\r\n            {0}.extend({{ pattern: {{ message: \"{1}\", params: \"{2}\" }} }});",

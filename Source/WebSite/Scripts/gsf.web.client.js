@@ -470,6 +470,10 @@ String.prototype.parseKeyValuePairs = function (parameterDelimiter, keyValueDeli
 }
 
 // Date Functions
+Date.prototype.addDays = function(days) {
+    return new Date(this.setDate(this.getDate() + days));
+}
+
 String.prototype.toDate = function () {
     return new Date(Date.parse(this));
 };

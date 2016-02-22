@@ -66,7 +66,7 @@ namespace openSPM.Models
         }
 
         [Label("Source Date")]
-        [InitialValue("(new Date()) + 30")] // <-- Example set inital value to 30 days from now
+        [InitialValue("(new Date()).addDays(30)")] // <-- Example to set inital value to 30 days from now
         public DateTime dtSource
         {
             get; set;

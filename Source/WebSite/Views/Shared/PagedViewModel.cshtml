@@ -197,6 +197,7 @@
             $(""#addNewEditDialog"").on(""shown.bs.modal"", function () {
                 $(""#addNewEditDialog .input-group.date"").datepicker({
                     todayBtn: ""linked"",
+                    enableOnReadonly: false,
                     autoclose: true
                 });
             });

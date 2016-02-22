@@ -38,7 +38,35 @@ namespace openSPM.Models
             get; set;
         }
 
-        public int GroupID
+        public int groupID
+        {
+            get; set;
+        }
+
+        [Label("Integer Key")]
+        public int intKey
+        {
+            get; set;
+        }
+
+        [Label("Alpha Key")]
+        [StringLength(64)]
+        public string alphaKey
+        {
+            get; set;
+        }
+
+
+        [Label("Alpha Value")]
+        [StringLength(64)]
+        public string alphaValue
+        {
+            get; set;
+        }
+
+        [Label("Alias Value")]
+        [StringLength(64)]
+        public string aliasValue
         {
             get; set;
         }
@@ -49,36 +77,15 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Label("Shadow Value")]
-        public int shadowValue
-        {
-            get; set;
-        }
-
-        [Label("Alpha Value")]
-        [StringLength(64)]
-        public string alphaValue
-        {
-            get; set;
-        }
-
-        [Label("Name")]
-        [StringLength(64)]
-        public string name
-        {
-            get; set;
-        }
-
-        [Label("Abbreviation")]
+        [Label("Abv Value")]
         [StringLength(12)]
-        public string abv
+        public string abvValue
         {
             get; set;
         }
 
-        [Label("Alias")]
-        [StringLength(64)]
-        public string alias
+        [Label("Bit Value")]
+        public bool bitValue
         {
             get; set;
         }

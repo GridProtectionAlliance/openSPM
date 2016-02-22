@@ -38,29 +38,28 @@ namespace openSPM.Models
         }
 
         [Label("Parent Patch")]
-        public int ParentID
+        public int parentID
         {
             get; set;
         }
 
         [Required]
-        [Label("Source Patch")]
-        public int SourceID
+        [Label("Patch Source")]
+        public int sourceID
         {
             get; set;
         }
 
-        [Required]
-        [Label("SPM ID")]
+        [Label("SPM Patch Reference")]
         [StringLength(64)]
-        public string SPMidentifier
+        public string patchReference
         {
             get; set;
         }
 
-        [Label("Source ID")]
+        [Label("Source Patch Reference")]
         [StringLength(64)]
-        public string SourceIdentifier
+        public string sourceReference
         {
             get; set;
         }
@@ -73,71 +72,69 @@ namespace openSPM.Models
         }
 
         [Label("Impact Value")]
-        public int ImpactValue
+        public int impactIntKey
         {
             get; set;
         }
 
-        [Required]
-        [Label("Submission Date")]
-        [InitialValue("new Date()")]
-        public DateTime dtSubmitted
+        [Label("Operator Group")]
+        public int operatorGroupID
         {
             get; set;
         }
 
         [StringLength(80)]
-        public string Title
+        public string title
         {
             get; set;
         }
 
         [StringLength(512)]
-        public string Target
+        public string target
         {
             get; set;
         }
 
         [StringLength(1024)]
-        public string Summary
+        public string summary
         {
             get; set;
         }
 
-        public string Detail
+        public string detail
         {
             get; set;
         }
 
         [StringLength(1024)]
-        public string Reference
+        public string reference
         {
             get; set;
         }
 
         [Label("Work Around")]
         [StringLength(1024)]
-        public string WorkArounds
+        public string workArounds
         {
             get; set;
         }
 
         [StringLength(512)]
         [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
-        public string Link
+        public string link
         {
             get; set;
         }
 
         [Label("Alarm Critical Days")]
-        public int AlarmCriticalDays
+        public int alarmCriticalDays
         {
             get; set;
         }
 
         [Required]
         [Label("Close Out Notes")]
-        public string CloseOutNotes
+        public string closeOutNotes
         {
             get; set;
         }
@@ -149,28 +146,25 @@ namespace openSPM.Models
         }
 
         [Required]
-        public DateTime CreatedOn
+        public DateTime dtCreated
         {
             get; set;
         }
 
         [Required]
-        [StringLength(184)]
-        public string CreatedBy
-        {
-            get; set;
-        }
-
-
-        [Required]
-        public DateTime UpdatedOn
+        public int createdByID
         {
             get; set;
         }
 
         [Required]
-        [StringLength(184)]
-        public string UpdatedBy
+        public DateTime dtUpdated
+        {
+            get; set;
+        }
+
+        [Required]
+        public int updatedByID
         {
             get; set;
         }

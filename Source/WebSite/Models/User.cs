@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Page.cs - Gbtc
+// User.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,66 +16,57 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/17/2016 - J. Ritchie Carroll
+//  02/19/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace openSPM.Models
 {
     /// <summary>
-    /// Model for openSPM.Page table.
+    /// Model for openSPM.User table.
     /// </summary>
-    public class Page
+    public class User
     {
-        // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]
-        [PrimaryKey]
+        [PrimaryKey(true)]
         public int ID
         {
             get; set;
         }
 
-        [Required]
-        [Label("Name")]
-        [StringLength(32)]
-        public string name
+        [Label("Parent User")]
+        public int parentID
         {
             get; set;
         }
 
         [Required]
-        [Label("Title")]
-        [StringLength(32)]
-        public string title
+        [Label("Security ID")]
+        [StringLength(184)]
+        public string SID
         {
             get; set;
         }
 
-        [Label("Menu")]
-        public int menuID
+        [Required]
+        [Label("SPM ID")]
+        [StringLength(64)]
+        public string SPMidentifier
         {
             get; set;
         }
 
-        [Label("Server-side Configuration Parameters")]
-        [StringLength(1024)]
-        public string serverConfiguration
+        [Label("System Role Key")]
+        public int systemRoleIntKey
         {
             get; set;
         }
 
-        [Label("Client-side Configuration Parameters")]
-        [StringLength(1024)]
-        public string clientConfiguration
-        {
-            get; set;
-        }
-
-        [Label("Description")]
-        [StringLength(512)]
-        public string description
+        [Label("Operator Role Key")]
+        public int operatorRoleIntKey
         {
             get; set;
         }
@@ -85,5 +76,19 @@ namespace openSPM.Models
         {
             get; set;
         }
+
+        [Required]
+        public DateTime dtCreated
+        {
+            get; set;
+        }
+
+        [Required]
+        [StringLength(184)]
+        public string createdBySID
+        {
+            get; set;
+        }
+
     }
 }

@@ -37,21 +37,21 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Label("Name")]
+        [Label("name")]
         [StringLength(32)]
         public string name
         {
             get; set;
         }
 
-        [Label("Description")]
+        [Label("description")]
         [StringLength(512)]
         public string description
         {
             get; set;
         }
 
-        [Label("Enabled")]
+        [Label("enabled")]
         public bool enabled
         {
             get; set;

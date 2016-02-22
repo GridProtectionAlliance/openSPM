@@ -33,7 +33,6 @@ using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
 
-// ReSharper disable ObjectCreationAsStatement
 namespace openSPM
 {
     public class MvcApplication : System.Web.HttpApplication
@@ -41,7 +40,7 @@ namespace openSPM
         /// <summary>
         /// Gets the default model used for the application.
         /// </summary>
-        public static readonly AppModel DefaultModel;
+        public static readonly AppModel DefaultModel = new AppModel();
 
         /// <summary>
         /// Gets the list of currently connected hub clients.
@@ -66,16 +65,14 @@ namespace openSPM
             systemSettings.Add("DataProviderString", "AssemblyName={System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089}; ConnectionType=System.Data.SqlClient.SqlConnection; AdapterType=System.Data.SqlClient.SqlDataAdapter", "Configuration database ADO.NET data provider assembly type creation string used");
             systemSettings.Add("CompanyName", "Grid Protection Alliance", "The name of the company who owns this instance of the openMIC.");
             systemSettings.Add("CompanyAcronym", "GPA", "The acronym representing the company who owns this instance of the openMIC.");
-            systemSettings.Add("DateFormat", "MM/dd/yyyy", "The default date format to use when rendering dates.");
-            systemSettings.Add("TimeFormat", "HH:mm.ss.fff", "The default time format to use when rendering times.");
+            systemSettings.Add("DateTimeFormat", "yyyy-MM-dd HH:mm.ss.fff", "The date/time format to use when rendering timestamps.");
 
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;
             global.CompanyAcronym = systemSettings["CompanyAcronym"].Value;
-            global.DateFormat = systemSettings["DateFormat"].Value;
-            global.TimeFormat = systemSettings["TimeFormat"].Value;
-            global.DateTimeFormat = $"{global.DateFormat} {global.TimeFormat}";
+            global.DateTimeFormat = systemSettings["DateTimeFormat"].Value;
 
+          
             // Load database driven model settings
             using (DataContext dataContext = new DataContext())
             {
@@ -92,16 +89,6 @@ namespace openSPM
                 foreach (KeyValuePair<string, string> item in pageDefaults)
                     global.PageDefaultSettings.Add(item.Key, item.Value);
             }
-        }
-
-        static MvcApplication()
-        {
-            // Initialize default application model instance
-            DefaultModel = new AppModel();
-
-            // Initialize RazorView for target languages - this invokes static constructors which will pre-compile templates
-            new RazorView<CSharp>();
-            new RazorView<VisualBasic>();
         }
 
         /// <summary>

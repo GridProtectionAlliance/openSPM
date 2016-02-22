@@ -23,17 +23,20 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using System.Threading;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
 using GSF;
 using GSF.Configuration;
+using GSF.Data;
+using GSF.Identity;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
 
-// ReSharper disable ObjectCreationAsStatement
 namespace openSPM
 {
     public class MvcApplication : System.Web.HttpApplication
@@ -41,7 +44,7 @@ namespace openSPM
         /// <summary>
         /// Gets the default model used for the application.
         /// </summary>
-        public static readonly AppModel DefaultModel;
+        public static readonly AppModel DefaultModel = new AppModel();
 
         /// <summary>
         /// Gets the list of currently connected hub clients.
@@ -66,19 +69,25 @@ namespace openSPM
             systemSettings.Add("DataProviderString", "AssemblyName={System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089}; ConnectionType=System.Data.SqlClient.SqlConnection; AdapterType=System.Data.SqlClient.SqlDataAdapter", "Configuration database ADO.NET data provider assembly type creation string used");
             systemSettings.Add("CompanyName", "Grid Protection Alliance", "The name of the company who owns this instance of the openMIC.");
             systemSettings.Add("CompanyAcronym", "GPA", "The acronym representing the company who owns this instance of the openMIC.");
-            systemSettings.Add("DateFormat", "MM/dd/yyyy", "The default date format to use when rendering dates.");
-            systemSettings.Add("TimeFormat", "HH:mm.ss.fff", "The default time format to use when rendering times.");
+            systemSettings.Add("DateFormat", "MM/dd/yyyy", "The default date format to use when rendering timestamps.");
+            systemSettings.Add("TimeFormat", "HH:mm.ss.fff", "The default time format to use when rendering timestamps.");
+            systemSettings.Add("DefaultSecurityRoles", "Administrator, Editor, Viewer", "The default security roles that should exist for the application.");
 
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;
             global.CompanyAcronym = systemSettings["CompanyAcronym"].Value;
-            global.DateFormat = systemSettings["DateFormat"].Value;
-            global.TimeFormat = systemSettings["TimeFormat"].Value;
-            global.DateTimeFormat = $"{global.DateFormat} {global.TimeFormat}";
+            global.DateTimeFormat = systemSettings["DateTimeFormat"].Value;
+
 
             // Load database driven model settings
             using (DataContext dataContext = new DataContext())
             {
+                // Make sure default NodeID record exists
+                ValidateDefaultNode(dataContext.Connection, Guid.Parse(systemSettings["NodeID"].Value));
+
+                // Validate default security roles exist
+                ValidateSecurityRoles(dataContext.Connection, systemSettings["DefaultSecurityRoles"].Value);
+
                 // Load global web settings
                 Dictionary<string, string> appSetting = dataContext.LoadDatabaseSettings("app.setting");
                 global.ApplicationName = appSetting["applicationName"];
@@ -92,16 +101,6 @@ namespace openSPM
                 foreach (KeyValuePair<string, string> item in pageDefaults)
                     global.PageDefaultSettings.Add(item.Key, item.Value);
             }
-        }
-
-        static MvcApplication()
-        {
-            // Initialize default application model instance
-            DefaultModel = new AppModel();
-
-            // Initialize RazorView for target languages - this invokes static constructors which will pre-compile templates
-            new RazorView<CSharp>();
-            new RazorView<VisualBasic>();
         }
 
         /// <summary>
@@ -157,6 +156,72 @@ namespace openSPM
                 }
 #endif
             }, DataHub.CurrentConnectionID);
+        }
+
+        /// <summary>
+        /// Data operation to validate and ensure there is a node in the database.
+        /// </summary>
+        /// <param name="database">Data connection to use for database operations.</param>
+        /// <param name="nodeID">Node ID to validate.</param>        
+        private static void ValidateDefaultNode(AdoDataConnection database, Guid nodeID)
+        {
+            // Queries
+            const string NodeCountFormat = "SELECT COUNT(*) FROM Node";
+            const string NodeInsertFormat = "INSERT INTO Node(Name, Description, Enabled) VALUES('Default', 'Default node', 1)";
+            const string NodeUpdateFormat = "UPDATE Node SET ID = {0}";
+
+            // Determine whether the node exists in the database and create it if it doesn't.
+            int nodeCount = database.ExecuteScalar<int?>(NodeCountFormat) ?? 0;
+
+            if (nodeCount == 0)
+            {
+                database.ExecuteNonQuery(NodeInsertFormat);
+                database.ExecuteNonQuery(NodeUpdateFormat, database.Guid(nodeID));
+            }
+
+        }
+
+        /// <summary>
+        /// Validates security roles for all defined nodes.
+        /// </summary>
+        /// <param name="database">Data connection to use for database operations.</param>
+        /// <param name="defaultSecurityRoles">Default security roles that should exist.</param>        
+        private static void ValidateSecurityRoles(AdoDataConnection database, string defaultSecurityRoles)
+        {
+            // Queries
+            const string RoleCountFormat = "SELECT COUNT(*) FROM ApplicationRole WHERE NodeID = {0} AND Name = {1}";
+
+            if (string.IsNullOrEmpty(defaultSecurityRoles))
+                defaultSecurityRoles = "Administrator, Editor, Viewer";
+
+            string[] roles = defaultSecurityRoles.Split(',').Select(role => role.Trim()).Where(role => !string.IsNullOrEmpty(role)).ToArray();
+
+            // For each Node in new database make sure all roles exist
+            DataTable dataTable = database.RetrieveData("SELECT ID FROM Node");
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                Guid nodeID = row.ConvertField<Guid>("ID");
+
+                foreach (string role in roles)
+                    if ((database.ExecuteScalar<int?>(RoleCountFormat, database.Guid(nodeID), role) ?? 0) == 0)
+                        AddRolesForNode(database, nodeID, role);
+            }
+        }
+
+        /// <summary>
+        /// Adds role for newly added node, e.g., Administrator, Editor, Viewer.
+        /// </summary>
+        /// <param name="database">Data connection to use for database operations.</param>
+        /// <param name="nodeID">Node ID to which roles are being assigned.</param>
+        /// <param name="roleName">Name of role to be added.</param>
+        private static void AddRolesForNode(AdoDataConnection database, Guid nodeID, string roleName)
+        {
+            // Queries
+            const string InsertRoleFormat = "INSERT INTO ApplicationRole(Name, Description, NodeID, UpdatedBy, CreatedBy) VALUES('{0}', '{0} Role', {{0}}, {{1}}, {{2}})";
+
+            string currentUserSID = UserInfo.UserNameToSID(UserInfo.CurrentUserID);
+            database.ExecuteNonQuery(string.Format(InsertRoleFormat, roleName), database.Guid(nodeID), currentUserSID, currentUserSID);
         }
     }
 }

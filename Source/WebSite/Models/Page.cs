@@ -53,8 +53,8 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Label("Minimum View Level")]
-        public int minViewLevel
+        [Label("Menu")]
+        public int menuID
         {
             get; set;
         }

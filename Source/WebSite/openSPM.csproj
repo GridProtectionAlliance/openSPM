@@ -197,6 +197,7 @@
     <Compile Include="Models\ModelExtensions.cs" />
     <Compile Include="Models\Page.cs" />
     <Compile Include="Models\PagedList.cs" />
+    <Compile Include="Models\User.cs" />
     <Compile Include="Models\Patch.cs" />
     <Compile Include="Models\PrimaryKeyAttribute.cs" />
     <Compile Include="Models\LabelAttribute.cs" />

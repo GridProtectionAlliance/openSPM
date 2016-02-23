@@ -28,8 +28,8 @@
 @{
     // Lookup page info based on defined page name
     DataContext dataContext = ViewBag.DataContext;
-    int pageID = 0; // dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
-    Page page = null; //dataContext.QueryRecord<Page>(pageID);
+    int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", ViewBag.PageName ?? "") ?? 0;
+    Page page = dataContext.QueryRecord<Page>(pageID);
 
     // Load layout settings
     Dictionary<string, string> layoutSettings = dataContext.LoadDatabaseSettings("layout.setting");
@@ -46,7 +46,7 @@
     }
 
     // Lookup desired menuImagePath for current page
-    Dictionary<string, string> serverConfiguration = (page?.serverConfiguration ?? "").ParseKeyValuePairs();
+    Dictionary<string, string> serverConfiguration = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
 
     // Look for overridden menuImagePath from server configuration string, otherwise use page default
     if (!serverConfiguration.TryGetValue("menuImagePath", out menuImagePath)) {
@@ -58,11 +58,23 @@
     menuImagePath = menuImagePath.EnsureEnd('/');
 
     // Load menu items for this page from database table
-    MenuItem[] menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE PageID={0} AND enabled <> 0 ORDER BY sortOrder", pageID).ToArray();
+    MenuItem[] menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY sortOrder", pageID).ToArray();
+
+    // Deference page locations for the menu items on this page
+    Dictionary<int, string> pageLocations = new Dictionary<int, string>();
+
+    foreach (MenuItem menuItem in menuItems) {
+        if (string.IsNullOrEmpty(menuItem.Link) && menuItem.PageID > 0) {
+            pageLocations.Add(menuItem.ID, dataContext.Connection.ExecuteScalar<string>("SELECT PageLocation FROM Page WHERE ID={0} AND Enabled <> 0", menuItem.PageID) ?? "#");
+        }
+        else {
+            pageLocations.Add(menuItem.ID, menuItem.Link);
+        }
+    }
 
     // Define ViewBag.CustomTitle in page code for custom page titles
     if (ViewBag.CustomTitle == null) {
-        ViewBag.Title = page?.title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
+        ViewBag.Title = page?.Title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
         pageTitle = ViewBag.Title;
     }
     else {
@@ -136,12 +148,7 @@
                         <a href="/" class="navbar-brand" style="margin-top: -5px"><img class="pull-left" style="padding: 12px 10px 10px 20px" alt="@Model.Global.ApplicationName" src="/Images/@(Model.Global.ApplicationName).png"></a>
                     </li>
                     @foreach (MenuItem menuItem in menuItems) {
-                        if (string.IsNullOrEmpty(menuItem.link)) {
-                            <li><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</li>
-                        }
-                        else {
-                            <li><a href="@menuItem.link"><img src="@($"{menuImagePath}{menuItem.image}")" alt="@menuItem.imageAlt">@menuItem.text</a></li>
-                        }
+                        <li><a href="@pageLocations[menuItem.ID]"><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@menuItem.Text</a></li>
                     }
                 </ul>
                 <footer id="footer">

@@ -198,6 +198,7 @@
     <Compile Include="Models\MenuItem.cs" />
     <Compile Include="Models\ModelExtensions.cs" />
     <Compile Include="Models\Page.cs" />
+    <Compile Include="Models\Menu.cs" />
     <Compile Include="Models\PagedList.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Patch.cs" />

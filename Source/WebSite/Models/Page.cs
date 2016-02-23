@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using openSPM.Attributes;
 
@@ -39,50 +40,67 @@ namespace openSPM.Models
         }
 
         [Required]
-        [Label("Name")]
-        [StringLength(32)]
-        public string name
+        [StringLength(64)]
+        public string Name
         {
             get; set;
         }
 
         [Required]
-        [Label("Title")]
-        [StringLength(32)]
-        public string title
+        [StringLength(64)]
+        public string Title
         {
             get; set;
         }
 
         [Label("Menu")]
-        public int menuID
+        public int MenuID
+        {
+            get; set;
+        }
+
+        [Required]
+        [Label("Page Location")]
+        public string PageLocation
         {
             get; set;
         }
 
         [Label("Server-side Configuration Parameters")]
-        [StringLength(1024)]
-        public string serverConfiguration
+        public string ServerConfiguration
         {
             get; set;
         }
 
         [Label("Client-side Configuration Parameters")]
-        [StringLength(1024)]
-        public string clientConfiguration
+        public string ClientConfiguration
         {
             get; set;
         }
 
-        [Label("Description")]
-        [StringLength(512)]
-        public string description
+        [Label("Included Labels")]
+        public string IncludedRoles
         {
             get; set;
         }
 
-        [Label("Enabled")]
-        public bool enabled
+        [Label("Excluded Labels")]
+        public string ExcludedRoles
+        {
+            get; set;
+        }
+
+        public string Description
+        {
+            get; set;
+        }
+
+        public bool Enabled
+        {
+            get; set;
+        }
+
+        public DateTime CreatedOn
         {
             get; set;
         }

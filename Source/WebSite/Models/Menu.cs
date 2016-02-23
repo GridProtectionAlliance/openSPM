@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  MenuItem.cs - Gbtc
+//  Menu.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/17/2016 - J. Ritchie Carroll
+//  02/23/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -27,69 +27,35 @@ using openSPM.Attributes;
 namespace openSPM.Models
 {
     /// <summary>
-    /// Model for openSPM.MenuItem table.
+    /// Model for openSPM.Menu table.
     /// </summary>
-    public class MenuItem
+    public class Menu
     {
-        [PrimaryKey(true)]
+        // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]
+        [PrimaryKey]
         public int ID
         {
             get; set;
         }
 
-        public int MenuID
-        {
-            get; set;
-        }
-
-        public int PageID
-        {
-            get; set;
-        }
-
-        [Required]
-        [Label("Image Source")]
-        [StringLength(200)]
-        public string Image
-        {
-            get; set;
-        }
-
-        [StringLength(200)]
-        [Label("Image Alternate Text")]
-        public string ImageAlt
+        [StringLength(64)]
+        public string Name
         {
             get; set;
         }
 
         [Required]
-        [Label("Menu Text")]
-        [StringLength(20)]
-        public string Text
+        [StringLength(12)]
+        public string Abbreviation
         {
             get; set;
         }
 
-        [Label("URL")]
-        [StringLength(200)]
-        public string Link
-        {
-            get; set;
-        }
-
-        [Label("Sort Order")]
-        public int SortOrder
-        {
-            get; set;
-        }
-
-        [Label("Description")]
         public string Description
         {
             get; set;
         }
 
-        [Label("Enabled")]
         public bool Enabled
         {
             get; set;

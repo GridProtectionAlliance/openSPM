@@ -257,6 +257,7 @@
     <Content Include="Images\Menu\assessment.png" />
     <Content Include="Images\Menu\help.png" />
     <Content Include="Images\Menu\home.png" />
+    <Content Include="Images\Menu\newPatch.png" />
     <Content Include="Images\Menu\notification.png" />
     <Content Include="Images\Menu\plan.png" />
     <Content Include="Images\Menu\settings.png" />

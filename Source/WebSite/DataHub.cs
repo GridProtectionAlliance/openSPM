@@ -25,12 +25,13 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using GSF.Identity;
 using Microsoft.AspNet.SignalR;
+using openSPM.Attributes;
 using openSPM.Models;
 
 namespace openSPM
 {
+    [RoleBasedSecurity]
     public class DataHub : Hub
     {
         #region [ Members ]

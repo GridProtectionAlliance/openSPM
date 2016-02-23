@@ -21,6 +21,11 @@
 //
 //******************************************************************************************************
 
+using System;
+using System.Collections.Generic;
+using System.Web;
+using GSF.Security;
+
 namespace openSPM.Models
 {
     // Custom view models should inherit from AppModel because the "Global" property is used by _Layout.cshtml
@@ -34,6 +39,17 @@ namespace openSPM.Models
         public GlobalSettings Global
         {
             get;
+        }
+
+        public AdoSecurityProvider SecurityProvider => SecurityProviderCache.CurrentProvider as AdoSecurityProvider;
+
+        public bool UserIsInGroup(string groupName)
+        {
+            foreach (string userGroup in SecurityProvider?.UserData?.Groups ?? new List<string>())
+                if (userGroup.Equals(groupName, StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+            return false;
         }
     }
 }

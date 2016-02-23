@@ -235,3 +235,5 @@ _Pvt_Extensions
 
 # FAKE - F# Make
 .fake/
+/Source/WebSite/ConfigurationCache/AdoSecurityCache.bin
+/Source/WebSite/UserRoleCache.bin

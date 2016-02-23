@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  FieldNameAttribute.cs - Gbtc
+//  InitialValueAttribute.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -25,16 +25,16 @@ using System;
 
 // TODO: Move into GSF
 
-namespace openSPM.Models
+namespace openSPM.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
-    public class FieldNameAttribute : Attribute
+    public class InitialValueAttribute : Attribute
     {
-        public readonly string FieldName;
+        public readonly string InitialValue;
 
-        public FieldNameAttribute(string fieldName)
+        public InitialValueAttribute(string initialValue)
         {
-            FieldName = fieldName;
+            InitialValue = initialValue;
         }
     }
 }

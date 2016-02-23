@@ -25,7 +25,7 @@ using System;
 
 // TODO: Move into GSF
 
-namespace openSPM.Models
+namespace openSPM.Attributes
 {
     [AttributeUsage(AttributeTargets.Property)]
     public class PrimaryKeyAttribute : Attribute

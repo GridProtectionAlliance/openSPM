@@ -182,6 +182,8 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="Attributes\RoleBasedSecurityAttribute.cs" />
+    <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="DataHub.cs" />
@@ -190,17 +192,17 @@
     </Compile>
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\DataContext.cs" />
-    <Compile Include="Models\InitialValueAttribute.cs" />
+    <Compile Include="Attributes\InitialValueAttribute.cs" />
     <Compile Include="Models\GlobalSettings.cs" />
-    <Compile Include="Models\FieldNameAttribute.cs" />
+    <Compile Include="Attributes\FieldNameAttribute.cs" />
     <Compile Include="Models\MenuItem.cs" />
     <Compile Include="Models\ModelExtensions.cs" />
     <Compile Include="Models\Page.cs" />
     <Compile Include="Models\PagedList.cs" />
     <Compile Include="Models\User.cs" />
     <Compile Include="Models\Patch.cs" />
-    <Compile Include="Models\PrimaryKeyAttribute.cs" />
-    <Compile Include="Models\LabelAttribute.cs" />
+    <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
+    <Compile Include="Attributes\LabelAttribute.cs" />
     <Compile Include="Models\RazorView.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\TableOperations.cs" />
@@ -343,9 +345,12 @@
     <Content Include="Views\Shared\Templates\AddDateField.cshtml" />
     <Content Include="Views\Admin\ValueListGroups.cshtml" />
     <Content Include="Views\Admin\ValueListItems.cshtml" />
+    <Content Include="Views\Shared\SecurityError.cshtml" />
+    <Content Include="Views\Shared\_ErrorLayout.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
+    <Folder Include="Views\Error\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config" />

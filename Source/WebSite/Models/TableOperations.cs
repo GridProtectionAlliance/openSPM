@@ -31,6 +31,7 @@ using GSF;
 using GSF.Collections;
 using GSF.Data;
 using GSF.Reflection;
+using openSPM.Attributes;
 
 // TODO: Move into GSF
 

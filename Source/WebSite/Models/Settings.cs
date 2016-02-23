@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System.ComponentModel.DataAnnotations;
+using openSPM.Attributes;
 
 namespace openSPM.Models
 {
@@ -51,5 +52,9 @@ namespace openSPM.Models
             get; set;
         }
 
+        public bool Internal
+        {
+            get; set;
+        }
     }
 }

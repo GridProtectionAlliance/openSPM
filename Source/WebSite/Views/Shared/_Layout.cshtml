@@ -28,8 +28,8 @@
 @{
     // Lookup page info based on defined page name
     DataContext dataContext = ViewBag.DataContext;
-    int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
-    Page page = dataContext.QueryRecord<Page>(pageID);
+    int pageID = 0; // dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
+    Page page = null; //dataContext.QueryRecord<Page>(pageID);
 
     // Load layout settings
     Dictionary<string, string> layoutSettings = dataContext.LoadDatabaseSettings("layout.setting");

@@ -30,6 +30,7 @@ using System.Text;
 using GSF;
 using GSF.Collections;
 using GSF.Data;
+using openSPM.Attributes;
 using RazorEngine.Templating;
 
 // TODO: Move into GSF - Razor field functions should be in a Web based extension 

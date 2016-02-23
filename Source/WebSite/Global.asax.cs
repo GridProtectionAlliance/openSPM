@@ -36,6 +36,7 @@ using GSF.Identity;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
+using AuthorizeAttribute = System.Web.Mvc.AuthorizeAttribute;
 
 namespace openSPM
 {
@@ -76,8 +77,9 @@ namespace openSPM
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;
             global.CompanyAcronym = systemSettings["CompanyAcronym"].Value;
-            global.DateTimeFormat = systemSettings["DateTimeFormat"].Value;
-
+            global.DateFormat = systemSettings["DateFormat"].Value;
+            global.TimeFormat = systemSettings["TimeFormat"].Value;
+            global.DateTimeFormat = $"{global.DateFormat} {global.TimeFormat}";
 
             // Load database driven model settings
             using (DataContext dataContext = new DataContext())

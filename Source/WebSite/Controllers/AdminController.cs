@@ -26,7 +26,7 @@ using openSPM.Models;
 
 namespace openSPM.Controllers
 {
-    /* [Authorize(Roles = "Administrator")] */
+    [Authorize(Roles = "Administrator")]
     public class AdminController : Controller
     {
         #region [ Members ]

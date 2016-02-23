@@ -26,6 +26,7 @@ using openSPM.Models;
 
 namespace openSPM.Controllers
 {
+    [Authorize]
     public class MainController : Controller
     {
         #region [ Members ]
@@ -73,7 +74,7 @@ namespace openSPM.Controllers
             }
         }
 
-        /* [Authorize(Roles = "Administrator")] */
+        [AllowAnonymous]
         public ActionResult Home()
         {
             return View();
@@ -94,11 +95,13 @@ namespace openSPM.Controllers
             return View();
         }
 
+        [AllowAnonymous]
         public ActionResult Help()
         {
             return View();
         }
 
+        [AllowAnonymous]
         public ActionResult Contact()
         {
             ViewBag.Message = "Contacting the Grid Protection Alliance";

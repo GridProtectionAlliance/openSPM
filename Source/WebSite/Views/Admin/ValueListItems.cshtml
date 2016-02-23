@@ -40,9 +40,9 @@
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "name", "Name", "text-left" },
-        new[] { "description", "Description", "text-left" },
-        new[] { "sortOrder", "Sort&nbsp;Order", "text-center" },
+        new[] { "Text", "Text", "text-left" },
+        new[] { "Description", "Description", "text-left" },
+        new[] { "SortOrder", "Sort&nbsp;Order", "text-center" },
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -50,9 +50,9 @@
 }
 @helper BodyRows()
 {
-    <td width="40%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: name, click: $parent.viewPageRecord"></button></td>
-    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(description, 2)"></div></td>
-    <td width="15%" class="text-center valign-middle" data-bind="text: sortOrder"></td>
+    <td width="40%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Text, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Description, 1.5), attr: {title: Description}"></div></td>
+    <td width="15%" class="text-center valign-middle" data-bind="text: SortOrder"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -61,18 +61,20 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("name"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("intValue"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("shadowValue"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("alphaValue"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("abv"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Key"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Text"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("AltText1"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("AltText2"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Abbreviation"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("alias"))
-        @Html.Raw(ViewBag.DataContext.AddTextAreaField<ValueList>("description", rows: 3))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("sortOrder"))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("private"))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("enabled"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Value"))
+        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("Flag"))
+        @Html.Raw(ViewBag.DataContext.AddTextAreaField<ValueList>("Description", rows: 3))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("SortOrder"))
+        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("IsDefault"))
+        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("Hidden"))
+        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -83,9 +85,9 @@
 
         // Configure view model
         viewModel.defaultSortField = "ID";
-        viewModel.labelField = "Name";
+        viewModel.labelField = "Text";
         viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputName";
+        viewModel.initialFocusField = "inputText";
 
         viewModel.setQueryRecordCount(function() {
             return dataHub.queryValueListCount(@parentID);

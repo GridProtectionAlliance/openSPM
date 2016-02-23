@@ -38,27 +38,23 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Label("name")]
-        [StringLength(32)]
-        public string name
+        [StringLength(200)]
+        public string Name
         {
             get; set;
         }
 
-        [Label("description")]
-        [StringLength(512)]
-        public string description
+        public string Description
         {
             get; set;
         }
 
-        [Label("enabled")]
-        public bool enabled
+        public bool Enabled
         {
             get; set;
         }
 
-        public DateTime dtCreated
+        public DateTime CreatedOn
         {
             get; set;
         }

@@ -240,7 +240,7 @@ namespace openSPM
 
         public void AddNewValueListGroup(ValueListGroup valueListGroup)
         {
-            valueListGroup.dtCreated = DateTime.UtcNow;
+            valueListGroup.CreatedOn = DateTime.UtcNow;
             m_dataContext.Table<ValueListGroup>().AddNewRecord(valueListGroup);
         }
 
@@ -283,6 +283,7 @@ namespace openSPM
 
         public void AddNewValueList(ValueList valueList)
         {
+            valueList.CreatedOn = DateTime.UtcNow;
             m_dataContext.Table<ValueList>().AddNewRecord(valueList);
         }
 

@@ -23,7 +23,6 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Configuration;
 using openSPM.Attributes;
 
 namespace openSPM.Models
@@ -39,85 +38,83 @@ namespace openSPM.Models
             get; set;
         }
 
-        public int groupID
+        public int GroupID
         {
             get; set;
         }
 
-        [Label("Integer Key")]
-        public int intKey
+        [Label("Key (Option Value)")]
+        public int Key
         {
             get; set;
         }
 
-        [Label("Alpha Key")]
-        [StringLength(64)]
-        public string alphaKey
+        [Label("Text (Option Label)")]
+        [StringLength(200)]
+        public string Text
         {
             get; set;
         }
 
 
-        [Label("Alpha Value")]
-        [StringLength(64)]
-        public string alphaValue
+        [Label("Alternate Text 1")]
+        [StringLength(200)]
+        public string AltText1
         {
             get; set;
         }
 
-        [Label("Alias Value")]
-        [StringLength(64)]
-        public string aliasValue
+        [Label("Alternate Text 2")]
+        [StringLength(200)]
+        public string AltText2
         {
             get; set;
         }
 
-        [Label("Integer Value")]
-        public int intValue
-        {
-            get; set;
-        }
-
-        [Label("Abv Value")]
         [StringLength(12)]
-        public string abvValue
+        public string Abbreviation
         {
             get; set;
         }
 
-        [Label("Bit Value")]
-        public bool bitValue
+        [Label("Numeric Value")]
+        public int Value
         {
             get; set;
         }
 
-        [Label("Description")]
-        [StringLength(512)]
-        public string description
+        public bool Flag
+        {
+            get; set;
+        }
+
+        public string Description
         {
             get; set;
         }
 
         [Label("Sort Order")]
-        public int sortOrder
+        public int SortOrder
         {
             get; set;
         }
 
-        [FieldName("private")] // <-- private is a reserved word in C#
-        [Label("Private")]
-        public bool @private
+        public bool Hidden
         {
             get; set;
         }
 
-        [Label("Enabled")]
-        public bool enabled
+        public bool IsDefault
         {
             get; set;
         }
 
-        public DateTime dtCreated
+        public bool Enabled
+        {
+            get; set;
+        }
+
+        public DateTime CreatedOn
         {
             get; set;
         }

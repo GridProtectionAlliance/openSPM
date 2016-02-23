@@ -43,8 +43,8 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { "ID", "ID", "text-center" },
-        new[] { "name", "&nbsp;&nbsp;&nbsp;Name", "text-left" },
-        new[] { "description", "Description", "text-left" },
+        new[] { "Name", "&nbsp;&nbsp;&nbsp;Name", "text-left" },
+        new[] { "Description", "Description", "text-left" },
         new[] { null, "Value&nbsp;Items", "text-center" }
     };
 
@@ -54,8 +54,8 @@
 @helper BodyRows()
 {
     <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
-    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: name, click: $parent.viewPageRecord"></button></td>
-    <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(description, 1.5), attr: {title: description}"></div></td>
+    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Description, 1.5), attr: {title: Description}"></div></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openValueListItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'valueListMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getValueListItemCount(ID), attr: {id: 'valueListCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -65,9 +65,9 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-12">
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueListGroup>("name"))
-        @Html.Raw(ViewBag.DataContext.AddTextAreaField<ValueListGroup>("description", rows: 3))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueListGroup>("enabled"))
+        @Html.Raw(ViewBag.DataContext.AddInputField<ValueListGroup>("Name"))
+        @Html.Raw(ViewBag.DataContext.AddTextAreaField<ValueListGroup>("Description", rows: 3))
+        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueListGroup>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -87,9 +87,9 @@
     <script>
         // Configure view model
         viewModel.defaultSortField = "ID";
-        viewModel.labelField = "name";
+        viewModel.labelField = "Name";
         viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputname";
+        viewModel.initialFocusField = "inputName";
 
         viewModel.setQueryRecordCount(function () {
             return dataHub.queryValueListGroupCount();

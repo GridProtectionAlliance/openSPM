@@ -21,9 +21,11 @@
 //
 //******************************************************************************************************
 
+using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Web.Mvc;
+using GSF.Collections;
 using GSF.Security;
 
 namespace openSPM.Attributes
@@ -33,6 +35,19 @@ namespace openSPM.Attributes
     /// </summary>
     public class RoleBasedSecurityAttribute : FilterAttribute, IAuthorizationFilter, IExceptionFilter
     {
+        public readonly string[] AllowedRoles;
+
+        public RoleBasedSecurityAttribute()
+        {
+            AllowedRoles = new string[0];
+        }
+
+        public RoleBasedSecurityAttribute(string allowedRoles)
+        {
+            AllowedRoles = allowedRoles?.Split(',').Select(role => role.Trim()).
+                Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0];
+        }
+
         public void OnAuthorization(AuthorizationContext filterContext)
         {
             // Initialize the security principal from caller's windows identity if uninitialized.
@@ -45,6 +60,9 @@ namespace openSPM.Attributes
             // Verify that the current thread principal has been authenticated.
             if (!Thread.CurrentPrincipal.Identity.IsAuthenticated)
                 throw new SecurityException($"Authentication failed for user '{Thread.CurrentPrincipal.Identity.Name}': {SecurityProviderCache.CurrentProvider.AuthenticationFailureReason}");
+
+            if (AllowedRoles.Length > 0 && !AllowedRoles.Any(role => filterContext.HttpContext.User.IsInRole(role)))
+                throw new SecurityException($"Access is for user '{Thread.CurrentPrincipal.Identity.Name}' defined: minimum required roles = {AllowedRoles.ToDelimitedString(", ")}.");
         }
 
         public void OnException(ExceptionContext filterContext)

@@ -22,11 +22,12 @@
 //******************************************************************************************************
 
 using System.Web.Mvc;
+using openSPM.Attributes;
 using openSPM.Models;
 
 namespace openSPM.Controllers
 {
-    [Authorize(Roles = "Administrator")]
+    [RoleBasedSecurity("Administrator")]
     public class AdminController : Controller
     {
         #region [ Members ]

@@ -25,6 +25,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
+using GSF;
+using GSF.Identity;
 using Microsoft.AspNet.SignalR;
 using openSPM.Attributes;
 using openSPM.Models;
@@ -123,18 +126,17 @@ namespace openSPM
 
         public void AddNewPatch(Patch patch)
         {
-            //TODO: fix defaults
-            patch.createdByID = 1;
-            patch.dtCreated = DateTime.UtcNow;
-            patch.updatedByID = 1;
-            patch.dtUpdated = patch.dtCreated;
+            patch.CreatedByID = GetCurrentUserID();
+            patch.CreatedOn = DateTime.UtcNow;
+            patch.UpdatedByID = patch.CreatedByID;
+            patch.UpdatedOn = patch.CreatedOn;
             m_dataContext.Table<Patch>().AddNewRecord(patch);
         }
 
         public void UpdatePatch(Patch patch)
         {
-            patch.updatedByID = 1;
-            patch.dtUpdated = DateTime.UtcNow;
+            patch.UpdatedByID = GetCurrentUserID();
+            patch.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Patch>().UpdateRecord(patch);
         }
 
@@ -293,6 +295,13 @@ namespace openSPM
         }
 
         #endregion
+
+        private Guid GetCurrentUserID()
+        {
+            Guid userID;
+            MvcApplication.UserIDCache.TryGetValue(UserInfo.CurrentUserID, out userID);
+            return userID;
+        }
 
         #endregion
 

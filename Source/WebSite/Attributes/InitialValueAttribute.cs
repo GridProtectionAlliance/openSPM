@@ -27,6 +27,9 @@ using System;
 
 namespace openSPM.Attributes
 {
+
+    // [InitialValue("(new Date()).addDays(30)")] // <-- Example to set initial value to 30 days from now
+
     [AttributeUsage(AttributeTargets.Property)]
     public class InitialValueAttribute : Attribute
     {

@@ -58,18 +58,32 @@
     menuImagePath = menuImagePath.EnsureEnd('/');
 
     // Load menu items for this page from database table
-    MenuItem[] menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY sortOrder", pageID).ToArray();
-
-    // Deference page locations for the menu items on this page
-    Dictionary<int, string> pageLocations = new Dictionary<int, string>();
+    List<MenuItem> menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY SortOrder", pageID).ToList();
+    List<MenuItem> unavailableMenuItems = new List<MenuItem>();
 
     foreach (MenuItem menuItem in menuItems) {
-        if (string.IsNullOrEmpty(menuItem.Link) && menuItem.PageID > 0) {
-            pageLocations.Add(menuItem.ID, dataContext.Connection.ExecuteScalar<string>("SELECT PageLocation FROM Page WHERE ID={0} AND Enabled <> 0", menuItem.PageID) ?? "#");
+        // If no menu link was provided, check for page table reference
+        if (string.IsNullOrWhiteSpace(menuItem.Link) && menuItem.PageID > 0) {
+            // Look-up associated page form menu item
+            Page menuPage = dataContext.QueryRecord<Page>(menuItem.PageID);
+
+            // Check if menu item is enabled, page location is specified and that user has rights to page
+            if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(page.PageLocation) &&
+                !Model.UserIsInRole(menuPage.ExcludedRoles.ToNonNullNorWhiteSpace()) &&
+                Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*"))) {
+                // Update menu item link
+                menuItem.Link = page.PageLocation;
+            }
+            else {
+                // Menu item is unavailable to user
+                unavailableMenuItems.Add(menuItem);
+            }
         }
-        else {
-            pageLocations.Add(menuItem.ID, menuItem.Link);
-        }
+    }
+
+    // Remove menu items that are not available to user
+    foreach (MenuItem menuItem in unavailableMenuItems) {
+        menuItems.Remove(menuItem);
     }
 
     // Define ViewBag.CustomTitle in page code for custom page titles
@@ -148,7 +162,7 @@
                         <a href="/" class="navbar-brand" style="margin-top: -5px"><img class="pull-left" style="padding: 12px 10px 10px 20px" alt="@Model.Global.ApplicationName" src="/Images/@(Model.Global.ApplicationName).png"></a>
                     </li>
                     @foreach (MenuItem menuItem in menuItems) {
-                        <li><a href="@pageLocations[menuItem.ID]"><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@menuItem.Text</a></li>
+                        <li><a href="@Html.Raw(menuItem.Link)"><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@Html.Raw(menuItem.Text)</a></li>
                     }
                 </ul>
                 <footer id="footer">

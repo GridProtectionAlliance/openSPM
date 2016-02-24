@@ -30,25 +30,27 @@
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "patchReference", "SPM&nbsp;Reference", "text-center" },
-        new[] { "impactIntKey", "Impact", "text-center" },
-        new[] { "title", "Title", "text-left" },
-        new[] { "dtSource", "Source Date", "text-center" }
+        new[] { null, "Status", "text-center valign-middle" },
+        new[] { "PatchReference", "SPM&nbsp;Reference", "text-center" },
+        new[] { "ImpactKey", "Impact", "text-center" },
+        new[] { "Title", "Title", "text-left" },
+        new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
     DataContext dataContext = ViewBag.DataContext;
-    int impactValuesID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE name='impact' AND enabled <> 0") ?? 0;
+    int impactKey = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='impact' AND Enabled <> 0") ?? 0;
 
-    ViewBag.ImpactValuesID = impactValuesID;
+    ViewBag.ImpactKey = impactKey;
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
 }
 @helper BodyRows()
 {
-    <td width="20%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: patchReference, click: $parent.viewPageRecord"></button></td>
-    <td width="15%" class="text-center valign-middle" data-bind="text: lookupImpactValue(impactIntKey)"></td>
-    <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(title, 1.5), attr: {title: title}"></div></td>
-    <td width="10%" class="text-center valign-middle" data-bind="text: dtSource.formatDate(DateFormat)"></td>
+    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="~/Images/StatusLights/disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
+    <td width="20%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchReference, click: $parent.viewPageRecord"></button></td>
+    <td width="15%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
+    <td width="45%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: Title}"></div></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: SourceReleaseDate.formatDate(DateFormat)"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -58,31 +60,32 @@
 {
     DataContext dataContext = ViewBag.DataContext;
     RecordRestriction impactValues = new RecordRestriction {
-        FilterExpression = "GroupID = {0} AND enabled <> 0 AND private = 0",
-        Parameters = new object[] { ViewBag.ImpactValuesID }
+        FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
+        Parameters = new object[] { ViewBag.ImpactKey }
     };
 
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Patch>("patchReference"))
-        @Html.Raw(dataContext.AddSelectField<Patch, Patch>("parentID", "ID", "patchReference"))
-        @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("sourceID", "ID", "SPMidentifier"))*@
-        @Html.Raw(dataContext.AddInputField<Patch>("sourceReference"))
-        @Html.Raw(dataContext.AddDateField<Patch>("dtSource"))
-        @Html.Raw(dataContext.AddSelectField<Patch, ValueList>("impactIntKey", "intKey", "alphaValue", "sortOrder", restriction: impactValues))
+        @Html.Raw(dataContext.AddInputField<Patch>("PatchReference"))
+        @Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))
+        @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("SourceID", "ID", "SPMidentifier"))*@
+        @Html.Raw(dataContext.AddInputField<Patch>("SourceReference"))
+        @Html.Raw(dataContext.AddDateField<Patch>("SourceReleaseDate"))
+        @Html.Raw(dataContext.AddSelectField<Patch, ValueList>("ImpactKey", "Key", "Text", "SortOrder", restriction: impactValues))
+        @Html.Raw(dataContext.AddInputField<Patch>("OperatorGroupID"))
     </div>
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Patch>("title"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("target"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("summary"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("detail", 3))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("reference"))
+        @Html.Raw(dataContext.AddInputField<Patch>("Title"))
+        @Html.Raw(dataContext.AddTextAreaField<Patch>("Target"))
+        @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
+        @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
+        @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))
     </div>
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("workArounds"))
-        @Html.Raw(dataContext.AddInputField<Patch>("link", "url"))
-        @Html.Raw(dataContext.AddInputField<Patch>("alarmCriticalDays"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("closeOutNotes", 4))
-        @Html.Raw(dataContext.AddCheckBoxField<Patch>("isNotCompliance"))
+        @Html.Raw(dataContext.AddTextAreaField<Patch>("WorkArounds"))
+        @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
+        @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
+        @Html.Raw(dataContext.AddTextAreaField<Patch>("CloseOutNotes", 4))
+        @Html.Raw(dataContext.AddCheckBoxField<Patch>("IsNotCompliance"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -122,8 +125,8 @@
         // Define Javascript based impact value lookup function
         var impactValues = [];
 
-        @foreach (ValueList valueList in dataContext.QueryRecords<ValueList>("SELECT ID FROM ValueList WHERE GroupID = {0} AND enabled <> 0 AND private = 0", impactValuesID)) {
-            @:impactValues[@valueList.intKey] = "@valueList.alphaValue.JavaScriptEncode()";
+        @foreach (ValueList valueList in dataContext.QueryRecords<ValueList>("SELECT ID FROM ValueList WHERE GroupID = {0} AND Enabled <> 0 AND Hidden = 0", impactKey)) {
+            @:impactValues[@valueList.Key] = "@valueList.Text.JavaScriptEncode()";
         }
 
         function lookupImpactValue(value) {

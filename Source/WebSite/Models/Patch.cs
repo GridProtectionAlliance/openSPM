@@ -39,133 +39,128 @@ namespace openSPM.Models
         }
 
         [Label("Parent Patch")]
-        public int parentID
+        public int ParentID
         {
             get; set;
         }
 
         [Required]
         [Label("Patch Source")]
-        public int sourceID
+        public int SourceID
         {
             get; set;
         }
 
+        [Required]
         [Label("SPM Patch Reference")]
         [StringLength(64)]
-        public string patchReference
+        public string PatchReference
         {
             get; set;
         }
 
+        [Required]
         [Label("Source Patch Reference")]
         [StringLength(64)]
-        public string sourceReference
+        public string SourceReference
         {
             get; set;
         }
 
-        [Label("Source Date")]
-        [InitialValue("(new Date()).addDays(30)")] // <-- Example to set inital value to 30 days from now
-        public DateTime dtSource
+        [Required]
+        [Label("Source Patch Release Date")]
+        [InitialValue("new Date()")]
+        public DateTime SourceReleaseDate
         {
             get; set;
         }
 
-        [Label("Impact Value")]
-        public int impactIntKey
+        [Label("Impact of Patch")]
+        public int ImpactKey
         {
             get; set;
         }
 
+        [Required]
         [Label("Operator Group")]
-        public int operatorGroupID
+        public int OperatorGroupID
         {
             get; set;
         }
 
         [StringLength(80)]
-        public string title
+        public string Title
         {
             get; set;
         }
 
-        [StringLength(512)]
-        public string target
+        public string Target
         {
             get; set;
         }
 
-        [StringLength(1024)]
-        public string summary
+        public string Summary
         {
             get; set;
         }
 
-        public string detail
+        public string Detail
         {
             get; set;
         }
 
-        [StringLength(1024)]
-        public string reference
+        public string Citations
         {
             get; set;
         }
 
-        [Label("Work Around")]
-        [StringLength(1024)]
-        public string workArounds
+        [Label("Work Arounds")]
+        public string WorkArounds
         {
             get; set;
         }
 
         [StringLength(512)]
         [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
-        public string link
+        public string Link
         {
             get; set;
         }
 
         [Label("Alarm Critical Days")]
-        public int alarmCriticalDays
+        public int AlarmCriticalDays
         {
             get; set;
         }
 
-        [Required]
         [Label("Close Out Notes")]
-        public string closeOutNotes
+        public string CloseOutNotes
         {
             get; set;
         }
 
-        [Label("Not In Compliance")]
-        public bool isNotCompliance
+        [Label("Not For Compliance")]
+        public bool IsNotCompliance
         {
             get; set;
         }
 
-        [Required]
-        public DateTime dtCreated
+        public DateTime CreatedOn
         {
             get; set;
         }
 
-        [Required]
-        public int createdByID
+        public Guid CreatedByID
         {
             get; set;
         }
 
-        [Required]
-        public DateTime dtUpdated
+        public DateTime UpdatedOn
         {
             get; set;
         }
 
-        [Required]
-        public int updatedByID
+        public Guid UpdatedByID
         {
             get; set;
         }

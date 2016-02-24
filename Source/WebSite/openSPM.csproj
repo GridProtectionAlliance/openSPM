@@ -253,9 +253,11 @@
     <Content Include="Images\Icons\mstile-310x150.png" />
     <Content Include="Images\Icons\mstile-310x310.png" />
     <Content Include="Images\Icons\mstile-70x70.png" />
+    <Content Include="Images\Menu\admin.png" />
     <Content Include="Images\Menu\apply.png" />
     <Content Include="Images\Menu\assess.png" />
     <Content Include="Images\Menu\cycleTimer.png" />
+    <Content Include="Images\Menu\done.png" />
     <Content Include="Images\Menu\help.png" />
     <Content Include="Images\Menu\home.png" />
     <Content Include="Images\Menu\nerc.png" />
@@ -263,6 +265,7 @@
     <Content Include="Images\Menu\notificationLog.png" />
     <Content Include="Images\Menu\notify.png" />
     <Content Include="Images\Menu\openPatches.png" />
+    <Content Include="Images\Menu\patch.png" />
     <Content Include="Images\Menu\patchHistory.png" />
     <Content Include="Images\Menu\plan.png" />
     <Content Include="Images\Menu\settings.png" />
@@ -272,6 +275,7 @@
     <Content Include="Images\Menu\tvasop.png" />
     <Content Include="Images\Menu\user.png" />
     <Content Include="Images\openSPM.png" />
+    <Content Include="Images\openSPM2.png" />
     <Content Include="Images\StatusLights\amberlight.png" />
     <Content Include="Images\StatusLights\bluelight.png" />
     <Content Include="Images\StatusLights\disabledlight.png" />

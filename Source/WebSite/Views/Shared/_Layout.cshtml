@@ -72,7 +72,7 @@
                 !Model.UserIsInRole(menuPage.ExcludedRoles.ToNonNullNorWhiteSpace()) &&
                 Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*"))) {
                 // Update menu item link
-                menuItem.Link = page.PageLocation;
+                menuItem.Link = menuPage.PageLocation;
             }
             else {
                 // Menu item is unavailable to user

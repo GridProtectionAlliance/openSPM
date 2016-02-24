@@ -1,29 +1,31 @@
 ﻿@*******************************************************************************************************
-//  Patches.cshtml - Gbtc
-//
-//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
-//
-//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
-//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
-//  file except in compliance with the License. You may obtain a copy of the License at:
-//
-//      http://opensource.org/licenses/MIT
-//
-//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
-//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
-//  License for the specific language governing permissions and limitations.
-//
-//  Code Modification History:
-//  ----------------------------------------------------------------------------------------------------
-//  02/20/2016 - Ritchie Carroll
-//       Generated original version of source code.
-//
-//*****************************************************************************************************@
+    //  Patches.cshtml - Gbtc
+    //
+    //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+    //
+    //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+    //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+    //  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+    //  file except in compliance with the License. You may obtain a copy of the License at:
+    //
+    //      http://opensource.org/licenses/MIT
+    //
+    //  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+    //  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+    //  License for the specific language governing permissions and limitations.
+    //
+    //  Code Modification History:
+    //  ----------------------------------------------------------------------------------------------------
+    //  02/20/2016 - Ritchie Carroll
+    //       Generated original version of source code.
+    //
+    //*****************************************************************************************************@
+@using System.Collections.Specialized
 @using System.Text
+@using GSF
 @using openSPM.Models
 @model AppModel
-@{    
+@{
     ViewBag.PageName = "Patch";
     ViewBag.PageControlScripts = new StringBuilder();
 
@@ -43,6 +45,9 @@
     ViewBag.ImpactKey = impactKey;
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+
+    NameValueCollection parameters = Request.QueryString;
+    bool showAddNew = parameters["AddNew"].ToNonNullString().ParseBoolean();
 }
 @helper BodyRows()
 {
@@ -58,11 +63,12 @@
 }
 @helper AddNewEditDialog()
 {
-    DataContext dataContext = ViewBag.DataContext;
-    RecordRestriction impactValues = new RecordRestriction {
-        FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
-        Parameters = new object[] { ViewBag.ImpactKey }
-    };
+DataContext dataContext = ViewBag.DataContext;
+RecordRestriction impactValues = new RecordRestriction
+{
+    FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
+    Parameters = new object[] { ViewBag.ImpactKey }
+};
 
     <div class="col-md-4">
         @Html.Raw(dataContext.AddInputField<Patch>("PatchReference"))
@@ -132,5 +138,13 @@
         function lookupImpactValue(value) {
             return impactValues[value];
         }
+
+        const showAddNew = @(showAddNew.ToString().ToLower());
+
+        $(function() {
+            if (showAddNew) {
+                setTimeout(viewModel.addPageRecord, 500);
+            }
+        });
     </script>
 }

@@ -65,9 +65,9 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-12">
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueListGroup>("Name"))
-        @Html.Raw(ViewBag.DataContext.AddTextAreaField<ValueListGroup>("Description", rows: 3))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueListGroup>("Enabled"))
+        @Html.Raw(Model.DataContext.AddInputField<ValueListGroup>("Name"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<ValueListGroup>("Description", rows: 3))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<ValueListGroup>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")

@@ -20,12 +20,9 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System
-@using System.Collections.Generic
 @using System.Text
 @using GSF
 @using openSPM.Models
-@using Page = openSPM.Models.Page
 @model AppModel
 @{
     StringBuilder pageControlScripts = ViewBag.PageControlScripts;
@@ -42,6 +39,9 @@
                 viewModel.updateSortOrder(viewModel.defaultSortField, true);
             });
     ");
+
+    string routeID = Url.RequestContext.RouteData.Values["id"] as string;
+    bool showAddNew = routeID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
 }
 @functions
 {
@@ -169,7 +169,15 @@
     </div>
 </div>
 @{
-    DataContext dataContext = ViewBag.DataContext;
+    DataContext dataContext = Model.DataContext;
+
+    if (showAddNew)
+    {
+        pageControlScripts.Append(@"
+            // Add new pop-up requested via URL parameter
+            setTimeout(viewModel.addPageRecord, 500);
+        ");
+    }
 
     pageControlScripts.Append(@"
             $(""#addRecordButton"").click(function () {

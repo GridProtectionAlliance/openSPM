@@ -61,20 +61,20 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Key"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Text"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("AltText1"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("AltText2"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Abbreviation"))
+        @Html.Raw(Model.DataContext.AddInputField<ValueList>("Key"))
+        @Html.Raw(Model.DataContext.AddInputField<ValueList>("Text"))
+        @Html.Raw(Model.DataContext.AddInputField<ValueList>("AltText1"))
+        @Html.Raw(Model.DataContext.AddInputField<ValueList>("AltText2"))
+        @Html.Raw(Model.DataContext.AddInputField<ValueList>("Abbreviation"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("Value"))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("Flag"))
-        @Html.Raw(ViewBag.DataContext.AddTextAreaField<ValueList>("Description", rows: 3))
-        @Html.Raw(ViewBag.DataContext.AddInputField<ValueList>("SortOrder"))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("IsDefault"))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("Hidden"))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<ValueList>("Enabled"))
+        @Html.Raw(Model.DataContext.AddInputField<ValueList>("Value"))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<ValueList>("Flag"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<ValueList>("Description", rows: 3))
+        @Html.Raw(Model.DataContext.AddInputField<ValueList>("SortOrder"))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<ValueList>("IsDefault"))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<ValueList>("Hidden"))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<ValueList>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")

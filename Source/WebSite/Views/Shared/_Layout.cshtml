@@ -27,7 +27,7 @@
 @model AppModel
 @{
     // Lookup page info based on defined page name
-    DataContext dataContext = ViewBag.DataContext;
+    DataContext dataContext = Model.DataContext;
     int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", ViewBag.PageName ?? "") ?? 0;
     Page page = dataContext.QueryRecord<Page>(pageID);
 
@@ -68,7 +68,7 @@
             Page menuPage = dataContext.QueryRecord<Page>(menuItem.PageID);
 
             // Check if menu item is enabled, page location is specified and that user has rights to page
-            if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(page.PageLocation) &&
+            if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(menuPage.PageLocation) &&
                 !Model.UserIsInRole(menuPage.ExcludedRoles.ToNonNullNorWhiteSpace()) &&
                 Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*"))) {
                 // Update menu item link

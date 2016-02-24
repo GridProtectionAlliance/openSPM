@@ -46,6 +46,15 @@ namespace openSPM.Models
             Global = MvcApplication.DefaultModel != null ? MvcApplication.DefaultModel.Global : new GlobalSettings();
         }
 
+        /// <summary>
+        /// Creates a new <see cref="AppModel"/> with the specified <paramref name="dataContext"/>.
+        /// </summary>
+        /// <param name="dataContext">Data context to provide to model.</param>
+        public AppModel(DataContext dataContext) : this()
+        {
+            DataContext = dataContext;
+        }
+
         #endregion
 
         #region [ Properties ]
@@ -62,6 +71,15 @@ namespace openSPM.Models
         /// Gets reference to user specific security provider instance.
         /// </summary>
         public AdoSecurityProvider SecurityProvider => SecurityProviderCache.CurrentProvider as AdoSecurityProvider;
+
+        /// <summary>
+        /// Gets or sets data context for model.
+        /// </summary>
+        public DataContext DataContext
+        {
+            get;
+            private set;
+        }
 
         #endregion
 

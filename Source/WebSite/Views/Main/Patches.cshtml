@@ -37,15 +37,12 @@
         new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
-    DataContext dataContext = ViewBag.DataContext;
+    DataContext dataContext = Model.DataContext;
     int impactKey = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='impact' AND Enabled <> 0") ?? 0;
 
     ViewBag.ImpactKey = impactKey;
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
-
-    string id = Url.RequestContext.RouteData.Values["id"] as string;
-    bool showAddNew = id?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
 }
 @helper BodyRows()
 {
@@ -61,7 +58,7 @@
 }
 @helper AddNewEditDialog()
 {
-DataContext dataContext = ViewBag.DataContext;
+DataContext dataContext = Model.DataContext;
 RecordRestriction impactValues = new RecordRestriction
 {
     FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
@@ -136,13 +133,5 @@ RecordRestriction impactValues = new RecordRestriction
         function lookupImpactValue(value) {
             return impactValues[value];
         }
-
-        const showAddNew = @(showAddNew.ToString().ToLower());
-
-        $(function() {
-            if (showAddNew) {
-                setTimeout(viewModel.addPageRecord, 500);
-            }
-        });
     </script>
 }

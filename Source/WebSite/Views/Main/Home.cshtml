@@ -32,7 +32,7 @@
     // DataContext is the "database connection" that is available for the page, you can
     // use direct database calls, e.g., dataContect.Connection.RetrieveData(...) or you
     // can use model based table operations, e.g., dataContext.QueryRecord<Page>(id)
-    DataContext dataContext = ViewBag.DataContext;
+    DataContext dataContext = Model.DataContext;
 
     //// TODO: Determine if the following "imagePath" logic needs to be in all pages...
     //// If all pages need the following functionality, move code to "_Layout.cshtml" and

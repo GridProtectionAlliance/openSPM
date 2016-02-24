@@ -66,15 +66,15 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("name"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("title"))
-        @Html.Raw(ViewBag.DataContext.AddInputField<Page>("minViewLevel"))
-        @Html.Raw(ViewBag.DataContext.AddTextAreaField<Page>("serverConfiguration"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("name"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("title"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("minViewLevel"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("serverConfiguration"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(ViewBag.DataContext.AddTextAreaField<Page>("clientConfiguration"))
-        @Html.Raw(ViewBag.DataContext.AddTextAreaField<Page>("description", rows: 3))
-        @Html.Raw(ViewBag.DataContext.AddCheckBoxField<Page>("enabled"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("clientConfiguration"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("description", rows: 3))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<Page>("enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")

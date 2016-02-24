@@ -258,6 +258,7 @@
     <Content Include="Images\Menu\assess.png" />
     <Content Include="Images\Menu\cycleTimer.png" />
     <Content Include="Images\Menu\done.png" />
+    <Content Include="Images\Menu\done2.png" />
     <Content Include="Images\Menu\help.png" />
     <Content Include="Images\Menu\home.png" />
     <Content Include="Images\Menu\nerc.png" />

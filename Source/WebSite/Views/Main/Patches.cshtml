@@ -20,9 +20,7 @@
     //       Generated original version of source code.
     //
     //*****************************************************************************************************@
-@using System.Collections.Specialized
 @using System.Text
-@using GSF
 @using openSPM.Models
 @model AppModel
 @{
@@ -46,8 +44,8 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
 
-    NameValueCollection parameters = Request.QueryString;
-    bool showAddNew = parameters["AddNew"].ToNonNullString().ParseBoolean();
+    string id = Url.RequestContext.RouteData.Values["id"] as string;
+    bool showAddNew = id?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
 }
 @helper BodyRows()
 {
@@ -133,7 +131,7 @@ RecordRestriction impactValues = new RecordRestriction
 
         @foreach (ValueList valueList in dataContext.QueryRecords<ValueList>("SELECT ID FROM ValueList WHERE GroupID = {0} AND Enabled <> 0 AND Hidden = 0", impactKey)) {
             @:impactValues[@valueList.Key] = "@valueList.Text.JavaScriptEncode()";
-        }
+         }
 
         function lookupImpactValue(value) {
             return impactValues[value];

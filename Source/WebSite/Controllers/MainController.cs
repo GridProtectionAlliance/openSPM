@@ -106,7 +106,6 @@ namespace openSPM.Controllers
         public ActionResult Contact()
         {
             ViewBag.Message = "Contacting the Grid Protection Alliance";
-
             return View();
         }
 

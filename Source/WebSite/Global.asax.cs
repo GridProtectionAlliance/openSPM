@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -36,7 +37,6 @@ using GSF.Identity;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
-using AuthorizeAttribute = System.Web.Mvc.AuthorizeAttribute;
 
 namespace openSPM
 {
@@ -46,6 +46,11 @@ namespace openSPM
         /// Gets the default model used for the application.
         /// </summary>
         public static readonly AppModel DefaultModel = new AppModel();
+
+        /// <summary>
+        /// Gets the current user ID cache.
+        /// </summary>
+        public static readonly ConcurrentDictionary<string, Guid> UserIDCache = new ConcurrentDictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// Gets the list of currently connected hub clients.

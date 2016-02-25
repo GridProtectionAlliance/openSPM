@@ -21,12 +21,15 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Linq;
 using System.Security;
 using System.Threading;
 using System.Web.Mvc;
 using GSF.Collections;
+using GSF.Identity;
 using GSF.Security;
+using openSPM.Models;
 
 namespace openSPM.Attributes
 {
@@ -57,12 +60,22 @@ namespace openSPM.Attributes
             // Setup the principal
             filterContext.HttpContext.User = Thread.CurrentPrincipal;
 
+            // Get current user name
+            string userName = Thread.CurrentPrincipal.Identity.Name;
+
             // Verify that the current thread principal has been authenticated.
             if (!Thread.CurrentPrincipal.Identity.IsAuthenticated)
-                throw new SecurityException($"Authentication failed for user '{Thread.CurrentPrincipal.Identity.Name}': {SecurityProviderCache.CurrentProvider.AuthenticationFailureReason}");
+                throw new SecurityException($"Authentication failed for user '{userName}': {SecurityProviderCache.CurrentProvider.AuthenticationFailureReason}");
 
             if (AllowedRoles.Length > 0 && !AllowedRoles.Any(role => filterContext.HttpContext.User.IsInRole(role)))
-                throw new SecurityException($"Access is for user '{Thread.CurrentPrincipal.Identity.Name}' defined: minimum required roles = {AllowedRoles.ToDelimitedString(", ")}.");
+                throw new SecurityException($"Access is for user '{userName}' defined: minimum required roles = {AllowedRoles.ToDelimitedString(", ")}.");
+
+            // Make sure current user ID is cached
+            if (!MvcApplication.UserIDCache.ContainsKey(userName)) {
+                using (DataContext dataContext = new DataContext()) {
+                    MvcApplication.UserIDCache.TryAdd(userName, dataContext.Connection.ExecuteScalar<Guid?>("SELECT ID FROM UserAccount WHERE Name={0}", UserInfo.UserNameToSID(userName)) ?? Guid.Empty);
+                }
+            }
         }
 
         public void OnException(ExceptionContext filterContext)

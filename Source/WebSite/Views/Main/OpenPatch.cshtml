@@ -27,7 +27,7 @@
 @{
   
     ViewBag.PageName = "OpenPatch";
-    DataContext dataContext = ViewBag.DataContext;
+    DataContext dataContext = Model.DataContext;
     int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
 
     DataTable testtable = dataContext.Connection.RetrieveData("SELECT * from fn_ListValues('impact')");

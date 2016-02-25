@@ -42,12 +42,12 @@ namespace openSPM.Controllers
 
         public MainController()
         {
-            // Set default model for pages used by layout
-            ViewData.Model = MvcApplication.DefaultModel;
-
             // Establish data context for the view
             m_dataContext = new DataContext();
             ViewData.Add("DataContext", m_dataContext);
+
+            // Set default model for pages used by layout
+            ViewData.Model = new AppModel(m_dataContext);
         }
 
         #endregion
@@ -106,7 +106,6 @@ namespace openSPM.Controllers
         public ActionResult Contact()
         {
             ViewBag.Message = "Contacting the Grid Protection Alliance";
-
             return View();
         }
 

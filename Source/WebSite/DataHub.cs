@@ -34,7 +34,7 @@ using openSPM.Models;
 
 namespace openSPM
 {
-    [RoleBasedSecurity]
+    [AuthorizeHubRole]
     public class DataHub : Hub
     {
         #region [ Members ]
@@ -119,11 +119,13 @@ namespace openSPM
             m_dataContext.Table<Patch>().DeleteRecord(id);
         }
 
+        [AuthorizeHubRole("Administrator, Editor, PIC")]
         public Patch NewPatch()
         {
             return new Patch();
         }
 
+        [AuthorizeHubRole("Administrator, Editor, PIC")]
         public void AddNewPatch(Patch patch)
         {
             patch.CreatedByID = GetCurrentUserID();
@@ -133,6 +135,7 @@ namespace openSPM
             m_dataContext.Table<Patch>().AddNewRecord(patch);
         }
 
+        [AuthorizeHubRole("Administrator, Editor, PIC")]
         public void UpdatePatch(Patch patch)
         {
             patch.UpdatedByID = GetCurrentUserID();

@@ -49,6 +49,9 @@ function PagedViewModel() {
     self.unassignedFieldCount = ko.observable(0);           // Number of bound fields with missing data
     self.dataHubIsConnected = ko.observable(false);         // Data hub connected observable flag - externally managed
     self.errors = ko.validation.group([ko.observable(0)]);  // Validation errors array
+    self.canEdit = ko.observable(true);                     // Can edit flag - normally controlled by external roles
+    self.canAddNew = ko.observable(true);                   // Can add new flag - normally controlled by external roles
+    self.canDelete = ko.observable(true);                   // Can delete flag - normally controlled by external roles
 
     // Internal fields
     self._currentPageSize = ko.observable(1);
@@ -378,6 +381,9 @@ function PagedViewModel() {
     }
 
     self.removePageRecord = function (record) {
+        if (!self.canDelete())
+            return;
+
         if (self.dataHubIsConnected() && confirm("Are you sure you want to delete \"" + record[self.labelField] + "\"?")) {
             const keyValues = [];
 
@@ -408,6 +414,9 @@ function PagedViewModel() {
     }
 
     self.saveEditedRecord = function () {
+        if (!self.canEdit())
+            return;
+
         if (self.dataHubIsConnected()) {
             const record = self.deriveJSRecord();
 
@@ -422,7 +431,10 @@ function PagedViewModel() {
     }
 
     self.saveNewRecord = function () {
-        if (self.dataHubIsConnected()) { 
+        if (!self.canAddNew())
+            return;
+
+        if (self.dataHubIsConnected()) {
             const record = self.deriveJSRecord();
 
             self.addNewRecord(record).done(function () {
@@ -442,12 +454,18 @@ function PagedViewModel() {
     }
 
     self.editPageRecord = function (record) {
+        if (!self.canEdit())
+            return;
+
         self.recordMode(RecordMode.Edit);
         self.currentRecord(self.deriveObservableRecord(record));
         $("#addNewEditDialog").modal("show");
     }
 
     self.addPageRecord = function () {
+        if (!self.canAddNew())
+            return;
+
         if (self.dataHubIsConnected()) {
             self.recordMode(RecordMode.AddNew);
             self.newRecord().done(function (emptyRecord) {

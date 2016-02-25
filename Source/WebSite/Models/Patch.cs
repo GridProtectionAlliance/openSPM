@@ -45,14 +45,14 @@ namespace openSPM.Models
         }
 
         [Required]
-        [Label("Patch Source")]
-        public int SourceID
+        [Label("Patch Vendor")]
+        public int VendorID
         {
             get; set;
         }
 
         [Required]
-        [Label("SPM Patch Reference")]
+        [Label("SPM Patch Identifier")]
         [StringLength(64)]
         public string PatchReference
         {
@@ -60,55 +60,60 @@ namespace openSPM.Models
         }
 
         [Required]
-        [Label("Source Patch Reference")]
+        [Label("Vendor Patch Name/Identifier")]
         [StringLength(64)]
-        public string SourceReference
+        public string VendorReference
         {
             get; set;
         }
 
         [Required]
-        [Label("Source Patch Release Date")]
+        [Label("Vendor Patch Release Date")]
         [InitialValue("new Date()")]
-        public DateTime SourceReleaseDate
+        public DateTime VendorReleaseDate
         {
             get; set;
         }
 
-        [Label("Impact of Patch")]
+        [Label("Vendor Stated Impact")]
         public int ImpactKey
         {
             get; set;
         }
 
         [Required]
-        [Label("Operator Group")]
-        public int OperatorGroupID
+        [Label("Assigned to SME Group")]
+        public int SMEGroupID
         {
             get; set;
         }
 
+        [Label("Patch Title")]
         [StringLength(80)]
         public string Title
         {
             get; set;
         }
 
+        [Label("Target Platform / Device")]
         public string Target
         {
             get; set;
         }
 
+        [Label("Patch Summary")]
         public string Summary
         {
             get; set;
         }
 
+        [Label("Patch Detail")]
         public string Detail
         {
             get; set;
         }
 
+        [Label("Vendor References")]
         public string Citations
         {
             get; set;
@@ -120,6 +125,7 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Label("Patch Source Link")]
         [StringLength(512)]
         [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
         public string Link
@@ -127,7 +133,8 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Label("Alarm Critical Days")]
+        [Label("Alarm Critical Business Days")]
+        [InitialValue("2")]
         public int AlarmCriticalDays
         {
             get; set;

@@ -77,7 +77,7 @@ namespace openSPM
             systemSettings.Add("CompanyAcronym", "GPA", "The acronym representing the company who owns this instance of the openMIC.");
             systemSettings.Add("DateFormat", "MM/dd/yyyy", "The default date format to use when rendering timestamps.");
             systemSettings.Add("TimeFormat", "HH:mm.ss.fff", "The default time format to use when rendering timestamps.");
-            systemSettings.Add("DefaultSecurityRoles", "Administrator, Editor, Viewer", "The default security roles that should exist for the application.");
+            systemSettings.Add("DefaultSecurityRoles", "Administrator, Editor, Viewer, PIC, SME, Monitor", "The default security roles that should exist for the application.");
 
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;

@@ -27,13 +27,14 @@ using openSPM.Models;
 
 namespace openSPM.Controllers
 {
-    [RoleBasedSecurity("Administrator")]
+    [AuthorizeControllerRole("Administrator")]
     public class AdminController : Controller
     {
         #region [ Members ]
 
         // Fields
         private readonly DataContext m_dataContext;
+        private readonly AppModel m_appModel;
         private bool m_disposed;
 
         #endregion
@@ -47,7 +48,8 @@ namespace openSPM.Controllers
             ViewData.Add("DataContext", m_dataContext);
 
             // Set default model for pages used by layout
-            ViewData.Model = new AppModel(m_dataContext);
+            m_appModel = new AppModel(m_dataContext);
+            ViewData.Model = m_appModel;
         }
 
         #endregion
@@ -77,21 +79,25 @@ namespace openSPM.Controllers
 
         public ActionResult Home()
         {
+            m_appModel.LookupPageDetail("AdminHome", ViewBag);
             return View();
         }
 
         public ActionResult Pages()
         {
+            m_appModel.LookupPageDetail("AdminPages", ViewBag);
             return View();
         }
 
         public ActionResult MenuItems()
         {
+            m_appModel.LookupPageDetail("AdminMenuItems", ViewBag);
             return View();
         }
 
         public ActionResult ValueListGroups()
         {
+            m_appModel.LookupPageDetail("AdminValueListGroups", ViewBag);
             return View();
         }
 

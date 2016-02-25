@@ -34,45 +34,48 @@
         new[] { "PatchReference", "SPM&nbsp;Reference", "text-center" },
         new[] { "ImpactKey", "Impact", "text-center" },
         new[] { "Title", "Title", "text-left" },
+        new[] { null, "Patch&nbsp;Status", "text-center valign-middle" },
         new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
+    ViewBag.HideUnauthorizedControls = true;
+    //ViewBag.EditRoles = "Test";
+    ViewBag.EditRoles = "Administrator, Editor, PIC";
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+
+    // TODO: Move into model located render function
     DataContext dataContext = Model.DataContext;
     int impactKey = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='impact' AND Enabled <> 0") ?? 0;
 
-    ViewBag.ImpactKey = impactKey;
-    ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
 }
 @helper BodyRows()
 {
-    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="~/Images/StatusLights/disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
-    <td width="20%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchReference, click: $parent.viewPageRecord"></button></td>
+    string statusLightsPath = Model.Global.PageDefaultSettings["statusLightsPath"] ?? "/Images/StatusLights/Small/";
+
+    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsPath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsPath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
+    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchReference, click: $parent.viewPageRecord"></button></td>
     <td width="15%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
-    <td width="45%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: Title}"></div></td>
-    <td width="10%" class="text-center valign-middle" data-bind="text: SourceReleaseDate.formatDate(DateFormat)"></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: Title}"></div></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Start...</button></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
 @helper AddNewEditDialog()
 {
-DataContext dataContext = Model.DataContext;
-RecordRestriction impactValues = new RecordRestriction
-{
-    FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
-    Parameters = new object[] { ViewBag.ImpactKey }
-};
+    DataContext dataContext = Model.DataContext;
 
     <div class="col-md-4">
         @Html.Raw(dataContext.AddInputField<Patch>("PatchReference"))
         @Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))
-        @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("SourceID", "ID", "SPMidentifier"))*@
-        @Html.Raw(dataContext.AddInputField<Patch>("SourceReference"))
-        @Html.Raw(dataContext.AddDateField<Patch>("SourceReleaseDate"))
-        @Html.Raw(dataContext.AddSelectField<Patch, ValueList>("ImpactKey", "Key", "Text", "SortOrder", restriction: impactValues))
-        @Html.Raw(dataContext.AddInputField<Patch>("OperatorGroupID"))
+        @*@Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name"))*@
+        @Html.Raw(dataContext.AddInputField<Patch>("VendorReference"))
+        @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
+        @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
     </div>
     <div class="col-md-4">
         @Html.Raw(dataContext.AddInputField<Patch>("Title"))
@@ -85,7 +88,7 @@ RecordRestriction impactValues = new RecordRestriction
         @Html.Raw(dataContext.AddTextAreaField<Patch>("WorkArounds"))
         @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
         @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("CloseOutNotes", 4))
+        @Html.Raw(dataContext.AddInputField<Patch>("SMEGroupID"))
         @Html.Raw(dataContext.AddCheckBoxField<Patch>("IsNotCompliance"))
     </div>
 }
@@ -95,9 +98,9 @@ RecordRestriction impactValues = new RecordRestriction
     <script>
         // Configure view model
         viewModel.defaultSortField = "ID";
-        viewModel.labelField = "patchReference";
+        viewModel.labelField = "PatchReference";
         viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputpatchReference";
+        viewModel.initialFocusField = "inputPatchReference";
 
         viewModel.setQueryRecordCount(function() {
             return dataHub.queryPatchCount();

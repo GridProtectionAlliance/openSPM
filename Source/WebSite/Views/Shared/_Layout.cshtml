@@ -26,10 +26,8 @@
 @using Page = openSPM.Models.Page
 @model AppModel
 @{
-    // Lookup page info based on defined page name
     DataContext dataContext = Model.DataContext;
-    int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", ViewBag.PageName ?? "") ?? 0;
-    Page page = dataContext.QueryRecord<Page>(pageID);
+    Page page = ViewBag.Page;
 
     // Load layout settings
     Dictionary<string, string> layoutSettings = dataContext.LoadDatabaseSettings("layout.setting");
@@ -88,7 +86,6 @@
 
     // Define ViewBag.CustomTitle in page code for custom page titles
     if (ViewBag.CustomTitle == null) {
-        ViewBag.Title = page?.Title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
         pageTitle = ViewBag.Title;
     }
     else {

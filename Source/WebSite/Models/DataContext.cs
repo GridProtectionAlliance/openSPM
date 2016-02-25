@@ -221,7 +221,7 @@ namespace openSPM.Models
         /// <typeparam name="T">Modeled table.</typeparam>
         /// <param name="fieldName">Field name for input date field.</param>
         /// <param name="inputType">Input field type, defaults to text.</param>
-        /// <param name="fieldLabel">Label name for input date field, defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldLabel">Label name for input date field, pulls from <see cref="LabelAttribute"/> if defined, otherwise defaults to <paramref name="fieldName"/>.</param>
         /// <param name="fieldID">ID to use for input field; defaults to date + <paramref name="fieldName"/>.</param>
         /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
         /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
@@ -310,7 +310,7 @@ namespace openSPM.Models
         /// <typeparam name="T">Modeled table.</typeparam>
         /// <param name="fieldName">Field name for input text field.</param>
         /// <param name="inputType">Input field type, defaults to text.</param>
-        /// <param name="fieldLabel">Label name for input text field, defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldLabel">Label name for input text field, pulls from <see cref="LabelAttribute"/> if defined, otherwise defaults to <paramref name="fieldName"/>.</param>
         /// <param name="fieldID">ID to use for input field; defaults to input + <paramref name="fieldName"/>.</param>
         /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
         /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
@@ -407,7 +407,7 @@ namespace openSPM.Models
         /// <typeparam name="T">Modeled table.</typeparam>
         /// <param name="fieldName">Field name for text area field.</param>
         /// <param name="rows">Number of rows for text area.</param>
-        /// <param name="fieldLabel">Label name for text area field, defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldLabel">Label name for text area field, pulls from <see cref="LabelAttribute"/> if defined, otherwise defaults to <paramref name="fieldName"/>.</param>
         /// <param name="fieldID">ID to use for text area field; defaults to text + <paramref name="fieldName"/>.</param>
         /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
         /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
@@ -497,7 +497,7 @@ namespace openSPM.Models
         /// <param name="optionValueFieldName">Field name for ID of option data.</param>
         /// <param name="optionLabelFieldName">Field name for label of option data, defaults to <paramref name="optionValueFieldName"/></param>
         /// <param name="optionSortFieldName">Field name for sort order of option data, defaults to <paramref name="optionLabelFieldName"/></param>
-        /// <param name="fieldLabel">Label name for select field, defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldLabel">Label name for select field, pulls from <see cref="LabelAttribute"/> if defined, otherwise defaults to <paramref name="fieldName"/>.</param>
         /// <param name="fieldID">ID to use for select field; defaults to select + <paramref name="fieldName"/>.</param>
         /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
         /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>

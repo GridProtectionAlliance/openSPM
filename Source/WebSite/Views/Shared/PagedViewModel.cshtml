@@ -27,6 +27,7 @@
 @{
     StringBuilder pageControlScripts = ViewBag.PageControlScripts;
 
+    // Setup page control scripts
     pageControlScripts.Append(Scripts.Render("~/js.bundle/pagedViewModel"));
 
     pageControlScripts.Append(@"
@@ -40,6 +41,21 @@
             });
     ");
 
+    // Get route ID value, if any
+    string routeID = Url.RequestContext.RouteData.Values["id"] as string;
+
+    // Check for optional page behaviors
+
+    // Hide the add new button
+    bool hideAddNewButton = ViewBag.HideAddNewButton ?? false;
+
+    // Hide unauthorized controls as disallowed by Edit/AddNew/Delete roles - otherwise will be disabled
+    bool hideUnauthorizedControls = ViewBag.HideUnauthorizedControls ?? false;
+
+    // Auto pop-up add new dialog
+    bool autoShowAddNew = routeID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
+
+    // Setup default roles if none are defined
     if (ViewBag.EditRoles == null) {
         ViewBag.EditRoles = "*";
     }
@@ -52,14 +68,10 @@
         ViewBag.DeleteRoles = ViewBag.EditRoles;
     }
 
-    bool hideAddNewButton = ViewBag.HideAddNewButton ?? false;
-    bool hideUnauthorizedControls = ViewBag.HideUnauthorizedControls ?? false;
+    // Check current allowed roles for user
     bool canEdit = Model.UserIsInRole(ViewBag.EditRoles);
     bool canAddNew = Model.UserIsInRole(ViewBag.AddNewRoles);
     bool canDelete = Model.UserIsInRole(ViewBag.DeleteRoles);
-
-    string routeID = Url.RequestContext.RouteData.Values["id"] as string;
-    bool showAddNew = routeID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
 }
 @functions
 {
@@ -198,7 +210,7 @@
 @{
     DataContext dataContext = Model.DataContext;
 
-    if (showAddNew)
+    if (autoShowAddNew)
     {
         pageControlScripts.Append(@"
             // Add new pop-up requested via URL parameter

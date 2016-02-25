@@ -25,8 +25,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
-using GSF;
 using GSF.Identity;
 using Microsoft.AspNet.SignalR;
 using openSPM.Attributes;
@@ -114,9 +112,11 @@ namespace openSPM
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        [AuthorizeHubRole("Administrator, Editor")]
         public void DeletePatch(int id)
         {
-            m_dataContext.Table<Patch>().DeleteRecord(id);
+            // For Patches, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
         [AuthorizeHubRole("Administrator, Editor, PIC")]

@@ -77,7 +77,6 @@ namespace openSPM.Controllers
             }
         }
 
-        [AllowAnonymous]
         public ActionResult Home()
         {
             m_appModel.LookupPageDetail("Home", ViewBag);
@@ -90,14 +89,12 @@ namespace openSPM.Controllers
             return View();
         }
 
-        [AllowAnonymous]
         public ActionResult Help()
         {
             m_appModel.LookupPageDetail("Help", ViewBag);
             return View();
         }
 
-        [AllowAnonymous]
         public ActionResult Contact()
         {
             m_appModel.LookupPageDetail("Contact", ViewBag);

@@ -38,9 +38,12 @@
         new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
+    ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
+    
     //ViewBag.EditRoles = "Test";
     ViewBag.EditRoles = "Administrator, Editor, PIC";
+    ViewBag.DeleteRoles = "Administrator, Editor";
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();

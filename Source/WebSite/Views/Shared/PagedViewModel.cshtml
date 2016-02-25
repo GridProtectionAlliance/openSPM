@@ -52,6 +52,7 @@
         ViewBag.DeleteRoles = ViewBag.EditRoles;
     }
 
+    bool hideAddNewButton = ViewBag.HideAddNewButton ?? false;
     bool hideUnauthorizedControls = ViewBag.HideUnauthorizedControls ?? false;
     bool canEdit = Model.UserIsInRole(ViewBag.EditRoles);
     bool canAddNew = Model.UserIsInRole(ViewBag.AddNewRoles);
@@ -138,7 +139,7 @@
         </div>
     </div>
     <div class="pull-right" id="pageControlsRow">
-        @if (canAddNew || !hideUnauthorizedControls) {
+        @if (!hideAddNewButton && (canAddNew || !hideUnauthorizedControls)) {
             <button type="button" class="btn btn-sm btn-primary pull-right" id="addRecordButton" @(canAddNew ? "data-bind=\"enable: dataHubIsConnected\"" : "disabled")>
                 <span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add&nbsp;New
             </button>

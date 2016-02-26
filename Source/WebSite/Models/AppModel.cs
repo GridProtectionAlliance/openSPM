@@ -220,13 +220,13 @@ namespace openSPM.Models
             viewBag.Page = page;
             viewBag.PageID = pageID;
             viewBag.PageName = pageName;
-            viewBag.PageImagePath = GetPageSetting(viewBag, "pageImagePath");
+            viewBag.PageImagePath = GetPageSetting(viewBag, "pageImagePath").Replace("{pageName}", pageName ?? "");
             viewBag.PageSettings = pageSettings;
             viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
         }
 
         /// <summary>
-        /// Gets overriden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
+        /// Gets overridden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
         /// </summary>
         /// <param name="viewBag">Page view bag.</param>
         /// <param name="key">Key name.</param>
@@ -238,7 +238,7 @@ namespace openSPM.Models
         }
 
         /// <summary>
-        /// Gets overriden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
+        /// Gets overridden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
         /// </summary>
         /// <param name="viewBag">Page view bag.</param>
         /// <param name="globalSettings">Global settings dictionary.</param>

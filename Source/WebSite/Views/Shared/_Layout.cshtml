@@ -42,10 +42,12 @@
     }
 
     // Look for overridden menuImagePath from page's server configuration settings, otherwise use page default
-    string menuImagePath = Model.GetPageSetting(ViewBag, layoutSettings, "menuImagePath", "/Images/Menu/").EnsureEnd('/');
+    string menuImagePath = Model.GetPageSetting(ViewBag, layoutSettings, "menuImagePath", "/Images/Menu/");
+
+    menuImagePath = menuImagePath.EnsureEnd('/');
 
     // Load menu items for this page from database table
-    List<MenuItem> menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY SortOrder", page?.MenuID ?? 0).ToList();
+            List<MenuItem> menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY SortOrder", page?.MenuID ?? 0).ToList();
     List<MenuItem> unavailableMenuItems = new List<MenuItem>();
 
     foreach (MenuItem menuItem in menuItems) {

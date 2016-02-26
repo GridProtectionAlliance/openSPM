@@ -77,7 +77,7 @@ namespace openSPM
             systemSettings.Add("CompanyAcronym", "GPA", "The acronym representing the company who owns this instance of the openMIC.");
             systemSettings.Add("DateFormat", "MM/dd/yyyy", "The default date format to use when rendering timestamps.");
             systemSettings.Add("TimeFormat", "HH:mm.ss.fff", "The default time format to use when rendering timestamps.");
-            systemSettings.Add("DefaultSecurityRoles", "Administrator, Editor, Viewer, PIC, SME, Monitor", "The default security roles that should exist for the application.");
+            systemSettings.Add("DefaultSecurityRoles", "Administrator, Owner, Viewer, PIC, SME, BUC", "The default security roles that should exist for the application.");
 
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;
@@ -204,7 +204,7 @@ namespace openSPM
             const string RoleCountFormat = "SELECT COUNT(*) FROM ApplicationRole WHERE NodeID = {0} AND Name = {1}";
 
             if (string.IsNullOrEmpty(defaultSecurityRoles))
-                defaultSecurityRoles = "Administrator, Editor, Viewer";
+                defaultSecurityRoles = "Administrator, Owner, Viewer";
 
             string[] roles = defaultSecurityRoles.Split(',').Select(role => role.Trim()).Where(role => !string.IsNullOrEmpty(role)).ToArray();
 

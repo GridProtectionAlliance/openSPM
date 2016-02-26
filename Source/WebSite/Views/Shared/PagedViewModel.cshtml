@@ -269,14 +269,14 @@
         canDelete.ToString().ToLower(), 
         RemoveSpaces(ViewBag.Title));
 
-    if (dataContext.InitialValueInitializers.Count > 0)
+    if (dataContext.FieldValueInitializers.Count > 0)
     {
         pageControlScripts.AppendFormat(@"
 
         $(viewModel).on(""newRecord"", function(event, newRecord) {{
             // Set initial field values");
 
-        foreach (Tuple<string, string> initialValue in dataContext.InitialValueInitializers) {
+        foreach (Tuple<string, string> initialValue in dataContext.FieldValueInitializers) {
             pageControlScripts.AppendFormat("\r\n            newRecord.{0} = {1};",
                 initialValue.Item1,initialValue.Item2.JavaScriptEncode());
         }

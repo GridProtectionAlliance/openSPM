@@ -112,20 +112,20 @@ namespace openSPM
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
-        [AuthorizeHubRole("Administrator, Editor")]
+        [AuthorizeHubRole("Administrator, Owner")]
         public void DeletePatch(int id)
         {
             // For Patches, we only "mark" a record as deleted
             m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
-        [AuthorizeHubRole("Administrator, Editor, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
         public Patch NewPatch()
         {
             return new Patch();
         }
 
-        [AuthorizeHubRole("Administrator, Editor, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
         public void AddNewPatch(Patch patch)
         {
             patch.CreatedByID = GetCurrentUserID();
@@ -135,7 +135,7 @@ namespace openSPM
             m_dataContext.Table<Patch>().AddNewRecord(patch);
         }
 
-        [AuthorizeHubRole("Administrator, Editor, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
         public void UpdatePatch(Patch patch)
         {
             patch.UpdatedByID = GetCurrentUserID();

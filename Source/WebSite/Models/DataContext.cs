@@ -48,7 +48,7 @@ namespace openSPM.Models
         private AdoDataConnection m_connection;
         private readonly Dictionary<Type, object> m_tableOperations;
         private readonly Dictionary<string, Tuple<string, string>> m_fieldValidationParameters;
-        private readonly List<Tuple<string, string>> m_initialValueInitializers; 
+        private readonly List<Tuple<string, string>> m_fieldValueInitializers; 
         private readonly List<string> m_definedDateFields; 
         private readonly string m_settingsCategory;
         private readonly bool m_disposeConnection;
@@ -73,7 +73,7 @@ namespace openSPM.Models
             m_connection = connection;
             m_tableOperations = new Dictionary<Type, object>();
             m_fieldValidationParameters = new Dictionary<string, Tuple<string, string>>();
-            m_initialValueInitializers = new List<Tuple<string, string>>();
+            m_fieldValueInitializers = new List<Tuple<string, string>>();
             m_definedDateFields = new List<string>();
             m_settingsCategory = "systemSettings";
             m_disposeConnection = disposeConnection || connection == null;
@@ -131,9 +131,9 @@ namespace openSPM.Models
         public Dictionary<string, Tuple<string, string>> FieldValidationParameters => m_fieldValidationParameters;
 
         /// <summary>
-        /// Gets initial value initializers, if any.
+        /// Gets field value initializers, if any.
         /// </summary>
-        public List<Tuple<string, string>> InitialValueInitializers => m_initialValueInitializers;
+        public List<Tuple<string, string>> FieldValueInitializers => m_fieldValueInitializers;
 
         /// <summary>
         /// Gets defined date fields, if any.
@@ -193,26 +193,26 @@ namespace openSPM.Models
         }
 
         /// <summary>
-        /// Adds a new initial value initializer.
+        /// Adds a new field value initializer.
         /// </summary>
         /// <param name="fieldName">Field name (as defined in model).</param>
         /// <param name="initialValue">Javascript based initial value for field.</param>
-        public void AddInitialValueInitializer(string fieldName, string initialValue = null)
+        public void AddFieldValueInitializer(string fieldName, string initialValue = null)
         {
-            m_initialValueInitializers.Add(new Tuple<string, string>(fieldName, initialValue ?? "\"\""));
+            m_fieldValueInitializers.Add(new Tuple<string, string>(fieldName, initialValue ?? "\"\""));
         }
 
         /// <summary>
-        /// Adds a new initial value initializer based on modeled table field attributes.
+        /// Adds a new field value initializer based on modeled table field attributes.
         /// </summary>
         /// <param name="fieldName">Field name (as defined in model).</param>
-        public void AddInitialValueInitializer<T>(string fieldName) where T : class, new()
+        public void AddFieldValueInitializer<T>(string fieldName) where T : class, new()
         {
             TableOperations<T> tableOperations = Table<T>();
             InitialValueAttribute initialValueAttribute;
 
             if (Table<T>().TryGetFieldAttribute(fieldName, out initialValueAttribute))
-                AddInitialValueInitializer(fieldName, initialValueAttribute.InitialValue);
+                AddFieldValueInitializer(fieldName, initialValueAttribute.InitialValue);
         }
 
         /// <summary>
@@ -259,7 +259,7 @@ namespace openSPM.Models
                 AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
             }
 
-            AddInitialValueInitializer<T>(fieldName);
+            AddFieldValueInitializer<T>(fieldName);
 
             return AddDateField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
                 stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
@@ -358,7 +358,7 @@ namespace openSPM.Models
                 AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
             }
 
-            AddInitialValueInitializer<T>(fieldName);
+            AddFieldValueInitializer<T>(fieldName);
 
             return AddInputField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
                 stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
@@ -445,7 +445,7 @@ namespace openSPM.Models
                 AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
             }
 
-            AddInitialValueInitializer<T>(fieldName);
+            AddFieldValueInitializer<T>(fieldName);
 
             return AddTextAreaField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
                 stringLengthAttribute?.MaximumLength ?? 0, rows, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
@@ -516,7 +516,7 @@ namespace openSPM.Models
                     fieldLabel = labelAttribute.Label;
             }
 
-            AddInitialValueInitializer<TSelect>(fieldName);
+            AddFieldValueInitializer<TSelect>(fieldName);
 
             return AddSelectField<TOption>(fieldName, Table<TSelect>().FieldHasAttribute<RequiredAttribute>(fieldName),
                 optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, restriction);
@@ -607,7 +607,7 @@ namespace openSPM.Models
                     fieldLabel = labelAttribute.Label;
             }
 
-            AddInitialValueInitializer<T>(fieldName);
+            AddFieldValueInitializer<T>(fieldName);
 
             return AddCheckBoxField(fieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip);
         }

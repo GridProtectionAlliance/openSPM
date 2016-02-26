@@ -24,7 +24,8 @@
 @using openSPM.Models
 @model AppModel
 @{
-    ViewBag.PageName = "Patch";
+    DataContext dataContext = Model.DataContext;
+
     ViewBag.PageControlScripts = new StringBuilder();
 
     // Define column headers, use null for field name to make column non-sortable
@@ -38,18 +39,19 @@
         new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
+    ViewBag.PatchDefaults = dataContext.LoadDatabaseSettings("patch.default");
+
     ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
-    
+
     //ViewBag.EditRoles = "Test";
-    ViewBag.EditRoles = "Administrator, Editor, PIC";
-    ViewBag.DeleteRoles = "Administrator, Editor";
+    ViewBag.EditRoles = "Administrator, Owner, PIC";
+    ViewBag.DeleteRoles = "Administrator, Owner";
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
 
     // TODO: Move into model located render function
-    DataContext dataContext = Model.DataContext;
     int impactKey = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='impact' AND Enabled <> 0") ?? 0;
 }
 @helper BodyRows()
@@ -70,6 +72,21 @@
 @helper AddNewEditDialog()
 {
     DataContext dataContext = Model.DataContext;
+    Dictionary<string, string> patchDefaults = ViewBag.PatchDefaults;
+    string setting;
+    int defaultCriticalAlarmDays;
+
+    // Get default critical alarm days
+    if (!patchDefaults.TryGetValue("criticalAlarmDays", out setting) || !int.TryParse(setting, out defaultCriticalAlarmDays)) {
+        defaultCriticalAlarmDays = 3;
+    }
+
+    // Validate default value
+    defaultCriticalAlarmDays = Math.Abs(defaultCriticalAlarmDays);
+
+    if (defaultCriticalAlarmDays < 2 || defaultCriticalAlarmDays > 9) {
+        defaultCriticalAlarmDays = 3;
+    }
 
     <div class="col-md-4">
         @Html.Raw(dataContext.AddInputField<Patch>("PatchReference"))
@@ -90,6 +107,10 @@
         @Html.Raw(dataContext.AddTextAreaField<Patch>("WorkArounds"))
         @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
         @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
+        @{
+            dataContext.AddFieldValueInitializer("AlarmCriticalDays", defaultCriticalAlarmDays.ToString());
+            dataContext.AddFieldValidation("AlarmCriticalDays()", $"^[{defaultCriticalAlarmDays}-9]+$", $"Cannot be less than {defaultCriticalAlarmDays}");
+        }
         @Html.Raw(dataContext.AddInputField<Patch>("SMEGroupID"))
         @Html.Raw(dataContext.AddCheckBoxField<Patch>("IsNotCompliance"))
     </div>

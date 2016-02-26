@@ -133,8 +133,8 @@ namespace openSPM.Models
             get; set;
         }
 
+        // Initial value loaded in page from settings table...
         [Label("Alarm Critical Business Days")]
-        [InitialValue("2")]
         public int AlarmCriticalDays
         {
             get; set;

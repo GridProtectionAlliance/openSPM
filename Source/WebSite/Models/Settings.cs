@@ -52,7 +52,13 @@ namespace openSPM.Models
             get; set;
         }
 
-        public bool Internal
+        public bool ApplicationInstance
+        {
+            get; set;
+        }
+
+        [StringLength(200)]
+        public string Roles
         {
             get; set;
         }

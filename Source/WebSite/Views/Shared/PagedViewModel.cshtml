@@ -262,11 +262,13 @@
         viewModel.canEdit({0});
         viewModel.canAddNew({1});
         viewModel.canDelete({2});
-        
-        viewModel.modelName = ""{3}"";", 
+
+        viewModel.initialFocusField = ""{3}"";
+        viewModel.modelName = ""{4}"";", 
         canEdit.ToString().ToLower(), 
         canAddNew.ToString().ToLower(), 
-        canDelete.ToString().ToLower(), 
+        canDelete.ToString().ToLower(),        
+        dataContext.InitialFocusField,
         RemoveSpaces(ViewBag.Title));
 
     if (dataContext.FieldValueInitializers.Count > 0)

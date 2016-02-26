@@ -30,6 +30,7 @@ using System.Text;
 using GSF;
 using GSF.Collections;
 using GSF.Data;
+using GSF.Reflection;
 using openSPM.Attributes;
 using RazorEngine.Templating;
 
@@ -57,6 +58,7 @@ namespace openSPM.Models
         private string m_addTextAreaFieldTemplate;
         private string m_addSelectFieldTemplate;
         private string m_addCheckBoxFieldTemplate;
+        private string m_initialFocusField;
         private bool m_disposed;
 
         #endregion
@@ -141,6 +143,47 @@ namespace openSPM.Models
         public List<string> DefinedDateFields => m_definedDateFields;
 
         /// <summary>
+        /// Gets field name designated for initial focus.
+        /// </summary>
+        public string InitialFocusField => m_initialFocusField;
+
+        #endregion
+
+        #region [ Methods ]
+
+        /// <summary>
+        /// Releases all the resources used by the <see cref="DataContext"/> object.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases the unmanaged resources used by the <see cref="DataContext"/> object and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!m_disposed)
+            {
+                try
+                {
+                    if (disposing)
+                    {
+                        if (m_disposeConnection)
+                            m_connection?.Dispose();
+                    }
+                }
+                finally
+                {
+                    m_disposed = true;  // Prevent duplicate dispose.
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets the table operations for the specified modeled table <typeparamref name="T"/>.
         /// </summary>
         /// <typeparam name="T">Modeled table.</typeparam>
@@ -182,6 +225,129 @@ namespace openSPM.Models
         }
 
         /// <summary>
+        /// Gets the field name targeted as the primary label for the modeled table.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <returns>Field name targeted as the primary label for the modeled table.</returns>
+        public string GetPrimaryLabelField<T>() where T : class, new()
+        {
+            PrimaryLabelAttribute primaryLabelAttribute;
+
+            if (typeof(T).TryGetAttribute(out primaryLabelAttribute) && !string.IsNullOrEmpty(primaryLabelAttribute.FieldName))
+                return primaryLabelAttribute.FieldName;
+
+            string[] fieldNames = Table<T>().GetFieldNames();
+            return fieldNames.Length > 0 ? fieldNames[0] : "";
+        }
+
+        /// <summary>
+        /// Looks up proper user roles for paged based on modeled security in <see cref="DataHub"/>.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <param name="viewBag">ViewBag for the current view.</param>
+        /// <remarks>Typically used in paged view model scenarios and invoked by controller prior to view rendering.</remarks>
+        public void EstablishUserRolesForPage<T>(dynamic viewBag) where T : class, new()
+        {
+            // Get any authorized roles for key records operations of modeled table
+            Tuple<string, string>[] recordOperations = DataHub.GetRecordOperations<T>();
+            viewBag.EditRoles = recordOperations[(int)RecordOperation.UpdateRecord].Item2;
+            viewBag.AddNewRoles = recordOperations[(int)RecordOperation.AddNewRecord].Item2;
+            viewBag.DeleteRoles = recordOperations[(int)RecordOperation.DeleteRecord].Item2;
+        }
+
+        /// <summary>
+        /// Renders client-side configuration script for paged view model.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <param name="defaultSortField">Default sort field, defaults to first primary key field.</param>
+        /// <returns>Rendered paged view model configuration script.</returns>
+        public string RenderViewModelConfiguration<T>(string defaultSortField = null) where T : class, new()
+        {
+            StringBuilder javascript = new StringBuilder();
+            string[] primaryKeyFields = Table<T>().GetPrimaryKeyFieldNames();
+
+            Func<string, string> fixForwardSpacing = newScript =>
+            {
+                Tuple<string, int>[] linesAndLengths = newScript
+                    .Split(new[] { Environment.NewLine }, StringSplitOptions.None)
+                    .Select(line => new Tuple<string, int>(line, line.Length - line.TrimStart(' ').Length))
+                    .ToArray();
+
+                int minLength = linesAndLengths
+                    .Select(lineAndLength => lineAndLength.Item2)
+                    .Where(length => length > 0)
+                    .Min();
+
+                return linesAndLengths
+                    .Select(lineAndLength => lineAndLength.Item2 > 0 ?
+                        $"    {(lineAndLength.Item2 > minLength ? lineAndLength.Item1.Substring(minLength) : lineAndLength.Item1)}" :
+                        lineAndLength.Item1.ToNonNullNorEmptyString())
+                    .ToDelimitedString(Environment.NewLine);
+            };
+
+            javascript.Append(fixForwardSpacing($@"// Configure view model
+                viewModel.defaultSortField = ""{defaultSortField ?? primaryKeyFields[0]}"";
+                viewModel.labelField = ""{GetPrimaryLabelField<T>()}"";
+                viewModel.primaryKeyFields = [{primaryKeyFields.Select(fieldName => $"\"{fieldName}\"").ToDelimitedString(", ")}];
+            "));
+
+            // Get method names for records operations of modeled table
+            Tuple<string, string>[] recordOperations = DataHub.GetRecordOperations<T>();
+            string queryRecordCountMethod = recordOperations[(int)RecordOperation.QueryRecordCount].Item1;
+            string queryRecordsMethod = recordOperations[(int)RecordOperation.QueryRecords].Item1;
+            string deleteRecordMethod = recordOperations[(int)RecordOperation.DeleteRecord].Item1;
+            string createNewRecordMethod = recordOperations[(int)RecordOperation.CreateNewRecord].Item1;
+            string addNewRecordMethod = recordOperations[(int)RecordOperation.AddNewRecord].Item1;
+            string updateMethod = recordOperations[(int)RecordOperation.UpdateRecord].Item1;
+
+            Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
+
+            if (!string.IsNullOrWhiteSpace(queryRecordCountMethod))
+                javascript.Append(fixForwardSpacing($@"
+                    viewModel.setQueryRecordCount(function () {{
+                        return dataHub.{toCamelCase(queryRecordCountMethod)}();
+                    }});
+                "));
+
+            if (!string.IsNullOrWhiteSpace(queryRecordsMethod))
+                javascript.Append(fixForwardSpacing($@"
+                    viewModel.setQueryRecords(function (sortField, ascending, page, pageSize) {{
+                        return dataHub.{toCamelCase(queryRecordsMethod)}(sortField, ascending, page, pageSize);
+                    }});
+                "));
+
+            if (!string.IsNullOrWhiteSpace(deleteRecordMethod))
+                javascript.Append(fixForwardSpacing($@"
+                    viewModel.setDeleteRecord(function (keyValues) {{
+                        return dataHub.{toCamelCase(deleteRecordMethod)}({Enumerable.Range(0, Table<T>().GetPrimaryKeyFieldNames().Length).Select(index => $"keyValues[{index}]").ToDelimitedString(", ")});
+                    }});
+                "));
+
+            if (!string.IsNullOrWhiteSpace(createNewRecordMethod))
+                javascript.Append(fixForwardSpacing($@"
+                    viewModel.setNewRecord(function () {{
+                        return dataHub.{toCamelCase(createNewRecordMethod)}();
+                    }});
+                "));
+
+            if (!string.IsNullOrWhiteSpace(addNewRecordMethod))
+                javascript.Append(fixForwardSpacing($@"
+                    viewModel.setAddNewRecord(function (record) {{
+                        return dataHub.{toCamelCase(addNewRecordMethod)}(record);
+                    }});
+                "));
+
+            if (!string.IsNullOrWhiteSpace(updateMethod))
+                javascript.Append(fixForwardSpacing($@"
+                    viewModel.setUpdateRecord(function (record) {{
+                        return dataHub.{toCamelCase(updateMethod)}(record);
+                    }});
+                "));
+
+            return javascript.ToString();
+        }
+
+        /// <summary>
         /// Adds a new pattern based validation and option error message to a field.
         /// </summary>
         /// <param name="observableFieldReference">Observable field reference (from JS view model).</param>
@@ -208,7 +374,6 @@ namespace openSPM.Models
         /// <param name="fieldName">Field name (as defined in model).</param>
         public void AddFieldValueInitializer<T>(string fieldName) where T : class, new()
         {
-            TableOperations<T> tableOperations = Table<T>();
             InitialValueAttribute initialValueAttribute;
 
             if (Table<T>().TryGetFieldAttribute(fieldName, out initialValueAttribute))
@@ -229,8 +394,9 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new date based input field based on modeled table field attributes.</returns>
-        public string AddDateField<T>(string fieldName, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
+        public string AddDateField<T>(string fieldName, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false) where T : class, new()
         {
             TableOperations<T> tableOperations = Table<T>();
             StringLengthAttribute stringLengthAttribute;
@@ -262,7 +428,7 @@ namespace openSPM.Models
             AddFieldValueInitializer<T>(fieldName);
 
             return AddDateField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
-                stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
+                stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus);
         }
 
         /// <summary>
@@ -280,18 +446,25 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new date based input field based on specified parameters.</returns>
-        public string AddDateField(string fieldName, bool required, int maxLength = 0, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null)
+        public string AddDateField(string fieldName, bool required, int maxLength = 0, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
             RazorView<CSharp> addDateFieldTemplate = new RazorView<CSharp>(AddDateFieldTemplate, MvcApplication.DefaultModel);
             DynamicViewBag viewBag = addDateFieldTemplate.ViewBag;
+
+            if (string.IsNullOrEmpty(fieldID))
+                fieldID = $"date{fieldName}";
+
+            if (initialFocus)
+                m_initialFocusField = fieldID;
 
             viewBag.AddValue("FieldName", fieldName);
             viewBag.AddValue("Required", required);
             viewBag.AddValue("MaxLength", maxLength);
             viewBag.AddValue("InputType", inputType ?? "text");
             viewBag.AddValue("FieldLabel", fieldLabel ?? fieldName);
-            viewBag.AddValue("FieldID", fieldID ?? $"date{fieldName}");
+            viewBag.AddValue("FieldID", fieldID);
             viewBag.AddValue("GroupDataBinding", groupDataBinding);
             viewBag.AddValue("LabelDataBinding", labelDataBinding);
             viewBag.AddValue("RequiredDataBinding", requiredDataBinding);
@@ -318,8 +491,9 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new input field based on modeled table field attributes.</returns>
-        public string AddInputField<T>(string fieldName, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
+        public string AddInputField<T>(string fieldName, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false) where T : class, new()
         {
             TableOperations<T> tableOperations = Table<T>();
             StringLengthAttribute stringLengthAttribute;
@@ -361,7 +535,7 @@ namespace openSPM.Models
             AddFieldValueInitializer<T>(fieldName);
 
             return AddInputField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
-                stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
+                stringLengthAttribute?.MaximumLength ?? 0, inputType, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus);
         }
 
         /// <summary>
@@ -379,18 +553,25 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new input field based on specified parameters.</returns>
-        public string AddInputField(string fieldName, bool required, int maxLength = 0, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null)
+        public string AddInputField(string fieldName, bool required, int maxLength = 0, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
             RazorView<CSharp> addInputFieldTemplate = new RazorView<CSharp>(AddInputFieldTemplate, MvcApplication.DefaultModel);
             DynamicViewBag viewBag = addInputFieldTemplate.ViewBag;
+
+            if (string.IsNullOrEmpty(fieldID))
+                fieldID = $"input{fieldName}";
+
+            if (initialFocus)
+                m_initialFocusField = fieldID;
 
             viewBag.AddValue("FieldName", fieldName);
             viewBag.AddValue("Required", required);
             viewBag.AddValue("MaxLength", maxLength);
             viewBag.AddValue("InputType", inputType ?? "text");
             viewBag.AddValue("FieldLabel", fieldLabel ?? fieldName);
-            viewBag.AddValue("FieldID", fieldID ?? $"input{fieldName}");
+            viewBag.AddValue("FieldID", fieldID);
             viewBag.AddValue("GroupDataBinding", groupDataBinding);
             viewBag.AddValue("LabelDataBinding", labelDataBinding);
             viewBag.AddValue("RequiredDataBinding", requiredDataBinding);
@@ -415,8 +596,9 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new text area field based on modeled table field attributes.</returns>
-        public string AddTextAreaField<T>(string fieldName, int rows = 2, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
+        public string AddTextAreaField<T>(string fieldName, int rows = 2, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false) where T : class, new()
         {
             TableOperations<T> tableOperations = Table<T>();
             StringLengthAttribute stringLengthAttribute;
@@ -448,7 +630,7 @@ namespace openSPM.Models
             AddFieldValueInitializer<T>(fieldName);
 
             return AddTextAreaField(fieldName, tableOperations.FieldHasAttribute<RequiredAttribute>(fieldName),
-                stringLengthAttribute?.MaximumLength ?? 0, rows, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip);
+                stringLengthAttribute?.MaximumLength ?? 0, rows, fieldLabel, fieldID, groupDataBinding, labelDataBinding, requiredDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus);
         }
 
         /// <summary>
@@ -466,18 +648,25 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new text area field based on specified parameters.</returns>
-        public string AddTextAreaField(string fieldName, bool required, int maxLength = 0, int rows = 2, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null)
+        public string AddTextAreaField(string fieldName, bool required, int maxLength = 0, int rows = 2, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
             RazorView<CSharp> addTextAreaTemplate = new RazorView<CSharp>(AddTextAreaFieldTemplate, MvcApplication.DefaultModel);
             DynamicViewBag viewBag = addTextAreaTemplate.ViewBag;
+
+            if (string.IsNullOrEmpty(fieldID))
+                fieldID = $"text{fieldName}";
+
+            if (initialFocus)
+                m_initialFocusField = fieldID;
 
             viewBag.AddValue("FieldName", fieldName);
             viewBag.AddValue("Required", required);
             viewBag.AddValue("MaxLength", maxLength);
             viewBag.AddValue("Rows", rows);
             viewBag.AddValue("FieldLabel", fieldLabel ?? fieldName);
-            viewBag.AddValue("FieldID", fieldID ?? $"text{fieldName}");
+            viewBag.AddValue("FieldID", fieldID);
             viewBag.AddValue("GroupDataBinding", groupDataBinding);
             viewBag.AddValue("LabelDataBinding", labelDataBinding);
             viewBag.AddValue("RequiredDataBinding", requiredDataBinding);
@@ -504,9 +693,10 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>Generated HTML for new text field based on modeled table field attributes.</returns>
-        public string AddSelectField<TSelect, TOption>(string fieldName, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, RecordRestriction restriction = null) where TSelect : class, new() where TOption : class, new()
+        public string AddSelectField<TSelect, TOption>(string fieldName, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false, RecordRestriction restriction = null) where TSelect : class, new() where TOption : class, new()
         {
             if (string.IsNullOrEmpty(fieldLabel))
             {
@@ -519,7 +709,7 @@ namespace openSPM.Models
             AddFieldValueInitializer<TSelect>(fieldName);
 
             return AddSelectField<TOption>(fieldName, Table<TSelect>().FieldHasAttribute<RequiredAttribute>(fieldName),
-                optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, restriction);
+                optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus, restriction);
         }
 
         /// <summary>
@@ -538,9 +728,10 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>Generated HTML for new text field based on specified parameters.</returns>
-        public string AddSelectField<TOption>(string fieldName, bool required, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, RecordRestriction restriction = null) where TOption : class, new()
+        public string AddSelectField<TOption>(string fieldName, bool required, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false, RecordRestriction restriction = null) where TOption : class, new()
         {
             RazorView<CSharp> addSelectFieldTemplate = new RazorView<CSharp>(AddSelectFieldTemplate, MvcApplication.DefaultModel);
             DynamicViewBag viewBag = addSelectFieldTemplate.ViewBag;
@@ -552,10 +743,16 @@ namespace openSPM.Models
             optionSortFieldName = optionSortFieldName ?? optionLabelFieldName;
             fieldLabel = fieldLabel ?? optionTableName;
 
+            if (string.IsNullOrEmpty(fieldID))
+                fieldID = $"select{fieldName}";
+
+            if (initialFocus)
+                m_initialFocusField = fieldID;
+
             viewBag.AddValue("FieldName", fieldName);
             viewBag.AddValue("Required", required);
             viewBag.AddValue("FieldLabel", fieldLabel);
-            viewBag.AddValue("FieldID", fieldID ?? $"select{fieldName}");
+            viewBag.AddValue("FieldID", fieldID);
             viewBag.AddValue("GroupDataBinding", groupDataBinding);
             viewBag.AddValue("LabelDataBinding", labelDataBinding);
             viewBag.AddValue("CustomDataBinding", customDataBinding);
@@ -596,8 +793,9 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new check box field based on modeled table field attributes.</returns>
-        public string AddCheckBoxField<T>(string fieldName, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
+        public string AddCheckBoxField<T>(string fieldName, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false) where T : class, new()
         {
             if (string.IsNullOrEmpty(fieldLabel))
             {
@@ -609,7 +807,7 @@ namespace openSPM.Models
 
             AddFieldValueInitializer<T>(fieldName);
 
-            return AddCheckBoxField(fieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip);
+            return AddCheckBoxField(fieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus);
         }
 
         /// <summary>
@@ -623,15 +821,22 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new check box field based on specified parameters.</returns>
-        public string AddCheckBoxField(string fieldName, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null)
+        public string AddCheckBoxField(string fieldName, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
             RazorView<CSharp> addCheckBoxFieldTemplate = new RazorView<CSharp>(AddCheckBoxFieldTemplate, MvcApplication.DefaultModel);
             DynamicViewBag viewBag = addCheckBoxFieldTemplate.ViewBag;
 
+            if (string.IsNullOrEmpty(fieldID))
+                fieldID = $"check{fieldName}";
+
+            if (initialFocus)
+                m_initialFocusField = fieldID;
+
             viewBag.AddValue("FieldName", fieldName);
             viewBag.AddValue("FieldLabel", fieldLabel ?? fieldName);
-            viewBag.AddValue("FieldID", fieldID ?? $"check{fieldName}");
+            viewBag.AddValue("FieldID", fieldID);
             viewBag.AddValue("GroupDataBinding", groupDataBinding);
             viewBag.AddValue("LabelDataBinding", labelDataBinding);
             viewBag.AddValue("CustomDataBinding", customDataBinding);
@@ -643,39 +848,9 @@ namespace openSPM.Models
 
         #endregion
 
-        #region [ Methods ]
+        #region [ Static ]
 
-        /// <summary>
-        /// Releases all the resources used by the <see cref="DataContext"/> object.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Releases the unmanaged resources used by the <see cref="DataContext"/> object and optionally releases the managed resources.
-        /// </summary>
-        /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!m_disposed)
-            {
-                try
-                {
-                    if (disposing)
-                    {
-                        if (m_disposeConnection)
-                            m_connection?.Dispose();
-                    }
-                }
-                finally
-                {
-                    m_disposed = true;  // Prevent duplicate dispose.
-                }
-            }
-        }
+        // Static Methods
         private static string ParamList(IReadOnlyList<object> parameters)
         {
             StringBuilder delimitedString = new StringBuilder();

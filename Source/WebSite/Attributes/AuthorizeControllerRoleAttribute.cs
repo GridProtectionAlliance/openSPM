@@ -37,16 +37,16 @@ namespace openSPM.Attributes
     /// Defines an MVC filter attribute to handle the GSF role based security model.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
-    public class AuthorizeControllerRole : FilterAttribute, IAuthorizationFilter, IExceptionFilter
+    public class AuthorizeControllerRoleAttribute : FilterAttribute, IAuthorizationFilter, IExceptionFilter
     {
         public readonly string[] AllowedRoles;
 
-        public AuthorizeControllerRole()
+        public AuthorizeControllerRoleAttribute()
         {
             AllowedRoles = new string[0];
         }
 
-        public AuthorizeControllerRole(string allowedRoles)
+        public AuthorizeControllerRoleAttribute(string allowedRoles)
         {
             AllowedRoles = allowedRoles?.Split(',').Select(role => role.Trim()).
                 Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0];

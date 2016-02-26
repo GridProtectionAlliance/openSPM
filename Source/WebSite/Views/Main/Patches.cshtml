@@ -44,10 +44,6 @@
     ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
 
-    //ViewBag.EditRoles = "Test";
-    ViewBag.EditRoles = "Administrator, Owner, PIC";
-    ViewBag.DeleteRoles = "Administrator, Owner";
-
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
 
@@ -56,7 +52,7 @@
 }
 @helper BodyRows()
 {
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
+string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
 
     <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchReference, click: $parent.viewPageRecord"></button></td>
@@ -89,7 +85,7 @@
     }
 
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Patch>("PatchReference"))
+        @Html.Raw(dataContext.AddInputField<Patch>("PatchReference", initialFocus: true))
         @Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))
         @*@Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name"))*@
         @Html.Raw(dataContext.AddInputField<Patch>("VendorReference"))
@@ -108,8 +104,10 @@
         @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
         @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
         @{
-            dataContext.AddFieldValueInitializer("AlarmCriticalDays", defaultCriticalAlarmDays.ToString());
-            dataContext.AddFieldValidation("AlarmCriticalDays()", $"^[{defaultCriticalAlarmDays}-9]+$", $"Cannot be less than {defaultCriticalAlarmDays}");
+            Model.AddPageDefinedFieldInitialization("AlarmCriticalDays",
+                /* Initial Value: */ defaultCriticalAlarmDays.ToString(),
+                /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
+                /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
         }
         @Html.Raw(dataContext.AddInputField<Patch>("SMEGroupID"))
         @Html.Raw(dataContext.AddCheckBoxField<Patch>("IsNotCompliance"))
@@ -119,45 +117,38 @@
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        // Configure view model
-        viewModel.defaultSortField = "ID";
-        viewModel.labelField = "PatchReference";
-        viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputPatchReference";
+        @Html.Raw(dataContext.RenderViewModelConfiguration<Patch>())
 
-        viewModel.setQueryRecordCount(function() {
-            return dataHub.queryPatchCount();
-        });
+        //// Configure view model
+        //viewModel.defaultSortField = "ID";
+        //viewModel.labelField = "PatchReference";
+        //viewModel.primaryKeyFields = ["ID"];
+        //viewModel.initialFocusField = "inputPatchReference";
 
-        viewModel.setQueryRecords(function(sortField, ascending, page, pageSize) {
-            return dataHub.queryPatches(sortField, ascending, page, pageSize);
-        });
+        //viewModel.setQueryRecordCount(function() {
+        //    return dataHub.queryPatchCount();
+        //});
 
-        viewModel.setDeleteRecord(function(keyValues) {
-            return dataHub.deletePatch(keyValues[0]);
-        });
+        //viewModel.setQueryRecords(function(sortField, ascending, page, pageSize) {
+        //    return dataHub.queryPatches(sortField, ascending, page, pageSize);
+        //});
 
-        viewModel.setNewRecord(function() {
-            return dataHub.newPatch();
-        });
+        //viewModel.setDeleteRecord(function(keyValues) {
+        //    return dataHub.deletePatch(keyValues[0]);
+        //});
 
-        viewModel.setAddNewRecord(function(record) {
-            return dataHub.addNewPatch(record);
-        });
+        //viewModel.setNewRecord(function() {
+        //    return dataHub.newPatch();
+        //});
 
-        viewModel.setUpdateRecord(function(record) {
-            return dataHub.updatePatch(record);
-        });
+        //viewModel.setAddNewRecord(function(record) {
+        //    return dataHub.addNewPatch(record);
+        //});
 
-        // Define Javascript based impact value lookup function
-        var impactValues = [];
+        //viewModel.setUpdateRecord(function(record) {
+        //    return dataHub.updatePatch(record);
+        //});
 
-        @foreach (ValueList valueList in dataContext.QueryRecords<ValueList>("SELECT ID FROM ValueList WHERE GroupID = {0} AND Enabled <> 0 AND Hidden = 0", impactKey)) {
-            @:impactValues[@valueList.Key] = "@valueList.Text.JavaScriptEncode()";
-         }
-
-        function lookupImpactValue(value) {
-            return impactValues[value];
-        }
+        @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
     </script>
 }

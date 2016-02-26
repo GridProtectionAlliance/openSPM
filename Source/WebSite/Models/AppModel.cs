@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using GSF;
 using GSF.Security;
 using openSPM.Attributes;
@@ -87,7 +88,40 @@ namespace openSPM.Models
 
         #region [ Methods ]
 
-        //public string RenderValueListLookup<T>()
+        /// <summary>
+        /// Renders client-side Javascript function for looking up value list values based on key.
+        /// </summary>
+        /// <param name="groupName">Value list group name as defined in ValueListGroup table.</param>
+        /// <param name="valueListName">Name of associative array, defaults to <paramref name="groupName"/> + Values.</param>
+        /// <param name="lookupFunctionName">Name of lookup function, defaults to lookup + <paramref name="groupName"/>.ToTitleCase() + Value.</param>
+        /// <returns>Client-side Javascript lookup function.</returns>
+        public string RenderValueListClientLookupFunction(string groupName, string valueListName = null, string lookupFunctionName = null)
+        {
+            StringBuilder javascript = new StringBuilder();
+
+            if (string.IsNullOrWhiteSpace(valueListName))
+                valueListName = $"{groupName}Values";
+
+            if (string.IsNullOrWhiteSpace(lookupFunctionName))
+                lookupFunctionName = $"lookup{groupName.ToTitleCase()}Value";
+
+            // Do some minimal validation on identifier names
+            valueListName = valueListName.RemoveWhiteSpace().RemoveControlCharacters();
+            lookupFunctionName = lookupFunctionName.RemoveWhiteSpace().RemoveControlCharacters();
+
+            javascript.AppendLine($"var {valueListName} = [];\r\n");
+
+            int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
+
+            foreach (ValueList valueList in DataContext.QueryRecords<ValueList>("SELECT ID FROM ValueList WHERE GroupID={0} AND Enabled <> 0 AND Hidden = 0", key))
+                javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
+
+            javascript.AppendLine($"\r\n        function {lookupFunctionName}(value) {{");
+            javascript.AppendLine($"            return {valueListName}[value];");
+            javascript.AppendLine("        }");
+
+            return javascript.ToString();
+        }
 
         /// <summary>
         /// Generates template based select field based on reflected modeled table field attributes with values derived from ValueList table.
@@ -105,8 +139,9 @@ namespace openSPM.Models
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
         /// <returns>Generated HTML for new text field based on modeled table field attributes.</returns>
-        public string AddValueListSelectField<T>(string fieldName, string groupName, string optionLabelFieldName = "Text", string optionValueFieldName = "Key", string optionSortFieldName = "SortOrder", string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null) where T : class, new()
+        public string AddValueListSelectField<T>(string fieldName, string groupName, string optionLabelFieldName = "Text", string optionValueFieldName = "Key", string optionSortFieldName = "SortOrder", string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false) where T : class, new()
         {
             int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
 
@@ -116,7 +151,22 @@ namespace openSPM.Models
                 Parameters = new object[] { key }
             };
 
-            return DataContext.AddSelectField<T, ValueList>(fieldName, optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, restriction);
+            return DataContext.AddSelectField<T, ValueList>(fieldName, optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus, restriction);
+        }
+
+        /// <summary>
+        /// Adds field initialization, and optional validation, from a page-defined (e.g., loaded from database) parameter definition.
+        /// </summary>
+        /// <param name="fieldName">Target field name.</param>
+        /// <param name="initialValue">Javascript based initial value for field.</param>
+        /// <param name="validationPattern">Regex based validation pattern, if any.</param>
+        /// <param name="errorMessage">Optional error message to display when pattern fails.</param>
+        public void AddPageDefinedFieldInitialization(string fieldName, string initialValue, string validationPattern = null, string errorMessage = null)
+        {
+            DataContext.AddFieldValueInitializer(fieldName, initialValue);
+
+            if (!string.IsNullOrEmpty(validationPattern))
+                DataContext.AddFieldValidation($"viewModel.currentRecord().{fieldName}", validationPattern, errorMessage);
         }
 
         /// <summary>

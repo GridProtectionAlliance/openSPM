@@ -38,16 +38,16 @@ namespace openSPM.Attributes
     /// Defines a SignalR authorization attribute to handle the GSF role based security model.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
-    public class AuthorizeHubRole : AuthorizeAttribute
+    public class AuthorizeHubRoleAttribute : AuthorizeAttribute
     {
         public readonly string[] AllowedRoles;
 
-        public AuthorizeHubRole()
+        public AuthorizeHubRoleAttribute()
         {
             AllowedRoles = new string[0];
         }
 
-        public AuthorizeHubRole(string allowedRoles)
+        public AuthorizeHubRoleAttribute(string allowedRoles)
         {
             Roles = allowedRoles;
 

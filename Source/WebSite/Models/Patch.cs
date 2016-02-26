@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Patch table.
     /// </summary>
+    [PrimaryLabel("PatchReference")]
     public class Patch
     {
         [PrimaryKey(true)]

@@ -79,13 +79,14 @@ namespace openSPM.Controllers
 
         public ActionResult Home()
         {
-            m_appModel.LookupPageDetail("Home", ViewBag);
+            m_appModel.LookupPageDetail("Home", ViewBag);            
             return View();
         }
 
         public ActionResult Patches()
         {
             m_appModel.LookupPageDetail("Patches", ViewBag);
+            m_dataContext.EstablishUserRolesForPage<Patch>(ViewBag);
             return View();
         }
 

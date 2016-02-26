@@ -182,8 +182,10 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Attributes\AuthorizeHubRole.cs" />
-    <Compile Include="Attributes\AuthorizeControllerRole.cs" />
+    <Compile Include="Attributes\AuthorizeHubRoleAttribute.cs" />
+    <Compile Include="Attributes\AuthorizeControllerRoleAttribute.cs" />
+    <Compile Include="Attributes\PrimaryLabelAttribute.cs" />
+    <Compile Include="Attributes\RecordOperationAttribute.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\AdminController.cs" />

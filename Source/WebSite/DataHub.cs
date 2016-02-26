@@ -23,9 +23,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using GSF.Collections;
 using GSF.Identity;
+using GSF.Reflection;
 using Microsoft.AspNet.SignalR;
 using openSPM.Attributes;
 using openSPM.Models;
@@ -102,30 +106,34 @@ namespace openSPM
 
         #region [ Patch Table Operations ]
 
+        [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
         public int QueryPatchCount()
         {
             return m_dataContext.Table<Patch>().QueryRecordCount();
         }
 
+        [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
         public IEnumerable<Patch> QueryPatches(string sortField, bool ascending, int page, int pageSize)
         {
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
         public void DeletePatch(int id)
         {
             // For Patches, we only "mark" a record as deleted
             m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(Patch), RecordOperation.CreateNewRecord)]
         public Patch NewPatch()
         {
             return new Patch();
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(Patch), RecordOperation.AddNewRecord)]
         public void AddNewPatch(Patch patch)
         {
             patch.CreatedByID = GetCurrentUserID();
@@ -136,6 +144,7 @@ namespace openSPM
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(Patch), RecordOperation.UpdateRecord)]
         public void UpdatePatch(Patch patch)
         {
             patch.UpdatedByID = GetCurrentUserID();
@@ -310,6 +319,8 @@ namespace openSPM
 
         #region [ Static ]
 
+        // Static Properties
+
         /// <summary>
         /// Gets the hub connection ID for the current thread.
         /// </summary>
@@ -318,6 +329,42 @@ namespace openSPM
         // Static Fields
         private static volatile int s_connectCount;
         private static readonly ThreadLocal<string> s_connectionID = new ThreadLocal<string>();
+        private static readonly Dictionary<Type, Tuple<string, string>[]> s_recordOperations = new Dictionary<Type, Tuple<string, string>[]>();
+
+        // Static Constructor
+        static DataHub()
+        {
+            int recordOperations = Enum.GetValues(typeof(RecordOperation)).Length;
+
+            // Analyze and cache data hub methods that are targeted for record operations
+            foreach (MethodInfo method in typeof(DataHub).GetMethods(BindingFlags.Public | BindingFlags.Instance))
+            {
+                AuthorizeHubRoleAttribute authorizeHubRoleAttribute;
+                RecordOperationAttribute recordOperationAttribute;
+
+                method.TryGetAttribute(out authorizeHubRoleAttribute);
+
+                if (method.TryGetAttribute(out recordOperationAttribute))
+                {
+                    // Cache method name and any defined authorized roles for current record operation
+                    s_recordOperations.GetOrAdd(recordOperationAttribute.ModelType, 
+                        type => new Tuple<string, string>[recordOperations])[(int)recordOperationAttribute.Operation] = 
+                        new Tuple<string, string>(method.Name, authorizeHubRoleAttribute?.AllowedRoles?.ToDelimitedString(','));
+                }
+            }
+        }
+
+        // Static Methods
+
+        /// <summary>
+        /// Gets record operation methods for specified modeled table.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <returns>record operation methods for specified modeled table.</returns>
+        public static Tuple<string, string>[] GetRecordOperations<T>() where T : class, new()
+        {
+            return s_recordOperations[typeof(T)];
+        }
 
         #endregion
     }

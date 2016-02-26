@@ -27,11 +27,9 @@
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
+    Dictionary<string, string> layoutSettings = Model.Global.LayoutSettings;
+    string copyrightText, copyrightUrl, setting;
     Page page = ViewBag.Page;
-
-    // Load layout settings
-    Dictionary<string, string> layoutSettings = dataContext.LoadDatabaseSettings("layout.setting");
-    string pageTitle, menuImagePath, copyrightText, copyrightUrl, setting;
 
     bool showCopyright = (layoutSettings.TryGetValue("showCopyright", out setting) && setting.ParseBoolean());
 
@@ -43,17 +41,8 @@
         copyrightUrl = "/Main/Contact";
     }
 
-    // Lookup desired menuImagePath for current page
-    Dictionary<string, string> serverConfiguration = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
-
-    // Look for overridden menuImagePath from server configuration string, otherwise use page default
-    if (!serverConfiguration.TryGetValue("menuImagePath", out menuImagePath)) {
-        if (!layoutSettings.TryGetValue("menuImagePath", out menuImagePath)) {
-            menuImagePath = "/Images/Menu/";
-        }
-    }
-
-    menuImagePath = menuImagePath.EnsureEnd('/');
+    // Look for overridden menuImagePath from page's server configuration settings, otherwise use page default
+    string menuImagePath = Model.GetPageSetting(ViewBag, layoutSettings, "menuImagePath", "/Images/Menu/").EnsureEnd('/');
 
     // Load menu items for this page from database table
     List<MenuItem> menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY SortOrder", page?.MenuID ?? 0).ToList();
@@ -85,12 +74,7 @@
     }
 
     // Define ViewBag.CustomTitle in page code for custom page titles
-    if (ViewBag.CustomTitle == null) {
-        pageTitle = ViewBag.Title;
-    }
-    else {
-        pageTitle = ViewBag.CustomTitle;
-    }
+    string pageTitle = ViewBag.CustomTitle ?? ViewBag.Title;
 
     // Add ViewBag.PageHasMenu = false to page code to disable side-bar menu on page
     bool pageHasMenu = ViewBag.PageHasMenu ?? true;

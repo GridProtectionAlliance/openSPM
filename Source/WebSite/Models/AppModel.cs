@@ -24,6 +24,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using GSF;
 using GSF.Security;
 using openSPM.Attributes;
 
@@ -214,11 +215,46 @@ namespace openSPM.Models
         {
             int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
             Page page = DataContext.QueryRecord<Page>(pageID);
+            Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
 
-            viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
-            viewBag.PageName = pageName;
-            viewBag.PageID = pageID;
             viewBag.Page = page;
+            viewBag.PageID = pageID;
+            viewBag.PageName = pageName;
+            viewBag.PageImagePath = GetPageSetting(viewBag, "pageImagePath");
+            viewBag.PageSettings = pageSettings;
+            viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
+        }
+
+        /// <summary>
+        /// Gets overriden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
+        /// </summary>
+        /// <param name="viewBag">Page view bag.</param>
+        /// <param name="key">Key name.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Setting from page's server configuration if found, otherwise the default setting.</returns>
+        public string GetPageSetting(dynamic viewBag, string key, string defaultValue = null)
+        {
+            return GetPageSetting(viewBag, Global.PageDefaults, key, defaultValue);
+        }
+
+        /// <summary>
+        /// Gets overriden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
+        /// </summary>
+        /// <param name="viewBag">Page view bag.</param>
+        /// <param name="globalSettings">Global settings dictionary.</param>
+        /// <param name="key">Key name.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Setting from page's server configuration if found, otherwise the default setting.</returns>
+        public string GetPageSetting(dynamic viewBag, Dictionary<string, string> globalSettings, string key, string defaultValue = null)
+        {
+            Dictionary<string, string> pageSettings = viewBag.PageSettings;
+            string value = defaultValue;
+
+            if (!(pageSettings?.TryGetValue(key, out value) ?? false))
+                if (!(globalSettings?.TryGetValue(key, out value) ?? false) || string.IsNullOrEmpty(value))
+                    value = defaultValue;
+
+            return value;
         }
 
         #endregion

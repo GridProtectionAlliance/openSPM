@@ -25,34 +25,10 @@
 @using Page = openSPM.Models.Page
 @model AppModel
 @{
-    // Define page name as defined in openSPM database Page table
-    ViewBag.PageName = "Home";
-
-
     // DataContext is the "database connection" that is available for the page, you can
     // use direct database calls, e.g., dataContect.Connection.RetrieveData(...) or you
     // can use model based table operations, e.g., dataContext.QueryRecord<Page>(id)
     DataContext dataContext = Model.DataContext;
-
-    //// TODO: Determine if the following "imagePath" logic needs to be in all pages...
-    //// If all pages need the following functionality, move code to "_Layout.cshtml" and
-    //// store result in ViewBag, e.g., ViewBag.ImagePath
-    //int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE name={0} AND enabled <> 0", ViewBag.PageName ?? "") ?? 0;
-    //Page page = dataContext.QueryRecord<Page>(pageID);
-
-    //Dictionary<string, string> serverConfiguration = (page?.serverConfiguration ?? "").ParseKeyValuePairs();
-    //string imagePath;
-
-    //if (!serverConfiguration.TryGetValue("imagePath", out imagePath)) {
-    //    if (Model.Global.PageDefaultSettings.TryGetValue("imagePath", out imagePath) && !string.IsNullOrEmpty(imagePath)) {
-    //        imagePath = imagePath.Replace("{pageName}", ViewBag.PageName ?? "");
-    //    }
-    //    else {
-    //        imagePath = $"/Images/{ViewBag.PageName ?? ""}";
-    //    }
-    //}
-
-
 }
 @section StyleSheets {
     @* Include any page specific style sheets here, these will be added to page header *@
@@ -70,6 +46,8 @@
         @* Bootstrap "button" with "danger" styling *@
         <button class="btn btn-danger" onclick="showErrorMessage('Test Error Message!', -1)">Error Test</button>
 
+        <h4>Page Image Path = @ViewBag.PageImagePath</h4>
+        <h4>Page Server Configuration Settings Count = @ViewBag.PageSettings.Count</h4>
         <h4>User = @User.Identity.Name</h4>
         <h4>Is Authenticated = @User.Identity.IsAuthenticated</h4>
         <h4>Is in Administrator Role = @User.IsInRole("Administrator")</h4>

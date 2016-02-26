@@ -81,6 +81,8 @@ namespace openSPM.Models
             set;
         }
 
-        public readonly Dictionary<string, string> PageDefaultSettings = new Dictionary<string, string>();
+        public readonly Dictionary<string, string> LayoutSettings = new Dictionary<string, string>();
+
+        public readonly Dictionary<string, string> PageDefaults = new Dictionary<string, string>();
     }
 }

@@ -140,7 +140,7 @@ namespace openSPM
                     if (type == UpdateType.Information)
                         HubClients.All.sendInfoMessage(message, 3000);
                     else
-                        HubClients.All(connectionID).sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
+                        HubClients.All.sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
                 }
 #endif
             }, DataHub.CurrentConnectionID);

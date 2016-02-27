@@ -53,11 +53,6 @@ namespace openSPM.Models
         private readonly List<string> m_definedDateFields; 
         private readonly string m_settingsCategory;
         private readonly bool m_disposeConnection;
-        private string m_addDateFieldTemplate;
-        private string m_addInputFieldTemplate;
-        private string m_addTextAreaFieldTemplate;
-        private string m_addSelectFieldTemplate;
-        private string m_addCheckBoxFieldTemplate;
         private string m_initialFocusField;
         private bool m_disposed;
 
@@ -101,31 +96,6 @@ namespace openSPM.Models
         /// Gets the <see cref="AdoDataConnection"/> for this <see cref="DataContext"/>.
         /// </summary>
         public AdoDataConnection Connection => m_connection ?? (m_connection = new AdoDataConnection(m_settingsCategory));
-
-        /// <summary>
-        /// Gets the date field razor template file name.
-        /// </summary>
-        public string AddDateFieldTemplate => m_addDateFieldTemplate ?? (m_addDateFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddDateField.cshtml");
-
-        /// <summary>
-        /// Gets the input field razor template file name.
-        /// </summary>
-        public string AddInputFieldTemplate => m_addInputFieldTemplate ?? (m_addInputFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddInputField.cshtml");
-
-        /// <summary>
-        /// Gets the text area field razor template file name.
-        /// </summary>
-        public string AddTextAreaFieldTemplate => m_addTextAreaFieldTemplate ?? (m_addTextAreaFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddTextAreaField.cshtml");
-
-        /// <summary>
-        /// Gets the select field razor template file name.
-        /// </summary>
-        public string AddSelectFieldTemplate => m_addSelectFieldTemplate ?? (m_addSelectFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddSelectField.cshtml");
-
-        /// <summary>
-        /// Gets the check box field razor template file name.
-        /// </summary>
-        public string AddCheckBoxFieldTemplate => m_addCheckBoxFieldTemplate ?? (m_addCheckBoxFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddCheckBoxField.cshtml");
 
         /// <summary>
         /// Gets validation pattern and error message for rendered fields, if any.
@@ -849,6 +819,40 @@ namespace openSPM.Models
         #endregion
 
         #region [ Static ]
+
+        // Static Fields
+        private static string s_addDateFieldTemplate;
+        private static string s_addInputFieldTemplate;
+        private static string s_addTextAreaFieldTemplate;
+        private static string s_addSelectFieldTemplate;
+        private static string s_addCheckBoxFieldTemplate;
+
+        // Static Properties
+
+        /// <summary>
+        /// Gets the date field razor template file name.
+        /// </summary>
+        public static string AddDateFieldTemplate => s_addDateFieldTemplate ?? (s_addDateFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddDateField.cshtml");
+
+        /// <summary>
+        /// Gets the input field razor template file name.
+        /// </summary>
+        public static string AddInputFieldTemplate => s_addInputFieldTemplate ?? (s_addInputFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddInputField.cshtml");
+
+        /// <summary>
+        /// Gets the text area field razor template file name.
+        /// </summary>
+        public static string AddTextAreaFieldTemplate => s_addTextAreaFieldTemplate ?? (s_addTextAreaFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddTextAreaField.cshtml");
+
+        /// <summary>
+        /// Gets the select field razor template file name.
+        /// </summary>
+        public static string AddSelectFieldTemplate => s_addSelectFieldTemplate ?? (s_addSelectFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddSelectField.cshtml");
+
+        /// <summary>
+        /// Gets the check box field razor template file name.
+        /// </summary>
+        public static string AddCheckBoxFieldTemplate => s_addCheckBoxFieldTemplate ?? (s_addCheckBoxFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddCheckBoxField.cshtml");
 
         // Static Methods
         private static string ParamList(IReadOnlyList<object> parameters)

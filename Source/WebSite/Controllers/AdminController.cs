@@ -89,6 +89,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Menus()
+        {
+            m_appModel.LookupPageDetail("AdminMenus", ViewBag);
+            return View();
+        }
+
         public ActionResult MenuItems()
         {
             m_appModel.LookupPageDetail("AdminMenuItems", ViewBag);

@@ -195,6 +195,16 @@ hr.full-break {
     clear: both;
 }
 
+/* OK button for pop-up forms */
+.popup-ok-button {
+    position: absolute;
+    right: 8px;
+    top: calc(100% - 43px);
+    top: -o-calc(100% - 43px);
+    top: -webkit-calc(100% - 43px);
+    top: -moz-calc(100% - 43px);
+}
+
 /* Preloads an image off-screen */
 .pre-cache {
     position: absolute;

@@ -848,8 +848,10 @@ namespace openSPM.Models
         // Static Methods
         private static string ParamList(IReadOnlyList<object> parameters)
         {
-            StringBuilder delimitedString = new StringBuilder();
+            if (parameters == null)
+                return "";
 
+            StringBuilder delimitedString = new StringBuilder();
 
             for (int i = 0; i < parameters.Count; i++)
                 delimitedString.AppendFormat(", {0}:{1}", i, parameters[i]);

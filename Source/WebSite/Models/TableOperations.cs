@@ -51,7 +51,7 @@ namespace openSPM.Models
         /// <summary>
         /// Defines restriction parameter values.
         /// </summary>
-        public object[] Parameters;
+        public object[] Parameters = new object[0];
     }
 
     /// <summary>

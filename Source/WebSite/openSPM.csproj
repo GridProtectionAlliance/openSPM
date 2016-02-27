@@ -203,7 +203,6 @@
     <Compile Include="Models\Page.cs" />
     <Compile Include="Models\Menu.cs" />
     <Compile Include="Models\PagedList.cs" />
-    <Compile Include="Models\User.cs" />
     <Compile Include="Models\Patch.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="Attributes\LabelAttribute.cs" />
@@ -372,6 +371,7 @@
     <Content Include="Views\Admin\ValueListItems.cshtml" />
     <Content Include="Views\Shared\SecurityError.cshtml" />
     <Content Include="Views\Shared\_ErrorLayout.cshtml" />
+    <Content Include="Views\Admin\Menus.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

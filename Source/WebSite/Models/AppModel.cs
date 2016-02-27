@@ -28,6 +28,7 @@ using System.Text;
 using GSF;
 using GSF.Security;
 using openSPM.Attributes;
+using RazorEngine.Templating;
 
 namespace openSPM.Models
 {
@@ -297,7 +298,19 @@ namespace openSPM.Models
         /// <returns>Setting from page's server configuration if found, otherwise the default setting.</returns>
         public string GetPageSetting(dynamic viewBag, Dictionary<string, string> globalSettings, string key, string defaultValue = null)
         {
-            Dictionary<string, string> pageSettings = viewBag.PageSettings;
+            return GetPageSetting(viewBag.PageSettings as Dictionary<string, string>, globalSettings, key, defaultValue);
+        }
+
+        /// <summary>
+        /// Gets overridden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
+        /// </summary>
+        /// <param name="pageSettings">Page settings dictionary.</param>
+        /// <param name="globalSettings">Global settings dictionary.</param>
+        /// <param name="key">Key name.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Setting from page's server configuration if found, otherwise the default setting.</returns>
+        public string GetPageSetting(Dictionary<string, string> pageSettings, Dictionary<string, string> globalSettings, string key, string defaultValue = null)
+        {
             string value = defaultValue;
 
             if (!(pageSettings?.TryGetValue(key, out value) ?? false))

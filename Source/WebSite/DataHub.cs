@@ -27,6 +27,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using GSF;
 using GSF.Collections;
 using GSF.Identity;
 using GSF.Reflection;
@@ -188,6 +189,7 @@ namespace openSPM
         [RecordOperation(typeof(Page), RecordOperation.AddNewRecord)]
         public void AddNewPage(Page page)
         {
+            page.CreatedOn = DateTime.UtcNow;
             m_dataContext.Table<Page>().AddNewRecord(page);
         }
 
@@ -200,6 +202,53 @@ namespace openSPM
 
         #endregion
 
+        #region [ Menu Table Operations ]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Menu), RecordOperation.QueryRecordCount)]
+        public int QueryMenuCount()
+        {
+            return m_dataContext.Table<Menu>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Menu), RecordOperation.QueryRecords)]
+        public IEnumerable<Menu> QueryMenus(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<Menu>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Menu), RecordOperation.DeleteRecord)]
+        public void DeleteMenu(int id)
+        {
+            m_dataContext.Table<Menu>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Menu), RecordOperation.CreateNewRecord)]
+        public Menu NewMenu()
+        {
+            return new Menu();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Menu), RecordOperation.AddNewRecord)]
+        public void AddNewMenu(Menu menu)
+        {
+            menu.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Menu>().AddNewRecord(menu);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Menu), RecordOperation.UpdateRecord)]
+        public void UpdateMenu(Menu menu)
+        {
+            m_dataContext.Table<Menu>().UpdateRecord(menu);
+        }
+
+        #endregion
+
         #region [ MenuItem Table Operations ]
 
         [AuthorizeHubRole("Administrator")]
@@ -208,7 +257,7 @@ namespace openSPM
         {
             return m_dataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction
             {
-                FilterExpression = "PageID = {0}",
+                FilterExpression = "MenuID = {0}",
                 Parameters = new object[] { parentID }
             });
         }
@@ -219,7 +268,7 @@ namespace openSPM
         {
             return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
             {
-                FilterExpression = "PageID = {0}",
+                FilterExpression = "MenuID = {0}",
                 Parameters = new object[] { parentID }
             });
         }
@@ -356,6 +405,21 @@ namespace openSPM
         }
 
         #endregion
+
+        /// <summary>
+        /// Gets page setting for specified page.
+        /// </summary>
+        /// <param name="pageID">ID of page record.</param>
+        /// <param name="key">Setting key name.</param>
+        /// <param name="defaultValue">Setting default value.</param>
+        /// <returns>Page setting for specified page.</returns>
+        public string GetPageSetting(int pageID, string key, string defaultValue)
+        {
+            Page page = m_dataContext.QueryRecord<Page>(pageID);
+            Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
+            AppModel model = MvcApplication.DefaultModel;
+            return model.GetPageSetting(pageSettings, model.Global.PageDefaults, key, defaultValue);
+        }
 
         private Guid GetCurrentUserID()
         {

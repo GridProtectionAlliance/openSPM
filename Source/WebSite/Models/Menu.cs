@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using openSPM.Attributes;
 
@@ -56,7 +57,7 @@ namespace openSPM.Models
             get; set;
         }
 
-        public bool Enabled
+        public DateTime CreatedOn
         {
             get; set;
         }

@@ -23,6 +23,7 @@
 @using System.Collections.Specialized
 @using System.Text
 @using openSPM.Models
+@using Page = openSPM.Models.Page
 @model AppModel
 @{
     NameValueCollection parameters = Request.QueryString;
@@ -35,9 +36,9 @@
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "text", "Menu Text", "text-left" },
-        new[] { "link", "URL", "text-left" },
-        new[] { "sortOrder", "Sort&nbsp;Order", "text-center" }
+        new[] { "Text", "Menu Text", "text-left" },
+        new[] { "Link", "URL", "text-left" },
+        new[] { "SortOrder", "Sort&nbsp;Order", "text-center" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -45,9 +46,9 @@
 }
 @helper BodyRows()
 {
-    <td width="40%" class="text-left valign-middle" nowrap><img data-bind="attr: {src: deriveImageSource(image), title: imageAlt}">&nbsp;<button type="button" class="btn btn-link" data-bind="text: text, click: $parent.viewPageRecord"></button></td>
-    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(link)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(link, 2)"></div></a></td>
-    <td width="15%" class="text-center valign-middle" data-bind="text: sortOrder"></td>
+    <td width="40%" class="text-left valign-middle" nowrap><img data-bind="attr: {src: deriveImageSource(Image, ID, PageID), title: ImageAlt, id: 'menuImage' + ID}">&nbsp;<button type="button" class="btn btn-link" data-bind="text: Text, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(Link)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Link, 2)"></div></a></td>
+    <td width="15%" class="text-center valign-middle" data-bind="text: SortOrder"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -56,16 +57,16 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("text"))
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("minViewLevel"))
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("image"))
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("imageAlt"))
+        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("Text"))
+        @Html.Raw(Model.DataContext.AddSelectField<MenuItem, Page>("PageID", "ID", "Name", "Name", restriction: new RecordRestriction { FilterExpression = "COALESCE(Name, '') <> ''" }))
+        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("Image"))
+        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("ImageAlt"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("link", "url"))
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("sortOrder"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<MenuItem>("description", 3))
-        @Html.Raw(Model.DataContext.AddCheckBoxField<MenuItem>("enabled"))
+        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("Link", "url"))
+        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("SortOrder"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<MenuItem>("Description", 3))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<MenuItem>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -78,11 +79,20 @@
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Initialize selected menu item record
-            observableRecord.PageID(@parentID);
+            observableRecord.MenuID(@parentID);
         });
 
-        function deriveImageSource(imageFileName) {
-            // TODO: Lookup proper images path...
+        function deriveImageSource(imageFileName, ID, pageID) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.getPageSetting(pageID, "menuImagePath", "/Images/Menu/").done(function (menuImagePath) {
+                    const menuImage = $("#menuImage" + ID);
+                    const menuImageSrc = menuImagePath + imageFileName;
+
+                    if (menuImage.attr("src") !== menuImageSrc)
+                        menuImage.attr("src", menuImageSrc);
+                });
+            }
+
             return "/Images/Menu/" + imageFileName;
         }
 

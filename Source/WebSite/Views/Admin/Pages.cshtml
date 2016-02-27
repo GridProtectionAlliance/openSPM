@@ -24,18 +24,6 @@
 @using openSPM.Models
 @using Page = openSPM.Models.Page
 @model AppModel
-@section StyleSheets {
-    <style>
-        .popup-ok-button {
-            position: absolute;
-            right: 8px;
-            top: calc(100% - 43px);
-            top: -o-calc(100% - 43px);
-            top: -webkit-calc(100% - 43px);
-            top: -moz-calc(100% - 43px);
-        }
-    </style>
-}
 @{
     ViewBag.PageControlScripts = new StringBuilder();
 
@@ -43,8 +31,8 @@
     {   //    { "Field", "Label", "Classes" }
         new[] { "ID", "ID", "text-center" },
         new[] { "Name", "&nbsp;&nbsp;&nbsp;Name", "text-left" },
-        new[] { "Title", "Title", "text-left" },
-        new[] { null, "Menu&nbsp;Items", "text-center" }
+        new[] { "PageLocation", "URL", "text-left" },
+        new[] { "Title", "Title", "text-left" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -53,9 +41,9 @@
 @helper BodyRows()
 {
     <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
-    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
-    <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: title}"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openMenuItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'menuItemMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getMenuItemCount(ID), attr: {id: 'menuItemCount' + ID}">0</span></button></td>
+    <td width="15%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="30%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: Title}"></div></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(PageLocation)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(PageLocation, 2)"></div></a></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -66,7 +54,7 @@
     <div class="col-md-6">
         @Html.Raw(Model.DataContext.AddInputField<Page>("Name"))
         @Html.Raw(Model.DataContext.AddInputField<Page>("Title"))
-        @Html.Raw(Model.DataContext.AddSelectField<Page, Menu>("MenuID", "ID", "Name"))
+        @Html.Raw(Model.DataContext.AddSelectField<Page, Menu>("MenuID", "ID", "Name", "Name"))
         @Html.Raw(Model.DataContext.AddInputField<Page>("PageLocation", "url"))
         @Html.Raw(Model.DataContext.AddTextAreaField<Page>("ServerConfiguration"))
     </div>
@@ -74,94 +62,14 @@
         @Html.Raw(Model.DataContext.AddTextAreaField<Page>("ClientConfiguration"))
         @Html.Raw(Model.DataContext.AddInputField<Page>("IncludedRoles"))
         @Html.Raw(Model.DataContext.AddInputField<Page>("ExcludedRoles"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("Description", rows: 3))
+        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("Description", 3))
         @Html.Raw(Model.DataContext.AddCheckBoxField<Page>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
-<div id="editMenuItemDialog" class="modal modal-wide fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <iframe style="border: none" id="editMenuItemFrame"></iframe>
-                <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
-            </div>
-        </div>
-    </div>
-</div>
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        // Configure view model
-        viewModel.defaultSortField = "ID";
-        viewModel.labelField = "name";
-        viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputname";
-
-        viewModel.setQueryRecordCount(function () {
-            return dataHub.queryPageCount();
-        });
-
-        viewModel.setQueryRecords(function (sortField, ascending, page, pageSize) {
-            return dataHub.queryPages(sortField, ascending, page, pageSize);
-        });
-
-        viewModel.setDeleteRecord(function (keyValues) {
-            return dataHub.deletePage(keyValues[0]);
-        });
-
-        viewModel.setNewRecord(function () {
-            return dataHub.newPage();
-        });
-
-        viewModel.setAddNewRecord(function (record) {
-            return dataHub.addNewPage(record);
-        });
-
-        viewModel.setUpdateRecord(function (record) {
-            return dataHub.updatePage(record);
-        });
-
-        function getMenuItemCount(pageID) {
-            if (viewModel.dataHubIsConnected()) {
-                dataHub.queryMenuItemCount(pageID).done(function (count) {
-                    const menuItemMode = $("#menuItemMode" + pageID);
-                    const menuItemCount = $("#menuItemCount" + pageID);
-                    const modeText = count > 0 ? "Edit" : "Add";
-
-                    if (menuItemMode.text() !== modeText)
-                        menuItemMode.text(modeText);
-
-                    if (menuItemCount.text() !== count.toString())
-                        menuItemCount.text(count.toString());
-                });
-            }
-
-            return "0";
-        }
-
-        $(viewModel).on("pageRecordsQueried", function (event) {
-            $("#editMenuItemFrame").attr("height", ($("#contentWell").outerHeight(true) - 50) + "px");
-        });
-
-        function openMenuItemEditor(record) {
-            $("#editMenuItemFrame").attr({
-                "src": "/Admin/MenuItems?ID=" + record.ID + "&Name=" + encodeURIComponent(record.name),
-                "height": ($("#contentWell").outerHeight(true) - 50) + "px",
-                "width": "100%"
-            });
-
-            $("#editMenuItemDialog").modal("show");
-        }
-
-        $("#editMenuItemDialog").on("hidden.bs.modal", function () {
-            // Refresh page counts after editing tasks
-            viewModel.queryPageRecords();
-        });
-
-        $(function() {
-            $("#editMenuItemDialog").modal({ show: false, backdrop: "static", keyboard: false });
-        });
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Page>())
     </script>
 }

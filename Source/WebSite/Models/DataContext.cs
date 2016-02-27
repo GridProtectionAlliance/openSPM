@@ -248,16 +248,17 @@ namespace openSPM.Models
                 viewModel.primaryKeyFields = [{primaryKeyFields.Select(fieldName => $"\"{fieldName}\"").ToDelimitedString(", ")}];
             ".FixForwardSpacing());
 
+            Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
+
             // Get method names for records operations of modeled table
             Tuple<string, string>[] recordOperations = DataHub.GetRecordOperations<T>();
-            string queryRecordCountMethod = recordOperations[(int)RecordOperation.QueryRecordCount].Item1;
-            string queryRecordsMethod = recordOperations[(int)RecordOperation.QueryRecords].Item1;
-            string deleteRecordMethod = recordOperations[(int)RecordOperation.DeleteRecord].Item1;
-            string createNewRecordMethod = recordOperations[(int)RecordOperation.CreateNewRecord].Item1;
-            string addNewRecordMethod = recordOperations[(int)RecordOperation.AddNewRecord].Item1;
-            string updateMethod = recordOperations[(int)RecordOperation.UpdateRecord].Item1;
+            string queryRecordCountMethod = toCamelCase(recordOperations[(int)RecordOperation.QueryRecordCount].Item1);
+            string queryRecordsMethod = toCamelCase(recordOperations[(int)RecordOperation.QueryRecords].Item1);
+            string deleteRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.DeleteRecord].Item1);
+            string createNewRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.CreateNewRecord].Item1);
+            string addNewRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.AddNewRecord].Item1);
+            string updateMethod = toCamelCase(recordOperations[(int)RecordOperation.UpdateRecord].Item1);
 
-            Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
             string keyValues = null;
 
             if (parentKeys.Length > 0)
@@ -266,42 +267,42 @@ namespace openSPM.Models
             if (!string.IsNullOrWhiteSpace(queryRecordCountMethod))
                 javascript.Append($@"
                     viewModel.setQueryRecordCount(function () {{
-                        return dataHub.{toCamelCase(queryRecordCountMethod)}({keyValues});
+                        return dataHub.{queryRecordCountMethod}({keyValues});
                     }});
                 ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(queryRecordsMethod))
                 javascript.Append($@"
                     viewModel.setQueryRecords(function (sortField, ascending, page, pageSize) {{
-                        return dataHub.{toCamelCase(queryRecordsMethod)}({(keyValues == null ? "" : $"{keyValues}, ")}sortField, ascending, page, pageSize);
+                        return dataHub.{queryRecordsMethod}({(keyValues == null ? "" : $"{keyValues}, ")}sortField, ascending, page, pageSize);
                     }});
                 ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(deleteRecordMethod))
                 javascript.Append($@"
                     viewModel.setDeleteRecord(function (keyValues) {{
-                        return dataHub.{toCamelCase(deleteRecordMethod)}({Enumerable.Range(0, Table<T>().GetPrimaryKeyFieldNames().Length).Select(index => $"keyValues[{index}]").ToDelimitedString(", ")});
+                        return dataHub.{deleteRecordMethod}({Enumerable.Range(0, Table<T>().GetPrimaryKeyFieldNames().Length).Select(index => $"keyValues[{index}]").ToDelimitedString(", ")});
                     }});
                 ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(createNewRecordMethod))
                 javascript.Append($@"
                     viewModel.setNewRecord(function () {{
-                        return dataHub.{toCamelCase(createNewRecordMethod)}();
+                        return dataHub.{createNewRecordMethod}();
                     }});
                 ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(addNewRecordMethod))
                 javascript.Append($@"
                     viewModel.setAddNewRecord(function (record) {{
-                        return dataHub.{toCamelCase(addNewRecordMethod)}(record);
+                        return dataHub.{addNewRecordMethod}(record);
                     }});
                 ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(updateMethod))
                 javascript.Append($@"
                     viewModel.setUpdateRecord(function (record) {{
-                        return dataHub.{toCamelCase(updateMethod)}(record);
+                        return dataHub.{updateMethod}(record);
                     }});
                 ".FixForwardSpacing());
 

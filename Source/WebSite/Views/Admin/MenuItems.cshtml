@@ -37,7 +37,7 @@
     {   //    { "Field", "Label", "Classes" }
         new[] { "text", "Menu Text", "text-left" },
         new[] { "link", "URL", "text-left" },
-        new[] { "sortOrder", "Sort&nbsp;Order", "text-center" },
+        new[] { "sortOrder", "Sort&nbsp;Order", "text-center" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -73,36 +73,8 @@
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
         "use strict";
-
-        // Configure view model
-        viewModel.defaultSortField = "ID";
-        viewModel.labelField = "Name";
-        viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputName";
-
-        viewModel.setQueryRecordCount(function() {
-            return dataHub.queryMenuItemCount(@parentID);
-        });
-
-        viewModel.setQueryRecords(function(sortField, ascending, page, pageSize) {
-            return dataHub.queryMenuItems(@parentID, sortField, ascending, page, pageSize);
-        });
-
-        viewModel.setDeleteRecord(function(keyValues) {
-            return dataHub.deleteMenuItem(keyValues[0]);
-        });
-
-        viewModel.setNewRecord(function() {
-            return dataHub.newMenuItem();
-        });
-
-        viewModel.setAddNewRecord(function(record) {
-            return dataHub.addNewMenuItem(record);
-        });
-
-        viewModel.setUpdateRecord(function(record) {
-            return dataHub.updateMenuItem(record);
-        });
+        
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<MenuItem>("ID", parentID))
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Initialize selected menu item record

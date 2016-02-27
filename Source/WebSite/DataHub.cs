@@ -156,31 +156,43 @@ namespace openSPM
 
         #region [ Page Table Operations ]
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Page), RecordOperation.QueryRecordCount)]
         public int QueryPageCount()
         {
             return m_dataContext.Table<Page>().QueryRecordCount();
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Page), RecordOperation.QueryRecords)]
         public IEnumerable<Page> QueryPages(string sortField, bool ascending, int page, int pageSize)
         {
             return m_dataContext.Table<Page>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Page), RecordOperation.DeleteRecord)]
         public void DeletePage(int id)
         {
             m_dataContext.Table<Page>().DeleteRecord(id);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Page), RecordOperation.CreateNewRecord)]
         public Page NewPage()
         {
             return new Page();
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Page), RecordOperation.AddNewRecord)]
         public void AddNewPage(Page page)
         {
             m_dataContext.Table<Page>().AddNewRecord(page);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Page), RecordOperation.UpdateRecord)]
         public void UpdatePage(Page page)
         {
             m_dataContext.Table<Page>().UpdateRecord(page);
@@ -190,15 +202,8 @@ namespace openSPM
 
         #region [ MenuItem Table Operations ]
 
-        public IEnumerable<MenuItem> QueryMenuItems(int parentID, string sortField, bool ascending, int page, int pageSize)
-        {
-            return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "PageID = {0}",
-                Parameters = new object[] { parentID }
-            });
-        }
-
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecordCount)]
         public int QueryMenuItemCount(int parentID)
         {
             return m_dataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction
@@ -208,21 +213,40 @@ namespace openSPM
             });
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecords)]
+        public IEnumerable<MenuItem> QueryMenuItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "PageID = {0}",
+                Parameters = new object[] { parentID }
+            });
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(MenuItem), RecordOperation.DeleteRecord)]
         public void DeleteMenuItem(int id)
         {
             m_dataContext.Table<MenuItem>().DeleteRecord(id);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(MenuItem), RecordOperation.CreateNewRecord)]
         public MenuItem NewMenuItem()
         {
             return new MenuItem();
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(MenuItem), RecordOperation.AddNewRecord)]
         public void AddNewMenuItem(MenuItem menuItem)
         {
             m_dataContext.Table<MenuItem>().AddNewRecord(menuItem);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(MenuItem), RecordOperation.UpdateRecord)]
         public void UpdateMenuItem(MenuItem menuItem)
         {
             m_dataContext.Table<MenuItem>().UpdateRecord(menuItem);
@@ -232,32 +256,44 @@ namespace openSPM
 
         #region [ ValueListGroup Table Operations ]
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueListGroup), RecordOperation.QueryRecordCount)]
         public int QueryValueListGroupCount()
         {
             return m_dataContext.Table<ValueListGroup>().QueryRecordCount();
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueListGroup), RecordOperation.QueryRecords)]
         public IEnumerable<ValueListGroup> QueryValueListGroups(string sortField, bool ascending, int page, int pageSize)
         {
             return m_dataContext.Table<ValueListGroup>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueListGroup), RecordOperation.DeleteRecord)]
         public void DeleteValueListGroup(int id)
         {
             m_dataContext.Table<ValueListGroup>().DeleteRecord(id);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueListGroup), RecordOperation.CreateNewRecord)]
         public ValueListGroup NewValueListGroup()
         {
             return new ValueListGroup();
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueListGroup), RecordOperation.AddNewRecord)]
         public void AddNewValueListGroup(ValueListGroup valueListGroup)
         {
             valueListGroup.CreatedOn = DateTime.UtcNow;
             m_dataContext.Table<ValueListGroup>().AddNewRecord(valueListGroup);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueListGroup), RecordOperation.UpdateRecord)]
         public void UpdateValueListGroup(ValueListGroup valueListGroup)
         {
             m_dataContext.Table<ValueListGroup>().UpdateRecord(valueListGroup);
@@ -267,15 +303,9 @@ namespace openSPM
 
         #region [ ValueList Table Operations ]
 
-        public IEnumerable<ValueList> QueryValueListItems(int parentID, string sortField, bool ascending, int page, int pageSize)
-        {
-            return m_dataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "GroupID = {0}",
-                Parameters = new object[] { parentID }
-            });
-        }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueList), RecordOperation.QueryRecordCount)]
         public int QueryValueListCount(int parentID)
         {
             return m_dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction
@@ -285,22 +315,41 @@ namespace openSPM
             });
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueList), RecordOperation.QueryRecords)]
+        public IEnumerable<ValueList> QueryValueListItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "GroupID = {0}",
+                Parameters = new object[] { parentID }
+            });
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueList), RecordOperation.DeleteRecord)]
         public void DeleteValueList(int id)
         {
             m_dataContext.Table<ValueList>().DeleteRecord(id);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueList), RecordOperation.CreateNewRecord)]
         public ValueList NewValueList()
         {
             return new ValueList();
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueList), RecordOperation.AddNewRecord)]
         public void AddNewValueList(ValueList valueList)
         {
             valueList.CreatedOn = DateTime.UtcNow;
             m_dataContext.Table<ValueList>().AddNewRecord(valueList);
         }
 
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ValueList), RecordOperation.UpdateRecord)]
         public void UpdateValueList(ValueList valueList)
         {
             m_dataContext.Table<ValueList>().UpdateRecord(valueList);

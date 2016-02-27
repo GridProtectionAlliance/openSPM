@@ -235,8 +235,9 @@ namespace openSPM.Models
         /// </summary>
         /// <typeparam name="T">Modeled table.</typeparam>
         /// <param name="defaultSortField">Default sort field, defaults to first primary key field.</param>
+        /// <param name="parentKeys">Primary keys values of the parent record to load.</param>
         /// <returns>Rendered paged view model configuration script.</returns>
-        public string RenderViewModelConfiguration<T>(string defaultSortField = null) where T : class, new()
+        public string RenderViewModelConfiguration<T>(string defaultSortField = null, params object[] parentKeys) where T : class, new()
         {
             StringBuilder javascript = new StringBuilder();
             string[] primaryKeyFields = Table<T>().GetPrimaryKeyFieldNames();
@@ -257,18 +258,22 @@ namespace openSPM.Models
             string updateMethod = recordOperations[(int)RecordOperation.UpdateRecord].Item1;
 
             Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
+            string keyValues = null;
+
+            if (parentKeys.Length > 0)
+                keyValues = parentKeys.ToDelimitedString(", ");
 
             if (!string.IsNullOrWhiteSpace(queryRecordCountMethod))
                 javascript.Append($@"
                     viewModel.setQueryRecordCount(function () {{
-                        return dataHub.{toCamelCase(queryRecordCountMethod)}();
+                        return dataHub.{toCamelCase(queryRecordCountMethod)}({keyValues});
                     }});
                 ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(queryRecordsMethod))
                 javascript.Append($@"
                     viewModel.setQueryRecords(function (sortField, ascending, page, pageSize) {{
-                        return dataHub.{toCamelCase(queryRecordsMethod)}(sortField, ascending, page, pageSize);
+                        return dataHub.{toCamelCase(queryRecordsMethod)}({(keyValues == null ? "" : $"{keyValues}, ")}sortField, ascending, page, pageSize);
                     }});
                 ".FixForwardSpacing());
 

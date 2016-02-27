@@ -24,13 +24,11 @@
 @using openSPM.Models
 @model AppModel
 @{
-    DataContext dataContext = Model.DataContext;
-
     ViewBag.PageControlScripts = new StringBuilder();
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
-    {   //    { "Field", "Label", "Classes" }
+{   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "PatchReference", "SPM&nbsp;Reference", "text-center" },
         new[] { "ImpactKey", "Impact", "text-center" },
@@ -39,20 +37,15 @@
         new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
-    ViewBag.PatchDefaults = dataContext.LoadDatabaseSettings("patch.default");
-
     ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
-
-    // TODO: Move into model located render function
-    int impactKey = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='impact' AND Enabled <> 0") ?? 0;
 }
 @helper BodyRows()
 {
-string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
 
     <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchReference, click: $parent.viewPageRecord"></button></td>
@@ -68,9 +61,9 @@ string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImageP
 @helper AddNewEditDialog()
 {
     DataContext dataContext = Model.DataContext;
-    Dictionary<string, string> patchDefaults = ViewBag.PatchDefaults;
-    string setting;
+    Dictionary<string, string> patchDefaults = dataContext.LoadDatabaseSettings("patch.default");
     int defaultCriticalAlarmDays;
+    string setting;
 
     // Get default critical alarm days
     if (!patchDefaults.TryGetValue("criticalAlarmDays", out setting) || !int.TryParse(setting, out defaultCriticalAlarmDays)) {
@@ -117,38 +110,7 @@ string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImageP
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(dataContext.RenderViewModelConfiguration<Patch>())
-
-        //// Configure view model
-        //viewModel.defaultSortField = "ID";
-        //viewModel.labelField = "PatchReference";
-        //viewModel.primaryKeyFields = ["ID"];
-        //viewModel.initialFocusField = "inputPatchReference";
-
-        //viewModel.setQueryRecordCount(function() {
-        //    return dataHub.queryPatchCount();
-        //});
-
-        //viewModel.setQueryRecords(function(sortField, ascending, page, pageSize) {
-        //    return dataHub.queryPatches(sortField, ascending, page, pageSize);
-        //});
-
-        //viewModel.setDeleteRecord(function(keyValues) {
-        //    return dataHub.deletePatch(keyValues[0]);
-        //});
-
-        //viewModel.setNewRecord(function() {
-        //    return dataHub.newPatch();
-        //});
-
-        //viewModel.setAddNewRecord(function(record) {
-        //    return dataHub.addNewPatch(record);
-        //});
-
-        //viewModel.setUpdateRecord(function(record) {
-        //    return dataHub.updatePatch(record);
-        //});
-
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Patch>())
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
     </script>
 }

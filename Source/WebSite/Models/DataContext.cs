@@ -215,7 +215,12 @@ namespace openSPM.Models
         /// </summary>
         /// <typeparam name="T">Modeled table.</typeparam>
         /// <param name="viewBag">ViewBag for the current view.</param>
-        /// <remarks>Typically used in paged view model scenarios and invoked by controller prior to view rendering.</remarks>
+        /// <remarks>
+        /// Typically used in paged view model scenarios and invoked by controller prior to view rendering.
+        /// Security is controlled at hub level, so failure to call will not impact security but may result
+        /// in screen enabling and/or showing controls that the user does not actually have access to and
+        /// upon attempted use will result in a security error.
+        /// </remarks>
         public void EstablishUserRolesForPage<T>(dynamic viewBag) where T : class, new()
         {
             // Get any authorized roles for key records operations of modeled table
@@ -236,30 +241,11 @@ namespace openSPM.Models
             StringBuilder javascript = new StringBuilder();
             string[] primaryKeyFields = Table<T>().GetPrimaryKeyFieldNames();
 
-            Func<string, string> fixForwardSpacing = newScript =>
-            {
-                Tuple<string, int>[] linesAndLengths = newScript
-                    .Split(new[] { Environment.NewLine }, StringSplitOptions.None)
-                    .Select(line => new Tuple<string, int>(line, line.Length - line.TrimStart(' ').Length))
-                    .ToArray();
-
-                int minLength = linesAndLengths
-                    .Select(lineAndLength => lineAndLength.Item2)
-                    .Where(length => length > 0)
-                    .Min();
-
-                return linesAndLengths
-                    .Select(lineAndLength => lineAndLength.Item2 > 0 ?
-                        $"    {(lineAndLength.Item2 > minLength ? lineAndLength.Item1.Substring(minLength) : lineAndLength.Item1)}" :
-                        lineAndLength.Item1.ToNonNullNorEmptyString())
-                    .ToDelimitedString(Environment.NewLine);
-            };
-
-            javascript.Append(fixForwardSpacing($@"// Configure view model
+            javascript.Append($@"// Configure view model
                 viewModel.defaultSortField = ""{defaultSortField ?? primaryKeyFields[0]}"";
                 viewModel.labelField = ""{GetPrimaryLabelField<T>()}"";
                 viewModel.primaryKeyFields = [{primaryKeyFields.Select(fieldName => $"\"{fieldName}\"").ToDelimitedString(", ")}];
-            "));
+            ".FixForwardSpacing());
 
             // Get method names for records operations of modeled table
             Tuple<string, string>[] recordOperations = DataHub.GetRecordOperations<T>();
@@ -273,46 +259,46 @@ namespace openSPM.Models
             Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
 
             if (!string.IsNullOrWhiteSpace(queryRecordCountMethod))
-                javascript.Append(fixForwardSpacing($@"
+                javascript.Append($@"
                     viewModel.setQueryRecordCount(function () {{
                         return dataHub.{toCamelCase(queryRecordCountMethod)}();
                     }});
-                "));
+                ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(queryRecordsMethod))
-                javascript.Append(fixForwardSpacing($@"
+                javascript.Append($@"
                     viewModel.setQueryRecords(function (sortField, ascending, page, pageSize) {{
                         return dataHub.{toCamelCase(queryRecordsMethod)}(sortField, ascending, page, pageSize);
                     }});
-                "));
+                ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(deleteRecordMethod))
-                javascript.Append(fixForwardSpacing($@"
+                javascript.Append($@"
                     viewModel.setDeleteRecord(function (keyValues) {{
                         return dataHub.{toCamelCase(deleteRecordMethod)}({Enumerable.Range(0, Table<T>().GetPrimaryKeyFieldNames().Length).Select(index => $"keyValues[{index}]").ToDelimitedString(", ")});
                     }});
-                "));
+                ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(createNewRecordMethod))
-                javascript.Append(fixForwardSpacing($@"
+                javascript.Append($@"
                     viewModel.setNewRecord(function () {{
                         return dataHub.{toCamelCase(createNewRecordMethod)}();
                     }});
-                "));
+                ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(addNewRecordMethod))
-                javascript.Append(fixForwardSpacing($@"
+                javascript.Append($@"
                     viewModel.setAddNewRecord(function (record) {{
                         return dataHub.{toCamelCase(addNewRecordMethod)}(record);
                     }});
-                "));
+                ".FixForwardSpacing());
 
             if (!string.IsNullOrWhiteSpace(updateMethod))
-                javascript.Append(fixForwardSpacing($@"
+                javascript.Append($@"
                     viewModel.setUpdateRecord(function (record) {{
                         return dataHub.{toCamelCase(updateMethod)}(record);
                     }});
-                "));
+                ".FixForwardSpacing());
 
             return javascript.ToString();
         }

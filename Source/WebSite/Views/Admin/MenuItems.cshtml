@@ -62,9 +62,9 @@
         @Html.Raw(Model.DataContext.AddInputField<MenuItem>("imageAlt"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("link", inputType: "url"))
+        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("link", "url"))
         @Html.Raw(Model.DataContext.AddInputField<MenuItem>("sortOrder"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<MenuItem>("description", rows: 3))
+        @Html.Raw(Model.DataContext.AddTextAreaField<MenuItem>("description", 3))
         @Html.Raw(Model.DataContext.AddCheckBoxField<MenuItem>("enabled"))
     </div>
 }

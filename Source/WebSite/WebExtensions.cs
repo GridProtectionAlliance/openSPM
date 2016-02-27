@@ -21,12 +21,14 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Net.Http;
 using System.Web;
 using GSF;
+using GSF.Collections;
 using openSPM.Models;
 
 namespace openSPM
@@ -69,6 +71,33 @@ namespace openSPM
         public static Dictionary<string, string> QueryParameters(this HttpRequestMessage request)
         {
             return request.GetQueryNameValuePairs().ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+        }
+
+        /// <summary>
+        /// Corrects script alignment with a desired number of forward spaces.
+        /// </summary>
+        /// <param name="script">Script text.</param>
+        /// <param name="spaces">Desired forward spaces.</param>
+        /// <returns>Script with corrected forward alignment.</returns>
+        public static string FixForwardSpacing(this string script, int spaces = 4)
+        {
+            Tuple<string, int>[] linesAndLengths = script
+                .Split(new[] { Environment.NewLine }, StringSplitOptions.None)
+                .Select(line => new Tuple<string, int>(line, line.Length - line.TrimStart(' ').Length))
+                .ToArray();
+
+            int minLength = linesAndLengths
+                .Select(lineAndLength => lineAndLength.Item2)
+                .Where(length => length > 0)
+                .Min();
+
+            string forwardSpacing = new string(' ', spaces);
+
+            return linesAndLengths
+                .Select(lineAndLength => lineAndLength.Item2 > 0 ?
+                    $"{forwardSpacing}{(lineAndLength.Item2 > minLength ? lineAndLength.Item1.Substring(minLength) : lineAndLength.Item1)}" :
+                    lineAndLength.Item1.ToNonNullNorEmptyString())
+                .ToDelimitedString(Environment.NewLine);
         }
 
         // TODO: Move these functions into appropriate locations within GSF.Core

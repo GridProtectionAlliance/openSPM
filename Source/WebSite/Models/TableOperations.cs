@@ -286,6 +286,24 @@ namespace openSPM.Models
         }
 
         /// <summary>
+        /// Gets the field names for the table.
+        /// </summary>
+        /// <returns>Array of field names.</returns>
+        public string[] GetFieldNames()
+        {
+            return s_fieldNames.Values.ToArray();
+        }
+
+        /// <summary>
+        /// Get the primary key field names for the table.
+        /// </summary>
+        /// <returns>Array of primary key field names.</returns>
+        public string[] GetPrimaryKeyFieldNames()
+        {
+            return s_primaryKeyProperties.Select(property => s_fieldNames[property.Name]).ToArray();
+        }
+
+        /// <summary>
         /// Attempts to get the specified <paramref name="attribute"/> for a field.
         /// </summary>
         /// <typeparam name="TAttribute">Type of attribute to attempt to get.</typeparam>

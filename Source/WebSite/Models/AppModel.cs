@@ -24,7 +24,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using GSF;
 using GSF.Security;
+using openSPM.Attributes;
 
 namespace openSPM.Models
 {
@@ -84,6 +87,87 @@ namespace openSPM.Models
         #endregion
 
         #region [ Methods ]
+
+        /// <summary>
+        /// Renders client-side Javascript function for looking up value list values based on key.
+        /// </summary>
+        /// <param name="groupName">Value list group name as defined in ValueListGroup table.</param>
+        /// <param name="valueListName">Name of associative array, defaults to <paramref name="groupName"/> + Values.</param>
+        /// <param name="lookupFunctionName">Name of lookup function, defaults to lookup + <paramref name="groupName"/>.ToTitleCase() + Value.</param>
+        /// <returns>Client-side Javascript lookup function.</returns>
+        public string RenderValueListClientLookupFunction(string groupName, string valueListName = null, string lookupFunctionName = null)
+        {
+            StringBuilder javascript = new StringBuilder();
+
+            if (string.IsNullOrWhiteSpace(valueListName))
+                valueListName = $"{groupName}Values";
+
+            if (string.IsNullOrWhiteSpace(lookupFunctionName))
+                lookupFunctionName = $"lookup{groupName.ToTitleCase()}Value";
+
+            // Do some minimal validation on identifier names
+            valueListName = valueListName.RemoveWhiteSpace().RemoveControlCharacters();
+            lookupFunctionName = lookupFunctionName.RemoveWhiteSpace().RemoveControlCharacters();
+
+            javascript.AppendLine($"var {valueListName} = [];\r\n");
+
+            int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
+
+            foreach (ValueList valueList in DataContext.QueryRecords<ValueList>("SELECT ID FROM ValueList WHERE GroupID={0} AND Enabled <> 0 AND Hidden = 0", key))
+                javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
+
+            javascript.AppendLine($"\r\n        function {lookupFunctionName}(value) {{");
+            javascript.AppendLine($"            return {valueListName}[value];");
+            javascript.AppendLine("        }");
+
+            return javascript.ToString();
+        }
+
+        /// <summary>
+        /// Generates template based select field based on reflected modeled table field attributes with values derived from ValueList table.
+        /// </summary>
+        /// <typeparam name="T">Modeled table for select field.</typeparam>
+        /// <param name="groupName">Value list group name as defined in ValueListGroup table.</param>
+        /// <param name="fieldName">Field name for value of select field.</param>
+        /// <param name="optionLabelFieldName">Field name for label of option data, defaults to "Text"</param>
+        /// <param name="optionValueFieldName">Field name for ID of option data, defaults to "Key".</param>
+        /// <param name="optionSortFieldName">Field name for sort order of option data, defaults to "SortOrder"</param>
+        /// <param name="fieldLabel">Label name for select field, pulls from <see cref="LabelAttribute"/> if defined, otherwise defaults to <paramref name="fieldName"/>.</param>
+        /// <param name="fieldID">ID to use for select field; defaults to select + <paramref name="fieldName"/>.</param>
+        /// <param name="groupDataBinding">Data-bind operations to apply to outer form-group div, if any.</param>
+        /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
+        /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
+        /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
+        /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
+        /// <param name="initialFocus">Use field for initial focus.</param>
+        /// <returns>Generated HTML for new text field based on modeled table field attributes.</returns>
+        public string AddValueListSelectField<T>(string fieldName, string groupName, string optionLabelFieldName = "Text", string optionValueFieldName = "Key", string optionSortFieldName = "SortOrder", string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false) where T : class, new()
+        {
+            int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
+
+            RecordRestriction restriction = new RecordRestriction
+            {
+                FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
+                Parameters = new object[] { key }
+            };
+
+            return DataContext.AddSelectField<T, ValueList>(fieldName, optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus, restriction);
+        }
+
+        /// <summary>
+        /// Adds field initialization, and optional validation, from a page-defined (e.g., loaded from database) parameter definition.
+        /// </summary>
+        /// <param name="fieldName">Target field name.</param>
+        /// <param name="initialValue">Javascript based initial value for field.</param>
+        /// <param name="validationPattern">Regex based validation pattern, if any.</param>
+        /// <param name="errorMessage">Optional error message to display when pattern fails.</param>
+        public void AddPageDefinedFieldInitialization(string fieldName, string initialValue, string validationPattern = null, string errorMessage = null)
+        {
+            DataContext.AddFieldValueInitializer(fieldName, initialValue);
+
+            if (!string.IsNullOrEmpty(validationPattern))
+                DataContext.AddFieldValidation($"viewModel.currentRecord().{fieldName}", validationPattern, errorMessage);
+        }
 
         /// <summary>
         /// Determines if user is in a specific role or list of roles (comma separated).
@@ -167,6 +251,60 @@ namespace openSPM.Models
         public bool UserIsInGroup(string[] groups)
         {
             return groups.Any(UserIsInGroup);
+        }
+
+        /// <summary>
+        /// Looks up page info based on defined page name.
+        /// </summary>
+        /// <param name="pageName">Page name as defined in Page table.</param>
+        /// <param name="viewBag">Current view bag.</param>
+        /// <remarks>
+        /// This is normally called from controller before returning view action result.
+        /// </remarks>
+        public void LookupPageDetail(string pageName, dynamic viewBag)
+        {
+            int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
+            Page page = DataContext.QueryRecord<Page>(pageID);
+            Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
+
+            viewBag.Page = page;
+            viewBag.PageID = pageID;
+            viewBag.PageName = pageName;
+            viewBag.PageImagePath = GetPageSetting(viewBag, "pageImagePath").Replace("{pageName}", pageName ?? "");
+            viewBag.PageSettings = pageSettings;
+            viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
+        }
+
+        /// <summary>
+        /// Gets overridden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
+        /// </summary>
+        /// <param name="viewBag">Page view bag.</param>
+        /// <param name="key">Key name.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Setting from page's server configuration if found, otherwise the default setting.</returns>
+        public string GetPageSetting(dynamic viewBag, string key, string defaultValue = null)
+        {
+            return GetPageSetting(viewBag, Global.PageDefaults, key, defaultValue);
+        }
+
+        /// <summary>
+        /// Gets overridden value from page settings dictionary (i.e., server configuration) if it exists, otherwise gets page default.
+        /// </summary>
+        /// <param name="viewBag">Page view bag.</param>
+        /// <param name="globalSettings">Global settings dictionary.</param>
+        /// <param name="key">Key name.</param>
+        /// <param name="defaultValue">Default value.</param>
+        /// <returns>Setting from page's server configuration if found, otherwise the default setting.</returns>
+        public string GetPageSetting(dynamic viewBag, Dictionary<string, string> globalSettings, string key, string defaultValue = null)
+        {
+            Dictionary<string, string> pageSettings = viewBag.PageSettings;
+            string value = defaultValue;
+
+            if (!(pageSettings?.TryGetValue(key, out value) ?? false))
+                if (!(globalSettings?.TryGetValue(key, out value) ?? false) || string.IsNullOrEmpty(value))
+                    value = defaultValue;
+
+            return value;
         }
 
         #endregion

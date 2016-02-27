@@ -77,7 +77,7 @@ namespace openSPM
             systemSettings.Add("CompanyAcronym", "GPA", "The acronym representing the company who owns this instance of the openMIC.");
             systemSettings.Add("DateFormat", "MM/dd/yyyy", "The default date format to use when rendering timestamps.");
             systemSettings.Add("TimeFormat", "HH:mm.ss.fff", "The default time format to use when rendering timestamps.");
-            systemSettings.Add("DefaultSecurityRoles", "Administrator, Editor, Viewer", "The default security roles that should exist for the application.");
+            systemSettings.Add("DefaultSecurityRoles", "Administrator, Owner, Viewer, PIC, SME, BUC", "The default security roles that should exist for the application.");
 
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;
@@ -105,11 +105,13 @@ namespace openSPM
                 global.ApplicationKeywords = appSetting["applicationKeywords"];
                 global.BootstrapTheme = appSetting["bootstrapTheme"];
 
-                // Load default page settings
-                Dictionary<string, string> pageDefaults = dataContext.LoadDatabaseSettings("page.default");
+                // Cache default page settings
+                foreach (KeyValuePair<string, string> item in dataContext.LoadDatabaseSettings("page.default"))
+                    global.PageDefaults.Add(item.Key, item.Value);
 
-                foreach (KeyValuePair<string, string> item in pageDefaults)
-                    global.PageDefaultSettings.Add(item.Key, item.Value);
+                // Cache layout settings
+                foreach (KeyValuePair<string, string> item in dataContext.LoadDatabaseSettings("layout.setting"))
+                    global.LayoutSettings.Add(item.Key, item.Value);
             }
         }
 
@@ -138,7 +140,7 @@ namespace openSPM
                     if (type == UpdateType.Information)
                         HubClients.All.sendInfoMessage(message, 3000);
                     else
-                        HubClients.All(connectionID).sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
+                        HubClients.All.sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
                 }
 #endif
             }, DataHub.CurrentConnectionID);
@@ -202,7 +204,7 @@ namespace openSPM
             const string RoleCountFormat = "SELECT COUNT(*) FROM ApplicationRole WHERE NodeID = {0} AND Name = {1}";
 
             if (string.IsNullOrEmpty(defaultSecurityRoles))
-                defaultSecurityRoles = "Administrator, Editor, Viewer";
+                defaultSecurityRoles = "Administrator, Owner, Viewer";
 
             string[] roles = defaultSecurityRoles.Split(',').Select(role => role.Trim()).Where(role => !string.IsNullOrEmpty(role)).ToArray();
 

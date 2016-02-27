@@ -36,16 +36,17 @@ namespace openSPM.Attributes
     /// <summary>
     /// Defines an MVC filter attribute to handle the GSF role based security model.
     /// </summary>
-    public class RoleBasedSecurityAttribute : FilterAttribute, IAuthorizationFilter, IExceptionFilter
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
+    public class AuthorizeControllerRoleAttribute : FilterAttribute, IAuthorizationFilter, IExceptionFilter
     {
         public readonly string[] AllowedRoles;
 
-        public RoleBasedSecurityAttribute()
+        public AuthorizeControllerRoleAttribute()
         {
             AllowedRoles = new string[0];
         }
 
-        public RoleBasedSecurityAttribute(string allowedRoles)
+        public AuthorizeControllerRoleAttribute(string allowedRoles)
         {
             AllowedRoles = allowedRoles?.Split(',').Select(role => role.Trim()).
                 Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0];
@@ -68,7 +69,7 @@ namespace openSPM.Attributes
                 throw new SecurityException($"Authentication failed for user '{userName}': {SecurityProviderCache.CurrentProvider.AuthenticationFailureReason}");
 
             if (AllowedRoles.Length > 0 && !AllowedRoles.Any(role => filterContext.HttpContext.User.IsInRole(role)))
-                throw new SecurityException($"Access is for user '{userName}' defined: minimum required roles = {AllowedRoles.ToDelimitedString(", ")}.");
+                throw new SecurityException($"Access is denied for user '{userName}' defined: minimum required roles = {AllowedRoles.ToDelimitedString(", ")}.");
 
             // Make sure current user ID is cached
             if (!MvcApplication.UserIDCache.ContainsKey(userName)) {

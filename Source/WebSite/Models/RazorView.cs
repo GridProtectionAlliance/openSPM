@@ -173,9 +173,12 @@ namespace openSPM.Models
 
             // Get configured template path
             CategorizedSettingsElementCollection systemSettings = ConfigurationFile.Current.Settings["systemSettings"];
-            systemSettings.Add("TemplatePath", "~/Views/Shared/Templates/", "Path for data context based field templates.");
-            TemplatePath = HostingEnvironment.MapPath(systemSettings["TemplatePath"].Value).EnsureEnd('/');
+            systemSettings.Add("TemplatePath", "~/Views/Shared/Templates/", "Path for data context based razor field templates.");
 
+            if (Common.GetApplicationType() == ApplicationType.Web)
+                TemplatePath = HostingEnvironment.MapPath(systemSettings["TemplatePath"].Value).EnsureEnd('/');
+            else
+                TemplatePath = FilePath.GetAbsolutePath(systemSettings["TemplatePath"].Value);
 #if DEBUG
             // The watching resolve path template manager should not be used in production since
             // assemblies cannot be unloaded from an AppDomain. Every time a change to a .cshtml

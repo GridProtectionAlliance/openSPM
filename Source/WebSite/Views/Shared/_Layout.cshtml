@@ -26,14 +26,10 @@
 @using Page = openSPM.Models.Page
 @model AppModel
 @{
-    // Lookup page info based on defined page name
     DataContext dataContext = Model.DataContext;
-    int pageID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", ViewBag.PageName ?? "") ?? 0;
-    Page page = dataContext.QueryRecord<Page>(pageID);
-
-    // Load layout settings
-    Dictionary<string, string> layoutSettings = dataContext.LoadDatabaseSettings("layout.setting");
-    string pageTitle, menuImagePath, copyrightText, copyrightUrl, setting;
+    Dictionary<string, string> layoutSettings = Model.Global.LayoutSettings;
+    string copyrightText, copyrightUrl, setting;
+    Page page = ViewBag.Page;
 
     bool showCopyright = (layoutSettings.TryGetValue("showCopyright", out setting) && setting.ParseBoolean());
 
@@ -45,15 +41,8 @@
         copyrightUrl = "/Main/Contact";
     }
 
-    // Lookup desired menuImagePath for current page
-    Dictionary<string, string> serverConfiguration = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
-
-    // Look for overridden menuImagePath from server configuration string, otherwise use page default
-    if (!serverConfiguration.TryGetValue("menuImagePath", out menuImagePath)) {
-        if (!layoutSettings.TryGetValue("menuImagePath", out menuImagePath)) {
-            menuImagePath = "/Images/Menu/";
-        }
-    }
+    // Look for overridden menuImagePath from page's server configuration settings, otherwise use page default
+    string menuImagePath = Model.GetPageSetting(ViewBag, layoutSettings, "menuImagePath", "/Images/Menu/");
 
     menuImagePath = menuImagePath.EnsureEnd('/');
 
@@ -69,8 +58,7 @@
 
             // Check if menu item is enabled, page location is specified and that user has rights to page
             if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(menuPage.PageLocation) &&
-                !Model.UserIsInRole(menuPage.ExcludedRoles.ToNonNullNorWhiteSpace()) &&
-                Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*"))) {
+                !Model.UserIsInRole(menuPage.ExcludedRoles) && Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*"))) {
                 // Update menu item link
                 menuItem.Link = menuPage.PageLocation;
             }
@@ -87,13 +75,7 @@
     }
 
     // Define ViewBag.CustomTitle in page code for custom page titles
-    if (ViewBag.CustomTitle == null) {
-        ViewBag.Title = page?.Title ?? (ViewBag.PageName == null ? "<ViewBag.PageName undefined>" : $"<Page record for \"{ViewBag.PageName}\" does not exist>");
-        pageTitle = ViewBag.Title;
-    }
-    else {
-        pageTitle = ViewBag.CustomTitle;
-    }
+    string pageTitle = ViewBag.CustomTitle ?? ViewBag.Title;
 
     // Add ViewBag.PageHasMenu = false to page code to disable side-bar menu on page
     bool pageHasMenu = ViewBag.PageHasMenu ?? true;

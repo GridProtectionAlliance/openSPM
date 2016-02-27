@@ -27,6 +27,7 @@
 @{
     StringBuilder pageControlScripts = ViewBag.PageControlScripts;
 
+    // Setup page control scripts
     pageControlScripts.Append(Scripts.Render("~/js.bundle/pagedViewModel"));
 
     pageControlScripts.Append(@"
@@ -40,8 +41,37 @@
             });
     ");
 
+    // Get route ID value, if any
     string routeID = Url.RequestContext.RouteData.Values["id"] as string;
-    bool showAddNew = routeID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
+
+    // Check for optional page behaviors
+
+    // Hide the add new button
+    bool hideAddNewButton = ViewBag.HideAddNewButton ?? false;
+
+    // Hide unauthorized controls as disallowed by Edit/AddNew/Delete roles - otherwise will be disabled
+    bool hideUnauthorizedControls = ViewBag.HideUnauthorizedControls ?? false;
+
+    // Auto pop-up add new dialog
+    bool autoShowAddNew = routeID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
+
+    // Setup default roles if none are defined
+    if (ViewBag.EditRoles == null) {
+        ViewBag.EditRoles = "*";
+    }
+
+    if (ViewBag.AddNewRoles == null) {
+        ViewBag.AddNewRoles = ViewBag.EditRoles;
+    }
+
+    if (ViewBag.DeleteRoles == null) {
+        ViewBag.DeleteRoles = ViewBag.EditRoles;
+    }
+
+    // Check current allowed roles for user
+    bool canEdit = Model.UserIsInRole(ViewBag.EditRoles);
+    bool canAddNew = Model.UserIsInRole(ViewBag.AddNewRoles);
+    bool canDelete = Model.UserIsInRole(ViewBag.DeleteRoles);
 }
 @functions
 {
@@ -52,6 +82,9 @@
 
         if (value.EndsWith("IES", StringComparison.Ordinal))
             return value.Substring(0, value.Length - 3) + "Y";
+
+        if (value.EndsWith("es", StringComparison.OrdinalIgnoreCase))
+            return value.Substring(0, value.Length - 2);
 
         if (value.EndsWith("s", StringComparison.OrdinalIgnoreCase))
             return value.Substring(0, value.Length - 1);
@@ -118,11 +151,13 @@
         </div>
     </div>
     <div class="pull-right" id="pageControlsRow">
-        <button type="button" class="btn btn-sm btn-primary pull-right" id="addRecordButton" data-bind="enable: dataHubIsConnected">
-            <span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add&nbsp;New
-        </button>
-        <br />
-        <hr class="half-break" />
+        @if (!hideAddNewButton && (canAddNew || !hideUnauthorizedControls)) {
+            <button type="button" class="btn btn-sm btn-primary pull-right" id="addRecordButton" @(canAddNew ? "data-bind=\"enable: dataHubIsConnected\"" : "disabled")>
+                <span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add&nbsp;New
+            </button>
+            <br />
+            <hr class="half-break" />
+        }
         <div class="btn-group btn-group-sm">
             <button type="button" class="btn btn-default" id="firstPageButton" data-bind="css: {'disabled': onFirstPage()}, enable: dataHubIsConnected() && !onFirstPage()"><span class="glyphicon glyphicon-backward"></span></button>
             <button type="button" class="btn btn-default" id="previousPageButton" data-bind="css: {'disabled': onFirstPage()}, enable: dataHubIsConnected() && !onFirstPage()"><span class="glyphicon glyphicon-triangle-left"></span></button>
@@ -161,8 +196,12 @@
                     <span data-bind="visible: validationErrors() > 0"><span data-bind="text: validationErrors()"></span> validation error<span data-bind="visible: validationErrors() > 1">s</span></span>
                     ...
                 </em>
-                <button type="button" class="btn btn-info" data-bind="visible: recordMode()===RecordMode.View, enable: dataHubIsConnected" id="editRecordButton">Edit</button>
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" data-bind="visible: recordMode()!==RecordMode.View, disable: unassignedFieldCount() > 0 || validationErrors() > 0 || !dataHubIsConnected()" id="saveRecordButton">Save</button>
+                @if (canEdit || !hideUnauthorizedControls) {
+                    <button type="button" class="btn btn-info" data-bind="visible: recordMode()===RecordMode.View@(canEdit ? ", enable: dataHubIsConnected" : "")" id="editRecordButton"@(canEdit ? "" : " disabled")>Edit</button>
+                }
+                @if (canEdit || canAddNew || !hideUnauthorizedControls) {
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" data-bind="visible: recordMode()!==RecordMode.View@(canEdit || canAddNew ? ", disable: unassignedFieldCount() > 0 || validationErrors() > 0 || !dataHubIsConnected()" : "")" id="saveRecordButton"@(canEdit || canAddNew ? "" : " disabled")>Save</button>
+                }
                 <button type="button" class="btn btn-default" id="cancelRecordButton">Cancel</button>
             </div>
         </div>
@@ -171,7 +210,7 @@
 @{
     DataContext dataContext = Model.DataContext;
 
-    if (showAddNew)
+    if (autoShowAddNew)
     {
         pageControlScripts.Append(@"
             // Add new pop-up requested via URL parameter
@@ -219,16 +258,27 @@
         });
     ");
 
-    pageControlScripts.AppendFormat("\r\n        viewModel.modelName = \"{0}\";", RemoveSpaces(ViewBag.Title));
+    pageControlScripts.AppendFormat(@"
+        viewModel.canEdit({0});
+        viewModel.canAddNew({1});
+        viewModel.canDelete({2});
 
-    if (dataContext.InitialValueInitializers.Count > 0)
+        viewModel.initialFocusField = ""{3}"";
+        viewModel.modelName = ""{4}"";", 
+        canEdit.ToString().ToLower(), 
+        canAddNew.ToString().ToLower(), 
+        canDelete.ToString().ToLower(),        
+        dataContext.InitialFocusField,
+        RemoveSpaces(ViewBag.Title));
+
+    if (dataContext.FieldValueInitializers.Count > 0)
     {
         pageControlScripts.AppendFormat(@"
 
         $(viewModel).on(""newRecord"", function(event, newRecord) {{
             // Set initial field values");
 
-        foreach (Tuple<string, string> initialValue in dataContext.InitialValueInitializers) {
+        foreach (Tuple<string, string> initialValue in dataContext.FieldValueInitializers) {
             pageControlScripts.AppendFormat("\r\n            newRecord.{0} = {1};",
                 initialValue.Item1,initialValue.Item2.JavaScriptEncode());
         }
@@ -252,7 +302,7 @@
         pageControlScripts.AppendFormat(@"
 
         $(viewModel).on(""derivingJSRecord"", function(event, observableRecord) {{
-            // Convert date strings back to date objects before serializaton");
+            // Convert date strings back to date objects before serialization");
 
         foreach (string dataField in dataContext.DefinedDateFields) {
             pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().toDate());", dataField);

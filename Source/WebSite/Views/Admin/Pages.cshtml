@@ -37,15 +37,13 @@
     </style>
 }
 @{
-    ViewBag.Title = "Page";
-    ViewBag.PageName = "adminPages";
     ViewBag.PageControlScripts = new StringBuilder();
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { "ID", "ID", "text-center" },
-        new[] { "name", "&nbsp;&nbsp;&nbsp;Name", "text-left" },
-        new[] { "title", "Title", "text-left" },
+        new[] { "Name", "&nbsp;&nbsp;&nbsp;Name", "text-left" },
+        new[] { "Title", "Title", "text-left" },
         new[] { null, "Menu&nbsp;Items", "text-center" }
     };
 
@@ -55,8 +53,8 @@
 @helper BodyRows()
 {
     <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
-    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: name, click: $parent.viewPageRecord"></button></td>
-    <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(title, 1.5), attr: {title: title}"></div></td>
+    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: title}"></div></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openMenuItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'menuItemMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getMenuItemCount(ID), attr: {id: 'menuItemCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -66,15 +64,18 @@
 @helper AddNewEditDialog()
 {
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<Page>("name"))
-        @Html.Raw(Model.DataContext.AddInputField<Page>("title"))
-        @Html.Raw(Model.DataContext.AddInputField<Page>("minViewLevel"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("serverConfiguration"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("Name"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("Title"))
+        @Html.Raw(Model.DataContext.AddSelectField<Page, Menu>("MenuID", "ID", "Name"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("PageLocation", "url"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("ServerConfiguration"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("clientConfiguration"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("description", rows: 3))
-        @Html.Raw(Model.DataContext.AddCheckBoxField<Page>("enabled"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("ClientConfiguration"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("IncludedRoles"))
+        @Html.Raw(Model.DataContext.AddInputField<Page>("ExcludedRoles"))
+        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("Description", rows: 3))
+        @Html.Raw(Model.DataContext.AddCheckBoxField<Page>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")

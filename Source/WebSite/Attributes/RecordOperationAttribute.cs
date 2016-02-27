@@ -1,12 +1,12 @@
 ﻿//******************************************************************************************************
-//  Settings.cs - Gbtc
+//  RecordOperationAttribute.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
-//  file except in compliance with the License. You may obtain a copy of the License at:
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may
+//  not use this file except in compliance with the License. You may obtain a copy of the License at:
 //
 //      http://opensource.org/licenses/MIT
 //
@@ -16,51 +16,37 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/18/2016 - J. Ritchie Carroll
+//  02/26/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System.ComponentModel.DataAnnotations;
-using openSPM.Attributes;
+using System;
 
-namespace openSPM.Models
+// TODO: Move into GSF
+
+namespace openSPM.Attributes
 {
-    public class Settings
+    public enum RecordOperation
     {
-        [PrimaryKey(true)]
-        public int ID
-        {
-            get; set;
-        }
+        QueryRecordCount,
+        QueryRecords,
+        DeleteRecord,
+        CreateNewRecord,
+        AddNewRecord,
+        UpdateRecord
+    }
 
-        [StringLength(64)]
-        public string Scope
-        {
-            get; set;
-        }
+    [AttributeUsage(AttributeTargets.Method)]
+    public class RecordOperationAttribute : Attribute
+    {
+        public readonly Type ModelType;
+        public readonly RecordOperation Operation;
 
-        [StringLength(64)]
-        public string Name
+        public RecordOperationAttribute(Type modelType, RecordOperation operation)
         {
-            get; set;
-        }
-
-        [StringLength(512)]
-        public string Value
-        {
-            get; set;
-        }
-
-        public bool ApplicationInstance
-        {
-            get; set;
-        }
-
-        [StringLength(200)]
-        public string Roles
-        {
-            get; set;
+            ModelType = modelType;
+            Operation = operation;
         }
     }
 }

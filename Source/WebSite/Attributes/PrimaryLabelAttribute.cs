@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  GlobalSettings.cs - Gbtc
+//  PrimaryLabelAttribute.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,73 +16,37 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/19/2016 - J. Ritchie Carroll
+//  02/26/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System.Collections.Generic;
+using System;
 
-namespace openSPM.Models
+namespace openSPM.Attributes
 {
-    public class GlobalSettings
+    /// <summary>
+    /// Defines field name that best represents row identification to a user.
+    /// </summary>
+    /// <remarks>
+    /// An example of when this would be used is during a record deletion confirmation, e.g:
+    /// Are you sure you want to delete "PrimaryLabel.FieldName.Value"?
+    /// </remarks>
+    [AttributeUsage(AttributeTargets.Class)]
+    public class PrimaryLabelAttribute : Attribute
     {
-        public string CompanyName
+        /// <summary>
+        /// Field name used as primary label.
+        /// </summary>
+        public readonly string FieldName;
+
+        /// <summary>
+        /// Creates a new <see cref="PrimaryLabelAttribute"/>.
+        /// </summary>
+        /// <param name="fieldName">Field name used as primary label.</param>
+        public PrimaryLabelAttribute(string fieldName)
         {
-            get;
-            set;
+            FieldName = fieldName;
         }
-
-        public string CompanyAcronym
-        {
-            get;
-            set;
-        }
-
-        public string ApplicationName
-        {
-            get;
-            set;
-        }
-
-        public string ApplicationDescription
-        {
-            get;
-            set;
-        }
-
-        public string ApplicationKeywords
-        {
-            get;
-            set;
-        }
-
-        public string DateFormat
-        {
-            get;
-            set;
-        }
-
-        public string TimeFormat
-        {
-            get;
-            set;
-        }
-
-        public string DateTimeFormat
-        {
-            get;
-            set;
-        }
-
-        public string BootstrapTheme
-        {
-            get;
-            set;
-        }
-
-        public readonly Dictionary<string, string> LayoutSettings = new Dictionary<string, string>();
-
-        public readonly Dictionary<string, string> PageDefaults = new Dictionary<string, string>();
     }
 }

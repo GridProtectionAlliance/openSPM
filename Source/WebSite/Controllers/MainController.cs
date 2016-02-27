@@ -27,13 +27,14 @@ using openSPM.Models;
 
 namespace openSPM.Controllers
 {
-    [RoleBasedSecurity]
+    [AuthorizeControllerRole]
     public class MainController : Controller
     {
         #region [ Members ]
 
         // Fields
         private readonly DataContext m_dataContext;
+        private readonly AppModel m_appModel;
         private bool m_disposed;
 
         #endregion
@@ -47,7 +48,8 @@ namespace openSPM.Controllers
             ViewData.Add("DataContext", m_dataContext);
 
             // Set default model for pages used by layout
-            ViewData.Model = new AppModel(m_dataContext);
+            m_appModel = new AppModel(m_dataContext);
+            ViewData.Model = m_appModel;
         }
 
         #endregion
@@ -75,36 +77,28 @@ namespace openSPM.Controllers
             }
         }
 
-        [AllowAnonymous]
         public ActionResult Home()
         {
+            m_appModel.LookupPageDetail("Home", ViewBag);            
             return View();
         }
 
         public ActionResult Patches()
         {
+            m_appModel.LookupPageDetail("Patches", ViewBag);
+            m_dataContext.EstablishUserRolesForPage<Patch>(ViewBag);
             return View();
         }
 
-        public ActionResult OpenPatch()
-        {
-            return View();
-        }
-
-        public ActionResult UpdatePatch()
-        {
-            return View();
-        }
-
-        [AllowAnonymous]
         public ActionResult Help()
         {
+            m_appModel.LookupPageDetail("Help", ViewBag);
             return View();
         }
 
-        [AllowAnonymous]
         public ActionResult Contact()
         {
+            m_appModel.LookupPageDetail("Contact", ViewBag);
             ViewBag.Message = "Contacting the Grid Protection Alliance";
             return View();
         }

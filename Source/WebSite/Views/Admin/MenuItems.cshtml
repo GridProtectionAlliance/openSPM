@@ -20,15 +20,9 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System
-@using System.Collections.Generic
 @using System.Collections.Specialized
-@using System.Net.Http
 @using System.Text
-@using GSF
-@using GSF.Identity
 @using openSPM.Models
-@using Page = System.Web.UI.Page
 @model AppModel
 @{
     NameValueCollection parameters = Request.QueryString;
@@ -43,7 +37,7 @@
     {   //    { "Field", "Label", "Classes" }
         new[] { "text", "Menu Text", "text-left" },
         new[] { "link", "URL", "text-left" },
-        new[] { "sortOrder", "Sort&nbsp;Order", "text-center" },
+        new[] { "sortOrder", "Sort&nbsp;Order", "text-center" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -68,9 +62,9 @@
         @Html.Raw(Model.DataContext.AddInputField<MenuItem>("imageAlt"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("link", inputType: "url"))
+        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("link", "url"))
         @Html.Raw(Model.DataContext.AddInputField<MenuItem>("sortOrder"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<MenuItem>("description", rows: 3))
+        @Html.Raw(Model.DataContext.AddTextAreaField<MenuItem>("description", 3))
         @Html.Raw(Model.DataContext.AddCheckBoxField<MenuItem>("enabled"))
     </div>
 }
@@ -79,36 +73,8 @@
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
         "use strict";
-
-        // Configure view model
-        viewModel.defaultSortField = "ID";
-        viewModel.labelField = "Name";
-        viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputName";
-
-        viewModel.setQueryRecordCount(function() {
-            return dataHub.queryMenuItemCount(@parentID);
-        });
-
-        viewModel.setQueryRecords(function(sortField, ascending, page, pageSize) {
-            return dataHub.queryMenuItems(@parentID, sortField, ascending, page, pageSize);
-        });
-
-        viewModel.setDeleteRecord(function(keyValues) {
-            return dataHub.deleteMenuItem(keyValues[0]);
-        });
-
-        viewModel.setNewRecord(function() {
-            return dataHub.newMenuItem();
-        });
-
-        viewModel.setAddNewRecord(function(record) {
-            return dataHub.addNewMenuItem(record);
-        });
-
-        viewModel.setUpdateRecord(function(record) {
-            return dataHub.updateMenuItem(record);
-        });
+        
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<MenuItem>("ID", parentID))
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Initialize selected menu item record

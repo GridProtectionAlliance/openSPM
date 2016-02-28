@@ -80,7 +80,7 @@
     <div class="col-md-4">
         @Html.Raw(dataContext.AddInputField<Patch>("PatchReference", initialFocus: true))
         @Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))
-        @*@Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name"))*@
+        @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
         @Html.Raw(dataContext.AddInputField<Patch>("VendorReference"))
         @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
         @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))

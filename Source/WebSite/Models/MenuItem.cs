@@ -83,13 +83,11 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Label("Description")]
         public string Description
         {
             get; set;
         }
 
-        [Label("Enabled")]
         public bool Enabled
         {
             get; set;

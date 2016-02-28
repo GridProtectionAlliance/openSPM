@@ -23,7 +23,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -70,9 +69,7 @@ namespace openSPM
                 try
                 {
                     if (disposing)
-                    {
                         m_dataContext?.Dispose();
-                    }
                 }
                 finally
                 {
@@ -86,7 +83,6 @@ namespace openSPM
         {
             // Store the current connection ID for this thread
             s_connectionID.Value = Context.ConnectionId;
-
             s_connectCount++;
 
             //MvcApplication.LogStatusMessage($"DataHub connect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
@@ -98,7 +94,6 @@ namespace openSPM
             if (stopCalled)
             {
                 s_connectCount--;
-
                 //MvcApplication.LogStatusMessage($"DataHub disconnect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
             }
 
@@ -137,7 +132,7 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.AddNewRecord)]
         public void AddNewPatch(Patch patch)
         {
-            patch.CreatedByID = GetCurrentUserID();
+            patch.CreatedByID = GetCurrentUserSID();
             patch.CreatedOn = DateTime.UtcNow;
             patch.UpdatedByID = patch.CreatedByID;
             patch.UpdatedOn = patch.CreatedOn;
@@ -148,9 +143,58 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.UpdateRecord)]
         public void UpdatePatch(Patch patch)
         {
-            patch.UpdatedByID = GetCurrentUserID();
+            patch.UpdatedByID = GetCurrentUserSID();
             patch.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Patch>().UpdateRecord(patch);
+        }
+
+        #endregion
+
+        #region [ Vendor Table Operations ]
+
+        [RecordOperation(typeof(Vendor), RecordOperation.QueryRecordCount)]
+        public int QueryVendorCount()
+        {
+            return m_dataContext.Table<Vendor>().QueryRecordCount();
+        }
+
+        [RecordOperation(typeof(Vendor), RecordOperation.QueryRecords)]
+        public IEnumerable<Vendor> QueryVendors(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Vendor), RecordOperation.DeleteRecord)]
+        public void DeleteVendor(int id)
+        {
+            m_dataContext.Table<Vendor>().DeleteRecord(id);
+        }
+
+        [RecordOperation(typeof(Vendor), RecordOperation.CreateNewRecord)]
+        public Vendor NewVendor()
+        {
+            return new Vendor();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Vendor), RecordOperation.AddNewRecord)]
+        public void AddNewVendor(Vendor vendor)
+        {
+            vendor.CreatedByID = GetCurrentUserSID();
+            vendor.CreatedOn = DateTime.UtcNow;
+            vendor.UpdatedByID = vendor.CreatedByID;
+            vendor.UpdatedOn = vendor.CreatedOn;
+            m_dataContext.Table<Vendor>().AddNewRecord(vendor);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Vendor), RecordOperation.UpdateRecord)]
+        public void UpdateVendor(Vendor vendor)
+        {
+            vendor.UpdatedByID = GetCurrentUserSID();
+            vendor.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Vendor>().UpdateRecord(vendor);
         }
 
         #endregion
@@ -406,6 +450,8 @@ namespace openSPM
 
         #endregion
 
+        #region [ Miscellaneous Hub Operations ]
+
         /// <summary>
         /// Gets page setting for specified page.
         /// </summary>
@@ -421,12 +467,18 @@ namespace openSPM
             return model.GetPageSetting(pageSettings, model.Global.PageDefaults, key, defaultValue);
         }
 
-        private Guid GetCurrentUserID()
+        /// <summary>
+        /// Gets SID for current user.
+        /// </summary>
+        /// <returns>SID for current user.</returns>
+        public Guid GetCurrentUserSID()
         {
             Guid userID;
             MvcApplication.UserIDCache.TryGetValue(UserInfo.CurrentUserID, out userID);
             return userID;
         }
+
+        #endregion
 
         #endregion
 

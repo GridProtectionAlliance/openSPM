@@ -1,0 +1,89 @@
+﻿@*******************************************************************************************************
+//  Vendors.cshtml - Gbtc
+//
+//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+//  file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  02/27/2016 - Ritchie Carroll
+//       Generated original version of source code.
+//
+//*****************************************************************************************************@
+@using System.Text
+@using openSPM.Models
+@model AppModel
+@{
+    ViewBag.PageControlScripts = new StringBuilder();
+
+    // Define column headers, use null for field name to make column non-sortable
+    ViewBag.HeaderColumns = new[]
+    {   //    { "Field", "Label", "Classes" }
+        new[] { "Name", "Name", "text-center" },
+        new[] { "Company", "Company", "text-left" },
+        new[] { "Link", "Link", "text-left" }
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+}
+@helper BodyRows()
+{
+    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Company, 1.5), attr: {title: Company}"></div></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(Link)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Link, 2)"></div></a></td>
+    <td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+    </td>
+}
+@helper AddNewEditDialog()
+{
+    DataContext dataContext = Model.DataContext;
+
+    <div class="col-md-4">
+        @Html.Raw(dataContext.AddInputField<Vendor>("Name", initialFocus: true))
+        @Html.Raw(Model.AddValueListSelectField<Vendor>("VendorTypeKey", "vendorType"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Abbreviation"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Company"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Link", "url"))
+        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Description", 5))
+        @Html.Raw(dataContext.AddCheckBoxField<Vendor>("Enabled"))
+    </div>
+    <div class="col-md-4">
+        @Html.Raw(dataContext.AddInputField<Vendor>("Address1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Address2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("City"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("State"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ZIP"))
+        @Html.Raw(Model.AddValueListSelectField<Vendor>("NoticeMethodKey", "noticeMethod"))
+        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Notes", 4))
+    </div>
+    <div class="col-md-4">
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactName1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactEmail1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneOfc1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneCell1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactName2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactEmail2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneOfc2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneCell2"))
+    </div>
+}
+@Html.Partial("PagedViewModel")
+@section Scripts {
+    @Html.Raw(ViewBag.PageControlScripts.ToString())
+    <script>
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Vendor>())
+    </script>
+}

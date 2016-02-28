@@ -90,6 +90,13 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Vendors()
+        {
+            m_appModel.LookupPageDetail("Vendors", ViewBag);
+            m_dataContext.EstablishUserRolesForPage<Vendor>(ViewBag);
+            return View();
+        }
+
         public ActionResult Help()
         {
             m_appModel.LookupPageDetail("Help", ViewBag);

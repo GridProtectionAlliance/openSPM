@@ -94,7 +94,7 @@
 
     string RemoveSpaces(string value)
     {
-        return value.RemoveWhiteSpace();
+        return value.RemoveWhiteSpace().RemoveInvalidFileNameCharacters();
     }
 
     string RenderSortScript(string fieldName, bool ascending)

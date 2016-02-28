@@ -46,7 +46,7 @@
 }
 @helper BodyRows()
 {
-    <td width="40%" class="text-left valign-middle" nowrap><img data-bind="attr: {src: deriveImageSource(Image, ID, PageID), title: ImageAlt, id: 'menuImage' + ID}">&nbsp;<button type="button" class="btn btn-link" data-bind="text: Text, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left valign-middle" nowrap><img data-bind="attr: {src: deriveImageSource($data), title: ImageAlt, id: 'menuImage' + ID}">&nbsp;<button type="button" class="btn btn-link" data-bind="text: Text, click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(Link)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Link, 2)"></div></a></td>
     <td width="15%" class="text-center valign-middle" data-bind="text: SortOrder"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
@@ -82,18 +82,18 @@
             observableRecord.MenuID(@parentID);
         });
 
-        function deriveImageSource(imageFileName, ID, pageID) {
+        function deriveImageSource(observableRecord) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.getPageSetting(pageID, "menuImagePath", "/Images/Menu/").done(function (menuImagePath) {
-                    const menuImage = $("#menuImage" + ID);
-                    const menuImageSrc = menuImagePath + imageFileName;
+                dataHub.getPageSetting(observableRecord.PageID, "menuImagePath", "/Images/Menu/").done(function (menuImagePath) {
+                    const menuImage = $("#menuImage" + observableRecord.ID);
+                    const imageSource = menuImagePath + observableRecord.Image;
 
-                    if (menuImage.attr("src") !== menuImageSrc)
-                        menuImage.attr("src", menuImageSrc);
+                    if (menuImage.attr("src") !== imageSource)
+                        menuImage.attr("src", imageSource);
                 });
             }
 
-            return "/Images/Menu/" + imageFileName;
+            return "/Images/Menu/" + observableRecord.Image;
         }
 
         $(function() {

@@ -193,24 +193,48 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\AccessLog.cs" />
+    <Compile Include="Models\ActionItem.cs" />
+    <Compile Include="Models\ActionStatus.cs" />
+    <Compile Include="Models\ApplicationRole.cs" />
     <Compile Include="Models\AppModel.cs" />
+    <Compile Include="Models\Assessment.cs" />
+    <Compile Include="Models\BusinessUnitGroup.cs" />
     <Compile Include="Models\DataContext.cs" />
     <Compile Include="Attributes\InitialValueAttribute.cs" />
+    <Compile Include="Models\DiscoveryResult.cs" />
+    <Compile Include="Models\Document.cs" />
     <Compile Include="Models\GlobalSettings.cs" />
     <Compile Include="Attributes\FieldNameAttribute.cs" />
+    <Compile Include="Models\Install.cs" />
+    <Compile Include="Models\InstallDocLink.cs" />
     <Compile Include="Models\MenuItem.cs" />
     <Compile Include="Models\ModelExtensions.cs" />
+    <Compile Include="Models\Node.cs" />
+    <Compile Include="Models\NoticeLog.cs" />
+    <Compile Include="Models\NoticeUserLink.cs" />
     <Compile Include="Models\Page.cs" />
     <Compile Include="Models\Menu.cs" />
     <Compile Include="Models\PagedList.cs" />
     <Compile Include="Models\Patch.cs" />
     <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
     <Compile Include="Attributes\LabelAttribute.cs" />
+    <Compile Include="Models\PatchDocLink.cs" />
+    <Compile Include="Models\PatchStatus.cs" />
+    <Compile Include="Models\Plan.cs" />
+    <Compile Include="Models\PlanActionLink.cs" />
+    <Compile Include="Models\PlanDocLink.cs" />
+    <Compile Include="Models\Platform.cs" />
+    <Compile Include="Models\PlatformBUGLink.cs" />
     <Compile Include="Models\RazorView.cs" />
+    <Compile Include="Models\SecurityGroup.cs" />
     <Compile Include="Models\Settings.cs" />
     <Compile Include="Models\TableOperations.cs" />
+    <Compile Include="Models\UserAccount.cs" />
+    <Compile Include="Models\UserBUGLink.cs" />
     <Compile Include="Models\ValueList.cs" />
     <Compile Include="Models\ValueListGroup.cs" />
+    <Compile Include="Models\Vendor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="WebExtensions.cs" />
@@ -372,6 +396,7 @@
     <Content Include="Views\Shared\SecurityError.cshtml" />
     <Content Include="Views\Shared\_ErrorLayout.cshtml" />
     <Content Include="Views\Admin\Menus.cshtml" />
+    <Content Include="Views\Main\Vendors.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

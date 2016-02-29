@@ -103,15 +103,27 @@ namespace openSPM
         #region [ Patch Table Operations ]
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
-        public int QueryPatchCount()
+        public int QueryPatchCount(bool showDeleted)
         {
-            return m_dataContext.Table<Patch>().QueryRecordCount();
+            if (showDeleted)
+                return m_dataContext.Table<Patch>().QueryRecordCount();
+
+            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
         }
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
-        public IEnumerable<Patch> QueryPatches(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Patch> QueryPatches(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+            if (showDeleted)
+                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+
+            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -153,22 +165,35 @@ namespace openSPM
         #region [ Vendor Table Operations ]
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecordCount)]
-        public int QueryVendorCount()
+        public int QueryVendorCount(bool showDeleted)
         {
-            return m_dataContext.Table<Vendor>().QueryRecordCount();
+            if (showDeleted)
+                return m_dataContext.Table<Vendor>().QueryRecordCount();
+
+            return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
         }
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecords)]
-        public IEnumerable<Vendor> QueryVendors(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Vendor> QueryVendors(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize);
+            if (showDeleted)
+                return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize);
+
+            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Vendor), RecordOperation.DeleteRecord)]
         public void DeleteVendor(int id)
         {
-            m_dataContext.Table<Vendor>().DeleteRecord(id);
+            // For Vendors, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE Vendor SET IsDeleted=1 WHERE ID={0}", id);
         }
 
         [RecordOperation(typeof(Vendor), RecordOperation.CreateNewRecord)]

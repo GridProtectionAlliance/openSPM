@@ -1,7 +1,7 @@
-//******************************************************************************************************
-//  BusinessUnitGroup.cs - Gbtc
+﻿//******************************************************************************************************
+//  IsDeletedFlagAttribute.cs - Gbtc
 //
-//  Copyright � 2016, Grid Protection Alliance.  All Rights Reserved.
+//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
@@ -16,41 +16,35 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/27/2016 - J. Ritchie Carroll
+//  2/29/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
 using System;
-using openSPM.Attributes;
 
-namespace openSPM.Models
+// TODO: Move into GSF
+
+namespace openSPM.Attributes
 {
     /// <summary>
-    /// Model for openSPM.BusinessUnitGroup table.
+    /// Defines field name that represents a record marked for deletion.
     /// </summary>
-    [IsDeletedField("IsDeleted")]
-    public class BusinessUnitGroup
+    [AttributeUsage(AttributeTargets.Class)]
+    public class IsDeletedFieldAttribute : Attribute
     {
-        [PrimaryKey(true)]
-        public int ID { get; set; }
+        /// <summary>
+        /// Field name used as is deleted record marker.
+        /// </summary>
+        public readonly string FieldName;
 
-        public string Name { get; set; }
-
-        public string Abbreviation { get; set; }
-
-        [Label("Coordinator")]
-        public Guid CoordinatorID { get; set; }
-
-        [Label("Alternate Coordinator")]
-        public Guid? AlternateBUCID { get; set; }
-
-        public string Description { get; set; }
-
-        public bool IsDeleted { get; set; }
-
-        public DateTime UpdatedOn { get; set; }
-
-        public Guid UpdatedByID { get; set; }
+        /// <summary>
+        /// Creates a new <see cref="IsDeletedFieldAttribute"/>.
+        /// </summary>
+        /// <param name="fieldName">Field name used as is deleted record marker.</param>
+        public IsDeletedFieldAttribute(string fieldName)
+        {
+            FieldName = fieldName;
+        }
     }
 }

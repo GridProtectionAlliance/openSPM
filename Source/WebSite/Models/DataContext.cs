@@ -203,11 +203,26 @@ namespace openSPM.Models
         {
             PrimaryLabelAttribute primaryLabelAttribute;
 
-            if (typeof(T).TryGetAttribute(out primaryLabelAttribute) && !string.IsNullOrEmpty(primaryLabelAttribute.FieldName))
+            if (typeof(T).TryGetAttribute(out primaryLabelAttribute) && !string.IsNullOrWhiteSpace(primaryLabelAttribute.FieldName))
                 return primaryLabelAttribute.FieldName;
 
             string[] fieldNames = Table<T>().GetFieldNames();
             return fieldNames.Length > 0 ? fieldNames[0] : "";
+        }
+
+        /// <summary>
+        /// Gets the field name targeted to mark a record as deleted.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <returns>Field name targeted to mark a record as deleted.</returns>
+        public string GetIsDeletedField<T>() where T : class, new()
+        {
+            IsDeletedFieldAttribute isDeletedFieldAttribute;
+
+            if (typeof(T).TryGetAttribute(out isDeletedFieldAttribute) && !string.IsNullOrWhiteSpace(isDeletedFieldAttribute.FieldName))
+                return isDeletedFieldAttribute.FieldName;
+
+            return null;
         }
 
         /// <summary>
@@ -230,6 +245,7 @@ namespace openSPM.Models
             viewBag.DeleteRoles = recordOperations[(int)RecordOperation.DeleteRecord].Item2;
         }
 
+
         /// <summary>
         /// Renders client-side configuration script for paged view model.
         /// </summary>
@@ -239,6 +255,19 @@ namespace openSPM.Models
         /// <returns>Rendered paged view model configuration script.</returns>
         public string RenderViewModelConfiguration<T>(string defaultSortField = null, params object[] parentKeys) where T : class, new()
         {
+            return RenderViewModelConfiguration<T>(false, defaultSortField, parentKeys);
+        }
+
+        /// <summary>
+        /// Renders client-side configuration script for paged view model.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <param name="showDeletedRecords">Determines if deleted records should be shown.</param>
+        /// <param name="defaultSortField">Default sort field, defaults to first primary key field.</param>
+        /// <param name="parentKeys">Primary keys values of the parent record to load.</param>
+        /// <returns>Rendered paged view model configuration script.</returns>
+        public string RenderViewModelConfiguration<T>(bool showDeletedRecords, string defaultSortField = null, params object[] parentKeys) where T : class, new()
+        {
             StringBuilder javascript = new StringBuilder();
             string[] primaryKeyFields = Table<T>().GetPrimaryKeyFieldNames();
 
@@ -247,6 +276,12 @@ namespace openSPM.Models
                 viewModel.labelField = ""{GetPrimaryLabelField<T>()}"";
                 viewModel.primaryKeyFields = [{primaryKeyFields.Select(fieldName => $"\"{fieldName}\"").ToDelimitedString(", ")}];
             ".FixForwardSpacing());
+
+            string showDeleted = null;
+            string isDeletedFieldName = GetIsDeletedField<T>();
+
+            if (isDeletedFieldName != null)
+                showDeleted = showDeletedRecords.ToString().ToLower();
 
             Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
 
@@ -263,6 +298,10 @@ namespace openSPM.Models
 
             if (parentKeys.Length > 0)
                 keyValues = parentKeys.ToDelimitedString(", ");
+
+            // If modeled table has IsDeletedField marker, the showDeleted parameter should come first in DataHub operations
+            if (showDeleted != null)
+                keyValues = keyValues != null ? $"{showDeleted}, {keyValues}" : showDeleted;
 
             if (!string.IsNullOrWhiteSpace(queryRecordCountMethod))
                 javascript.Append($@"

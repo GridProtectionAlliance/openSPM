@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Platform table.
     /// </summary>
+    [IsDeletedField("IsDeleted")]
     public class Platform
     {
         [PrimaryKey(true)]

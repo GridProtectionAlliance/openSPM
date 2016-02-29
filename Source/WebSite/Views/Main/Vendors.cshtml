@@ -34,6 +34,12 @@
         new[] { "Link", "Link", "text-left" }
     };
 
+    // Get route ID value, if any
+    string routeID = Url.RequestContext.RouteData.Values["id"] as string;
+
+    // See if user has requested to show deleted records
+    bool showDeleted = routeID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
+
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
 }
@@ -84,6 +90,6 @@
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Vendor>())
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Vendor>(showDeleted))
     </script>
 }

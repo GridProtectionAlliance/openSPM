@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Install table.
     /// </summary>
+    [PrimaryLabel("Summary")]
     public class Install
     {
         [PrimaryKey(true)]

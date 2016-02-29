@@ -184,7 +184,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Attributes\AuthorizeHubRoleAttribute.cs" />
     <Compile Include="Attributes\AuthorizeControllerRoleAttribute.cs" />
-    <Compile Include="Attributes\IsDeletedFieldAttribute.cs" />
+    <Compile Include="Attributes\IsDeletedFlagAttribute.cs" />
     <Compile Include="Attributes\PrimaryLabelAttribute.cs" />
     <Compile Include="Attributes\RecordOperationAttribute.cs" />
     <Compile Include="Controllers\ErrorController.cs" />

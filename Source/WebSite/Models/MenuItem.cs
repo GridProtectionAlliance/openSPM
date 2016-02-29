@@ -29,6 +29,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.MenuItem table.
     /// </summary>
+    [PrimaryLabel("Text")]
     public class MenuItem
     {
         [PrimaryKey(true)]

@@ -29,7 +29,8 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.BusinessUnitGroup table.
     /// </summary>
-    [IsDeletedField("IsDeleted")]
+    [PrimaryLabel("Name")]
+    [IsDeletedFlag("IsDeleted")]
     public class BusinessUnitGroup
     {
         [PrimaryKey(true)]

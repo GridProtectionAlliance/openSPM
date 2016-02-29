@@ -31,7 +31,7 @@ namespace openSPM.Models
     /// Model for openSPM.Patch table.
     /// </summary>
     [PrimaryLabel("PatchReference")]
-    [IsDeletedField("IsDeleted")]
+    [IsDeletedFlag("IsDeleted")]
     public class Patch
     {
         [PrimaryKey(true)]

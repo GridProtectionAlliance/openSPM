@@ -217,7 +217,7 @@ namespace openSPM.Models
         /// <returns>Field name targeted to mark a record as deleted.</returns>
         public string GetIsDeletedField<T>() where T : class, new()
         {
-            IsDeletedFieldAttribute isDeletedFieldAttribute;
+            IsDeletedFlagAttribute isDeletedFieldAttribute;
 
             if (typeof(T).TryGetAttribute(out isDeletedFieldAttribute) && !string.IsNullOrWhiteSpace(isDeletedFieldAttribute.FieldName))
                 return isDeletedFieldAttribute.FieldName;

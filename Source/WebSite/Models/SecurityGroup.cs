@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.SecurityGroup table.
     /// </summary>
+    [PrimaryLabel("Name")]
     public class SecurityGroup
     {
         [PrimaryKey(true)]

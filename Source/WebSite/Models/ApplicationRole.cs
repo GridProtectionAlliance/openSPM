@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.ApplicationRole table.
     /// </summary>
+    [PrimaryLabel("Name")]
     public class ApplicationRole
     {
         [PrimaryKey(true)]

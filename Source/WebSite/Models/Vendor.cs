@@ -30,7 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Vendor table.
     /// </summary>
-    [IsDeletedField("IsDeleted")]
+    [IsDeletedFlag("IsDeleted")]
     public class Vendor
     {
         [PrimaryKey(true)]

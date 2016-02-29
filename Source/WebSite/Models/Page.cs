@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Page table.
     /// </summary>
+    [PrimaryLabel("Name")]
     public class Page
     {
         // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]

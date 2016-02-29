@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Document table.
     /// </summary>
+    [PrimaryLabel("Filename")]
     public class Document
     {
         [PrimaryKey(true)]

@@ -29,6 +29,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Assessment table.
     /// </summary>
+    [PrimaryLabel("PatchResult")]
     public class Assessment
     {
         [PrimaryKey(true)]

@@ -31,7 +31,7 @@ namespace openSPM.Attributes
     /// Defines field name that represents a record marked for deletion.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class IsDeletedFieldAttribute : Attribute
+    public class IsDeletedFlagAttribute : Attribute
     {
         /// <summary>
         /// Field name used as is deleted record marker.
@@ -39,10 +39,10 @@ namespace openSPM.Attributes
         public readonly string FieldName;
 
         /// <summary>
-        /// Creates a new <see cref="IsDeletedFieldAttribute"/>.
+        /// Creates a new <see cref="IsDeletedFlagAttribute"/>.
         /// </summary>
         /// <param name="fieldName">Field name used as is deleted record marker.</param>
-        public IsDeletedFieldAttribute(string fieldName)
+        public IsDeletedFlagAttribute(string fieldName)
         {
             FieldName = fieldName;
         }

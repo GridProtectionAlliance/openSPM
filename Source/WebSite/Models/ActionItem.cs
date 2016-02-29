@@ -31,6 +31,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.ActionItem table.
     /// </summary>
+    [PrimaryLabel("Title")]
     public class ActionItem
     {
         [PrimaryKey(true)]

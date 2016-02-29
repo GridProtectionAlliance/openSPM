@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Node table.
     /// </summary>
+    [PrimaryLabel("Name")]
     public class Node
     {
         [PrimaryKey(true)]

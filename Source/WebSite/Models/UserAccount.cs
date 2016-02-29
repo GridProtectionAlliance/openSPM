@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.UserAccount table.
     /// </summary>
+    [PrimaryLabel("Name")]
     public class UserAccount
     {
         [PrimaryKey(true)]

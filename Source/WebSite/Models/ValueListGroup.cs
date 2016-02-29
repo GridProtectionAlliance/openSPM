@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.ValueListGroup table.
     /// </summary>
+    [PrimaryLabel("Name")]
     public class ValueListGroup
     {
         [PrimaryKey(true)]

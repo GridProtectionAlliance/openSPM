@@ -30,6 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Menu table.
     /// </summary>
+    [PrimaryLabel("Name")]
     public class Menu
     {
         // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]

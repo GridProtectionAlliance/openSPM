@@ -30,7 +30,8 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.Plan table.
     /// </summary>
-    [IsDeletedField("IsDeleted")]
+    [PrimaryLabel("Summary")]
+    [IsDeletedFlag("IsDeleted")]
     public class Plan
     {
         [PrimaryKey(true)]

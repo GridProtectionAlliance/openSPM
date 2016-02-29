@@ -44,6 +44,7 @@ namespace openSPM.Models
 
         public byte[] DocumentBlob { get; set; }
 
+        [InitialValue("true")]
         public bool Enabled { get; set; }
 
         public DateTime CreatedOn { get; set; }

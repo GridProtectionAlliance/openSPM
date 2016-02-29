@@ -88,6 +88,7 @@ namespace openSPM.Models
             get; set;
         }
 
+        [InitialValue("true")]
         public bool Enabled
         {
             get; set;

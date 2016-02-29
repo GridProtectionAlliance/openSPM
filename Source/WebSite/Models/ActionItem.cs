@@ -60,6 +60,7 @@ namespace openSPM.Models
         [Column(TypeName = "date")]
         public DateTime? ScheduledEndDate { get; set; }
 
+        [InitialValue("1")]
         public bool Enabled { get; set; }
 
         public DateTime CreatedOn { get; set; }

@@ -258,6 +258,7 @@ namespace openSPM.Models
         /// <summary>
         /// Looks up page info based on defined page name.
         /// </summary>
+        /// <param name="context">Url.RequestContext for view.</param>
         /// <param name="pageName">Page name as defined in Page table.</param>
         /// <param name="viewBag">Current view bag.</param>
         /// <remarks>

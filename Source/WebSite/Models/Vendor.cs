@@ -72,7 +72,7 @@ namespace openSPM.Models
         [StringLength(200)]
         public string Country { get; set; }
 
-        [Label("Zipcode")]
+        [Label("Zip-code")]
         [StringLength(10)]
         public string ZIP { get; set; }
 
@@ -97,7 +97,7 @@ namespace openSPM.Models
         [StringLength(20)]
         public string ContactPhoneOfc1 { get; set; }
 
-        [Label("Primary Conact Phone (Cell)")]
+        [Label("Primary Contact Phone (Cell)")]
         [StringLength(20)]
         public string ContactPhoneCell1 { get; set; }
 
@@ -120,6 +120,7 @@ namespace openSPM.Models
 
         public string Notes { get; set; }
 
+        [InitialValue("true")]
         public bool Enabled { get; set; }
 
         public bool IsDeleted { get; set; }

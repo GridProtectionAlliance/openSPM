@@ -180,8 +180,7 @@
                     @pageTitle <small class="pull-right" id="titleText" style="margin-top: 8px"></small>
                 </h3>
             </div>
-            @* ReSharper disable once PossibleNullReferenceException *@
-            <!-- Page Body for @Request.Url.AbsolutePath -->
+            <!-- Page Body for @(Request?.Url?.AbsolutePath) -->
             @RenderBody()
 
         </div>

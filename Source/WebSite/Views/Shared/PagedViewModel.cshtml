@@ -55,6 +55,14 @@
     // Auto pop-up add new dialog
     bool autoShowAddNew = routeID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
 
+    bool showIsDeletedToggleLink = false;
+    bool showingDeletedRecords = false;
+
+    if (ViewBag.ShowDeleted != null) {
+        showIsDeletedToggleLink = true;
+        showingDeletedRecords = Convert.ToBoolean(ViewBag.ShowDeleted);
+    }
+
     // Setup default roles if none are defined
     if (ViewBag.EditRoles == null) {
         ViewBag.EditRoles = "*";
@@ -184,7 +192,7 @@
                     @SingularForm(ViewBag.Title ?? "")
                 </h4>
             </div>
-            <div class="modal-body auto-height"  data-bind="with: currentRecord, validationOptions: {messageTemplate: 'validationMessageTemplate'}, css: {'modal-readonly': recordMode()===RecordMode.View}">
+            <div class="modal-body auto-height" data-bind="with: currentRecord, validationOptions: {messageTemplate: 'validationMessageTemplate'}, css: {'modal-readonly': recordMode()===RecordMode.View}">
                 <form role="form">
                     @Html.Raw(ViewBag.AddNewEditDialog)
                 </form>
@@ -210,12 +218,27 @@
 @{
     DataContext dataContext = Model.DataContext;
 
-    if (autoShowAddNew)
-    {
+    if (autoShowAddNew) {
         pageControlScripts.Append(@"
             // Add new pop-up requested via URL parameter
             setTimeout(viewModel.addPageRecord, 500);
         ");
+    }
+
+    if (showIsDeletedToggleLink) {
+        string baseURL = Request?.Url?.AbsolutePath ?? "/";
+
+        if (showingDeletedRecords) {
+            baseURL = baseURL.Substring(0, baseURL.Length - "/ShowDeleted".Length);
+            pageControlScripts.Append($@"
+            $(""#titleText"").append(""<br /><div style='margin-top: 3px' class='small text-center'><a href='{baseURL}'>Hide Deleted</a></div>"");
+        ");
+        }
+        else {
+            pageControlScripts.Append($@"
+            $(""#titleText"").append(""<br /><div style='margin-top: 3px' class='small text-center'><a href='{baseURL}/ShowDeleted'>Show Deleted</a></div>"");
+        ");
+        }
     }
 
     pageControlScripts.Append(@"
@@ -264,15 +287,14 @@
         viewModel.canDelete({2});
 
         viewModel.initialFocusField = ""{3}"";
-        viewModel.modelName = ""{4}"";", 
-        canEdit.ToString().ToLower(), 
-        canAddNew.ToString().ToLower(), 
-        canDelete.ToString().ToLower(),        
+        viewModel.modelName = ""{4}"";",
+        canEdit.ToString().ToLower(),
+        canAddNew.ToString().ToLower(),
+        canDelete.ToString().ToLower(),
         dataContext.InitialFocusField,
         RemoveSpaces(ViewBag.Title));
 
-    if (dataContext.FieldValueInitializers.Count > 0)
-    {
+    if (dataContext.FieldValueInitializers.Count > 0) {
         pageControlScripts.AppendFormat(@"
 
         $(viewModel).on(""newRecord"", function(event, newRecord) {{
@@ -286,8 +308,7 @@
         pageControlScripts.Append("\r\n        });");
     }
 
-    if (dataContext.DefinedDateFields.Count > 0)
-    {
+    if (dataContext.DefinedDateFields.Count > 0) {
         pageControlScripts.AppendFormat(@"
 
         $(viewModel).on(""derivingObservableRecord"", function(event, observableRecord) {{

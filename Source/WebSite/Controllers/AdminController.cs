@@ -83,6 +83,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Users()
+        {
+            m_appModel.LookupPageDetail("AdminUsers", ViewBag);
+            return View();
+        }
+
         public ActionResult Pages()
         {
             m_appModel.LookupPageDetail("AdminPages", ViewBag);

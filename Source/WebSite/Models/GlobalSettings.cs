@@ -21,12 +21,19 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
 
 namespace openSPM.Models
 {
     public class GlobalSettings
     {
+        public Guid NodeID
+        {
+            get;
+            set;
+        }
+
         public string CompanyName
         {
             get;
@@ -70,6 +77,18 @@ namespace openSPM.Models
         }
 
         public string DateTimeFormat
+        {
+            get;
+            set;
+        }
+
+        public string PasswordRequirementsRegex
+        {
+            get;
+            set;
+        }
+
+        public string PasswordRequirementsError
         {
             get;
             set;

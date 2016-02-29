@@ -131,14 +131,14 @@
             return "0";
         }
 
-        $(viewModel).on("pageRecordsQueried", function (event) {
-            $("#editValueListItemFrame").attr("height", ($("#contentWell").outerHeight(true) - 50) + "px");
+        $(window).resize(function () {
+            $("#editValueListItemFrame").attr("height", ($(document).height() - 150) + "px");
         });
 
         function openValueListItemEditor(record) {
             $("#editValueListItemFrame").attr({
                 "src": "/Admin/ValueListItems?ID=" + record.ID + "&Name=" + encodeURIComponent(record.name),
-                "height": ($("#contentWell").outerHeight(true) - 50) + "px",
+                "height": ($(document).height() - 150) + "px",
                 "width": "100%"
             });
 

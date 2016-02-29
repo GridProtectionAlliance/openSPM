@@ -158,7 +158,7 @@ namespace openSPM.Models
             try
             {
                 T record = new T();
-                DataRow row = m_connection.RetrieveRow(string.Format(s_selectSql, primaryKeys));
+                DataRow row = m_connection.RetrieveRow(s_selectSql, primaryKeys);
 
                 // Make sure record exists, return null instead of a blank record
                 if (GetPrimaryKeys(row).All(Common.IsDefaultValue))

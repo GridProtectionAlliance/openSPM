@@ -86,6 +86,7 @@ namespace openSPM.Models
 
         [Label("Primary Contact E-Mail")]
         [StringLength(200)]
+        [RegularExpression(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$", ErrorMessage = "Invalid e-mail address.")]
         public string ContactEmail1 { get; set; }
 
         [Label("Primary Contact Phone (Office)")]
@@ -102,6 +103,7 @@ namespace openSPM.Models
 
         [Label("Secondary Contact E-Mail")]
         [StringLength(200)]
+        [RegularExpression(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$", ErrorMessage = "Invalid e-mail address.")]
         public string ContactEmail2 { get; set; }
 
         [Label("Secondary Contact Phone (Office)")]

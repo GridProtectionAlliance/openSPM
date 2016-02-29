@@ -132,7 +132,7 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.AddNewRecord)]
         public void AddNewPatch(Patch patch)
         {
-            patch.CreatedByID = GetCurrentUserSID();
+            patch.CreatedByID = GetCurrentUserID();
             patch.CreatedOn = DateTime.UtcNow;
             patch.UpdatedByID = patch.CreatedByID;
             patch.UpdatedOn = patch.CreatedOn;
@@ -143,7 +143,7 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.UpdateRecord)]
         public void UpdatePatch(Patch patch)
         {
-            patch.UpdatedByID = GetCurrentUserSID();
+            patch.UpdatedByID = GetCurrentUserID();
             patch.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Patch>().UpdateRecord(patch);
         }
@@ -181,7 +181,7 @@ namespace openSPM
         [RecordOperation(typeof(Vendor), RecordOperation.AddNewRecord)]
         public void AddNewVendor(Vendor vendor)
         {
-            vendor.CreatedByID = GetCurrentUserSID();
+            vendor.CreatedByID = GetCurrentUserID();
             vendor.CreatedOn = DateTime.UtcNow;
             vendor.UpdatedByID = vendor.CreatedByID;
             vendor.UpdatedOn = vendor.CreatedOn;
@@ -192,9 +192,63 @@ namespace openSPM
         [RecordOperation(typeof(Vendor), RecordOperation.UpdateRecord)]
         public void UpdateVendor(Vendor vendor)
         {
-            vendor.UpdatedByID = GetCurrentUserSID();
+            vendor.UpdatedByID = GetCurrentUserID();
             vendor.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Vendor>().UpdateRecord(vendor);
+        }
+
+        #endregion
+
+        #region [ UserAccount Table Operations ]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(UserAccount), RecordOperation.QueryRecordCount)]
+        public int QueryUserAccountCount()
+        {
+            return m_dataContext.Table<UserAccount>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(UserAccount), RecordOperation.QueryRecords)]
+        public IEnumerable<UserAccount> QueryUserAccounts(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<UserAccount>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(UserAccount), RecordOperation.DeleteRecord)]
+        public void DeleteUserAccount(Guid id)
+        {
+            m_dataContext.Table<UserAccount>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(UserAccount), RecordOperation.CreateNewRecord)]
+        public UserAccount NewUserAccount()
+        {
+            return new UserAccount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(UserAccount), RecordOperation.AddNewRecord)]
+        public void AddNewUserAccount(UserAccount user)
+        {
+            user.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
+            user.CreatedBy = UserInfo.CurrentUserID;
+            user.CreatedOn = DateTime.UtcNow;
+            user.UpdatedBy = user.CreatedBy;
+            user.UpdatedOn = user.CreatedOn;
+            m_dataContext.Table<UserAccount>().AddNewRecord(user);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(UserAccount), RecordOperation.UpdateRecord)]
+        public void UpdateUserAccount(UserAccount user)
+        {
+            user.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
+            user.UpdatedBy = UserInfo.CurrentUserID;
+            user.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<UserAccount>().UpdateRecord(user);
         }
 
         #endregion
@@ -468,10 +522,40 @@ namespace openSPM
         }
 
         /// <summary>
-        /// Gets SID for current user.
+        /// Gets SID for a given user name.
         /// </summary>
-        /// <returns>SID for current user.</returns>
-        public Guid GetCurrentUserSID()
+        /// <param name="userName">User name to convert to SID.</param>
+        /// <returns>SID for a given user name.</returns>
+        public string UserNameToSID(string userName)
+        {
+            return UserInfo.UserNameToSID(userName);
+        }
+
+        /// <summary>
+        /// Gets SID for a given group name.
+        /// </summary>
+        /// <param name="groupName">Group name to convert to SID.</param>
+        /// <returns>SID for a given group name.</returns>
+        public string GroupNameToSID(string groupName)
+        {
+            return UserInfo.GroupNameToSID(groupName);
+        }
+
+        /// <summary>
+        /// Gets account name for a given SID.
+        /// </summary>
+        /// <param name="sid">SID to convert to a account name.</param>
+        /// <returns>Account name for a given SID.</returns>
+        public string SIDToAccountName(string sid)
+        {
+            return UserInfo.SIDToAccountName(sid);
+        }
+
+        /// <summary>
+        /// Gets UserAccount table ID for current user.
+        /// </summary>
+        /// <returns>UserAccount.ID for current user.</returns>
+        public Guid GetCurrentUserID()
         {
             Guid userID;
             MvcApplication.UserIDCache.TryGetValue(UserInfo.CurrentUserID, out userID);

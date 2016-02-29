@@ -35,6 +35,7 @@ namespace openSPM.Models
         [PrimaryKey(true)]
         public Guid ID { get; set; }
 
+        [Label("User Name")]
         [Required]
         [StringLength(200)]
         public string Name { get; set; }
@@ -42,9 +43,11 @@ namespace openSPM.Models
         [StringLength(200)]
         public string Password { get; set; }
 
+        [Label("First Name")]
         [StringLength(200)]
         public string FirstName { get; set; }
 
+        [Label("Last Name")]
         [StringLength(200)]
         public string LastName { get; set; }
 
@@ -53,12 +56,16 @@ namespace openSPM.Models
         [StringLength(200)]
         public string Phone { get; set; }
 
+        [Label("E-Mail")]
         [StringLength(200)]
+        [RegularExpression(@"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$", ErrorMessage = "Invalid e-mail address.")]
         public string Email { get; set; }
 
+        [Label("Locked Out")]
         public bool LockedOut { get; set; }
 
         [Label("Use Active Directory Authentication")]
+        [InitialValue("true")]
         public bool UseADAuthentication { get; set; }
 
         public DateTime? ChangePasswordOn { get; set; }

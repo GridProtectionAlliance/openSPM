@@ -1,0 +1,132 @@
+﻿@*******************************************************************************************************
+//  Users.cshtml - Gbtc
+//
+//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+//  file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  02/28/2016 - Ritchie Carroll
+//       Generated original version of source code.
+//
+//*****************************************************************************************************@
+@using System.Text
+@using openSPM.Models
+@model AppModel
+@{
+    ViewBag.PageControlScripts = new StringBuilder();
+
+    // Define column headers, use null for field name to make column non-sortable
+    ViewBag.HeaderColumns = new[]
+    {   //    { "Field", "Label", "Classes" }
+        new[] { null, "User Name", "text-center" },
+        new[] { "UseADAuthentication", "Is&nbsp;AD&nbsp;User", "text-center" },
+        new[] { "CreatedOn", "Date&nbsp;Added", "text-center" },
+        new[] { null, "User Roles", "text-center" }
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+}
+@helper BodyRows()
+{
+    <td width="65%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: AccountName(), attr: {title: Name}, click: $parent.viewPageRecord"></button></td>
+    <td width="10%" class="text-center valign-middle"><input type="checkbox" id="checkEnabled" data-bind="checked: UseADAuthentication" disabled></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: CreatedOn.formatDate(DateFormat)"></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-primary btn-sm">Roles...</button></td>
+    <td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+    </td>
+}
+@helper AddNewEditDialog()
+{
+    DataContext dataContext = Model.DataContext;
+
+    <div class="col-md-12">
+        @Html.Raw(dataContext.AddInputField<UserAccount>("Name", initialFocus: true))
+        <div class="panel panel-default" data-bind="css: {'panel-readonly': $root.recordMode()===RecordMode.View, 'panel-primary': UseDBAuthentication}">
+            <div class="panel-heading">
+                <div style="display: none">
+                    @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("UseADAuthentication"))
+                </div>
+                <div class="checkbox">
+                    <label for="checkUseDBAuthentication"><input type="checkbox" id="checkUseDBAuthentication" data-bind="checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Use Database Authentication</label>
+                </div>
+            </div>
+            <div class="panel-body" data-bind="visible: UseDBAuthentication">
+                <div class="row">
+                    <div class="col-md-6">
+                        @Html.Raw(dataContext.AddInputField<UserAccount>("Password", "password", dependencyFieldName: "UseDBAuthentication"))
+                        @Html.Raw(dataContext.AddInputField<UserAccount>("FirstName", dependencyFieldName: "UseDBAuthentication"))
+                        @Html.Raw(dataContext.AddInputField<UserAccount>("LastName", dependencyFieldName: "UseDBAuthentication"))
+                    </div>
+                    <div class="col-md-6">
+                        @Html.Raw(dataContext.AddInputField<UserAccount>("Phone", dependencyFieldName: "UseDBAuthentication"))
+                        @Html.Raw(dataContext.AddInputField<UserAccount>("Email", dependencyFieldName: "UseDBAuthentication"))
+                        @Html.Raw(dataContext.AddDateField<UserAccount>("ChangePasswordOn", dependencyFieldName: "UseDBAuthentication"))
+                        @{
+                            Model.AddPageDefinedFieldInitialization("Password", "\"\"",
+                                /* RegEx Pattern: */ Model.Global.PasswordRequirementsRegex,
+                                /* Error Message: */ Model.Global.PasswordRequirementsError);
+                            Model.AddPageDefinedFieldInitialization("ChangePasswordOn", "(new Date()).addDays(90)");
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="pull-right">
+            @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("LockedOut"))
+        </div>        
+    </div>
+}
+@Html.Partial("PagedViewModel")
+@section Scripts {
+    @Html.Raw(ViewBag.PageControlScripts.ToString())
+    <script>
+        "use strict";
+
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<UserAccount>())        
+        function lookupAccountName(record) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.sIDToAccountName(record.Name).done(function (accountName) {
+                    record.AccountName(accountName);
+                });
+            }
+        }
+
+        $(viewModel).on("pageRecordsQueried", function(event, records) {
+            for (let i = 0; i < records.length; i++) {
+                records[i].AccountName = ko.observable("...");
+                lookupAccountName(records[i]);
+            }
+        });
+
+        $(viewModel).on("newRecord", function (event, newRecord) {
+            newRecord.AccountName = ko.observable("");
+        });
+
+        $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
+            observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
+
+            if (observableRecord.AccountName)
+                observableRecord.Name(observableRecord.AccountName());
+        });
+
+        $(viewModel).on("derivingJSRecord", function(event, observableRecord) {
+            observableRecord.UseADAuthentication(!observableRecord.UseDBAuthentication());
+            delete observableRecord.UseDBAuthentication;
+            delete observableRecord.AccountName;
+        });
+    </script>
+}

@@ -366,12 +366,12 @@ function PagedViewModel() {
     self.queryPageRecords = function () {
         if (self.dataHubIsConnected())
             self.queryRecords(self.sortField(), self.sortAscending(), self.currentPage(), self.currentPageSize()).done(function (records) {
+                $(self).trigger("pageRecordsQueried", [records]);
                 self.pageRecords.removeAll();
                 self.pageRecords(records);
                 refreshHubDependentControlState();
                 $("[id='recordRow']").css("visibility", "visible");
                 $("#loadingDataLabel").hide();
-                $(self).trigger("pageRecordsQueried");
 
                 // Validate proper page size after any record refresh
                 setTimeout(self.calculatePageSize, 150);

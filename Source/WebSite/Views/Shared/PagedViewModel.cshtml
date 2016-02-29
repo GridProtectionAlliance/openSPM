@@ -280,7 +280,7 @@
 
         foreach (Tuple<string, string> initialValue in dataContext.FieldValueInitializers) {
             pageControlScripts.AppendFormat("\r\n            newRecord.{0} = {1};",
-                initialValue.Item1,initialValue.Item2.JavaScriptEncode());
+                initialValue.Item1, initialValue.Item2);
         }
 
         pageControlScripts.Append("\r\n        });");
@@ -294,7 +294,7 @@
             // Convert date objects to strings");
 
         foreach (string dataField in dataContext.DefinedDateFields) {
-            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().formatDate(DateFormat));", dataField);
+            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(notNull(observableRecord.{0}()).formatDate(DateFormat));", dataField);
         }
 
         pageControlScripts.Append("\r\n        });");

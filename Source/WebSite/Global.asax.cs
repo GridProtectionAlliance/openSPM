@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading;
+using System.Web;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -34,13 +35,14 @@ using GSF;
 using GSF.Configuration;
 using GSF.Data;
 using GSF.Identity;
+using GSF.Security;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
 
 namespace openSPM
 {
-    public class MvcApplication : System.Web.HttpApplication
+    public class MvcApplication : HttpApplication
     {
         /// <summary>
         /// Gets the default model used for the application.
@@ -70,6 +72,7 @@ namespace openSPM
 
             // Make sure openSPM specific default config file service settings exist
             CategorizedSettingsElementCollection systemSettings = ConfigurationFile.Current.Settings["systemSettings"];
+            CategorizedSettingsElementCollection securityProvider = ConfigurationFile.Current.Settings["securityProvider"];
 
             systemSettings.Add("ConnectionString", "Data Source=DBSERVERNAME; Initial Catalog=openSPM; Integrated Security=SSPI", "Configuration connection string.");
             systemSettings.Add("DataProviderString", "AssemblyName={System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089}; ConnectionType=System.Data.SqlClient.SqlConnection; AdapterType=System.Data.SqlClient.SqlDataAdapter", "Configuration database ADO.NET data provider assembly type creation string used");
@@ -78,6 +81,8 @@ namespace openSPM
             systemSettings.Add("DateFormat", "MM/dd/yyyy", "The default date format to use when rendering timestamps.");
             systemSettings.Add("TimeFormat", "HH:mm.ss.fff", "The default time format to use when rendering timestamps.");
             systemSettings.Add("DefaultSecurityRoles", "Administrator, Owner, Viewer, PIC, SME, BUC", "The default security roles that should exist for the application.");
+            securityProvider.Add("PasswordRequirementsRegex", AdoSecurityProvider.DefaultPasswordRequirementsRegex, "Regular expression used to validate new passwords for database users.");
+            securityProvider.Add("PasswordRequirementsError", AdoSecurityProvider.DefaultPasswordRequirementsError, "Error message to be displayed when new database user password fails regular expression test.");
 
             // Load default configuration file based model settings
             global.CompanyName = systemSettings["CompanyName"].Value;
@@ -85,12 +90,15 @@ namespace openSPM
             global.DateFormat = systemSettings["DateFormat"].Value;
             global.TimeFormat = systemSettings["TimeFormat"].Value;
             global.DateTimeFormat = $"{global.DateFormat} {global.TimeFormat}";
+            global.PasswordRequirementsRegex = securityProvider["PasswordRequirementsRegex"].Value;
+            global.PasswordRequirementsError = securityProvider["PasswordRequirementsError"].Value;
 
             // Load database driven model settings
             using (DataContext dataContext = new DataContext())
             {
                 // Make sure default NodeID record exists
-                ValidateDefaultNode(dataContext.Connection, Guid.Parse(systemSettings["NodeID"].Value));
+                global.NodeID = Guid.Parse(systemSettings["NodeID"].Value);
+                ValidateDefaultNode(dataContext.Connection, global.NodeID);
 
                 // Validate default security roles exist
                 ValidateSecurityRoles(dataContext.Connection, systemSettings["DefaultSecurityRoles"].Value);
@@ -190,7 +198,6 @@ namespace openSPM
                 database.ExecuteNonQuery(NodeInsertFormat);
                 database.ExecuteNonQuery(NodeUpdateFormat, database.Guid(nodeID));
             }
-
         }
 
         /// <summary>

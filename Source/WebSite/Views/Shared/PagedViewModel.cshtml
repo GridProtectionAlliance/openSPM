@@ -49,7 +49,7 @@
     // Hide the add new button
     bool hideAddNewButton = ViewBag.HideAddNewButton ?? false;
 
-    // Hide unauthorized controls as disallowed by Edit/AddNew/Delete roles - otherwise will be disabled
+    // Hide unauthorized controls as disallowed by Edit/AddNew/Delete roles - otherwise unauthorized controls will be disabled
     bool hideUnauthorizedControls = ViewBag.HideUnauthorizedControls ?? false;
 
     // Auto pop-up add new dialog
@@ -58,6 +58,7 @@
     bool showIsDeletedToggleLink = false;
     bool showingDeletedRecords = false;
 
+    // Check for existence of ShowDeleted property to control toggle link visibility
     if (ViewBag.ShowDeleted != null) {
         showIsDeletedToggleLink = true;
         showingDeletedRecords = Convert.ToBoolean(ViewBag.ShowDeleted);
@@ -149,7 +150,7 @@
                 </tr>
             </thead>
             <tbody data-bind="foreach: pageRecords">
-                <tr style="visibility: hidden" id="recordRow"@Html.Raw(ViewBag.IsDeletedField == null ? "" : $" data-bind=\"css: {{'danger': {ViewBag.IsDeletedField}}}\"") >
+                <tr style="visibility: hidden" id="recordRow"@Html.Raw(ViewBag.IsDeletedField == null ? "" : $" data-bind=\"css: {{'danger': {ViewBag.IsDeletedField}}}\"")>
                     @Html.Raw(ViewBag.BodyRows)
                 </tr>
             </tbody>
@@ -160,7 +161,7 @@
     </div>
     <div class="pull-right" id="pageControlsRow">
         @if (!hideAddNewButton && (canAddNew || !hideUnauthorizedControls)) {
-            <button type="button" class="btn btn-sm btn-primary pull-right" id="addRecordButton" @(canAddNew ? "data-bind=\"enable: dataHubIsConnected\"" : "disabled")>
+            <button type="button" class="btn btn-sm btn-primary pull-right" id="addRecordButton" @Html.Raw(canAddNew ? "data-bind=\"enable: dataHubIsConnected\"" : "disabled")>
                 <span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add&nbsp;New
             </button>
             <br />
@@ -205,10 +206,10 @@
                     ...
                 </em>
                 @if (canEdit || !hideUnauthorizedControls) {
-                    <button type="button" class="btn btn-info" data-bind="visible: recordMode()===RecordMode.View@(canEdit ? ", enable: dataHubIsConnected" : "")" id="editRecordButton"@(canEdit ? "" : " disabled")>Edit</button>
+                    <button type="button" class="btn btn-info" data-bind="visible: recordMode()===RecordMode.View@(Html.Raw(canEdit ? ", enable: dataHubIsConnected" : ""))" id="editRecordButton"@Html.Raw(canEdit ? "" : " disabled")>Edit</button>
                 }
                 @if (canEdit || canAddNew || !hideUnauthorizedControls) {
-                    <button type="submit" class="btn btn-primary" data-dismiss="modal" data-bind="visible: recordMode()!==RecordMode.View@(canEdit || canAddNew ? ", disable: unassignedFieldCount() > 0 || validationErrors() > 0 || !dataHubIsConnected()" : "")" id="saveRecordButton"@(canEdit || canAddNew ? "" : " disabled")>Save</button>
+                    <button type="submit" class="btn btn-primary" data-dismiss="modal" data-bind="visible: recordMode()!==RecordMode.View@(Html.Raw(canEdit || canAddNew ? ", disable: unassignedFieldCount() > 0 || validationErrors() > 0 || !dataHubIsConnected()" : ""))" id="saveRecordButton"@Html.Raw(canEdit || canAddNew ? "" : " disabled")>Save</button>
                 }
                 <button type="button" class="btn btn-default" id="cancelRecordButton">Cancel</button>
             </div>

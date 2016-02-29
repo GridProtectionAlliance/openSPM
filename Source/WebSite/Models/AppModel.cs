@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web.Routing;
 using GSF;
 using GSF.Security;
 using openSPM.Attributes;
@@ -262,7 +263,7 @@ namespace openSPM.Models
         /// <remarks>
         /// This is normally called from controller before returning view action result.
         /// </remarks>
-        public void LookupPageDetail(string pageName, dynamic viewBag)
+        public void LookupPageDetail(RequestContext context, string pageName, dynamic viewBag)
         {
             int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
             Page page = DataContext.QueryRecord<Page>(pageID);
@@ -273,6 +274,7 @@ namespace openSPM.Models
             viewBag.PageName = pageName;
             viewBag.PageImagePath = GetPageSetting(viewBag, "pageImagePath").Replace("{pageName}", pageName ?? "");
             viewBag.PageSettings = pageSettings;
+            viewBag.RouteID = context.RouteData.Values["id"] as string;
             viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
         }
 

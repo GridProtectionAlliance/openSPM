@@ -79,57 +79,56 @@ namespace openSPM.Controllers
 
         public ActionResult Home()
         {
-            m_appModel.LookupPageDetail("Home", ViewBag);            
+            m_appModel.LookupPageDetail(Url.RequestContext, "Home", ViewBag);            
             return View();
         }
 
         public ActionResult Patches()
         {
-            m_appModel.LookupPageDetail("Patches", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "Patches", ViewBag);
             m_dataContext.EstablishUserRolesForPage<Patch>(ViewBag);
             return View();
         }
 
         public ActionResult Vendors()
         {
-            m_appModel.LookupPageDetail("Vendors", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "Vendors", ViewBag);
             m_dataContext.EstablishUserRolesForPage<Vendor>(ViewBag);
             return View();
         }
 
         public ActionResult Help()
         {
-            m_appModel.LookupPageDetail("Help", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "Help", ViewBag);
             return View();
         }
 
         public ActionResult Contact()
         {
-            m_appModel.LookupPageDetail("Contact", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "Contact", ViewBag);
             ViewBag.Message = "Contacting the Grid Protection Alliance";
             return View();
         }
 
         public ActionResult Settings()
         {
-            m_appModel.LookupPageDetail("Settings", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "Settings", ViewBag);
             return View();
         }
 
         public ActionResult DisplayPDF()
         {
-            // Get route ID value, if any
             string routeID = Url.RequestContext.RouteData.Values["id"] as string;
 
             if (!string.IsNullOrEmpty(routeID))
-                m_appModel.LookupPageDetail(routeID, ViewBag);
+                m_appModel.LookupPageDetail(Url.RequestContext, routeID, ViewBag);
 
             return View();
         }
 
         public ActionResult PageTemplate1()
         {
-            m_appModel.LookupPageDetail("PageTemplate1", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "PageTemplate1", ViewBag);
             return View();
         }
 

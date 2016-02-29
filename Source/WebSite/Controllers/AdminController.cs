@@ -79,37 +79,37 @@ namespace openSPM.Controllers
 
         public ActionResult Home()
         {
-            m_appModel.LookupPageDetail("AdminHome", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "AdminHome", ViewBag);
             return View();
         }
 
         public ActionResult Users()
         {
-            m_appModel.LookupPageDetail("AdminUsers", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "AdminUsers", ViewBag);
             return View();
         }
 
         public ActionResult Pages()
         {
-            m_appModel.LookupPageDetail("AdminPages", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "AdminPages", ViewBag);
             return View();
         }
 
         public ActionResult Menus()
         {
-            m_appModel.LookupPageDetail("AdminMenus", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "AdminMenus", ViewBag);
             return View();
         }
 
         public ActionResult MenuItems()
         {
-            m_appModel.LookupPageDetail("AdminMenuItems", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "AdminMenuItems", ViewBag);
             return View();
         }
 
         public ActionResult ValueListGroups()
         {
-            m_appModel.LookupPageDetail("AdminValueListGroups", ViewBag);
+            m_appModel.LookupPageDetail(Url.RequestContext, "AdminValueListGroups", ViewBag);
             return View();
         }
 

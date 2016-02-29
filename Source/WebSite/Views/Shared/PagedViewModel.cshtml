@@ -41,9 +41,6 @@
             });
     ");
 
-    // Get route ID value, if any
-    string routeID = Url.RequestContext.RouteData.Values["id"] as string;
-
     // Check for optional page behaviors
 
     // Hide the add new button
@@ -53,7 +50,7 @@
     bool hideUnauthorizedControls = ViewBag.HideUnauthorizedControls ?? false;
 
     // Auto pop-up add new dialog
-    bool autoShowAddNew = routeID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
+    bool autoShowAddNew = ViewBag.RouteID?.Equals("AddNew", StringComparison.OrdinalIgnoreCase) ?? false;
 
     bool showIsDeletedToggleLink = false;
     bool showingDeletedRecords = false;

@@ -37,11 +37,8 @@
         new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
-    // Get route ID value, if any
-    string routeID = Url.RequestContext.RouteData.Values["id"] as string;
-
     // See if user has requested to show deleted records
-    ViewBag.ShowDeleted = routeID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
+    ViewBag.ShowDeleted = ViewBag.RouteID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
 
     if (ViewBag.ShowDeleted) {
         ViewBag.IsDeletedField = Model.DataContext.GetIsDeletedField<Patch>();

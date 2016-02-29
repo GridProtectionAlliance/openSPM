@@ -37,13 +37,6 @@
         new[] { "SourceReleaseDate", "Release&nbsp;Date", "text-center" }
     };
 
-    // See if user has requested to show deleted records
-    ViewBag.ShowDeleted = ViewBag.RouteID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
-
-    if (ViewBag.ShowDeleted) {
-        ViewBag.IsDeletedField = Model.DataContext.GetIsDeletedField<Patch>();
-    }
-
     ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
 
@@ -117,7 +110,7 @@
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Patch>(ViewBag.ShowDeleted))
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Patch>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
     </script>
 }

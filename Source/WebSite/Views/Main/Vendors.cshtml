@@ -34,13 +34,6 @@
         new[] { "Link", "Link", "text-left" }
     };
 
-    // See if user has requested to show deleted records
-    ViewBag.ShowDeleted = ViewBag.RouteID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
-
-    if (ViewBag.ShowDeleted) {
-        ViewBag.IsDeletedField = Model.DataContext.GetIsDeletedField<Vendor>();
-    }
-
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
 }
@@ -91,6 +84,6 @@
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Vendor>(ViewBag.ShowDeleted))
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Vendor>(ViewBag))
     </script>
 }

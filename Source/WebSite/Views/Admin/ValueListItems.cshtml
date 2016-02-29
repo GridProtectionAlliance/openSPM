@@ -77,35 +77,7 @@
     <script>
         "use strict";
 
-        // Configure view model
-        viewModel.defaultSortField = "ID";
-        viewModel.labelField = "Text";
-        viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputText";
-
-        viewModel.setQueryRecordCount(function() {
-            return dataHub.queryValueListCount(@parentID);
-        });
-
-        viewModel.setQueryRecords(function(sortField, ascending, page, pageSize) {
-            return dataHub.queryValueListItems(@parentID, sortField, ascending, page, pageSize);
-        });
-
-        viewModel.setDeleteRecord(function(keyValues) {
-            return dataHub.deleteValueList(keyValues[0]);
-        });
-
-        viewModel.setNewRecord(function() {
-            return dataHub.newValueList();
-        });
-
-        viewModel.setAddNewRecord(function(record) {
-            return dataHub.addNewValueList(record);
-        });
-
-        viewModel.setUpdateRecord(function(record) {
-            return dataHub.updateValueList(record);
-        });
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<ValueList>(ViewBag, "SortOrder", parentID))
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Initialize selected value list record

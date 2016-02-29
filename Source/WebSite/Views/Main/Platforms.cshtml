@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  Vendors.cshtml - Gbtc
+//  Platforms.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/27/2016 - Ritchie Carroll
+//  02/29/2016 - Ritchie Carroll
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
@@ -33,13 +33,6 @@
         new[] { "Company", "Company", "text-left" },
         new[] { "Link", "Link", "text-left" }
     };
-
-    // See if user has requested to show deleted records
-    ViewBag.ShowDeleted = ViewBag.RouteID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
-
-    if (ViewBag.ShowDeleted) {
-        ViewBag.IsDeletedField = Model.DataContext.GetIsDeletedField<Vendor>();
-    }
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
@@ -59,38 +52,38 @@
     DataContext dataContext = Model.DataContext;
 
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Vendor>("Name", initialFocus: true))
-        @Html.Raw(Model.AddValueListSelectField<Vendor>("VendorTypeKey", "vendorType"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("Abbreviation"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("Company"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("Link", "url"))
-        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Description", 5))
-        @Html.Raw(dataContext.AddCheckBoxField<Vendor>("Enabled"))
+        @Html.Raw(dataContext.AddInputField<Platform>("Name", initialFocus: true))
+        @Html.Raw(Model.AddValueListSelectField<Platform>("PlatformTypeKey", "PlatformType"))
+        @Html.Raw(dataContext.AddInputField<Platform>("Abbreviation"))
+        @Html.Raw(dataContext.AddInputField<Platform>("Company"))
+        @Html.Raw(dataContext.AddInputField<Platform>("Link", "url"))
+        @Html.Raw(dataContext.AddTextAreaField<Platform>("Description", 5))
+        @Html.Raw(dataContext.AddCheckBoxField<Platform>("Enabled"))
     </div>
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Vendor>("Address1"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("Address2"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("City"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("State"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ZIP"))
-        @Html.Raw(Model.AddValueListSelectField<Vendor>("NoticeMethodKey", "noticeMethod"))
-        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Notes", 4))
+        @Html.Raw(dataContext.AddInputField<Platform>("Address1"))
+        @Html.Raw(dataContext.AddInputField<Platform>("Address2"))
+        @Html.Raw(dataContext.AddInputField<Platform>("City"))
+        @Html.Raw(dataContext.AddInputField<Platform>("State"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ZIP"))
+        @Html.Raw(Model.AddValueListSelectField<Platform>("NoticeMethodKey", "noticeMethod"))
+        @Html.Raw(dataContext.AddTextAreaField<Platform>("Notes", 4))
     </div>
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactName1"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactEmail1"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneOfc1"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneCell1"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactName2"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactEmail2"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneOfc2"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneCell2"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactName1"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactEmail1"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactPhoneOfc1"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactPhoneCell1"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactName2"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactEmail2"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactPhoneOfc2"))
+        @Html.Raw(dataContext.AddInputField<Platform>("ContactPhoneCell2"))
     </div>
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Vendor>(ViewBag.ShowDeleted))
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Platform>(ViewBag))
     </script>
 }

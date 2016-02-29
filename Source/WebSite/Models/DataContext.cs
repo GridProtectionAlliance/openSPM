@@ -215,12 +215,12 @@ namespace openSPM.Models
         /// </summary>
         /// <typeparam name="T">Modeled table.</typeparam>
         /// <returns>Field name targeted to mark a record as deleted.</returns>
-        public string GetIsDeletedField<T>() where T : class, new()
+        public string GetIsDeletedFlag<T>() where T : class, new()
         {
-            IsDeletedFlagAttribute isDeletedFieldAttribute;
+            IsDeletedFlagAttribute isDeletedFlagAttribute;
 
-            if (typeof(T).TryGetAttribute(out isDeletedFieldAttribute) && !string.IsNullOrWhiteSpace(isDeletedFieldAttribute.FieldName))
-                return isDeletedFieldAttribute.FieldName;
+            if (typeof(T).TryGetAttribute(out isDeletedFlagAttribute) && !string.IsNullOrWhiteSpace(isDeletedFlagAttribute.FieldName))
+                return isDeletedFlagAttribute.FieldName;
 
             return null;
         }
@@ -245,28 +245,15 @@ namespace openSPM.Models
             viewBag.DeleteRoles = recordOperations[(int)RecordOperation.DeleteRecord].Item2;
         }
 
-
         /// <summary>
         /// Renders client-side configuration script for paged view model.
         /// </summary>
         /// <typeparam name="T">Modeled table.</typeparam>
+        /// <param name="viewBag">ViewBag for the view.</param>
         /// <param name="defaultSortField">Default sort field, defaults to first primary key field.</param>
         /// <param name="parentKeys">Primary keys values of the parent record to load.</param>
         /// <returns>Rendered paged view model configuration script.</returns>
-        public string RenderViewModelConfiguration<T>(string defaultSortField = null, params object[] parentKeys) where T : class, new()
-        {
-            return RenderViewModelConfiguration<T>(false, defaultSortField, parentKeys);
-        }
-
-        /// <summary>
-        /// Renders client-side configuration script for paged view model.
-        /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
-        /// <param name="showDeletedRecords">Determines if deleted records should be shown.</param>
-        /// <param name="defaultSortField">Default sort field, defaults to first primary key field.</param>
-        /// <param name="parentKeys">Primary keys values of the parent record to load.</param>
-        /// <returns>Rendered paged view model configuration script.</returns>
-        public string RenderViewModelConfiguration<T>(bool showDeletedRecords, string defaultSortField = null, params object[] parentKeys) where T : class, new()
+        public string RenderViewModelConfiguration<T>(dynamic viewBag, string defaultSortField = null, params object[] parentKeys) where T : class, new()
         {
             StringBuilder javascript = new StringBuilder();
             string[] primaryKeyFields = Table<T>().GetPrimaryKeyFieldNames();
@@ -277,11 +264,10 @@ namespace openSPM.Models
                 viewModel.primaryKeyFields = [{primaryKeyFields.Select(fieldName => $"\"{fieldName}\"").ToDelimitedString(", ")}];
             ".FixForwardSpacing());
 
-            string showDeleted = null;
-            string isDeletedFieldName = GetIsDeletedField<T>();
+            string showDeletedValue = null;
 
-            if (isDeletedFieldName != null)
-                showDeleted = showDeletedRecords.ToString().ToLower();
+            if (viewBag.IsDeletedField != null)
+                showDeletedValue = (viewBag.ShowDeleted ?? false).ToString().ToLower();
 
             Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
 
@@ -300,8 +286,8 @@ namespace openSPM.Models
                 keyValues = parentKeys.ToDelimitedString(", ");
 
             // If modeled table has IsDeletedField marker, the showDeleted parameter should come first in DataHub operations
-            if (showDeleted != null)
-                keyValues = keyValues != null ? $"{showDeleted}, {keyValues}" : showDeleted;
+            if (showDeletedValue != null)
+                keyValues = keyValues != null ? $"{showDeletedValue}, {keyValues}" : showDeletedValue;
 
             if (!string.IsNullOrWhiteSpace(queryRecordCountMethod))
                 javascript.Append($@"

@@ -71,7 +71,7 @@
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Menu>())
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Menu>(ViewBag))
 
         function getMenuItemCount(pageID, element) {
             if (viewModel.dataHubIsConnected()) {

@@ -70,6 +70,6 @@
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Page>())
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Page>(ViewBag))
     </script>
 }

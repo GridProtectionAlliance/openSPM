@@ -147,7 +147,7 @@
                 </tr>
             </thead>
             <tbody data-bind="foreach: pageRecords">
-                <tr style="visibility: hidden" id="recordRow"@Html.Raw(ViewBag.IsDeletedField == null ? "" : $" data-bind=\"css: {{'danger': {ViewBag.IsDeletedField}}}\"")>
+                <tr style="visibility: hidden" id="recordRow"@Html.Raw(ViewBag.ShowDeleted ?? false ? $" data-bind=\"css: {{'danger': {ViewBag.IsDeletedField}}}\"" : "")>
                     @Html.Raw(ViewBag.BodyRows)
                 </tr>
             </tbody>

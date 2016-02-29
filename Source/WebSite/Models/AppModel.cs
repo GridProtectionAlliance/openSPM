@@ -270,6 +270,16 @@ namespace openSPM.Models
         {
             LookupPageDetail(requestContext, pageName, viewBag);
             dataContext.EstablishUserRolesForPage<T>(viewBag);
+
+            // See if modeled table has a flag field that represents a deleted row
+            string isDeletedField = dataContext.GetIsDeletedFlag<T>();
+
+            if (!string.IsNullOrWhiteSpace(isDeletedField))
+            {
+                // See if user has requested to show deleted records
+                viewBag.ShowDeleted = viewBag.RouteID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
+                viewBag.IsDeletedField = isDeletedField;
+            }
         }
 
         /// <summary>

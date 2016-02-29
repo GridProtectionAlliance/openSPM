@@ -23,18 +23,6 @@
 @using System.Text
 @using openSPM.Models
 @model AppModel
-@section StyleSheets {
-    <style>
-        .popup-ok-button {
-            position: absolute;
-            right: 8px;
-            top: calc(100% - 43px);
-            top: -o-calc(100% - 43px);
-            top: -webkit-calc(100% - 43px);
-            top: -moz-calc(100% - 43px);
-        }
-    </style>
-}
 @{
     ViewBag.PageControlScripts = new StringBuilder();
 
@@ -83,35 +71,7 @@
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        // Configure view model
-        viewModel.defaultSortField = "ID";
-        viewModel.labelField = "Name";
-        viewModel.primaryKeyFields = ["ID"];
-        viewModel.initialFocusField = "inputName";
-
-        viewModel.setQueryRecordCount(function () {
-            return dataHub.queryValueListGroupCount();
-        });
-
-        viewModel.setQueryRecords(function (sortField, ascending, page, pageSize) {
-            return dataHub.queryValueListGroups(sortField, ascending, page, pageSize);
-        });
-
-        viewModel.setDeleteRecord(function (keyValues) {
-            return dataHub.deleteValueListGroup(keyValues[0]);
-        });
-
-        viewModel.setNewRecord(function () {
-            return dataHub.newValueListGroup();
-        });
-
-        viewModel.setAddNewRecord(function (record) {
-            return dataHub.addNewValueListGroup(record);
-        });
-
-        viewModel.setUpdateRecord(function (record) {
-            return dataHub.updateValueListGroup(record);
-        });
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<ValueListGroup>(ViewBag))
 
         function getValueListItemCount(groupID, element) {
             if (viewModel.dataHubIsConnected()) {

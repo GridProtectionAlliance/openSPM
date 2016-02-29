@@ -96,7 +96,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<UserAccount>())        
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))        
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.sIDToAccountName(record.Name).done(function (accountName) {

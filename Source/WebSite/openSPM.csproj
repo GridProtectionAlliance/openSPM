@@ -403,6 +403,7 @@
     <Content Include="Views\Main\PageTemplate1.cshtml" />
     <Content Include="Views\Main\Settings.cshtml" />
     <Content Include="Views\Main\DisplayPDF.cshtml" />
+    <Content Include="Views\Main\Platforms.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

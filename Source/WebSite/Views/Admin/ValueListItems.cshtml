@@ -20,13 +20,8 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System
-@using System.Collections.Generic
 @using System.Collections.Specialized
-@using System.Net.Http
 @using System.Text
-@using GSF
-@using GSF.Identity
 @using openSPM.Models
 @model AppModel
 @{
@@ -34,7 +29,6 @@
     int parentID = int.Parse(parameters["ID"]);
 
     ViewBag.CustomTitle = "Edit Value List Items for \"" + parameters["Name"] + "\" Page";
-    ViewBag.Title = "Value List Items";
     ViewBag.PageHasMenu = false;
     ViewBag.PageControlScripts = new StringBuilder();
 

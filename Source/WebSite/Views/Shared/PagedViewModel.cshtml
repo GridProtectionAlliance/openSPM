@@ -225,16 +225,17 @@
 
     if (showIsDeletedToggleLink) {
         string baseURL = Request?.Url?.AbsolutePath ?? "/";
+        baseURL = baseURL.Substring(0, baseURL.Length - (ViewBag.RouteID ?? "").Length);
+        baseURL = baseURL.EnsureEnd('/');
 
         if (showingDeletedRecords) {
-            baseURL = baseURL.Substring(0, baseURL.Length - "/ShowDeleted".Length);
             pageControlScripts.Append($@"
             $(""#titleText"").append(""<br /><div style='margin-top: 3px' class='small text-center'><a href='{baseURL}'>Hide Deleted</a></div>"");
         ");
         }
         else {
             pageControlScripts.Append($@"
-            $(""#titleText"").append(""<br /><div style='margin-top: 3px' class='small text-center'><a href='{baseURL}/ShowDeleted'>Show Deleted</a></div>"");
+            $(""#titleText"").append(""<br /><div style='margin-top: 3px' class='small text-center'><a href='{baseURL}ShowDeleted'>Show Deleted</a></div>"");
         ");
         }
     }

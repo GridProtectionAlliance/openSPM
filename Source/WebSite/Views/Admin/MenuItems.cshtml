@@ -30,7 +30,6 @@
     int parentID = int.Parse(parameters["ID"]);
 
     ViewBag.CustomTitle = "Edit Menu Items for \"" + parameters["Name"] + "\" Page";
-    ViewBag.Title = "Page Menu Item";
     ViewBag.PageHasMenu = false;
     ViewBag.PageControlScripts = new StringBuilder();
 
@@ -75,7 +74,7 @@
     <script>
         "use strict";
         
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<MenuItem>("ID", parentID))
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<MenuItem>("SortOrder", parentID))
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Initialize selected menu item record

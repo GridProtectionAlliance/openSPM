@@ -255,16 +255,33 @@ namespace openSPM.Models
             return groups.Any(UserIsInGroup);
         }
 
+
         /// <summary>
-        /// Looks up page info based on defined page name.
+        /// Looks up page info based on defined page name and establishes user roles for page based on specified modeled table <typeparamref name="T"/>.
         /// </summary>
-        /// <param name="context">Url.RequestContext for view.</param>
+        /// <param name="dataContext">DataContext for view.</param>
+        /// <param name="requestContext">Url.RequestContext for view.</param>
         /// <param name="pageName">Page name as defined in Page table.</param>
         /// <param name="viewBag">Current view bag.</param>
         /// <remarks>
         /// This is normally called from controller before returning view action result.
         /// </remarks>
-        public void LookupPageDetail(RequestContext context, string pageName, dynamic viewBag)
+        public void LookupPageDetail<T>(DataContext dataContext, RequestContext requestContext, string pageName, dynamic viewBag) where T : class, new()
+        {
+            LookupPageDetail(requestContext, pageName, viewBag);
+            dataContext.EstablishUserRolesForPage<T>(viewBag);
+        }
+
+        /// <summary>
+        /// Looks up page info based on defined page name.
+        /// </summary>
+        /// <param name="requestContext">Url.RequestContext for view.</param>
+        /// <param name="pageName">Page name as defined in Page table.</param>
+        /// <param name="viewBag">Current view bag.</param>
+        /// <remarks>
+        /// This is normally called from controller before returning view action result.
+        /// </remarks>
+        public void LookupPageDetail(RequestContext requestContext, string pageName, dynamic viewBag)
         {
             int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
             Page page = DataContext.QueryRecord<Page>(pageID);
@@ -275,7 +292,7 @@ namespace openSPM.Models
             viewBag.PageName = pageName;
             viewBag.PageImagePath = GetPageSetting(viewBag, "pageImagePath").Replace("{pageName}", pageName ?? "");
             viewBag.PageSettings = pageSettings;
-            viewBag.RouteID = context.RouteData.Values["id"] as string;
+            viewBag.RouteID = requestContext.RouteData.Values["id"] as string;
             viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
         }
 

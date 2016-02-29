@@ -42,7 +42,7 @@
     <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
     <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Description, 1.5), attr: {title: Description}"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openMenuItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'menuItemMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getMenuItemCount(ID, $($element).text()), attr: {id: 'menuItemCount' + ID}">0</span></button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openMenuItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'menuItemMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getMenuItemCount(ID, $($element)), attr: {id: 'menuItemCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -73,7 +73,7 @@
     <script>
         @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Menu>())
 
-        function getMenuItemCount(pageID, currentValue) {
+        function getMenuItemCount(pageID, element) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.queryMenuItemCount(pageID).done(function (count) {
                     const menuItemMode = $("#menuItemMode" + pageID);
@@ -88,7 +88,7 @@
                 });
             }
 
-            return currentValue;
+            return element.text();
         }
 
         $(window).resize(function () {
@@ -108,6 +108,9 @@
         $("#editMenuItemDialog").on("hidden.bs.modal", function () {
             // Refresh page counts after editing tasks
             viewModel.queryPageRecords();
+
+            // Clear frame page
+            $("#editMenuItemFrame").attr("src", "about:blank");
         });
 
         $(function() {

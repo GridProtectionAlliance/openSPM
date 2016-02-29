@@ -85,36 +85,37 @@ namespace openSPM.Controllers
 
         public ActionResult Users()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "AdminUsers", ViewBag);
+            m_appModel.LookupPageDetail<UserAccount>(m_dataContext, Url.RequestContext, "AdminUsers", ViewBag);
             return View();
         }
 
         public ActionResult Pages()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "AdminPages", ViewBag);
+            m_appModel.LookupPageDetail<Page>(m_dataContext, Url.RequestContext, "AdminPages", ViewBag);
             return View();
         }
 
         public ActionResult Menus()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "AdminMenus", ViewBag);
+            m_appModel.LookupPageDetail<Menu>(m_dataContext, Url.RequestContext, "AdminMenus", ViewBag);
             return View();
         }
 
         public ActionResult MenuItems()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "AdminMenuItems", ViewBag);
+            m_appModel.LookupPageDetail<MenuItem>(m_dataContext, Url.RequestContext, "AdminMenuItems", ViewBag);
             return View();
         }
 
         public ActionResult ValueListGroups()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "AdminValueListGroups", ViewBag);
+            m_appModel.LookupPageDetail<ValueListGroup>(m_dataContext, Url.RequestContext, "AdminValueListGroups", ViewBag);
             return View();
         }
 
         public ActionResult ValueListItems()
         {
+            m_appModel.LookupPageDetail<ValueList>(m_dataContext, Url.RequestContext, "AdminValueListItems", ViewBag);
             return View();
         }
 

@@ -85,15 +85,19 @@ namespace openSPM.Controllers
 
         public ActionResult Patches()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "Patches", ViewBag);
-            m_dataContext.EstablishUserRolesForPage<Patch>(ViewBag);
+            m_appModel.LookupPageDetail<Patch>(m_dataContext, Url.RequestContext, "Patches", ViewBag);
             return View();
         }
 
         public ActionResult Vendors()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "Vendors", ViewBag);
-            m_dataContext.EstablishUserRolesForPage<Vendor>(ViewBag);
+            m_appModel.LookupPageDetail<Vendor>(m_dataContext, Url.RequestContext, "Vendors", ViewBag);
+            return View();
+        }
+
+        public ActionResult Platforms()
+        {
+            m_appModel.LookupPageDetail<Platform>(m_dataContext, Url.RequestContext, "Platforms", ViewBag);
             return View();
         }
 
@@ -118,6 +122,7 @@ namespace openSPM.Controllers
 
         public ActionResult DisplayPDF()
         {
+            // Using route ID, i.e., /Main/DisplayPDF/{id}, as page name of PDF load
             string routeID = Url.RequestContext.RouteData.Values["id"] as string;
 
             if (!string.IsNullOrEmpty(routeID))

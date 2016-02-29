@@ -35,8 +35,8 @@ namespace openSPM.Models
         [PrimaryKey(true)]
         public int ID { get; set; }
 
-        [Label("Target Platform")]
-        public int PlatformID { get; set; }
+        [Label("Select Source")]
+        public int VendorID { get; set; }
 
         [Label("Result")]
         public int ResultKey { get; set; }

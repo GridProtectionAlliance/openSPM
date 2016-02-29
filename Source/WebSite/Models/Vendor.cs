@@ -35,7 +35,9 @@ namespace openSPM.Models
         [PrimaryKey(true)]
         public int ID { get; set; }
 
-        [Label("Vendor Type")]
+        [Required]
+        [Label("Patch Source Type")]
+        [InitialValue("1")]
         public int VendorTypeKey { get; set; }
 
         [Required]
@@ -46,6 +48,7 @@ namespace openSPM.Models
         [StringLength(12)]
         public string Abbreviation { get; set; }
 
+        [Label("Full Corporate Name")]
         [StringLength(200)]
         public string Company { get; set; }
 
@@ -77,7 +80,7 @@ namespace openSPM.Models
         [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
         public string Link { get; set; }
 
-        [Label("Notice Method")]
+        [Label("Patch Notification Method")]
         public int NoticeMethodKey { get; set; }
 
         [Label("Primary Contact Name")]
@@ -117,6 +120,8 @@ namespace openSPM.Models
         public string Notes { get; set; }
 
         public bool Enabled { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public DateTime UpdatedOn { get; set; }
 

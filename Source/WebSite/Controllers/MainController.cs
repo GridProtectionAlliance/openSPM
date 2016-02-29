@@ -110,6 +110,24 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Settings()
+        {
+            m_appModel.LookupPageDetail("Settings", ViewBag);
+            return View();
+        }
+
+        public ActionResult DisplayPDF()
+        {
+            m_appModel.LookupPageDetail("DisplayPDF", ViewBag);
+            return View();
+        }
+
+        public ActionResult PageTemplate1()
+        {
+            m_appModel.LookupPageDetail("PageTemplate1", ViewBag);
+            return View();
+        }
+
         #endregion
     }
 }

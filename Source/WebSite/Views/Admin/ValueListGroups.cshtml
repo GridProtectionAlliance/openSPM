@@ -54,7 +54,7 @@
     <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
     <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Description, 1.5), attr: {title: Description}"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openValueListItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'valueListMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getValueListItemCount(ID), attr: {id: 'valueListCount' + ID}">0</span></button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openValueListItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'valueListMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getValueListItemCount(ID, $($element).text()), attr: {id: 'valueListCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -113,7 +113,7 @@
             return dataHub.updateValueListGroup(record);
         });
 
-        function getValueListItemCount(groupID) {
+        function getValueListItemCount(groupID, currentValue) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.queryValueListCount(groupID).done(function (count) {
                     const valueListMode = $("#valueListMode" + groupID);
@@ -128,7 +128,7 @@
                 });
             }
 
-            return "0";
+            return currentValue;
         }
 
         $(window).resize(function () {
@@ -147,7 +147,8 @@
 
         $("#editValueListItemDialog").on("hidden.bs.modal", function () {
             // Refresh page counts after editing tasks
-            viewModel.queryValueListGroupRecords();
+            if (viewModel.dataHubIsConnected())
+                dataHub.queryValueListGroupRecords();
         });
 
         $(function() {

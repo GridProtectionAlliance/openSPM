@@ -46,6 +46,8 @@ namespace openSPM.Models
 
         public string Description { get; set; }
 
+        public bool IsDeleted { get; set; }
+
         public DateTime UpdatedOn { get; set; }
 
         public Guid UpdatedByID { get; set; }

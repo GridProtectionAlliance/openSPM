@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using openSPM.Attributes;
 
 namespace openSPM.Models
@@ -34,13 +35,17 @@ namespace openSPM.Models
         [PrimaryKey(true)]
         public int ID { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
+        [Required]
         public string Abbreviation { get; set; }
 
         public string Description { get; set; }
 
-        public DateTime? UpdatedOn { get; set; }
+        public bool IsDeleted { get; set; }
+
+        public DateTime UpdatedOn { get; set; }
 
         public Guid UpdatedByID { get; set; }
     }

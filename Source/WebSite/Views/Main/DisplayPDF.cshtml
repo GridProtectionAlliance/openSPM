@@ -22,5 +22,27 @@
 //*****************************************************************************************************@
 @using openSPM.Models
 @model AppModel
-<p>Body HTML goes here...</p>
-<p>(1) Add view to MainController...</p>
+@{
+    Dictionary<string, string> pageSettings = ViewBag.PageSettings;
+    string pdfLink;
+
+    if (!pageSettings.TryGetValue("pdfLink", out pdfLink)) {
+        pdfLink = "/Docs/Test.pdf";
+    }
+}
+<embed id="pdfContent"src="@pdfLink" width="100%" height="200">
+@section Scripts {
+    <script>
+        function resizePDFContent() {
+            $("#pdfContent").attr("height", (calculateRemainingBodyHeight() + 40) + "px");
+        }
+
+        $(window).resize(function () {
+            resizePDFContent();
+        });
+
+        $(function() {
+            resizePDFContent();
+        });
+    </script>
+}

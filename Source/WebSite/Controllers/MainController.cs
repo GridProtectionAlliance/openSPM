@@ -118,7 +118,12 @@ namespace openSPM.Controllers
 
         public ActionResult DisplayPDF()
         {
-            m_appModel.LookupPageDetail("DisplayPDF", ViewBag);
+            // Get route ID value, if any
+            string routeID = Url.RequestContext.RouteData.Values["id"] as string;
+
+            if (!string.IsNullOrEmpty(routeID))
+                m_appModel.LookupPageDetail(routeID, ViewBag);
+
             return View();
         }
 

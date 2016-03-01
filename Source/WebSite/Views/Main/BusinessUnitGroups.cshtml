@@ -54,8 +54,8 @@
     <div class="col-md-12">
         @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Name", initialFocus: true))
         @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Abbreviation"))
-        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("CoordinatorID", "ID", "Name"))
-        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("AlternateBUCID", "ID", "Name"))
+        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("CoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
+        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("AlternateBUCID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
         @Html.Raw(dataContext.AddTextAreaField<BusinessUnitGroup>("Description"))
     </div>
 }
@@ -66,6 +66,17 @@
         "use strict";
 
         @Html.Raw(Model.DataContext.RenderViewModelConfiguration<BusinessUnitGroup>(ViewBag))
+        // Resolve option label SID to an account name
+        function lookupOptionLabel(element) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.sIDToAccountName(element.text()).done(function (accountName) {
+                    element.text(accountName);
+                });
+            }
+
+            return element.text();
+        }
+
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.queryUserAccount(record.CoordinatorID).done(function (userAccount) {
@@ -76,6 +87,7 @@
             }
         }
 
+        // Add a virtual observable field called "AccountName" that will resolve SID values to account names
         $(viewModel).on("pageRecordsQueried", function (event, records) {
             for (let i = 0; i < records.length; i++) {
                 records[i].AccountName = ko.observable(records[i].CoordinatorID);
@@ -83,10 +95,12 @@
             }
         });
 
+        // Make sure new records get virtual field
         $(viewModel).on("newRecord", function (event, newRecord) {
             newRecord.AccountName = ko.observable("");
         });
 
+        // Remove virtual observable field before serialization for record updates
         $(viewModel).on("derivingJSRecord", function (event, observableRecord) {
             delete observableRecord.AccountName;
         });

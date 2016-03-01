@@ -679,11 +679,12 @@ namespace openSPM.Models
         /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
+        /// <param name="optionDataBinding">Data-bind operations to apply to each option value, if any.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
         /// <param name="initialFocus">Use field for initial focus.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>Generated HTML for new text field based on modeled table field attributes.</returns>
-        public string AddSelectField<TSelect, TOption>(string fieldName, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false, RecordRestriction restriction = null) where TSelect : class, new() where TOption : class, new()
+        public string AddSelectField<TSelect, TOption>(string fieldName, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string optionDataBinding = null, string toolTip = null, bool initialFocus = false, RecordRestriction restriction = null) where TSelect : class, new() where TOption : class, new()
         {
             if (string.IsNullOrEmpty(fieldLabel))
             {
@@ -696,7 +697,7 @@ namespace openSPM.Models
             AddFieldValueInitializer<TSelect>(fieldName);
 
             return AddSelectField<TOption>(fieldName, Table<TSelect>().FieldHasAttribute<RequiredAttribute>(fieldName),
-                optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, toolTip, initialFocus, restriction);
+                optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, optionDataBinding, toolTip, initialFocus, restriction);
         }
 
         /// <summary>
@@ -714,11 +715,12 @@ namespace openSPM.Models
         /// <param name="labelDataBinding">Data-bind operations to apply to label, if any.</param>
         /// <param name="customDataBinding">Extra custom data-binding operations to apply to field, if any.</param>
         /// <param name="dependencyFieldName">Defines default "enabled" subordinate data-bindings based a single boolean field, e.g., a check-box.</param>
+        /// <param name="optionDataBinding">Data-bind operations to apply to each option value, if any.</param>
         /// <param name="toolTip">Tool tip text to apply to field, if any.</param>
         /// <param name="initialFocus">Use field for initial focus.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>Generated HTML for new text field based on specified parameters.</returns>
-        public string AddSelectField<TOption>(string fieldName, bool required, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false, RecordRestriction restriction = null) where TOption : class, new()
+        public string AddSelectField<TOption>(string fieldName, bool required, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string optionDataBinding = null, string toolTip = null, bool initialFocus = false, RecordRestriction restriction = null) where TOption : class, new()
         {
             RazorView<CSharp> addSelectFieldTemplate = new RazorView<CSharp>(AddSelectFieldTemplate, MvcApplication.DefaultModel);
             DynamicViewBag viewBag = addSelectFieldTemplate.ViewBag;
@@ -745,6 +747,7 @@ namespace openSPM.Models
             viewBag.AddValue("CustomDataBinding", customDataBinding);
             viewBag.AddValue("DependencyFieldName", dependencyFieldName);
             viewBag.AddValue("ToolTip", toolTip);
+            viewBag.AddValue("OptionDataBinding", optionDataBinding);
 
             if (restriction == null)
             {

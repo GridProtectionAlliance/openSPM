@@ -34,6 +34,7 @@
     string customDataBinding = ViewBag.CustomDataBinding;
     string dependencyFieldName = ViewBag.DependencyFieldName;
     string toolTip = ViewBag.ToolTip;
+    string optionDataBinding = ViewBag.OptionDataBinding;
     Dictionary<string, string> options = ViewBag.Options;
 
     if (!string.IsNullOrEmpty(dependencyFieldName)) {
@@ -61,6 +62,10 @@
     if (!string.IsNullOrEmpty(toolTip)) {
         toolTip = string.Format(" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"{0}\"", toolTip);
     }
+
+    if (!string.IsNullOrEmpty(optionDataBinding)) {
+        optionDataBinding = string.Format(" data-bind=\"{0}\"", optionDataBinding);
+    }
 }
 <div class="form-group"@Raw(groupDataBinding)@Raw(toolTip)>
     @if (fieldLabel.Length > 0) {
@@ -68,7 +73,7 @@
     }
     <select class="form-control" id="@Raw(fieldID)" data-bind="value: @Raw(fieldName), valueAllowUnset: @((!required).ToString().ToLower()), attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}@Raw(customDataBinding)">
         @foreach (KeyValuePair<string, string> item in options) {
-            <option value="@item.Key">@item.Value</option>
+            <option value="@item.Key"@Raw(optionDataBinding)>@item.Value</option>
         }
     </select>
 </div>

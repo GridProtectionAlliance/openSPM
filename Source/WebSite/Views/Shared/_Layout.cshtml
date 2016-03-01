@@ -139,12 +139,17 @@
             <!-- #sidebarWrapper -->
             <button type="button" class="btn btn-link btn-sm" id="toggleMenuButton" title="Toggle Menu"><span class="glyphicon glyphicon-expand" id="toggleMenuIcon"></span></button>
             <div id="sidebarWrapper">
-                <ul class="sidebar-nav">
+                <ul class="sidebar-nav" style="padding-bottom: 30px">
                     <li class="sidebar-brand" title="@Model.Global.ApplicationDescription">
                         <a href="/" class="navbar-brand" style="margin-top: -5px"><img class="pull-left" style="padding: 12px 10px 10px 20px" alt="@Model.Global.ApplicationName" src="/Images/@(Model.Global.ApplicationName).png"></a>
                     </li>
                     @foreach (MenuItem menuItem in menuItems) {
-                        <li><a href="@Html.Raw(menuItem.Link)"><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@Html.Raw(menuItem.Text)</a></li>
+                        if (menuItem.PageID == 0 || string.IsNullOrWhiteSpace(menuItem.Link)) {
+                            <li><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@Html.Raw(menuItem.Text)</li>
+                        }
+                        else {
+                            <li><a href="@Html.Raw(menuItem.Link)"><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@Html.Raw(menuItem.Text)</a></li>
+                        }
                     }
                 </ul>
                 <footer id="footer">

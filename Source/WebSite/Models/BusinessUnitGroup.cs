@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using openSPM.Attributes;
 
 namespace openSPM.Models
@@ -36,10 +37,13 @@ namespace openSPM.Models
         [PrimaryKey(true)]
         public int ID { get; set; }
 
+        [Required]
         public string Name { get; set; }
 
+        [Required]
         public string Abbreviation { get; set; }
 
+        [Required]
         [Label("Coordinator")]
         public Guid CoordinatorID { get; set; }
 

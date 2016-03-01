@@ -22,9 +22,11 @@
 //*****************************************************************************************************@
 @using openSPM.Models
 @model AppModel
+
+<div class="alert alert-danger">These system settings control application appearance and behavior - edit with care.</div>
+
 <ul class="list-group">
     <li class="list-group-item">@Html.ActionLink("Edit System Pages", "Pages", "Admin")</li>
     <li class="list-group-item">@Html.ActionLink("Edit System Menus", "Menus", "Admin")</li>
     <li class="list-group-item">@Html.ActionLink("Edit Value Lists", "ValueListGroups", "Admin")</li>
-    <li class="list-group-item">Edit System Settings</li>
 </ul>

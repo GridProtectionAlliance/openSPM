@@ -94,6 +94,28 @@ namespace openSPM.Models
         #region [ Methods ]
 
         /// <summary>
+        /// Queries database and returns modeled table records for the specified sql statement and parameters.
+        /// </summary>
+        /// <param name="sqlFormat">SQL expression to query.</param>
+        /// <param name="parameters">Parameters for query, if any.</param>
+        /// <returns>An enumerable of modeled table row instances for queried records.</returns>
+        /// <remarks>
+        /// Select only needs to return primary key fields, full record will be loaded based on primary key values.
+        /// </remarks>
+        public IEnumerable<T> QueryRecords(string sqlFormat, params object[] parameters)
+        {
+            try
+            {
+                return m_connection.RetrieveData(sqlFormat, parameters).AsEnumerable().Select(row => LoadRecord(GetPrimaryKeys(row)));
+            }
+            catch (Exception ex)
+            {
+                MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlFormat}, {KeyList(parameters)}\": {ex.Message}", ex));
+                return Enumerable.Empty<T>();
+            }
+        }
+
+        /// <summary>
         /// Queries database and returns modeled table records for the specified sorting and paging parameters.
         /// </summary>
         /// <param name="sortField">Field name to order-by.</param>
@@ -209,27 +231,83 @@ namespace openSPM.Models
         }
 
         /// <summary>
+        /// Deletes the records referenced by the specified <paramref name="restriction"/>.
+        /// </summary>
+        /// <param name="restriction">Record restriction to apply</param>
+        /// <returns>Number of rows affected.</returns>
+        public int DeleteRecord(RecordRestriction restriction)
+        {
+            string deleteSql = s_deleteSql.Substring(0, s_updateSql.IndexOf(" WHERE ", StringComparison.OrdinalIgnoreCase) + 7);
+
+            try
+            {
+                int affectedRecords = m_connection.ExecuteNonQuery($"{deleteSql}{restriction.FilterExpression}", restriction.Parameters);
+
+                if (affectedRecords > 0)
+                    m_primaryKeyCache = null;
+
+                return affectedRecords;
+            }
+            catch (Exception ex)
+            {
+                MvcApplication.LogException(new InvalidOperationException($"Exception during record delete for {typeof(T).Name} \"{deleteSql}, {KeyList(restriction.Parameters)}\": {ex.Message}", ex));
+                return 0;
+            }
+        }
+
+        /// <summary>
         /// Updates the database with the specified modeled table <paramref name="record"/>.
         /// </summary>
         /// <param name="record">Record to update.</param>
+        /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>Number of rows affected.</returns>
-        public int UpdateRecord(T record)
+        /// <remarks>
+        /// Record restriction is only used for custom update expressions or in cases where modeled
+        /// table has no defined primary keys.
+        /// </remarks>
+        public int UpdateRecord(T record, RecordRestriction restriction = null)
         {
             List<object> values = new List<object>();
+
+            if ((object)restriction == null)
+            {
+                try
+                {
+                    foreach (PropertyInfo property in s_updateProperties)
+                        values.Add(property.GetValue(record));
+
+                    foreach (PropertyInfo property in s_primaryKeyProperties)
+                        values.Add(property.GetValue(record));
+
+                    return m_connection.ExecuteNonQuery(s_updateSql, values.ToArray());
+                }
+                catch (Exception ex)
+                {
+                    MvcApplication.LogException(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{s_updateSql}, {KeyList(values)}\": {ex.Message}", ex));
+                    return 0;
+                }
+            }
+
+            string updateSql = s_updateSql.Substring(0, s_updateSql.IndexOf(" WHERE ", StringComparison.OrdinalIgnoreCase) + 7);
 
             try
             {
                 foreach (PropertyInfo property in s_updateProperties)
                     values.Add(property.GetValue(record));
 
-                foreach (PropertyInfo property in s_primaryKeyProperties)
-                    values.Add(property.GetValue(record));
+                values.AddRange(restriction.Parameters);
 
-                return m_connection.ExecuteNonQuery(s_updateSql, values.ToArray());
+                List<object> updateWhereOffsets = new List<object>();
+                int updateFieldIndex = s_updateProperties.Length;
+
+                for (int i = 0; i < restriction.Parameters.Length; i++)
+                    updateWhereOffsets.Add($"{{{updateFieldIndex + i}}}");
+
+                return m_connection.ExecuteNonQuery($"{updateSql}{string.Format(restriction.FilterExpression, updateWhereOffsets.ToArray())}", values.ToArray());
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{s_updateSql}, {KeyList(values)}\": {ex.Message}", ex));
+                MvcApplication.LogException(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{updateSql}, {KeyList(values)}\": {ex.Message}", ex));
                 return 0;
             }
         }
@@ -402,7 +480,7 @@ namespace openSPM.Models
             StringBuilder whereFormat = new StringBuilder();
             StringBuilder primaryKeyFields = new StringBuilder();
             List<PropertyInfo> addNewProperties = new List<PropertyInfo>();
-            List<PropertyInfo> updateproperties = new List<PropertyInfo>();
+            List<PropertyInfo> updateProperties = new List<PropertyInfo>();
             List<PropertyInfo> primaryKeyProperties = new List<PropertyInfo>();
             string tableName = typeof(T).Name;
             int primaryKeyIndex = 0;
@@ -442,10 +520,23 @@ namespace openSPM.Models
                     addNewFormat.Append($"{(addNewFormat.Length > 0 ? ", " : "")}{{{addNewFieldIndex++}}}");
                     updateFormat.Append($"{(updateFormat.Length > 0 ? ", " : "")}{fieldName}={{{updateFieldIndex++}}}");
                     addNewProperties.Add(property);
-                    updateproperties.Add(property);
+                    updateProperties.Add(property);
                 }
 
                 s_attributes.Add(property, new HashSet<Type>(property.CustomAttributes.Select(attributeData => attributeData.AttributeType)));
+            }
+
+            // Have to assume all fields are primary when none are specified
+            if (primaryKeyProperties.Count == 0)
+            {
+                primaryKeyFields.Append("*");
+
+                foreach (PropertyInfo property in s_properties.Values)
+                {
+                    string fieldName = s_fieldNames[property.Name];
+                    whereFormat.Append($"{(whereFormat.Length > 0 ? "AND " : "")}{fieldName}={{{primaryKeyIndex++}}}");
+                    primaryKeyProperties.Add(property);
+                }
             }
 
             List<object> updateWhereOffsets = new List<object>();
@@ -462,7 +553,7 @@ namespace openSPM.Models
             s_deleteSql = string.Format(DeleteSqlFormat, tableName, whereFormat);
 
             s_addNewProperties = addNewProperties.ToArray();
-            s_updateProperties = updateproperties.ToArray();
+            s_updateProperties = updateProperties.ToArray();
             s_primaryKeyProperties = primaryKeyProperties.ToArray();
         }
 

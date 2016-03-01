@@ -24,6 +24,7 @@
 @using openSPM.Models
 @model AppModel
 @{
+    DataContext dataContext = Model.DataContext;
     ViewBag.PageControlScripts = new StringBuilder();
 
     // Define column headers, use null for field name to make column non-sortable
@@ -36,30 +37,30 @@
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
 @helper BodyRows()
 {
     <td width="65%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: AccountName(), attr: {title: Name}, click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle"><input type="checkbox" id="checkEnabled" data-bind="checked: UseADAuthentication" disabled></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: CreatedOn.formatDate(DateFormat)"></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-primary btn-sm">Roles...</button></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-primary btn-sm" data-bind="click: openRolesEditor.bind($data), enable: $parent.canEdit() && $parent.dataHubIsConnected()">Roles...</button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-@helper AddNewEditDialog()
+@helper AddNewEditDialog(DataContext dataContext)
 {
-    DataContext dataContext = Model.DataContext;
-
     <div class="col-md-12">
         @Html.Raw(dataContext.AddInputField<UserAccount>("Name", initialFocus: true))
         <div class="panel panel-default" data-bind="css: {'panel-readonly': $root.recordMode()===RecordMode.View, 'panel-primary': UseDBAuthentication}">
             <div class="panel-heading">
+                @* Adding actual field check-box, but hidden, to pick-up any model based field initializers *@
                 <div style="display: none">
                     @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("UseADAuthentication"))
                 </div>
+                @* Adding non-modeled virtual field UseDBAuthentication check-box that represents boolean opposite of UseADAuthentication *@
                 <div class="checkbox">
                     <label for="checkUseDBAuthentication"><input type="checkbox" id="checkUseDBAuthentication" data-bind="checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Use Database Authentication</label>
                 </div>
@@ -91,15 +92,55 @@
     </div>
 }
 @Html.Partial("PagedViewModel")
+<div id="editRolesDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Edit Roles for <span id="currentUserName"></span>:</h4>
+            </div>
+            <div class="modal-body">
+                <div class="modal-body auto-height text-center">
+                    <form role="form">
+                        <input type="hidden" id="currentUserID" />
+                        <div class="center-block">
+                            <div id="loadingRoles">Loading role assignments&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span><hr class="full-break" /></div>
+                            <table class="table-condensed table-center">
+                                @foreach (ApplicationRole role in dataContext.Table<ApplicationRole>().QueryRecords("SELECT ID FROM ApplicationRole WHERE NodeID={0} ORDER BY Name", Model.Global.NodeID)) {
+                                    <tr>
+                                        <td class="text-left valign-middle">
+                                            <div class="checkbox" style="margin: 0">
+                                                <label for="@role.ID"><input type="checkbox" id="@role.ID"> @role.Description (@role.Name)</label>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </table>
+                            <br/>
+                            <div class="text-center">
+                                <a href="/Main/Help#Roles" target="_blank">@Model.Global.ApplicationName Role Definitions</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveRolesButton" data-bind="enable: canEdit()">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
         "use strict";
 
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))        
+        @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
+
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.sIDToAccountName(record.Name).done(function (accountName) {
+                dataHub.sIDToAccountName(record.Name).done(function(accountName) {
                     record.AccountName(accountName);
                 });
             }
@@ -112,7 +153,7 @@
             }
         });
 
-        $(viewModel).on("newRecord", function (event, newRecord) {
+        $(viewModel).on("newRecord", function(event, newRecord) {
             newRecord.AccountName = ko.observable("");
         });
 
@@ -127,6 +168,49 @@
             observableRecord.UseADAuthentication(!observableRecord.UseDBAuthentication());
             delete observableRecord.UseDBAuthentication;
             delete observableRecord.AccountName;
+        });
+
+        function openRolesEditor(record) {            
+            $("#currentUserID").text(record.ID);
+            $("#currentUserName").text(record.AccountName());
+            
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryApplicationRoles().done(function (roles) {
+                    var evaluations = roles.length;
+
+                    if (evaluations > 0)
+                        $("#loadingRoles").show();
+
+                    for (let i = 0; i < roles.length; i++) {
+                        dataHub.userIsInRole(record.ID, roles[i].ID).done(function(roleID) {
+                            return function (result) {
+                                $("#" + roleID).prop("checked", result);
+
+                                evaluations--;
+
+                                if (evaluations <= 0)
+                                    $("#loadingRoles").hide();
+                            };
+                        }(roles[i].ID));
+                    }
+                    $("#editRolesDialog").modal("show");
+                });
+            }
+        }
+
+        $(function() {
+            $("#editRolesDialog").modal({ show: false, backdrop: "static" });
+
+            $("#saveRolesButton").click(function () {
+                alert("Found " + $("#editRolesDialog input:checkbox").length + " checkboxes for " + $("#currentUserID").text() +  "!");
+                //self.updateRecord(record).done(function () {
+                //    self.initialize();
+                //    $(self).trigger("recordSaved", [record, false]);
+                //    showInfoMessage("Saved updated record...");
+                //}).fail(function (error) {
+                //    showErrorMessage(error);
+                //});
+            });
         });
     </script>
 }

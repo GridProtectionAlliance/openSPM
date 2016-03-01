@@ -419,11 +419,6 @@ namespace openSPM
             return m_dataContext.Table<UserAccount>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
-        public UserAccount QueryUserAccount(Guid id)
-        {
-            return m_dataContext.QueryRecord<UserAccount>(id);
-        }
-
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(UserAccount), RecordOperation.DeleteRecord)]
         public void DeleteUserAccount(Guid id)
@@ -724,10 +719,66 @@ namespace openSPM
         /// <returns>Page setting for specified page.</returns>
         public string GetPageSetting(int pageID, string key, string defaultValue)
         {
-            Page page = m_dataContext.QueryRecord<Page>(pageID);
+            Page page = m_dataContext.Table<Page>().LoadRecord(pageID);
             Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
             AppModel model = MvcApplication.DefaultModel;
             return model.GetPageSetting(pageSettings, model.Global.PageDefaults, key, defaultValue);
+        }
+
+        /// <summary>
+        /// Gets the specified user account record.
+        /// </summary>
+        /// <param name="id">ID of requested user.</param>
+        /// <returns>Specified user account record.</returns>
+        public UserAccount QueryUserAccount(Guid id)
+        {
+            return m_dataContext.Table<UserAccount>().LoadRecord(id);
+        }
+
+        /// <summary>
+        /// Gets the current application role records.
+        /// </summary>
+        /// <returns>Current application role records.</returns>
+        public IEnumerable<ApplicationRole> QueryApplicationRoles()
+        {
+            return m_dataContext.Table<ApplicationRole>().QueryRecords("SELECT ID FROM ApplicationRole WHERE NodeID={0} ORDER BY Name", MvcApplication.DefaultModel.Global.NodeID);
+        }
+
+        /// <summary>
+        /// Determines if user is in role based on database ID values.
+        /// </summary>
+        /// <param name="userID">User ID value.</param>
+        /// <param name="roleID">Role ID value.</param>
+        /// <returns><c>true</c> if user is in role; otherwise, <c>false</c>.</returns>
+        public bool UserIsInRole(Guid userID, Guid roleID)
+        {
+            return (m_dataContext.Connection.ExecuteScalar<int?>("SELECT COUNT(*) FROM ApplicationRoleUserAccount WHERE UserAccountID={0} AND ApplicationRoleID={1}", userID, roleID) ?? 0) > 0;
+        }
+
+        /// <summary>
+        /// Adds or removes a user from a role.
+        /// </summary>
+        /// <param name="userID">User ID value.</param>
+        /// <param name="roleID">Role ID value.</param>
+        /// <param name="value">Desired state for user role, i.e., in = <c>true</c>, out = <c>false</c>.</param>
+        [AuthorizeHubRole("Administrator")]
+        public void SetUserInRole(Guid userID, Guid roleID, bool value)
+        {
+            if (UserIsInRole(userID, roleID) != value)
+            {
+                if (value)
+                {
+                    m_dataContext.Table<ApplicationRoleUserAccount>().AddNewRecord(new ApplicationRoleUserAccount
+                    {
+                        ApplicationRoleID = roleID,
+                        UserAccountID = userID
+                    });
+                }
+                else
+                {
+                    m_dataContext.Table<ApplicationRoleUserAccount>().DeleteRecord(roleID, userID);
+                }
+            }
         }
 
         /// <summary>

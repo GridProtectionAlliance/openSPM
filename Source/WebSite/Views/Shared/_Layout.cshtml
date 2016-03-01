@@ -47,14 +47,14 @@
     menuImagePath = menuImagePath.EnsureEnd('/');
 
     // Load menu items for this page from database table
-    List<MenuItem> menuItems = dataContext.QueryRecords<MenuItem>("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY SortOrder", page?.MenuID ?? 0).ToList();
+    List<MenuItem> menuItems = dataContext.Table<MenuItem>().QueryRecords("SELECT ID FROM MenuItem WHERE MenuID={0} AND Enabled <> 0 ORDER BY SortOrder", page?.MenuID ?? 0).ToList();
     List<MenuItem> unavailableMenuItems = new List<MenuItem>();
 
     foreach (MenuItem menuItem in menuItems) {
         // If no menu link was provided, check for page table reference
         if (string.IsNullOrWhiteSpace(menuItem.Link) && menuItem.PageID > 0) {
             // Look-up associated page form menu item
-            Page menuPage = dataContext.QueryRecord<Page>(menuItem.PageID);
+            Page menuPage = dataContext.Table<Page>().LoadRecord(menuItem.PageID);
 
             // Check if menu item is enabled, page location is specified and that user has rights to page
             if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(menuPage.PageLocation) &&

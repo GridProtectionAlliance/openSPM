@@ -198,6 +198,7 @@
     <Compile Include="Models\ActionItem.cs" />
     <Compile Include="Models\ActionStatus.cs" />
     <Compile Include="Models\ApplicationRole.cs" />
+    <Compile Include="Models\ApplicationRoleUserAccount.cs" />
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\Assessment.cs" />
     <Compile Include="Models\BusinessUnitGroup.cs" />

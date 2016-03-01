@@ -23,6 +23,7 @@
 
 using System;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Principal;
 using System.Threading;
@@ -55,7 +56,7 @@ namespace openSPM.Attributes
                 Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0];
         }
 
-
+        [MethodImpl(MethodImplOptions.Synchronized)]
         protected override bool UserAuthorized(IPrincipal user)
         {
             // Get current user name

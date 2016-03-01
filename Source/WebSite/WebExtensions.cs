@@ -117,7 +117,7 @@ namespace openSPM
         {
             Dictionary<string, string> settings = new Dictionary<string, string>();
 
-            foreach (Settings setting in dataContext.QueryRecords<Settings>("SELECT ID FROM Settings WHERE Scope={0}", scope))
+            foreach (Settings setting in dataContext.Table<Settings>().QueryRecords("SELECT ID FROM Settings WHERE Scope={0}", scope))
             {
                 if (!string.IsNullOrEmpty(setting.Name))
                     settings.Add(setting.Name, setting.Value);

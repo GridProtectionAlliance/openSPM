@@ -115,7 +115,7 @@ namespace openSPM.Models
 
             int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
 
-            foreach (ValueList valueList in DataContext.QueryRecords<ValueList>("SELECT ID FROM ValueList WHERE GroupID={0} AND Enabled <> 0 AND Hidden = 0", key))
+            foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SELECT ID FROM ValueList WHERE GroupID={0} AND Enabled <> 0 AND Hidden = 0", key))
                 javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
 
             javascript.AppendLine($"\r\n        function {lookupFunctionName}(value) {{");
@@ -295,7 +295,7 @@ namespace openSPM.Models
         public void LookupPageDetail(RequestContext requestContext, string pageName, dynamic viewBag)
         {
             int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
-            Page page = DataContext.QueryRecord<Page>(pageID);
+            Page page = DataContext.Table<Page>().LoadRecord(pageID);
             Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
 
             viewBag.Page = page;

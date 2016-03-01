@@ -164,37 +164,6 @@ namespace openSPM.Models
         }
 
         /// <summary>
-        /// Queries a new modeled table record using the specified <paramref name="primaryKeys"/>.
-        /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
-        /// <param name="primaryKeys">Primary keys values of the record to load.</param>
-        /// <returns>New modeled table record queried from the specified <paramref name="primaryKeys"/>.</returns>
-        public T QueryRecord<T>(params object[] primaryKeys) where T : class, new()
-        {
-            return Table<T>().LoadRecord(primaryKeys);
-        }
-
-        /// <summary>
-        /// Queries database and returns modeled table records for the specified sql statement and parameters.
-        /// </summary>
-        /// <param name="sqlFormat">SQL expression to query.</param>
-        /// <param name="parameters">Parameters for query, if any.</param>
-        /// <returns>An enumerable of modeled table row instances for queried records.</returns>
-        public IEnumerable<T> QueryRecords<T>(string sqlFormat, params object[] parameters) where T : class, new()
-        {
-            try
-            {
-                TableOperations<T> tableOperations = Table<T>();
-                return m_connection.RetrieveData(sqlFormat, parameters).AsEnumerable().Select(row => tableOperations.LoadRecord(tableOperations.GetPrimaryKeys(row)));
-            }
-            catch (Exception ex)
-            {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlFormat}{ParamList(parameters)}\": {ex.Message}", ex));
-                return Enumerable.Empty<T>();
-            }
-        }
-
-        /// <summary>
         /// Gets the field name targeted as the primary label for the modeled table.
         /// </summary>
         /// <typeparam name="T">Modeled table.</typeparam>
@@ -751,7 +720,7 @@ namespace openSPM.Models
 
             if (restriction == null)
             {
-                foreach (TOption record in QueryRecords<TOption>($"SELECT * FROM {optionTableName} ORDER BY {optionSortFieldName}"))
+                foreach (TOption record in Table<TOption>().QueryRecords($"SELECT * FROM {optionTableName} ORDER BY {optionSortFieldName}"))
                 {
                     if (record != null)
                         options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));
@@ -759,7 +728,7 @@ namespace openSPM.Models
             }
             else
             {
-                foreach (TOption record in QueryRecords<TOption>($"SELECT * FROM {optionTableName} WHERE {restriction.FilterExpression} ORDER BY {optionSortFieldName}", restriction.Parameters))
+                foreach (TOption record in Table<TOption>().QueryRecords($"SELECT * FROM {optionTableName} WHERE {restriction.FilterExpression} ORDER BY {optionSortFieldName}", restriction.Parameters))
                 {
                     if (record != null)
                         options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));

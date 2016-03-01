@@ -197,22 +197,22 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(Patch), RecordOperation.AddNewRecord)]
-        public void AddNewPatch(Patch patch)
+        public void AddNewPatch(Patch record)
         {
-            patch.CreatedByID = GetCurrentUserID();
-            patch.CreatedOn = DateTime.UtcNow;
-            patch.UpdatedByID = patch.CreatedByID;
-            patch.UpdatedOn = patch.CreatedOn;
-            m_dataContext.Table<Patch>().AddNewRecord(patch);
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            m_dataContext.Table<Patch>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(Patch), RecordOperation.UpdateRecord)]
-        public void UpdatePatch(Patch patch)
+        public void UpdatePatch(Patch record)
         {
-            patch.UpdatedByID = GetCurrentUserID();
-            patch.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Patch>().UpdateRecord(patch);
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Patch>().UpdateRecord(record);
         }
 
         #endregion
@@ -259,22 +259,22 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Vendor), RecordOperation.AddNewRecord)]
-        public void AddNewVendor(Vendor vendor)
+        public void AddNewVendor(Vendor record)
         {
-            vendor.CreatedByID = GetCurrentUserID();
-            vendor.CreatedOn = DateTime.UtcNow;
-            vendor.UpdatedByID = vendor.CreatedByID;
-            vendor.UpdatedOn = vendor.CreatedOn;
-            m_dataContext.Table<Vendor>().AddNewRecord(vendor);
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            m_dataContext.Table<Vendor>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Vendor), RecordOperation.UpdateRecord)]
-        public void UpdateVendor(Vendor vendor)
+        public void UpdateVendor(Vendor record)
         {
-            vendor.UpdatedByID = GetCurrentUserID();
-            vendor.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Vendor>().UpdateRecord(vendor);
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Vendor>().UpdateRecord(record);
         }
 
         #endregion
@@ -321,22 +321,84 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Platform), RecordOperation.AddNewRecord)]
-        public void AddNewPlatform(Platform vendor)
+        public void AddNewPlatform(Platform record)
         {
-            vendor.CreatedByID = GetCurrentUserID();
-            vendor.CreatedOn = DateTime.UtcNow;
-            vendor.UpdatedByID = vendor.CreatedByID;
-            vendor.UpdatedOn = vendor.CreatedOn;
-            m_dataContext.Table<Platform>().AddNewRecord(vendor);
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            m_dataContext.Table<Platform>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Platform), RecordOperation.UpdateRecord)]
-        public void UpdatePlatform(Platform vendor)
+        public void UpdatePlatform(Platform record)
         {
-            vendor.UpdatedByID = GetCurrentUserID();
-            vendor.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Platform>().UpdateRecord(vendor);
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Platform>().UpdateRecord(record);
+        }
+
+        #endregion
+
+        #region [ BusinessUnitGroup Table Operations ]
+
+        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.QueryRecordCount)]
+        public int QueryBusinessUnitGroupCount(bool showDeleted)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<BusinessUnitGroup>().QueryRecordCount();
+
+            return m_dataContext.Table<BusinessUnitGroup>().QueryRecordCount(new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
+        }
+
+        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.QueryRecords)]
+        public IEnumerable<BusinessUnitGroup> QueryBusinessUnitGroups(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<BusinessUnitGroup>().QueryRecords(sortField, ascending, page, pageSize);
+
+            return m_dataContext.Table<BusinessUnitGroup>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.DeleteRecord)]
+        public void DeleteBusinessUnitGroup(int id)
+        {
+            // For BusinessUnitGroups, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE BusinessUnitGroup SET IsDeleted=1 WHERE ID={0}", id);
+        }
+
+        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.CreateNewRecord)]
+        public BusinessUnitGroup NewBusinessUnitGroup()
+        {
+            return new BusinessUnitGroup();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.AddNewRecord)]
+        public void AddNewBusinessUnitGroup(BusinessUnitGroup record)
+        {
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            m_dataContext.Table<BusinessUnitGroup>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.UpdateRecord)]
+        public void UpdateBusinessUnitGroup(BusinessUnitGroup record)
+        {
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<BusinessUnitGroup>().UpdateRecord(record);
         }
 
         #endregion
@@ -357,6 +419,11 @@ namespace openSPM
             return m_dataContext.Table<UserAccount>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        public UserAccount QueryUserAccount(Guid id)
+        {
+            return m_dataContext.QueryRecord<UserAccount>(id);
+        }
+
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(UserAccount), RecordOperation.DeleteRecord)]
         public void DeleteUserAccount(Guid id)
@@ -373,24 +440,24 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(UserAccount), RecordOperation.AddNewRecord)]
-        public void AddNewUserAccount(UserAccount user)
+        public void AddNewUserAccount(UserAccount record)
         {
-            user.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
-            user.CreatedBy = UserInfo.CurrentUserID;
-            user.CreatedOn = DateTime.UtcNow;
-            user.UpdatedBy = user.CreatedBy;
-            user.UpdatedOn = user.CreatedOn;
-            m_dataContext.Table<UserAccount>().AddNewRecord(user);
+            record.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
+            record.CreatedBy = UserInfo.CurrentUserID;
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedBy = record.CreatedBy;
+            record.UpdatedOn = record.CreatedOn;
+            m_dataContext.Table<UserAccount>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(UserAccount), RecordOperation.UpdateRecord)]
-        public void UpdateUserAccount(UserAccount user)
+        public void UpdateUserAccount(UserAccount record)
         {
-            user.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
-            user.UpdatedBy = UserInfo.CurrentUserID;
-            user.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<UserAccount>().UpdateRecord(user);
+            record.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
+            record.UpdatedBy = UserInfo.CurrentUserID;
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<UserAccount>().UpdateRecord(record);
         }
 
         #endregion
@@ -427,17 +494,17 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Page), RecordOperation.AddNewRecord)]
-        public void AddNewPage(Page page)
+        public void AddNewPage(Page record)
         {
-            page.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Page>().AddNewRecord(page);
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Page>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Page), RecordOperation.UpdateRecord)]
-        public void UpdatePage(Page page)
+        public void UpdatePage(Page record)
         {
-            m_dataContext.Table<Page>().UpdateRecord(page);
+            m_dataContext.Table<Page>().UpdateRecord(record);
         }
 
         #endregion
@@ -474,17 +541,17 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Menu), RecordOperation.AddNewRecord)]
-        public void AddNewMenu(Menu menu)
+        public void AddNewMenu(Menu record)
         {
-            menu.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Menu>().AddNewRecord(menu);
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Menu>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Menu), RecordOperation.UpdateRecord)]
-        public void UpdateMenu(Menu menu)
+        public void UpdateMenu(Menu record)
         {
-            m_dataContext.Table<Menu>().UpdateRecord(menu);
+            m_dataContext.Table<Menu>().UpdateRecord(record);
         }
 
         #endregion
@@ -529,16 +596,16 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(MenuItem), RecordOperation.AddNewRecord)]
-        public void AddNewMenuItem(MenuItem menuItem)
+        public void AddNewMenuItem(MenuItem record)
         {
-            m_dataContext.Table<MenuItem>().AddNewRecord(menuItem);
+            m_dataContext.Table<MenuItem>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(MenuItem), RecordOperation.UpdateRecord)]
-        public void UpdateMenuItem(MenuItem menuItem)
+        public void UpdateMenuItem(MenuItem record)
         {
-            m_dataContext.Table<MenuItem>().UpdateRecord(menuItem);
+            m_dataContext.Table<MenuItem>().UpdateRecord(record);
         }
 
         #endregion
@@ -575,17 +642,17 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueListGroup), RecordOperation.AddNewRecord)]
-        public void AddNewValueListGroup(ValueListGroup valueListGroup)
+        public void AddNewValueListGroup(ValueListGroup record)
         {
-            valueListGroup.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<ValueListGroup>().AddNewRecord(valueListGroup);
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<ValueListGroup>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueListGroup), RecordOperation.UpdateRecord)]
-        public void UpdateValueListGroup(ValueListGroup valueListGroup)
+        public void UpdateValueListGroup(ValueListGroup record)
         {
-            m_dataContext.Table<ValueListGroup>().UpdateRecord(valueListGroup);
+            m_dataContext.Table<ValueListGroup>().UpdateRecord(record);
         }
 
         #endregion
@@ -631,17 +698,17 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.AddNewRecord)]
-        public void AddNewValueList(ValueList valueList)
+        public void AddNewValueList(ValueList record)
         {
-            valueList.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<ValueList>().AddNewRecord(valueList);
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<ValueList>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.UpdateRecord)]
-        public void UpdateValueList(ValueList valueList)
+        public void UpdateValueList(ValueList record)
         {
-            m_dataContext.Table<ValueList>().UpdateRecord(valueList);
+            m_dataContext.Table<ValueList>().UpdateRecord(record);
         }
 
         #endregion

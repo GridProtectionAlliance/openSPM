@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  Platforms.cshtml - Gbtc
+//  BusinessUnitGroups.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -30,6 +30,7 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { "Name", "Name", "text-center" },
+        new[] { null, "Coordinator", "text-center" },
         new[] { "Description", "Description", "text-left" },
     };
 
@@ -38,8 +39,9 @@
 }
 @helper BodyRows()
 {
-    <td width="35%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
-    <td width="60%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Description, 1.5), attr: {title: Description}"></div></td>
+    <td width="25%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: AccountName(), attr: {title: CoordinatorID}, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Description, 2), attr: {title: Description}"></div></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -50,16 +52,43 @@
     DataContext dataContext = Model.DataContext;
 
     <div class="col-md-12">
-        @Html.Raw(dataContext.AddSelectField<Platform, Vendor>("VendorID", "ID", "Name"))
-        @Html.Raw(dataContext.AddInputField<Platform>("Name", initialFocus: true))
-        @Html.Raw(dataContext.AddInputField<Platform>("Abbreviation"))
-        @Html.Raw(dataContext.AddTextAreaField<Platform>("Description"))
+        @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Name", initialFocus: true))
+        @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Abbreviation"))
+        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("CoordinatorID", "ID", "Name"))
+        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("AlternateBUCID", "ID", "Name"))
+        @Html.Raw(dataContext.AddTextAreaField<BusinessUnitGroup>("Description"))
     </div>
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
     @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Platform>(ViewBag))
+        "use strict";
+
+        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<BusinessUnitGroup>(ViewBag))
+        function lookupAccountName(record) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryUserAccount(record.CoordinatorID).done(function (userAccount) {
+                    dataHub.sIDToAccountName(userAccount.Name).done(function (accountName) {
+                        record.AccountName(accountName);
+                    });
+                });
+            }
+        }
+
+        $(viewModel).on("pageRecordsQueried", function (event, records) {
+            for (let i = 0; i < records.length; i++) {
+                records[i].AccountName = ko.observable(records[i].CoordinatorID);
+                lookupAccountName(records[i]);
+            }
+        });
+
+        $(viewModel).on("newRecord", function (event, newRecord) {
+            newRecord.AccountName = ko.observable("");
+        });
+
+        $(viewModel).on("derivingJSRecord", function (event, observableRecord) {
+            delete observableRecord.AccountName;
+        });
     </script>
 }

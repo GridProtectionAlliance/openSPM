@@ -101,6 +101,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult BusinessUnitGroups()
+        {
+            m_appModel.LookupPageDetail<BusinessUnitGroup>(m_dataContext, Url.RequestContext, "BusinessUnitGroups", ViewBag);
+            return View();
+        }
+
         public ActionResult Help()
         {
             m_appModel.LookupPageDetail(Url.RequestContext, "Help", ViewBag);

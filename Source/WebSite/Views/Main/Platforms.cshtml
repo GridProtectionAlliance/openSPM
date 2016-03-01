@@ -50,6 +50,7 @@
     DataContext dataContext = Model.DataContext;
 
     <div class="col-md-12">
+        @Html.Raw(dataContext.AddSelectField<Platform, Vendor>("VendorID", "ID", "Name"))
         @Html.Raw(dataContext.AddInputField<Platform>("Name", initialFocus: true))
         @Html.Raw(dataContext.AddInputField<Platform>("Abbreviation"))
         @Html.Raw(dataContext.AddTextAreaField<Platform>("Description", 5))

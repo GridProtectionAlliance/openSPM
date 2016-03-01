@@ -38,6 +38,10 @@ namespace openSPM.Models
         public int ID { get; set; }
 
         [Required]
+        [Label("Patch Vendor")]
+        public int VendorID { get; set; }
+
+        [Required]
         public string Name { get; set; }
 
         [Required]

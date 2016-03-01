@@ -50,5 +50,9 @@ namespace openSPM.Models
         public DateTime UpdatedOn { get; set; }
 
         public Guid UpdatedByID { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+
+        public Guid CreatedByID { get; set; }
     }
 }

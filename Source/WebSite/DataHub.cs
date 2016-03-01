@@ -100,6 +100,61 @@ namespace openSPM
             return base.OnDisconnected(stopCalled);
         }
 
+        #endregion
+
+        #region [ Static ]
+
+        // Static Properties
+
+        /// <summary>
+        /// Gets the hub connection ID for the current thread.
+        /// </summary>
+        public static string CurrentConnectionID => s_connectionID.Value;
+
+        // Static Fields
+        private static volatile int s_connectCount;
+        private static readonly ThreadLocal<string> s_connectionID = new ThreadLocal<string>();
+        private static readonly Dictionary<Type, Tuple<string, string>[]> s_recordOperations = new Dictionary<Type, Tuple<string, string>[]>();
+
+        // Static Constructor
+        static DataHub()
+        {
+            int recordOperations = Enum.GetValues(typeof(RecordOperation)).Length;
+
+            // Analyze and cache data hub methods that are targeted for record operations
+            foreach (MethodInfo method in typeof(DataHub).GetMethods(BindingFlags.Public | BindingFlags.Instance))
+            {
+                AuthorizeHubRoleAttribute authorizeHubRoleAttribute;
+                RecordOperationAttribute recordOperationAttribute;
+
+                method.TryGetAttribute(out authorizeHubRoleAttribute);
+
+                if (method.TryGetAttribute(out recordOperationAttribute))
+                {
+                    // Cache method name and any defined authorized roles for current record operation
+                    s_recordOperations.GetOrAdd(recordOperationAttribute.ModelType,
+                        type => new Tuple<string, string>[recordOperations])[(int)recordOperationAttribute.Operation] =
+                        new Tuple<string, string>(method.Name, authorizeHubRoleAttribute?.AllowedRoles?.ToDelimitedString(','));
+                }
+            }
+        }
+
+        // Static Methods
+
+        /// <summary>
+        /// Gets record operation methods for specified modeled table.
+        /// </summary>
+        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <returns>record operation methods for specified modeled table.</returns>
+        public static Tuple<string, string>[] GetRecordOperations<T>() where T : class, new()
+        {
+            return s_recordOperations[typeof(T)];
+        }
+
+        #endregion
+
+        // Client-side script functionality
+
         #region [ Patch Table Operations ]
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
@@ -220,6 +275,68 @@ namespace openSPM
             vendor.UpdatedByID = GetCurrentUserID();
             vendor.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Vendor>().UpdateRecord(vendor);
+        }
+
+        #endregion
+
+        #region [ Platform Table Operations ]
+
+        [RecordOperation(typeof(Platform), RecordOperation.QueryRecordCount)]
+        public int QueryPlatformCount(bool showDeleted)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<Platform>().QueryRecordCount();
+
+            return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
+        }
+
+        [RecordOperation(typeof(Platform), RecordOperation.QueryRecords)]
+        public IEnumerable<Platform> QueryPlatforms(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize);
+
+            return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
+            {
+                FilterExpression = "IsDeleted = 0"
+            });
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Platform), RecordOperation.DeleteRecord)]
+        public void DeletePlatform(int id)
+        {
+            // For Platforms, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE Platform SET IsDeleted=1 WHERE ID={0}", id);
+        }
+
+        [RecordOperation(typeof(Platform), RecordOperation.CreateNewRecord)]
+        public Platform NewPlatform()
+        {
+            return new Platform();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Platform), RecordOperation.AddNewRecord)]
+        public void AddNewPlatform(Platform vendor)
+        {
+            vendor.CreatedByID = GetCurrentUserID();
+            vendor.CreatedOn = DateTime.UtcNow;
+            vendor.UpdatedByID = vendor.CreatedByID;
+            vendor.UpdatedOn = vendor.CreatedOn;
+            m_dataContext.Table<Platform>().AddNewRecord(vendor);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Platform), RecordOperation.UpdateRecord)]
+        public void UpdatePlatform(Platform vendor)
+        {
+            vendor.UpdatedByID = GetCurrentUserID();
+            vendor.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Platform>().UpdateRecord(vendor);
         }
 
         #endregion
@@ -585,59 +702,6 @@ namespace openSPM
             Guid userID;
             MvcApplication.UserIDCache.TryGetValue(UserInfo.CurrentUserID, out userID);
             return userID;
-        }
-
-        #endregion
-
-        #endregion
-
-        #region [ Static ]
-
-        // Static Properties
-
-        /// <summary>
-        /// Gets the hub connection ID for the current thread.
-        /// </summary>
-        public static string CurrentConnectionID => s_connectionID.Value;
-
-        // Static Fields
-        private static volatile int s_connectCount;
-        private static readonly ThreadLocal<string> s_connectionID = new ThreadLocal<string>();
-        private static readonly Dictionary<Type, Tuple<string, string>[]> s_recordOperations = new Dictionary<Type, Tuple<string, string>[]>();
-
-        // Static Constructor
-        static DataHub()
-        {
-            int recordOperations = Enum.GetValues(typeof(RecordOperation)).Length;
-
-            // Analyze and cache data hub methods that are targeted for record operations
-            foreach (MethodInfo method in typeof(DataHub).GetMethods(BindingFlags.Public | BindingFlags.Instance))
-            {
-                AuthorizeHubRoleAttribute authorizeHubRoleAttribute;
-                RecordOperationAttribute recordOperationAttribute;
-
-                method.TryGetAttribute(out authorizeHubRoleAttribute);
-
-                if (method.TryGetAttribute(out recordOperationAttribute))
-                {
-                    // Cache method name and any defined authorized roles for current record operation
-                    s_recordOperations.GetOrAdd(recordOperationAttribute.ModelType, 
-                        type => new Tuple<string, string>[recordOperations])[(int)recordOperationAttribute.Operation] = 
-                        new Tuple<string, string>(method.Name, authorizeHubRoleAttribute?.AllowedRoles?.ToDelimitedString(','));
-                }
-            }
-        }
-
-        // Static Methods
-
-        /// <summary>
-        /// Gets record operation methods for specified modeled table.
-        /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
-        /// <returns>record operation methods for specified modeled table.</returns>
-        public static Tuple<string, string>[] GetRecordOperations<T>() where T : class, new()
-        {
-            return s_recordOperations[typeof(T)];
         }
 
         #endregion

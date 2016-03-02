@@ -306,6 +306,7 @@
     <Content Include="Images\Menu\tbd.png" />
     <Content Include="Images\Menu\tvasop.png" />
     <Content Include="Images\Menu\user.png" />
+    <Content Include="Images\Menu\userGroups.png" />
     <Content Include="Images\openSPM.png" />
     <Content Include="Images\openSPM2.png" />
     <Content Include="Images\ProcessSteps\Large\1settings.png" />

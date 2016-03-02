@@ -237,7 +237,7 @@ namespace openSPM.Models
         /// <returns>Number of rows affected.</returns>
         public int DeleteRecord(RecordRestriction restriction)
         {
-            string deleteSql = s_deleteSql.Substring(0, s_updateSql.IndexOf(" WHERE ", StringComparison.OrdinalIgnoreCase) + 7);
+            string deleteSql = s_deleteSql.Substring(0, s_deleteSql.IndexOf(" WHERE ", StringComparison.OrdinalIgnoreCase) + 7);
 
             try
             {

@@ -134,7 +134,7 @@ namespace openSPM
                     // Cache method name and any defined authorized roles for current record operation
                     s_recordOperations.GetOrAdd(recordOperationAttribute.ModelType,
                         type => new Tuple<string, string>[recordOperations])[(int)recordOperationAttribute.Operation] =
-                        new Tuple<string, string>(method.Name, authorizeHubRoleAttribute?.AllowedRoles?.ToDelimitedString(','));
+                        new Tuple<string, string>(method.Name, authorizeHubRoleAttribute?.Roles);
                 }
             }
         }
@@ -752,33 +752,51 @@ namespace openSPM
         /// <returns><c>true</c> if user is in role; otherwise, <c>false</c>.</returns>
         public bool UserIsInRole(Guid userID, Guid roleID)
         {
-            return (m_dataContext.Connection.ExecuteScalar<int?>("SELECT COUNT(*) FROM ApplicationRoleUserAccount WHERE UserAccountID={0} AND ApplicationRoleID={1}", userID, roleID) ?? 0) > 0;
+            return m_dataContext.Table<ApplicationRoleUserAccount>().QueryRecordCount(new RecordRestriction
+            {
+                FilterExpression = "UserAccountID={0} AND ApplicationRoleID={1}",
+                Parameters = new object[] { userID, roleID }
+            }) > 0;
         }
 
         /// <summary>
-        /// Adds or removes a user from a role.
+        /// Adds user to a role.
         /// </summary>
         /// <param name="userID">User ID value.</param>
         /// <param name="roleID">Role ID value.</param>
-        /// <param name="value">Desired state for user role, i.e., in = <c>true</c>, out = <c>false</c>.</param>
+        /// <returns><c>true</c> if user was added; otherwise <c>false</c>.</returns>
         [AuthorizeHubRole("Administrator")]
-        public void SetUserInRole(Guid userID, Guid roleID, bool value)
+        public bool AddUserToRole(Guid userID, Guid roleID)
         {
-            if (UserIsInRole(userID, roleID) != value)
+            // Nothing to do if user is already in role
+            if (UserIsInRole(userID, roleID))
+                return false;
+
+            return m_dataContext.Table<ApplicationRoleUserAccount>().AddNewRecord(new ApplicationRoleUserAccount
             {
-                if (value)
-                {
-                    m_dataContext.Table<ApplicationRoleUserAccount>().AddNewRecord(new ApplicationRoleUserAccount
-                    {
-                        ApplicationRoleID = roleID,
-                        UserAccountID = userID
-                    });
-                }
-                else
-                {
-                    m_dataContext.Table<ApplicationRoleUserAccount>().DeleteRecord(roleID, userID);
-                }
-            }
+                ApplicationRoleID = roleID,
+                UserAccountID = userID
+            }) > 0;
+        }
+
+        /// <summary>
+        /// Removes user from a role.
+        /// </summary>
+        /// <param name="userID">User ID value.</param>
+        /// <param name="roleID">Role ID value.</param>
+        /// <returns><c>true</c> if user was removed; otherwise <c>false</c>.</returns>
+        [AuthorizeHubRole("Administrator")]
+        public bool RemoveUserFromRole(Guid userID, Guid roleID)
+        {
+            // Nothing to do if user is not currently in role
+            if (!UserIsInRole(userID, roleID))
+                return false;
+
+            return m_dataContext.Table<ApplicationRoleUserAccount>().DeleteRecord(new RecordRestriction
+            {
+                FilterExpression = "UserAccountID={0} AND ApplicationRoleID={1}",
+                Parameters = new object[] { userID, roleID }
+            }) > 0;
         }
 
         /// <summary>

@@ -23,7 +23,6 @@
 
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Principal;
 using System.Threading;
@@ -41,30 +40,66 @@ namespace openSPM.Attributes
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
     public class AuthorizeHubRoleAttribute : AuthorizeAttribute
     {
-        public readonly string[] AllowedRoles;
+        #region [ Members ]
 
+        // Fields
+        private string[] m_allowedRoles;
+
+        #endregion
+
+        #region [ Constructors ]
+
+        /// <summary>
+        /// Creates a new <see cref="AuthorizeHubRoleAttribute"/>.
+        /// </summary>
         public AuthorizeHubRoleAttribute()
         {
-            AllowedRoles = new string[0];
         }
 
+        /// <summary>
+        /// Creates a new <see cref="AuthorizeHubRoleAttribute"/> with specified allowed roles.
+        /// </summary>
         public AuthorizeHubRoleAttribute(string allowedRoles)
         {
             Roles = allowedRoles;
-
-            AllowedRoles = allowedRoles?.Split(',').Select(role => role.Trim()).
-                Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0];
         }
 
-        [MethodImpl(MethodImplOptions.Synchronized)]
+        #endregion
+
+        #region [ Properties ]
+
+        /// <summary>
+        /// Gets the allowed <see cref="AuthorizeAttribute.Roles"/> as a string array.
+        /// </summary>
+        public string[] AllowedRoles => m_allowedRoles ?? (m_allowedRoles = Roles?.Split(',').Select(role => role.Trim()).Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0]);
+
+        #endregion
+
+        #region [ Methods ]
+
+        /// <summary>
+        /// Provides an entry point for custom authorization checks.
+        /// </summary>
+        /// <param name="user">The <see cref="IPrincipal"/> for the client being authorize</param>
+        /// <returns>
+        /// <c>true</c> if the user is authorized, otherwise, <c>false</c>.
+        /// </returns>
         protected override bool UserAuthorized(IPrincipal user)
         {
             // Get current user name
             string userName = user.Identity.Name;
 
-            // Initialize the security principal from caller's windows identity if uninitialized.
+            // Initialize the security principal from caller's windows identity if uninitialized, note that
+            // simply by checking current provider any existing cached security principal will be restored
             if (SecurityProviderCache.CurrentProvider == null)
-                SecurityProviderCache.CurrentProvider = SecurityProviderUtility.CreateProvider(user.Identity.Name);
+            {
+                lock (typeof(AuthorizeHubRoleAttribute))
+                {
+                    // Let's see if we won the race...
+                    if (SecurityProviderCache.CurrentProvider == null)
+                        SecurityProviderCache.CurrentProvider = SecurityProviderUtility.CreateProvider(userName);
+                }
+            }
 
             // Setup the principal
             user = Thread.CurrentPrincipal;
@@ -87,5 +122,7 @@ namespace openSPM.Attributes
 
             return true;
         }
+
+        #endregion
     }
 }

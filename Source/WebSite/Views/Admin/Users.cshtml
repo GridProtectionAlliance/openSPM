@@ -60,10 +60,8 @@
                 <div style="display: none">
                     @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("UseADAuthentication"))
                 </div>
-                @* Adding non-modeled virtual field UseDBAuthentication check-box that represents boolean opposite of UseADAuthentication *@
-                <div class="checkbox">
-                    <label for="checkUseDBAuthentication"><input type="checkbox" id="checkUseDBAuthentication" data-bind="checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Use Database Authentication</label>
-                </div>
+                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Active Directory Authentication</label>
+                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Database Authentication</label>
             </div>
             <div class="panel-body" data-bind="visible: UseDBAuthentication">
                 <div class="row">
@@ -173,6 +171,7 @@
         function openRolesEditor(record) {            
             $("#currentUserID").text(record.ID);
             $("#currentUserName").text(record.AccountName());
+            $("#editRolesDialog input:checkbox").prop("checked", false);
             
             if (viewModel.dataHubIsConnected()) {
                 dataHub.queryApplicationRoles().done(function (roles) {
@@ -202,14 +201,26 @@
             $("#editRolesDialog").modal({ show: false, backdrop: "static" });
 
             $("#saveRolesButton").click(function () {
-                alert("Found " + $("#editRolesDialog input:checkbox").length + " checkboxes for " + $("#currentUserID").text() +  "!");
-                //self.updateRecord(record).done(function () {
-                //    self.initialize();
-                //    $(self).trigger("recordSaved", [record, false]);
-                //    showInfoMessage("Saved updated record...");
-                //}).fail(function (error) {
-                //    showErrorMessage(error);
-                //});
+                if (viewModel.dataHubIsConnected()) {
+                    const userID = $("#currentUserID").text();
+                    const roles = $("#editRolesDialog input:checkbox");
+
+                    for (let i = 0; i < roles.length; i++) {
+                        const element = $(roles[i]);
+                        const roleID = element.attr("id");
+
+                        if (element.prop("checked")) {
+                            dataHub.addUserToRole(userID, roleID).fail(function(error) {
+                                showErrorMessage(error);
+                            });
+                        }
+                        else {
+                            dataHub.removeUserFromRole(userID, roleID).fail(function (error) {
+                                showErrorMessage(error);
+                            });
+                        }
+                    }
+                }
             });
         });
     </script>

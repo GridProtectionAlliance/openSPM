@@ -622,3 +622,33 @@ $.fn.visible = function () {
 $.fn.invisible = function () {
     return this.css("visibility", "hidden");
 }
+
+// Returns deferred for .done() attachment that will be resolved when all specified events handlers have completed
+// http://stackoverflow.com/questions/5009194/how-to-use-jquery-deferred-with-custom-events
+$.fn.when = function (events) {
+
+    var deferred, $element, elemIndex, eventIndex;
+
+    // Get the list of events
+    events = events.split(/\s+/g);
+
+    // We will store one deferred per event and per element
+    var deferreds = [];
+
+    // For each element
+    for (elemIndex = 0; elemIndex < this.length; elemIndex++) {
+        $element = $(this[elemIndex]);
+
+        // For each event
+        for (eventIndex = 0; eventIndex < events.length; eventIndex++) {
+            // Store a Deferred...
+            deferreds.push((deferred = $.Deferred()));
+
+            // ... that is resolved when the event is fired on this element
+            $element.one(events[eventIndex], deferred.resolve);
+        }
+    }
+
+    // Return a promise resolved once all events fired on all elements
+    return $.when.apply(null, deferreds);
+};

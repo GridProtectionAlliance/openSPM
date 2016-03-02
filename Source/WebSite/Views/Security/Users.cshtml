@@ -54,10 +54,11 @@
         @Html.Raw(dataContext.AddInputField<UserAccount>("Name", initialFocus: true))
         <div class="panel panel-default" data-bind="css: {'panel-readonly': $root.recordMode()===RecordMode.View, 'panel-primary': UseDBAuthentication}">
             <div class="panel-heading">
-                @* Adding actual field check-box, but hidden, to pick-up any model based field initializers *@
+                @* Adding actual UseADAuthentication field check-box, but hidden, to pick-up any model based field initializers *@
                 <div style="display: none">
                     @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("UseADAuthentication"))
                 </div>
+                @* Adding radio buttons bound to virtual UseDBAuthentication that models negated state of UseADAuthentication field for simplified dependency field initialization *@
                 <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Active Directory Authentication</label>
                 <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Database Authentication</label>
             </div>
@@ -132,7 +133,6 @@
         "use strict";
 
         @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
-
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.sIDToAccountName(record.Name).done(function(accountName) {
@@ -142,6 +142,7 @@
         }
 
         $(viewModel).on("pageRecordsQueried", function(event, records) {
+            // Add a virtual observable field called "AccountName" that will resolve SID values to account names
             for (let i = 0; i < records.length; i++) {
                 records[i].AccountName = ko.observable("...");
                 lookupAccountName(records[i]);
@@ -149,18 +150,24 @@
         });
 
         $(viewModel).on("newRecord", function(event, newRecord) {
+            // Make sure new records get virtual field
             newRecord.AccountName = ko.observable("");
         });
 
-        $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
+        $(viewModel).on("derivingObservableRecord", function (event, observableRecord) {
+            // Create a virtual UseDBAuthentication field that is negated state of actual UseADAuthentication field
             observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
 
+            // Load human readable account name into Name field
             if (observableRecord.AccountName)
                 observableRecord.Name(observableRecord.AccountName());
         });
 
-        $(viewModel).on("derivingJSRecord", function(event, observableRecord) {
+        $(viewModel).on("derivingJSRecord", function (event, observableRecord) {
+            // Set state of actual field to be negated state of virtual field
             observableRecord.UseADAuthentication(!observableRecord.UseDBAuthentication());
+
+            // Remove virtual observable fields before serialization for record updates
             delete observableRecord.UseDBAuthentication;
             delete observableRecord.AccountName;
         });

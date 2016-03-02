@@ -305,8 +305,8 @@
         $(viewModel).on(""derivingObservableRecord"", function(event, observableRecord) {{
             // Convert date objects to strings");
 
-        foreach (string dataField in dataContext.DefinedDateFields) {
-            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(notNull(observableRecord.{0}()).formatDate(DateFormat));", dataField);
+        foreach (string dateField in dataContext.DefinedDateFields) {
+            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(notNull(observableRecord.{0}()).formatDate(DateFormat));", dateField);
         }
 
         pageControlScripts.Append("\r\n        });");
@@ -316,8 +316,8 @@
         $(viewModel).on(""derivingJSRecord"", function(event, observableRecord) {{
             // Convert date strings back to date objects before serialization");
 
-        foreach (string dataField in dataContext.DefinedDateFields) {
-            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().toDate());", dataField);
+        foreach (string dateField in dataContext.DefinedDateFields) {
+            pageControlScripts.AppendFormat("\r\n            observableRecord.{0}(observableRecord.{0}().toDate());", dateField);
         }
 
         pageControlScripts.Append("\r\n        });");

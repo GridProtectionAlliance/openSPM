@@ -593,6 +593,10 @@ namespace openSPM
         [RecordOperation(typeof(MenuItem), RecordOperation.AddNewRecord)]
         public void AddNewMenuItem(MenuItem record)
         {
+            // TODO: MenuItem.Text is currently required in database, but empty should be allowed for spacer items
+            if (string.IsNullOrEmpty(record.Text))
+                record.Text = " ";
+
             m_dataContext.Table<MenuItem>().AddNewRecord(record);
         }
 
@@ -600,6 +604,10 @@ namespace openSPM
         [RecordOperation(typeof(MenuItem), RecordOperation.UpdateRecord)]
         public void UpdateMenuItem(MenuItem record)
         {
+            // TODO: MenuItem.Text is currently required in database, but empty should be allowed for spacer items
+            if (string.IsNullOrEmpty(record.Text))
+                record.Text = " ";
+
             m_dataContext.Table<MenuItem>().UpdateRecord(record);
         }
 

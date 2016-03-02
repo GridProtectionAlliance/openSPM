@@ -62,8 +62,7 @@ namespace openSPM.Models
         {
             get; set;
         }
-
-        [Required]
+        
         [Label("Menu Text")]
         [StringLength(20)]
         public string Text

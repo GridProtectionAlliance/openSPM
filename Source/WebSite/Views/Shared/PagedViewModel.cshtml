@@ -25,6 +25,10 @@
 @using openSPM.Models
 @model AppModel
 @{
+    if (ViewBag.PageControlScripts == null) {
+        ViewBag.PageControlScripts = new StringBuilder();
+    }
+
     StringBuilder pageControlScripts = ViewBag.PageControlScripts;
 
     // Setup page control scripts
@@ -61,23 +65,12 @@
         showingDeletedRecords = Convert.ToBoolean(ViewBag.ShowDeleted);
     }
 
-    // Setup default roles if none are defined
-    if (ViewBag.EditRoles == null) {
-        ViewBag.EditRoles = "*";
-    }
-
-    if (ViewBag.AddNewRoles == null) {
-        ViewBag.AddNewRoles = ViewBag.EditRoles;
-    }
-
-    if (ViewBag.DeleteRoles == null) {
-        ViewBag.DeleteRoles = ViewBag.EditRoles;
-    }
-
-    // Check current allowed roles for user
-    bool canEdit = Model.UserIsInRole(ViewBag.EditRoles);
-    bool canAddNew = Model.UserIsInRole(ViewBag.AddNewRoles);
-    bool canDelete = Model.UserIsInRole(ViewBag.DeleteRoles);
+    // Get current allowed create / update / delete states for user - default to none.
+    // Note that overriding view bag settings will only affect UI, back end security
+    // will still be applicable
+    bool canEdit = ViewBag.CanEdit ?? false;
+    bool canAddNew = ViewBag.CanAddNew ?? false;
+    bool canDelete = ViewBag.CanDelete ?? false;
 }
 @functions
 {

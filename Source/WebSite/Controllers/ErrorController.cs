@@ -25,6 +25,9 @@ using System.Web.Mvc;
 
 namespace openSPM.Controllers
 {
+    /// <summary>
+    /// Represents a MVC controller for the site's error pages.
+    /// </summary>
     public class ErrorController : Controller
     {
         [AllowAnonymous]

@@ -199,6 +199,7 @@
     @* ReSharper disable once Html.PathError *@
     <script src="/signalr/hubs"></script>
     @Scripts.Render("~/js.bundle/site")
+    @Html.Raw(ViewBag.PageControlScripts?.ToString())
     @RenderSection("Scripts", false)
 </body>
 </html>

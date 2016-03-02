@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  AdminController.cs - Gbtc
+//  SettingsController.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/17/2016 - J. Ritchie Carroll
+//  03/02/2016 - Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -27,8 +27,11 @@ using openSPM.Models;
 
 namespace openSPM.Controllers
 {
-    [AuthorizeControllerRole("Administrator")]
-    public class AdminController : Controller
+    /// <summary>
+    /// Represents a MVC controller for the site's settings pages.
+    /// </summary>
+    [AuthorizeControllerRole]
+    public class SettingsController : Controller
     {
         #region [ Members ]
 
@@ -41,7 +44,10 @@ namespace openSPM.Controllers
 
         #region [ Constructors ]
 
-        public AdminController()
+        /// <summary>
+        /// Creates a new <see cref="SettingsController"/>.
+        /// </summary>
+        public SettingsController()
         {
             // Establish data context for the view
             m_dataContext = new DataContext();
@@ -57,7 +63,7 @@ namespace openSPM.Controllers
         #region [ Methods ]
 
         /// <summary>
-        /// Releases the unmanaged resources used by the <see cref="MainController"/> object and optionally releases the managed resources.
+        /// Releases the unmanaged resources used by the <see cref="SettingsController"/> object and optionally releases the managed resources.
         /// </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
@@ -79,43 +85,25 @@ namespace openSPM.Controllers
 
         public ActionResult Home()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "AdminHome", ViewBag);
+            m_appModel.ConfigureView(Url.RequestContext, "Settings.Home", ViewBag);
             return View();
         }
 
-        public ActionResult Users()
+        public ActionResult Vendors()
         {
-            m_appModel.LookupPageDetail<UserAccount>(m_dataContext, Url.RequestContext, "AdminUsers", ViewBag);
+            m_appModel.ConfigureView<Vendor>(m_dataContext, Url.RequestContext, "Settings.Vendors", ViewBag);
             return View();
         }
 
-        public ActionResult Pages()
+        public ActionResult Platforms()
         {
-            m_appModel.LookupPageDetail<Page>(m_dataContext, Url.RequestContext, "AdminPages", ViewBag);
+            m_appModel.ConfigureView<Platform>(m_dataContext, Url.RequestContext, "Settings.Platforms", ViewBag);
             return View();
         }
 
-        public ActionResult Menus()
+        public ActionResult BusinessUnitGroups()
         {
-            m_appModel.LookupPageDetail<Menu>(m_dataContext, Url.RequestContext, "AdminMenus", ViewBag);
-            return View();
-        }
-
-        public ActionResult MenuItems()
-        {
-            m_appModel.LookupPageDetail<MenuItem>(m_dataContext, Url.RequestContext, "AdminMenuItems", ViewBag);
-            return View();
-        }
-
-        public ActionResult ValueListGroups()
-        {
-            m_appModel.LookupPageDetail<ValueListGroup>(m_dataContext, Url.RequestContext, "AdminValueListGroups", ViewBag);
-            return View();
-        }
-
-        public ActionResult ValueListItems()
-        {
-            m_appModel.LookupPageDetail<ValueList>(m_dataContext, Url.RequestContext, "AdminValueListItems", ViewBag);
+            m_appModel.ConfigureView<BusinessUnitGroup>(m_dataContext, Url.RequestContext, "Settings.BusinessUnitGroups", ViewBag);
             return View();
         }
 

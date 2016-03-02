@@ -20,12 +20,10 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System.Text
 @using openSPM.Models
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
-    ViewBag.PageControlScripts = new StringBuilder();
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -44,7 +42,7 @@
     <td width="65%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: AccountName(), attr: {title: Name}, click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle"><input type="checkbox" id="checkEnabled" data-bind="checked: UseADAuthentication" disabled></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: CreatedOn.formatDate(DateFormat)"></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-primary btn-sm" data-bind="click: openRolesEditor.bind($data), enable: $parent.canEdit() && $parent.dataHubIsConnected()">Roles...</button></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openRolesEditor.bind($data), enable: $parent.canEdit() && $parent.dataHubIsConnected()">Roles...</button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -130,7 +128,6 @@
     </div>
 </div>
 @section Scripts {
-    @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
         "use strict";
 

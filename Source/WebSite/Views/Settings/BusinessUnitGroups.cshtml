@@ -20,11 +20,10 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System.Text
 @using openSPM.Models
 @model AppModel
 @{
-    ViewBag.PageControlScripts = new StringBuilder();
+    DataContext dataContext = Model.DataContext;
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -35,7 +34,7 @@
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
 @helper BodyRows()
 {
@@ -47,10 +46,8 @@
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-@helper AddNewEditDialog()
+@helper AddNewEditDialog(DataContext dataContext)
 {
-    DataContext dataContext = Model.DataContext;
-
     <div class="col-md-12">
         @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Name", initialFocus: true))
         @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Abbreviation"))
@@ -61,11 +58,10 @@
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
-    @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
         "use strict";
 
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<BusinessUnitGroup>(ViewBag))
+        @Html.Raw(dataContext.RenderViewModelConfiguration<BusinessUnitGroup>(ViewBag))
         // Resolve option label SID to an account name
         function lookupOptionLabel(element) {
             if (viewModel.dataHubIsConnected()) {

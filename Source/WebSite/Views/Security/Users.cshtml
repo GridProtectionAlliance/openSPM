@@ -133,6 +133,7 @@
         "use strict";
 
         @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
+
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.sIDToAccountName(record.Name).done(function(accountName) {
@@ -154,7 +155,7 @@
             newRecord.AccountName = ko.observable("");
         });
 
-        $(viewModel).on("derivingObservableRecord", function (event, observableRecord) {
+        $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Create a virtual UseDBAuthentication field that is negated state of actual UseADAuthentication field
             observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
 
@@ -163,22 +164,31 @@
                 observableRecord.Name(observableRecord.AccountName());
         });
 
-        $(viewModel).on("derivingJSRecord", function (event, observableRecord) {
+        $(viewModel).on("derivingJSRecord", function(event, observableRecord, promises) {
             // Set state of actual field to be negated state of virtual field
             observableRecord.UseADAuthentication(!observableRecord.UseDBAuthentication());
 
             // Remove virtual observable fields before serialization for record updates
             delete observableRecord.UseDBAuthentication;
             delete observableRecord.AccountName;
+
+            if (viewModel.dataHubIsConnected()) {
+                promises.push($.Deferred(function(deferred) {
+                    dataHub.userNameToSID().done(function(sid) {
+                        observableRecord.Name(sid);
+                        deferred.resolve();
+                    });
+                }).promise());
+            }
         });
 
-        function openRolesEditor(record) {            
+        function openRolesEditor(record) {
             $("#currentUserID").text(record.ID);
             $("#currentUserName").text(record.AccountName());
             $("#editRolesDialog input:checkbox").prop("checked", false);
-            
+
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryApplicationRoles().done(function (roles) {
+                dataHub.queryApplicationRoles().done(function(roles) {
                     var evaluations = roles.length;
 
                     if (evaluations > 0)
@@ -186,7 +196,7 @@
 
                     for (let i = 0; i < roles.length; i++) {
                         dataHub.userIsInRole(record.ID, roles[i].ID).done(function(roleID) {
-                            return function (result) {
+                            return function(result) {
                                 $("#" + roleID).prop("checked", result);
 
                                 evaluations--;
@@ -204,7 +214,7 @@
         $(function() {
             $("#editRolesDialog").modal({ show: false, backdrop: "static" });
 
-            $("#saveRolesButton").click(function () {
+            $("#saveRolesButton").click(function() {
                 if (viewModel.dataHubIsConnected()) {
                     const userID = $("#currentUserID").text();
                     const roles = $("#editRolesDialog input:checkbox");
@@ -217,9 +227,8 @@
                             dataHub.addUserToRole(userID, roleID).fail(function(error) {
                                 showErrorMessage(error);
                             });
-                        }
-                        else {
-                            dataHub.removeUserFromRole(userID, roleID).fail(function (error) {
+                        } else {
+                            dataHub.removeUserFromRole(userID, roleID).fail(function(error) {
                                 showErrorMessage(error);
                             });
                         }

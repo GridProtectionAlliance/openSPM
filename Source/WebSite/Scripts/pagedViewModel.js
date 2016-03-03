@@ -312,12 +312,15 @@ function PagedViewModel() {
 
     // Convert observable object to a simple Javascript record
     self.deriveJSRecord = function () {
-        const observableRecord = self.currentRecord();
+        return $.Deferred(function (deferred) {
+            const observableRecord = self.currentRecord();
+            var promises = [];
 
-        // Allow customization of observable record before conversion
-        $(self).trigger("derivingJSRecord", [observableRecord]);
+            // Allow customization of observable record before conversion
+            $(self).trigger("derivingJSRecord", [observableRecord, promises]);
 
-        return ko.mapping.toJS(observableRecord);
+            $(promises).whenAll().done(deferred.resolve(ko.mapping.toJS(observableRecord)));
+        }).promise();
     }
 
     // Convert simple Javascript record to an observable object
@@ -418,14 +421,14 @@ function PagedViewModel() {
             return;
 
         if (self.dataHubIsConnected()) {
-            const record = self.deriveJSRecord();
-
-            self.updateRecord(record).done(function () {
-                self.initialize();
-                $(self).trigger("recordSaved", [record, false]);
-                showInfoMessage("Saved updated record...");
-            }).fail(function (error) {
-                showErrorMessage(error);
+            self.deriveJSRecord().done(function (record) {
+                self.updateRecord(record).done(function () {
+                    self.initialize();
+                    $(self).trigger("recordSaved", [record, false]);
+                    showInfoMessage("Saved updated record...");
+                }).fail(function (error) {
+                    showErrorMessage(error);
+                });
             });
         }
     }
@@ -435,14 +438,14 @@ function PagedViewModel() {
             return;
 
         if (self.dataHubIsConnected()) {
-            const record = self.deriveJSRecord();
-
-            self.addNewRecord(record).done(function () {
-                self.initialize();
-                $(self).trigger("recordSaved", [record, true]);
-                showInfoMessage("Saved new record...");
-            }).fail(function (error) {
-                showErrorMessage(error);
+            self.deriveJSRecord().done(function (record) {
+                self.addNewRecord(record).done(function () {
+                    self.initialize();
+                    $(self).trigger("recordSaved", [record, true]);
+                    showInfoMessage("Saved new record...");
+                }).fail(function (error) {
+                    showErrorMessage(error);
+                });
             });
         }
     }

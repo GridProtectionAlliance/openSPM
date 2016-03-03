@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable NativeTypePrototypeExtending
 
 // Grid Solutions Framework Core Web Client Script Functions
 "use strict";
@@ -623,32 +624,23 @@ $.fn.invisible = function () {
     return this.css("visibility", "hidden");
 }
 
-// Returns deferred for .done() attachment that will be resolved when all specified events handlers have completed
-// http://stackoverflow.com/questions/5009194/how-to-use-jquery-deferred-with-custom-events
-$.fn.when = function (events) {
+// The following target arrays of promises
+$.fn.whenAny = function () {
+    var finish = $.Deferred();
 
-    var deferred, $element, elemIndex, eventIndex;
+    if (this.length === 0)
+        finish.resolve();
+    else
+        $.each(this, function (index, deferred) {
+            deferred.done(finish.resolve);
+        });
 
-    // Get the list of events
-    events = events.split(/\s+/g);
+    return finish.promise();
+}
 
-    // We will store one deferred per event and per element
-    var deferreds = [];
+$.fn.whenAll = function () {
+    if (this.length > 0)
+        return $.when.apply($, this);
 
-    // For each element
-    for (elemIndex = 0; elemIndex < this.length; elemIndex++) {
-        $element = $(this[elemIndex]);
-
-        // For each event
-        for (eventIndex = 0; eventIndex < events.length; eventIndex++) {
-            // Store a Deferred...
-            deferreds.push((deferred = $.Deferred()));
-
-            // ... that is resolved when the event is fired on this element
-            $element.one(events[eventIndex], deferred.resolve);
-        }
-    }
-
-    // Return a promise resolved once all events fired on all elements
-    return $.when.apply(null, deferreds);
-};
+    return $.Deferred().resolve().promise();
+}

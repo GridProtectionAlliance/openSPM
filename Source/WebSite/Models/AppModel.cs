@@ -307,7 +307,8 @@ namespace openSPM.Models
             viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
             viewBag.PageControlScripts = new StringBuilder();
 
-            // Setup default roles if none are defined
+            // Setup default roles if none are defined. Important to check only for null here as empty string will
+            // be treated as none-allowed, e.g., read-only for modeled views
             if (viewBag.EditRoles == null)
                 viewBag.EditRoles = "*";
 

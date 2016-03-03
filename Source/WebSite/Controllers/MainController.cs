@@ -95,6 +95,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult DiscoverPatches()
+        {
+            m_appModel.ConfigureView<LatestVendorDiscoveryResult>(m_dataContext, Url.RequestContext, "Check", ViewBag);
+            return View();
+        }
+
         public ActionResult Help()
         {
             m_appModel.ConfigureView(Url.RequestContext, "Help", ViewBag);

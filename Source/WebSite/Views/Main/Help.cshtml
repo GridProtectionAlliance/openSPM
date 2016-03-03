@@ -105,28 +105,77 @@
         <tr>
             <td ><img src="/Images/ProcessSteps/Small/5assess.png" /></td>
             <td>
-                <p>TBD</p>
+                <p>Starting the 35-day timer for patch assessment (as measured from the day that the patch was released by the vendor), requires the one,
+                or typically more, BUCs with CCA platforms addressed by this patch to “assess” the patch for applicability.  To facilitate communication,
+                all SMEs within the impacted Business Units are copied on the notification that a new security patch is available.  The BUC (or if 
+                configured the BUC alternate) must enter the results of the assessment for their business unit in openSPM.  The minimum required information 
+                that must be entered is one of the four “Assessment Results” that that drop down:</p>
+                <ul>
+                    <li>Install the patch</li>
+                    <li>Develop a mitigation plan</li>
+                    <li>Install the patch & Develop a mitigate plan</li>
+                    <li>The patch is NOT an applicable security patch for this business unit</li>
+                </ul>
+                <p>If the assessment results in decision to develop a mitigation plan, the BUC must enter (and/or attach documents) that describes the basis
+                for mitigation in lieu of patching.</p>
+                <p>If the assessment results in a decision to apply the patch, the BUC is not required to enter a basis for this decision – but may do so on
+                 a case-by-case basis.</p>
+                <p>
+                    Selecting “Patch” and/or “Mitigation Plan” starts a new 35-day timer for this business unit for the action of (1) installing the patch
+                    and/or (2) developing a mitigation plan.
+                </p>
+                <p>Notifications will be sent to the BUC and SMEs in this Business Unit (as well as the Owner) as the 35-day compliance date approaches.</p>
+
             </td>
         </tr>
 
         <tr>
             <td ><img src="/Images/ProcessSteps/Small/6install.png" /></td>
             <td>
-                <p>TBD</p>
+                <p>
+                    Once the patch has been installed on all CCA within the BU, an SME in the impacted business unit must enter the “patch installation
+                    completion” date in openSPM.
+                </p>
+                <p>The SME should also enter notes and/or attach documents that provide details and evidence of the installation.</p>
+                <p>If no mitigation plan was required for this patch, this step ends the compliance actions on this patch.</p>
+
             </td>
         </tr>
 
         <tr>
             <td ><img src="/Images/ProcessSteps/Small/7plan.png" /></td>
             <td>
-                <p>TBD</p>
+                <p>If a Mitigation Plan must be developed to address the patch, then this plan must be developed and the action steps of this plan
+                 must be entered into openSPM -- and be approved by the BUC within 35-days of completion of the patch assessment. The BUC or 
+                any SME within the BU may enter the mitigation plan. The mitigation plan requires entry of:</p>
+                <ul>
+                    <li>Risks from not patching</li>
+                    <li>Justification for mitigation</li>
+                    <li>Short plan summary</li>
+                </ul>
+                <p>Mitigation Plans must include at least two action steps – and may include as many action steps as are needed.  
+                The two required steps are:</p>
+                <ul>
+                   <li>“Do something”</li>
+                   <li>“Enter plan execution completion into openSPM”</li>
+                </ul>
+                <p>Each action step requires:</p>
+                <ul>
+                    <li>Type</li>
+                    <li>Title (80 characters max)</li>
+                    <li>Scheduled start date</li>
+                    <li>Scheduled end date</li>
+                </ul> 
             </td>
         </tr>
 
         <tr>
             <td ><img src="/Images/ProcessSteps/Small/8done.png" /></td>
             <td>
-                <p>TBD</p>
+                <p>After patches have been assessed, installed and/or mitigation plans developed, the PIC conducts a 
+                final assessment of the information logged about the security patch and the compliance evidence that
+                 has been provided.   Following this evaluation, the patch is flagged as “done” and removed from the
+                 “active patch list”</p>
             </td>
         </tr>
 
@@ -134,15 +183,16 @@
             <td>&nbsp;</td>
             <td>
                 <p>Definitions:</p>
-                <p><b>Business Unit Group</b> (BU Group) - xx</p>
-                <p><b>Business Unit Coordinator</b> (BUC) - xx</p>
-                <p><b>Patch Input Coordinator</b> (PIC) - xx</p>
-                <p><b>Subject Matter Expert</b> (SME)- xx</p>
-                <p><b>Security Patch Compliance Authority</b> (Owner) - xx</p>
-                <p><b>System Adminsitrator</b> (Admin) - xx</p>
-                <p><b>Candidate Patch</b> - xx</p>
-                <p><b>Patch Assessment</b>- xx</p>
-                <p><b>Patch Mitigation Plan</b> - xx</p>
+                <p><b>Business Unit Coordinator</b> (BUC) - The individual that is the approval authority for a busines unit's security actions for CCA for which that BU is accoutable.  A BUC enters the results of the patch assessment for that business unit.  A BUC approves Mitgation Plans for their Business Unit.</p>
+                <p><b>Business Unit Group</b> (BU Group) - An virtual organizational entity comprised of a BUC (the approval authority) and SMEs (the technical experts) that have responsibility for CCA.</p>
+                <p><b>Candidate Security Patch</b> - These are the patches that PICs and automated processes discover that may have security implications to CCA. </p>
+                <p><b>Mitigation</b> - actions taken to minimize risk without complete elimination of a specific vulnerability (e.g. implementing additional process checks, adding access control mechanisms, authoring Intrusion Detection System rules to detect anomalous activities)</p>
+                <p><b>Patch Assessment</b>- Assessments are a compliance requirement and are conducted to determine if a candidate patch is an applicable secuirty patch and if so the action required to address it -- either patch or mitigatge or both.</p>
+                <p><b>Patch Input Coordinator</b> (PIC) - The individuals responsible for (1) reviewing sources of patch availablity, (2) entering candidate security patches into openSPM for assessment by SMEs, and (3) closing patches that been successfully assessed / addressed by the BUs.</p>
+                <p><b>Patch Mitigation Plan</b> - The combination of risk assessment and justification for mitigation vs. patching PLUS a set of action steps that will mitigate the need to install the patch.</p>
+                <p><b>Security Patch Compliance Authority</b> (Owner) - The corporate owner of the processes managed by openSPM.  The Owner can set business process configuraiton paramters and has full functionality on all system pages except for those pages reserved for Admins.</p>
+                <p><b>Subject Matter Expert</b> (SME)- Professional staff within the business unit charged with making assessments on the security applicability and methods for addressing the vendor notice of patch availablity.</p>
+                <p><b>System Adminsitrator</b> (Admin) - Informaton Technology personnel authorized to establish users and roles and set implementation specific configuration parameters (e.g., data base location).  Admins have unrestricted access to all pages in the openSPM Sytstem.</p>
             </td>
         </tr>
        

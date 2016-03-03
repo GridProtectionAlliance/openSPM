@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  Users.cshtml - Gbtc
+//  Groups.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/28/2016 - J. Ritchie Carroll
+//  03/03/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
@@ -28,10 +28,10 @@
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { null, "User Name", "text-center valign-middle" },
-        new[] { "UseADAuthentication", "Is&nbsp;AD&nbsp;User", "text-center" },
+        new[] { null, "Group Name", "text-center valign-middle" },
+        new[] { "UseADAuthentication", "Is&nbsp;AD&nbsp;Group", "text-center" },
         new[] { "CreatedOn", "Date&nbsp;Added", "text-center" },
-        new[] { null, "User Roles", "text-center valign-middle" }
+        new[] { null, "Group Roles", "text-center valign-middle" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -40,7 +40,7 @@
 @helper BodyRows()
 {
     <td width="65%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: AccountName(), attr: {title: Name}, click: $parent.viewPageRecord"></button></td>
-    <td width="10%" class="text-center valign-middle"><input type="checkbox" id="checkEnabled" data-bind="checked: UseADAuthentication" disabled></td>
+    <td width="10%" class="text-center valign-middle"><input type="checkbox" id="checkEnabled" data-bind="checked: useADAuthentication(AccountName())" disabled></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: CreatedOn.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openRolesEditor.bind($data), enable: $parent.canEdit() && $parent.dataHubIsConnected()">Roles...</button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
@@ -59,40 +59,15 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        @Html.Raw(dataContext.AddInputField<UserAccount>("Name", fieldLabel: $"Name{AccountValidationFeedback().ToString().Trim()}", customDataBinding: "attr: {'acct-valid': validateAccount($data)}", initialFocus: true))
+        @Html.Raw(dataContext.AddInputField<SecurityGroup>("Name", fieldLabel: $"Name{AccountValidationFeedback().ToString().Trim()}", customDataBinding: "attr: {'acct-valid': validateAccount($data)}", initialFocus: true))
         <div class="panel panel-default" data-bind="css: {'panel-readonly': $root.recordMode()===RecordMode.View, 'panel-primary': UseDBAuthentication}">
             <div class="panel-heading">
-                @* Adding actual UseADAuthentication field check-box, but hidden, to pick-up any model based field initializers *@
-                <div style="display: none">
-                    @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("UseADAuthentication"))
-                </div>
-                @* Adding radio buttons bound to virtual UseDBAuthentication that models negated state of UseADAuthentication field for simplified dependency field initialization *@
-                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Active Directory User</label>
-                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Database User</label>
+                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Active Directory Group</label>
+                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Database Group</label>
             </div>
             <div class="panel-body" data-bind="visible: UseDBAuthentication">
-                <div class="row">
-                    <div class="col-md-6">
-                        @Html.Raw(dataContext.AddInputField<UserAccount>("Password", "password", dependencyFieldName: "UseDBAuthentication"))
-                        @Html.Raw(dataContext.AddInputField<UserAccount>("FirstName", dependencyFieldName: "UseDBAuthentication"))
-                        @Html.Raw(dataContext.AddInputField<UserAccount>("LastName", dependencyFieldName: "UseDBAuthentication"))
-                    </div>
-                    <div class="col-md-6">
-                        @Html.Raw(dataContext.AddInputField<UserAccount>("Phone", dependencyFieldName: "UseDBAuthentication"))
-                        @Html.Raw(dataContext.AddInputField<UserAccount>("Email", dependencyFieldName: "UseDBAuthentication"))
-                        @Html.Raw(dataContext.AddDateField<UserAccount>("ChangePasswordOn", dependencyFieldName: "UseDBAuthentication"))
-                        @{
-                            Model.AddPageDefinedFieldInitialization("Password", "\"\"",
-                                /* RegEx Pattern: */ Model.Global.PasswordRequirementsRegex,
-                                /* Error Message: */ Model.Global.PasswordRequirementsError);
-                            Model.AddPageDefinedFieldInitialization("ChangePasswordOn", "(new Date()).addDays(90)");
-                        }
-                    </div>
-                </div>
+                @Html.Raw(dataContext.AddTextAreaField<SecurityGroup>("Description", 4, dependencyFieldName: "UseDBAuthentication"))
             </div>
-        </div>
-        <div class="pull-right">
-            @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("LockedOut"))
         </div>
     </div>
 }
@@ -102,12 +77,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Edit Roles for <span id="currentUserName"></span>:</h4>
+                <h4 class="modal-title">Edit Roles for <span id="currentGroupName"></span>:</h4>
             </div>
             <div class="modal-body">
                 <div class="modal-body auto-height text-center">
                     <form role="form">
-                        <input type="hidden" id="currentUserID" />
+                        <input type="hidden" id="currentGroupID" />
                         <div class="center-block">
                             <div id="loadingRoles">Loading role assignments&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span><hr class="full-break" /></div>
                             <table class="table-condensed table-center">
@@ -140,7 +115,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
+        @Html.Raw(dataContext.RenderViewModelConfiguration<SecurityGroup>(ViewBag))
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
                 securityHub.sIDToAccountName(record.Name).done(function (accountName) {
@@ -155,7 +130,7 @@
             }
             else {
                 if (viewModel.dataHubIsConnected()) {
-                    securityHub.userNameToSID(observableRecord.Name()).done(function (sid) {
+                    securityHub.groupNameToSID(observableRecord.Name()).done(function (sid) {
                         showAccountNameFeedback(observableRecord.Name() !== sid);
                     });
                 }
@@ -179,6 +154,17 @@
             }
         }
 
+        function useADAuthentication(accountName)
+        {
+            const groupName = notNull(accountName);
+
+            // Just deriving if group is AD based by delimiters in group name
+            if (groupName.length > 0)
+                return (groupName.indexOf("\\") > 0 || groupName.indexOf("@@") > 0);
+
+            return true; // Default to AD group
+        }
+
         $(viewModel).on("pageRecordsQueried", function (event, records) {
             // Add a virtual observable field called "AccountName" that will resolve SID values to account names
             for (let i = 0; i < records.length; i++) {
@@ -188,35 +174,30 @@
         });
 
         $(viewModel).on("newRecord", function (event, newRecord) {
-            // Make sure new records get virtual field
+            // Make sure new records get virtual fields
             newRecord.AccountName = ko.observable("");
         });
 
         $(viewModel).on("derivingObservableRecord", function (event, observableRecord) {
-            // Create a virtual UseDBAuthentication field that is negated state of actual UseADAuthentication field
-            observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
-
             // Load human readable account name into Name field
             if (observableRecord.AccountName)
                 observableRecord.Name(observableRecord.AccountName());
-
-            @* Cannot decrypt a password hash, have to clear it and force re-entry *@
-            if (!observableRecord.UseADAuthentication())
-                observableRecord.Password(null);
+                
+            // Create a virtual UseDBAuthentication field
+            observableRecord.UseDBAuthentication = ko.observable(!useADAuthentication(notNull(observableRecord.Name())));
         });
 
         $(viewModel).on("derivingJSRecord", function (event, observableRecord, promises) {
-            // Set state of actual field to be negated state of virtual field
-            observableRecord.UseADAuthentication(!observableRecord.UseDBAuthentication());
+            const isADGroup = !observableRecord.UseDBAuthentication();
 
             // Remove virtual observable fields before serialization for record updates
             delete observableRecord.UseDBAuthentication;
             delete observableRecord.AccountName;
 
-            // Push promise to convert user name back to SID before updating record
-            if (viewModel.dataHubIsConnected() && observableRecord.UseADAuthentication()) {
+            // Push promise to convert group name back to SID before updating record
+            if (viewModel.dataHubIsConnected() && isADGroup) {
                 promises.push($.Deferred(function (deferred) {
-                    securityHub.userNameToSID(observableRecord.Name()).done(function (sid) {
+                    securityHub.groupNameToSID(observableRecord.Name()).done(function (sid) {
                         observableRecord.Name(sid);
                         deferred.resolve();
                     });
@@ -225,8 +206,8 @@
         });
 
         function openRolesEditor(record) {
-            $("#currentUserID").text(record.ID);
-            $("#currentUserName").text(record.AccountName());
+            $("#currentGroupID").text(record.ID);
+            $("#currentGroupName").text(record.AccountName());
             $("#editRolesDialog input:checkbox").prop("checked", false);
 
             if (viewModel.dataHubIsConnected()) {
@@ -237,7 +218,7 @@
                         $("#loadingRoles").show();
 
                     for (let i = 0; i < roles.length; i++) {
-                        securityHub.userIsInRole(record.ID, roles[i].ID).done(function (roleID) {
+                        securityHub.groupIsInRole(record.ID, roles[i].ID).done(function (roleID) {
                             return function (result) {
                                 $("#" + roleID).prop("checked", result);
 
@@ -258,7 +239,7 @@
 
             $("#saveRolesButton").click(function () {
                 if (viewModel.dataHubIsConnected()) {
-                    const userID = $("#currentUserID").text();
+                    const groupID = $("#currentGroupID").text();
                     const roles = $("#editRolesDialog input:checkbox");
 
                     for (let i = 0; i < roles.length; i++) {
@@ -266,11 +247,11 @@
                         const roleID = element.attr("id");
 
                         if (element.prop("checked")) {
-                            securityHub.addUserToRole(userID, roleID).fail(function (error) {
+                            securityHub.addGroupToRole(groupID, roleID).fail(function (error) {
                                 showErrorMessage(error);
                             });
                         } else {
-                            securityHub.removeUserFromRole(userID, roleID).fail(function (error) {
+                            securityHub.removeGroupFromRole(groupID, roleID).fail(function (error) {
                                 showErrorMessage(error);
                             });
                         }

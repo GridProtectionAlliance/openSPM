@@ -65,7 +65,7 @@
         // Resolve option label SID to an account name
         function lookupOptionLabel(element) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.sIDToAccountName(element.text()).done(function (accountName) {
+                securityHub.sIDToAccountName(element.text()).done(function (accountName) {
                     element.text(accountName);
                 });
             }
@@ -75,8 +75,8 @@
 
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryUserAccount(record.CoordinatorID).done(function (userAccount) {
-                    dataHub.sIDToAccountName(userAccount.Name).done(function (accountName) {
+                securityHub.queryUserAccount(record.CoordinatorID).done(function (userAccount) {
+                    securityHub.sIDToAccountName(userAccount.Name).done(function (accountName) {
                         record.AccountName(accountName);
                     });
                 });

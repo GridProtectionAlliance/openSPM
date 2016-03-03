@@ -115,11 +115,7 @@ namespace openSPM.Models
 
             int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
 
-            foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SortOrder", true, new RecordRestriction
-            {
-                FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
-                Parameters = new object[] { key }
-            }))
+            foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SortOrder", true, new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", key)))
             {
                 javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
             }
@@ -154,11 +150,7 @@ namespace openSPM.Models
         {
             int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
 
-            RecordRestriction restriction = new RecordRestriction
-            {
-                FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
-                Parameters = new object[] { key }
-            };
+            RecordRestriction restriction = new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", key);
 
             return DataContext.AddSelectField<T, ValueList>(fieldName, optionValueFieldName, optionLabelFieldName, optionSortFieldName, fieldLabel, fieldID, groupDataBinding, labelDataBinding, customDataBinding, dependencyFieldName, optionDataBinding, toolTip, initialFocus, restriction);
         }

@@ -239,7 +239,9 @@ function PagedViewModel() {
 
             // Initialize current record with an empty row
             self.newRecord().done(function (emptyRecord) {
-                self.currentRecord(self.deriveObservableRecord(emptyRecord));
+                self.deriveObservableRecord(emptyRecord).done(function (observableRecord) {
+                    self.currentRecord(observableRecord);
+                });
             });
         }
 
@@ -314,27 +316,33 @@ function PagedViewModel() {
     self.deriveJSRecord = function () {
         return $.Deferred(function (deferred) {
             const observableRecord = self.currentRecord();
-            var promises = [];
+            const promises = [];
 
             // Allow customization of observable record before conversion
             $(self).trigger("derivingJSRecord", [observableRecord, promises]);
 
-            $(promises).whenAll().done(deferred.resolve(ko.mapping.toJS(observableRecord)));
+            $(promises).whenAll().done(function () {
+                deferred.resolve(ko.mapping.toJS(observableRecord));
+            });
         }).promise();
     }
 
     // Convert simple Javascript record to an observable object
     self.deriveObservableRecord = function (record) {
-        const observableRecord = ko.mapping.fromJS(record);
+        return $.Deferred(function (deferred) {
+            const observableRecord = ko.mapping.fromJS(record);
+            const promises = [];
 
-        // Allow customization of new observable record
-        $(self).trigger("derivingObservableRecord", [observableRecord]);
+            // Allow customization of new observable record
+            $(self).trigger("derivingObservableRecord", [observableRecord, promises]);
 
-        // Apply validation binding to current observable record
-        self.errors = ko.validation.group(observableRecord);
-        self.refreshValidationErrors();
-
-        return observableRecord;
+            $(promises).whenAll().done(function () {
+                // Apply validation binding to current observable record
+                self.errors = ko.validation.group(observableRecord);
+                self.refreshValidationErrors();
+                deferred.resolve(observableRecord);
+            });
+        }).promise();
     }
 
     self.setFocusOnInitialField = function () {
@@ -451,18 +459,22 @@ function PagedViewModel() {
     }
 
     self.viewPageRecord = function (record) {
-        self.recordMode(RecordMode.View);
-        self.currentRecord(self.deriveObservableRecord(record));
-        $("#addNewEditDialog").modal("show");
+        self.deriveObservableRecord(record).done(function (observableRecord) {
+            self.recordMode(RecordMode.View);
+            self.currentRecord(observableRecord);
+            $("#addNewEditDialog").modal("show");
+        });
     }
 
     self.editPageRecord = function (record) {
         if (!self.canEdit())
             return;
 
-        self.recordMode(RecordMode.Edit);
-        self.currentRecord(self.deriveObservableRecord(record));
-        $("#addNewEditDialog").modal("show");
+        self.deriveObservableRecord(record).done(function (observableRecord) {
+            self.recordMode(RecordMode.Edit);
+            self.currentRecord(observableRecord);
+            $("#addNewEditDialog").modal("show");
+        });
     }
 
     self.addPageRecord = function () {
@@ -470,11 +482,15 @@ function PagedViewModel() {
             return;
 
         if (self.dataHubIsConnected()) {
-            self.recordMode(RecordMode.AddNew);
             self.newRecord().done(function (emptyRecord) {
+                // Raise event to allow any new record initialization
                 $(self).trigger("newRecord", [emptyRecord]);
-                self.currentRecord(self.deriveObservableRecord(emptyRecord));
-                $("#addNewEditDialog").modal("show");
+
+                self.deriveObservableRecord(emptyRecord).done(function (observableRecord) {
+                    self.recordMode(RecordMode.AddNew);
+                    self.currentRecord(observableRecord);
+                    $("#addNewEditDialog").modal("show");
+                });
             });
         }
     }

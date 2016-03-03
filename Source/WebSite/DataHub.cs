@@ -30,6 +30,7 @@ using GSF;
 using GSF.Collections;
 using GSF.Identity;
 using GSF.Reflection;
+using GSF.Security;
 using Microsoft.AspNet.SignalR;
 using openSPM.Attributes;
 using openSPM.Models;
@@ -437,6 +438,9 @@ namespace openSPM
         [RecordOperation(typeof(UserAccount), RecordOperation.AddNewRecord)]
         public void AddNewUserAccount(UserAccount record)
         {
+            if (!record.UseADAuthentication && !string.IsNullOrWhiteSpace(record.Password))
+                record.Password = SecurityProviderUtility.EncryptPassword(record.Password);
+
             record.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
             record.CreatedBy = UserInfo.CurrentUserID;
             record.CreatedOn = DateTime.UtcNow;
@@ -449,6 +453,9 @@ namespace openSPM
         [RecordOperation(typeof(UserAccount), RecordOperation.UpdateRecord)]
         public void UpdateUserAccount(UserAccount record)
         {
+            if (!record.UseADAuthentication && !string.IsNullOrWhiteSpace(record.Password))
+                record.Password = SecurityProviderUtility.EncryptPassword(record.Password);
+
             record.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
             record.UpdatedBy = UserInfo.CurrentUserID;
             record.UpdatedOn = DateTime.UtcNow;

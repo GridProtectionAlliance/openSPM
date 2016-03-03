@@ -717,7 +717,7 @@ namespace openSPM.Models
             viewBag.AddValue("ToolTip", toolTip);
             viewBag.AddValue("OptionDataBinding", optionDataBinding);
 
-            foreach (TOption record in Table<TOption>().QueryRecords(optionSortFieldName, true, restriction))
+            foreach (TOption record in Table<TOption>().QueryRecords(optionSortFieldName, restriction))
             {
                 if (record != null)
                     options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));

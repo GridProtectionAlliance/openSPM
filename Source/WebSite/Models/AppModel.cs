@@ -115,7 +115,7 @@ namespace openSPM.Models
 
             int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
 
-            foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SortOrder", true, new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", key)))
+            foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SortOrder", new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", key)))
             {
                 javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
             }

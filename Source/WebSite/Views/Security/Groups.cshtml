@@ -86,7 +86,7 @@
                         <div class="center-block">
                             <div id="loadingRoles">Loading role assignments&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span><hr class="full-break" /></div>
                             <table class="table-condensed table-center">
-                            @foreach (ApplicationRole role in dataContext.Table<ApplicationRole>().QueryRecords("Name", true, new RecordRestriction("NodeID={0}", Model.Global.NodeID))) {
+                            @foreach (ApplicationRole role in dataContext.Table<ApplicationRole>().QueryRecords("Name", new RecordRestriction("NodeID={0}", Model.Global.NodeID))) {
                                 <tr>
                                     <td class="text-left valign-middle">
                                         <div class="checkbox" style="margin: 0">

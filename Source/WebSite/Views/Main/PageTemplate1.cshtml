@@ -89,14 +89,14 @@
 
     //Patch
 
-    IEnumerable<Patch> records = dataContext.Table<Patch>().QueryRecords("SortOrder", true, new RecordRestriction("Field = 'SomeValue'"));
+    IEnumerable<Patch> records = dataContext.Table<Patch>().QueryRecords("SortOrder", new RecordRestriction("Field = 'SomeValue'"));
 
     foreach (Patch patch in records) {
         string summary = patch.Summary;
     }
 
     // Parameterized query
-    dataContext.Table<Patch>().QueryRecords("SortOrder", true, new RecordRestriction("Field = {0}", "someValue"));
+    dataContext.Table<Patch>().QueryRecords("SortOrder DESC", new RecordRestriction("Field = {0}", "someValue"));
 
 }
 <p>Body HTML goes here...</p>

@@ -59,12 +59,11 @@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    Dictionary<string, string> patchDefaults = dataContext.LoadDatabaseSettings("patch.default");
     int defaultCriticalAlarmDays;
     string setting;
 
     // Get default critical alarm days
-    if (!patchDefaults.TryGetValue("criticalAlarmDays", out setting) || !int.TryParse(setting, out defaultCriticalAlarmDays)) {
+    if (!Model.Global.ApplicationSettings.TryGetValue("criticalAlarmDays", out setting) || !int.TryParse(setting, out defaultCriticalAlarmDays)) {
         defaultCriticalAlarmDays = 3;
     }
 

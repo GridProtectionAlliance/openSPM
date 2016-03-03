@@ -20,11 +20,81 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using System.Data
+@using GSF.Data
 @using openSPM.Models
 @model AppModel
 @{
+    // TODO: Examples of how to get to settings
 
-    // TODO: Add examples of how to get to settings
+    Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
+    string setting;
+
+
+    int warningDays;
+
+    // Get warning days
+    if (!appSettings.TryGetValue("warningDays", out setting) || !int.TryParse(setting, out warningDays)) {
+        warningDays = 14;
+    }
+
+
+
+    int defaultCriticalAlarmDays;
+
+    // Get default critical alarm days
+    if (!Model.Global.ApplicationSettings.TryGetValue("criticalAlarmDays", out setting) || !int.TryParse(setting, out defaultCriticalAlarmDays))
+    {
+        defaultCriticalAlarmDays = 3;
+    }
+
+    // Validate default value
+    defaultCriticalAlarmDays = Math.Abs(defaultCriticalAlarmDays);
+
+    if (defaultCriticalAlarmDays < 2 || defaultCriticalAlarmDays > 9)
+    {
+        defaultCriticalAlarmDays = 3;
+    }
+
+
+    // Use helper function to get page default - checks for overrides in ServerConfiguration first, the defaults to page.default settings
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
+
+
+    // Get custom image path for page
+    string pageImagePath = ViewBag.PageImagePath;
+
+
+    DataContext dataContext = Model.DataContext;
+
+
+    // Traditional examples
+
+    AdoDataConnection connection = dataContext.Connection;
+
+    connection.ExecuteNonQuery("DELETE FROM Table WHERE ID = 11");
+
+    int id = connection.ExecuteScalar<int?>("SELECT ID FROM Table WHERE Field = Value") ?? 0;
+
+    DataTable recordSet = connection.RetrieveData("SELECT * FROM Table WHERE Field = Value");
+
+    foreach (DataRow row in recordSet.Rows) {
+        string column = row["FieldName"] as string;
+    }
+
+    // Model based examples
+
+    //Patch
+
+    IEnumerable<Patch> records = dataContext.Table<Patch>().QueryRecords("SortOrder", true, new RecordRestriction("Field = 'SomeValue'"));
+
+    foreach (Patch patch in records) {
+        string summary = patch.Summary;
+    }
+
+    // Parameterized query
+    dataContext.Table<Patch>().QueryRecords("SortOrder", true, new RecordRestriction("Field = {0}", "someValue"));
+
 }
 <p>Body HTML goes here...</p>
 <p>(1) Add view to MainController...</p>

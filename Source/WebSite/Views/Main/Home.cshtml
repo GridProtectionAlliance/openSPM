@@ -1,25 +1,25 @@
 ﻿@*******************************************************************************************************
-//  Home.cshtml - Gbtc
-//
-//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
-//
-//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
-//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
-//  file except in compliance with the License. You may obtain a copy of the License at:
-//
-//      http://opensource.org/licenses/MIT
-//
-//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
-//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
-//  License for the specific language governing permissions and limitations.
-//
-//  Code Modification History:
-//  ----------------------------------------------------------------------------------------------------
-//  01/22/2016 - J. Ritchie Carroll
-//       Generated original version of source code.
-//
-//*****************************************************************************************************@
+    //  Home.cshtml - Gbtc
+    //
+    //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+    //
+    //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+    //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+    //  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+    //  file except in compliance with the License. You may obtain a copy of the License at:
+    //
+    //      http://opensource.org/licenses/MIT
+    //
+    //  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+    //  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+    //  License for the specific language governing permissions and limitations.
+    //
+    //  Code Modification History:
+    //  ----------------------------------------------------------------------------------------------------
+    //  01/22/2016 - J. Ritchie Carroll
+    //       Generated original version of source code.
+    //
+    //*****************************************************************************************************@
 @using openSPM.Models
 @model AppModel
 @{
@@ -34,3 +34,293 @@
 @section Scripts {
     @* Include any page specific scripts here, these will be added to scripts at bottom of page *@
 }
+<div class="row">
+    <div class="col-md-6"> 
+        <p>&nbsp;</p>    
+        <table>
+            <tr>
+                <td colspan="4"><b>Active Corporate Patches</b></td>
+            </tr>
+            <tr>
+                <td>&nbsp;</td>
+                <td  align="right">&nbsp;Today&nbsp;</td>
+                <td  align="right">&nbsp;&nbsp;&nbsp;&nbsp;(T-7)</td>
+                <td  align="right">&nbsp;&nbsp;&nbsp;&nbsp;(T-14)</td>
+            </tr>
+
+            <tr>
+                <td>Total</td>
+                <td align="right">17</td>
+                <td align="right">20</td>
+                <td align="right">19</td>
+            </tr>
+
+            <tr>
+                <td>Wating Assessment</td>
+                <td align="right">5</td>
+                <td align="right">12</td>      
+                <td align="right">11</td>
+            </tr>
+
+            <tr>
+                <td>Requiring Patch</td>
+                <td align="right">10</td>
+                <td align="right">6</td>
+                <td align="right">4</td>
+            </tr>
+
+            <tr>
+                <td>Requiring Mit Plan</td>
+                <td align="right">2</td>
+                <td align="right">2</td>
+                <td align="right">4</td>
+            </tr>
+
+        </table>
+
+        <p>&nbsp;</p>
+        <table>
+            <tr>
+                <td colspan="3"><b>Year-To-Date</b></td>
+            </tr>
+            <tr>
+                <td align="left">Pataches Assessed</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">613</td>
+            </tr>
+            <tr>
+                <td align="left">Patches Not Applicable&nbsp;&nbsp;</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">87</td>
+            </tr>
+            <tr>
+                <td align="left">Patches Applied</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">587</td>
+            </tr>
+            <tr>
+                <td align="left">Mitigation Plans</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">28</td>
+            </tr>
+        </table>
+        <p>&nbsp;</p>
+        <table>
+            <tr>
+                <td colspan="3"><b>YTD Critical Alarms</b></td>
+            </tr>
+            <tr>
+                <td align="left">Discovery</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">2</td>
+            </tr>
+            <tr>
+                <td align="left">Assessment</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">17</td>
+            </tr>
+            <tr>
+                <td align="left">Installation</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">8</td>
+            </tr>
+            <tr>
+                <td align="left">Mitigation Plans&nbsp;&nbsp;</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">4</td>
+            </tr>
+        </table>
+        <p>&nbsp;</p>
+        <table>
+            <tr>
+                <td colspan="3"><b>YTD Violations</b></td>
+            </tr>
+            <tr>
+                <td align="left">Discovery</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">1</td>
+            </tr>
+            <tr>
+                <td align="left">Assessment</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">0</td>
+            </tr>
+            <tr>
+                <td align="left">Installation</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">0</td>
+            </tr>
+            <tr>
+                <td align="left">Mitigation Plans&nbsp;&nbsp;</td>
+                <td>&nbsp;&nbsp;</td>
+                <td align="right">0</td>
+            </tr>
+        </table>
+        <p>&nbsp;</p>
+        <table>
+            <tr>
+                <td colspan="2"><b>My Patches</b></td>
+            </tr>
+            <tr>
+                <td>&nbsp;&nbsp;</td>
+                <td>
+                    <table>
+                        <tr>
+                            <td align="left">Total Active</td>
+                            <td>&nbsp;&nbsp;</td>
+                            <td align="right">5</td>
+                        </tr>
+                        <tr><td colspan="3">&nbsp;</td></tr>
+                        <tr>
+                            <td align="left">Pending</td>
+                            <td>&nbsp;&nbsp;</td>
+                            <td align="right">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td align="left">&nbsp;&nbsp;Assessment</td>
+                            <td>&nbsp;&nbsp;</td>
+                            <td align="right">2</td>
+                        </tr>
+                        <tr>
+                            <td align="left">&nbsp;&nbsp;Installation</td>
+                            <td>&nbsp;&nbsp;</td>
+                            <td align="right">1</td>
+                        </tr>
+                        <tr>
+                            <td align="left">&nbsp;&nbsp;Mitigation Plans&nbsp;&nbsp;</td>
+                            <td>&nbsp;&nbsp;</td>
+                            <td align="right">1</td>
+                        </tr>
+                        <tr><td colspan="3">&nbsp;</td></tr>
+                        <tr>
+                            <td align="left">Cricial Alarms</td>
+                            <td>&nbsp;&nbsp;</td>
+                            <td align="right">1</td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="col-md-6">
+        
+        
+        <p>&nbsp;</p>
+        <table>
+            <tr><td colspan="4"><b>Patches in Alarm</b></td></tr>
+            <tr>
+                <td align="left" width="16">&nbsp;</td>
+                <td align="center">&nbsp;<u>ToGo Days</u>&nbsp;</td>
+                <td align="center">&nbsp;<u>&nbsp;&nbsp;Type&nbsp;&nbsp;</u>&nbsp;</td>
+                <td align="center"><u>&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;&nbsp;&nbsp;&nbsp;</u></td>
+            </tr>
+
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/redlight.png" width="8" /></td>
+                <td align="right">2&nbsp;&nbsp;</td>
+                <td align="center">Disvr</td>
+                <td align="center">CISCO</td>
+            </tr>
+
+
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/redlight.png" width="8" /></td>
+                <td align="right">3&nbsp;&nbsp;</td>
+                <td align="center">Disvr</td>
+                <td align="center">Windows</td>
+            </tr>
+
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/redlight.png" width="8" /></td>
+                <td align="right">4&nbsp;&nbsp;</td>
+                <td align="center">Assess</td>
+                <td align="center"><a href="#temp">TVA-16-321</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">5&nbsp;&nbsp;</td>
+                <td align="center">Assess</td>
+                <td align="center"><a href="#temp">TVA-16-325</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">6&nbsp;&nbsp;</td>
+                <td align="center">Plan</td>
+                <td align="center"><a href="#temp">TVA-16-332</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">7&nbsp;&nbsp;</td>
+                <td align="center">Install</td>
+                <td align="center"><a href="#temp">TVA-16-356</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">8&nbsp;&nbsp;</td>
+                <td align="center">Install</td>
+                <td align="center"><a href="#temp">TVA-16-357</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">9&nbsp;&nbsp;</td>
+                <td align="center">Install</td>
+                <td align="center"><a href="#temp">TVA-16-358</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">9&nbsp;&nbsp;</td>
+                <td align="center">Install</td>
+                <td align="center"><a href="#temp">TVA-16-362</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">9&nbsp;&nbsp;</td>
+                <td align="center">Install</td>
+                <td align="center"><a href="#temp">TVA-16-365</a></td>
+            </tr>
+            <tr>
+                <td align="left" width="16"><img src="/Images/StatusLights/Small/amberlight.png" width="8" /></td>
+                <td align="right">10&nbsp;&nbsp;</td>
+                <td align="center">Plan</td>
+                <td align="center"><a href="#temp">TVA-16-366</a></td>
+            </tr>
+        </table>
+
+        <p>&nbsp;</p>
+        <table>
+            <tr><td colspan="3" align="left"><b>Patches Added Today</b></td></tr>
+            <tr>
+                <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+                <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;Platform&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+                <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;Vendor&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+            </tr>
+
+            <tr>
+                <td align="center"><a href="#temp">TVA-16-534</a></td>
+                <td align="center">Windows</td>
+                <td align="center">Micorsoft</td>
+            </tr>
+
+            <tr>
+                <td align="center"><a href="#temp">TVA-16-535</a></td>
+                <td align="center">Relay</td>
+                <td align="center">SEL</td>
+            </tr>
+
+            <tr>
+                <td align="center"><a href="#temp">TVA-16-536</a></td>
+                <td align="center">Router</td>
+                <td align="center">Cisco</td>
+            </tr>
+
+            <tr>
+                <td align="center"><a href="#temp">TVA-16-537</a></td>
+                <td align="center">DFR</td>
+                <td align="center">ACS</td>
+            </tr>
+
+    </div>
+
+</div>

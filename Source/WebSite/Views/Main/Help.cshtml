@@ -24,10 +24,12 @@
 @model AppModel
 
 <table class="table table-striped">
+
     <colgroup>
         <col class="col-md-2">
-        <col class="col-md-7">
+        <col class="col-md-10">
     </colgroup>
+
     <tbody>
         <tr>
             <td >Step</td>
@@ -36,7 +38,7 @@
         <tr valign="middle">
             <td ><img src="/Images/ProcessSteps/Small/1settings.png" /></td>
             <td>
-                <p>By clicking on "settings" in the main menu, those with authorization can update the following lists:</p>
+                <p>By clicking on "settings" in the main menu, those with authorization can update the following 5 lists:</p>
                 <ol>
                     <li>
                         The <b>Patch Source</b> (or Vendor) List.  This is the list that the Patch Input Coordinator (PIC) must check for applicable security patches.
@@ -48,13 +50,15 @@
                     <li>
                         The <b>Business Unit Group</b> (BU Group) List.  Defines the BU Coordinator (BUC) that is accountable for one or more Platforms within openSPM. 
                         While there is typically just one BU Group per business unit, Owners can create as many groups as are needed to manage BUC / SME 
-                        accountability relationships.
-                    </li>
-                    <li>
-                        The list of applicable platforms for each BU Group.  
-                    </li>
-                    <li>
-                        The list of Subject Matter Experts (SMEs) for each BU Group
+                        accountability relationships.  In addition, the BU Group menu item allows management of 2 additional lists:
+                        <ul>
+                            <li>
+                                The list of applicable platforms for each BU Group.
+                            </li>
+                            <li>
+                                The list of Subject Matter Experts (SMEs) for each BU Group
+                            </li>
+                        </ul>
                     </li>
                 </ol>
             </td>
@@ -74,14 +78,14 @@
                 <p>As new candidate security patches are discovered in Step 2, the PIC assigns the patch a corporate ID number and adds (copy and pastes)
                  the patch information from the vendor web site into openSPM.  The minimum required information for entry of a new patch is:</p>
                 <ul>
-                    <li>Corporate patch tacking number</li>
+                    <li>Corporate patch tacking number of the form "TVA-yy-nnn"</li>
                     <li>Vendor / Source (from drop-down menu)</li>
                     <li>Vendor patch tracking ID</li>
                     <li>Patch title (80 characters max)</li>
                     <li>Vendor patch release date (this is used as the default start date for the 35-day period allowed for assessment)</li>
                     <li>Target Platform(s) (from drop-down menu) that directs the patch to one or more BUs for assessment.</li>
                 </ul>
-                <p>>As much information as is available from the vendor should be added to define the patch.  Fields are provided in the openSPM patch
+                <p>As much information as is available from the vendor should be added to define the patch.  Fields are provided in the openSPM patch
                     entry from for this additional information.  Documents, such as PDFs, can be attached if they available from the vendor.</p>
 
 
@@ -183,17 +187,26 @@
             <td>&nbsp;</td>
             <td>
                 <p>Definitions:</p>
-                <p><b>Business Unit Coordinator</b> (BUC) - The individual that is the approval authority for a busines unit's security actions for CCA for which that BU is accoutable.  A BUC enters the results of the patch assessment for that business unit.  A BUC approves Mitgation Plans for their Business Unit.</p>
                 <p><b>Business Unit Group</b> (BU Group) - An virtual organizational entity comprised of a BUC (the approval authority) and SMEs (the technical experts) that have responsibility for CCA.</p>
                 <p><b>Candidate Security Patch</b> - These are the patches that PICs and automated processes discover that may have security implications to CCA. </p>
                 <p><b>Mitigation</b> - actions taken to minimize risk without complete elimination of a specific vulnerability (e.g. implementing additional process checks, adding access control mechanisms, authoring Intrusion Detection System rules to detect anomalous activities)</p>
                 <p><b>Patch Assessment</b>- Assessments are a compliance requirement and are conducted to determine if a candidate patch is an applicable secuirty patch and if so the action required to address it -- either patch or mitigatge or both.</p>
-                <p><b>Patch Input Coordinator</b> (PIC) - The individuals responsible for (1) reviewing sources of patch availablity, (2) entering candidate security patches into openSPM for assessment by SMEs, and (3) closing patches that been successfully assessed / addressed by the BUs.</p>
                 <p><b>Patch Mitigation Plan</b> - The combination of risk assessment and justification for mitigation vs. patching PLUS a set of action steps that will mitigate the need to install the patch.</p>
+            </td>
+
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>
+                <p><a href="Role"></a>System Roles:</p>
+                <p><b>Business Unit Coordinator</b> (BUC) - The individual that is the approval authority for a busines unit's security actions for CCA for which that BU is accoutable.  A BUC enters the results of the patch assessment for that business unit.  A BUC approves Mitgation Plans for their Business Unit.</p>
+                <p><b>Patch Input Coordinator</b> (PIC) - The individuals responsible for (1) reviewing sources of patch availablity, (2) entering candidate security patches into openSPM for assessment by SMEs, and (3) closing patches that been successfully assessed / addressed by the BUs.</p>
                 <p><b>Security Patch Compliance Authority</b> (Owner) - The corporate owner of the processes managed by openSPM.  The Owner can set business process configuraiton paramters and has full functionality on all system pages except for those pages reserved for Admins.</p>
                 <p><b>Subject Matter Expert</b> (SME)- Professional staff within the business unit charged with making assessments on the security applicability and methods for addressing the vendor notice of patch availablity.</p>
                 <p><b>System Adminsitrator</b> (Admin) - Informaton Technology personnel authorized to establish users and roles and set implementation specific configuration parameters (e.g., data base location).  Admins have unrestricted access to all pages in the openSPM Sytstem.</p>
+                <p><b>Viewer</b> - Those authenticated to the domain can view the status of active patches but cannot make any changes within the system. </p>
             </td>
+
         </tr>
        
     </tbody>

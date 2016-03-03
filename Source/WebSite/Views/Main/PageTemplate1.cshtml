@@ -43,7 +43,7 @@
     int defaultCriticalAlarmDays;
 
     // Get default critical alarm days
-    if (!Model.Global.ApplicationSettings.TryGetValue("criticalAlarmDays", out setting) || !int.TryParse(setting, out defaultCriticalAlarmDays))
+    if (!appSettings.TryGetValue("criticalAlarmDays", out setting) || !int.TryParse(setting, out defaultCriticalAlarmDays))
     {
         defaultCriticalAlarmDays = 3;
     }
@@ -57,13 +57,16 @@
     }
 
 
-    // Use helper function to get page default - checks for overrides in ServerConfiguration first, the defaults to page.default settings
+    // Use helper function to get page defaults - checks for overrides in ServerConfiguration first, then attempts tp pickup default from page.default settings
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
+
 
 
     // Get custom image path for page
     string pageImagePath = ViewBag.PageImagePath;
 
+
+    // TODO: Database examples
 
     DataContext dataContext = Model.DataContext;
 

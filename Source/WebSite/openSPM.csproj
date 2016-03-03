@@ -430,6 +430,13 @@
     <Content Include="Views\Settings\BusinessUnitGroups.cshtml" />
     <Content Include="Views\Security\Groups.cshtml" />
     <Content Include="Views\Main\DiscoverPatches.cshtml" />
+    <Content Include="Views\Main\PageTemplate2.cshtml" />
+    <Content Include="Views\Main\Install.cshtml" />
+    <Content Include="Views\Main\Assess.cshtml" />
+    <Content Include="Views\Main\History.cshtml" />
+    <Content Include="Views\Main\Plan.cshtml" />
+    <Content Include="Views\Main\Notification.cshtml" />
+    <Content Include="Views\Main\Done.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

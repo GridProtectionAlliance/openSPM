@@ -135,6 +135,41 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Assess()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "Assess", ViewBag);
+            return View();
+        }
+
+        public ActionResult History()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "History", ViewBag);
+            return View();
+        }
+
+        public ActionResult Plan()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "Plan", ViewBag);
+            return View();
+        }
+
+
+        public ActionResult Notification()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "Notification", ViewBag);
+            return View();
+        }
+
+
+        public ActionResult Done()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "Done", ViewBag);
+            return View();
+        }
+
+
+
+
         #endregion
     }
 }

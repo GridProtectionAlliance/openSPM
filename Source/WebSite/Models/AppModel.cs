@@ -267,10 +267,12 @@ namespace openSPM.Models
         /// <remarks>
         /// This is normally called from controller before returning view action result.
         /// </remarks>
-        public void LookupPageDetail<T>(DataContext dataContext, RequestContext requestContext, string pageName, dynamic viewBag) where T : class, new()
+        public void ConfigureView<T>(DataContext dataContext, RequestContext requestContext, string pageName, dynamic viewBag) where T : class, new()
         {
-            LookupPageDetail(requestContext, pageName, viewBag);
+            // Attempt to establish roles based on hub defined security for specified modeled table
             dataContext.EstablishUserRolesForPage<T>(viewBag);
+
+            ConfigureView(requestContext, pageName, viewBag);
 
             // See if modeled table has a flag field that represents a deleted row
             string isDeletedField = dataContext.GetIsDeletedFlag<T>();
@@ -292,7 +294,7 @@ namespace openSPM.Models
         /// <remarks>
         /// This is normally called from controller before returning view action result.
         /// </remarks>
-        public void LookupPageDetail(RequestContext requestContext, string pageName, dynamic viewBag)
+        public void ConfigureView(RequestContext requestContext, string pageName, dynamic viewBag)
         {
             int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
             Page page = DataContext.Table<Page>().LoadRecord(pageID);
@@ -305,6 +307,22 @@ namespace openSPM.Models
             viewBag.PageSettings = pageSettings;
             viewBag.RouteID = requestContext.RouteData.Values["id"] as string;
             viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
+            viewBag.PageControlScripts = new StringBuilder();
+
+            // Setup default roles if none are defined
+            if (viewBag.EditRoles == null)
+                viewBag.EditRoles = "*";
+
+            if (viewBag.AddNewRoles == null)
+                viewBag.AddNewRoles = viewBag.EditRoles;
+
+            if (viewBag.DeleteRoles == null)
+                viewBag.DeleteRoles = viewBag.EditRoles;
+
+            // Check current allowed roles for user
+            viewBag.CanEdit = UserIsInRole(viewBag.EditRoles);
+            viewBag.CanAddNew = UserIsInRole(viewBag.AddNewRoles);
+            viewBag.CanDelete = UserIsInRole(viewBag.DeleteRoles);
         }
 
         /// <summary>

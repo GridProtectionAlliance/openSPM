@@ -41,6 +41,7 @@ namespace openSPM.Models
         [StringLength(200)]
         public string Name { get; set; }
 
+        [Required]
         [StringLength(200)]
         public string Password { get; set; }
 

@@ -27,6 +27,9 @@ using openSPM.Models;
 
 namespace openSPM.Controllers
 {
+    /// <summary>
+    /// Represents a MVC controller for the site's main pages.
+    /// </summary>
     [AuthorizeControllerRole]
     public class MainController : Controller
     {
@@ -41,6 +44,9 @@ namespace openSPM.Controllers
 
         #region [ Constructors ]
 
+        /// <summary>
+        /// Creates a new <see cref="MainController"/>.
+        /// </summary>
         public MainController()
         {
             // Establish data context for the view
@@ -79,50 +85,26 @@ namespace openSPM.Controllers
 
         public ActionResult Home()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "Home", ViewBag);            
+            m_appModel.ConfigureView(Url.RequestContext, "Home", ViewBag);            
             return View();
         }
 
         public ActionResult Patches()
         {
-            m_appModel.LookupPageDetail<Patch>(m_dataContext, Url.RequestContext, "Patches", ViewBag);
-            return View();
-        }
-
-        public ActionResult Vendors()
-        {
-            m_appModel.LookupPageDetail<Vendor>(m_dataContext, Url.RequestContext, "Vendors", ViewBag);
-            return View();
-        }
-
-        public ActionResult Platforms()
-        {
-            m_appModel.LookupPageDetail<Platform>(m_dataContext, Url.RequestContext, "Platforms", ViewBag);
-            return View();
-        }
-
-        public ActionResult BusinessUnitGroups()
-        {
-            m_appModel.LookupPageDetail<BusinessUnitGroup>(m_dataContext, Url.RequestContext, "BusinessUnitGroups", ViewBag);
+            m_appModel.ConfigureView<Patch>(m_dataContext, Url.RequestContext, "Patches", ViewBag);
             return View();
         }
 
         public ActionResult Help()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "Help", ViewBag);
+            m_appModel.ConfigureView(Url.RequestContext, "Help", ViewBag);
             return View();
         }
 
         public ActionResult Contact()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "Contact", ViewBag);
+            m_appModel.ConfigureView(Url.RequestContext, "Contact", ViewBag);
             ViewBag.Message = "Contacting the Grid Protection Alliance";
-            return View();
-        }
-
-        public ActionResult Settings()
-        {
-            m_appModel.LookupPageDetail(Url.RequestContext, "Settings", ViewBag);
             return View();
         }
 
@@ -130,14 +112,14 @@ namespace openSPM.Controllers
         {
             // Using route ID, i.e., /Main/DisplayPDF/{id}, as page name of PDF load
             string routeID = Url.RequestContext.RouteData.Values["id"] as string ?? "UndefinedPageName";
-            m_appModel.LookupPageDetail(Url.RequestContext, routeID, ViewBag);
+            m_appModel.ConfigureView(Url.RequestContext, routeID, ViewBag);
 
             return View();
         }
 
         public ActionResult PageTemplate1()
         {
-            m_appModel.LookupPageDetail(Url.RequestContext, "PageTemplate1", ViewBag);
+            m_appModel.ConfigureView(Url.RequestContext, "PageTemplate1", ViewBag);
             return View();
         }
 

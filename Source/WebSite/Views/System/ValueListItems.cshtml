@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  MenuItems.cshtml - Gbtc
+//  ValueListItems.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,91 +21,78 @@
 //
 //*****************************************************************************************************@
 @using System.Collections.Specialized
-@using System.Text
 @using openSPM.Models
-@using Page = openSPM.Models.Page
 @model AppModel
 @{
+    DataContext dataContext = Model.DataContext;
     NameValueCollection parameters = Request.QueryString;
-    int parentID = int.Parse(parameters["ID"]);
+    int parentID = int.Parse(parameters["ID"] ?? "0");
 
-    ViewBag.CustomTitle = "Edit Menu Items for \"" + parameters["Name"] + "\" Page";
+    ViewBag.CustomTitle = "Edit Value List Items for \"" + parameters["Name"] + "\" Page";
     ViewBag.PageHasMenu = false;
-    ViewBag.PageControlScripts = new StringBuilder();
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "Text", "Menu Text", "text-left" },
-        new[] { "Link", "URL", "text-left" },
-        new[] { "SortOrder", "Sort&nbsp;Order", "text-center" }
+        new[] { "Text", "Text", "text-left" },
+        new[] { "Description", "Description", "text-left" },
+        new[] { "SortOrder", "Sort&nbsp;Order", "text-center" },
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
 @helper BodyRows()
 {
-    <td width="40%" class="text-left valign-middle" nowrap><img data-bind="attr: {src: deriveImageSource($data), title: ImageAlt, id: 'menuImage' + ID}">&nbsp;<button type="button" class="btn btn-link" data-bind="text: Text, click: $parent.viewPageRecord"></button></td>
-    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(Link)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Link, 2)"></div></a></td>
+    <td width="40%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Text, click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Description, 1.5), attr: {title: Description}"></div></td>
     <td width="15%" class="text-center valign-middle" data-bind="text: SortOrder"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-@helper AddNewEditDialog()
+@helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("Text"))
-        @Html.Raw(Model.DataContext.AddSelectField<MenuItem, Page>("PageID", "ID", "Name", "Name", restriction: new RecordRestriction { FilterExpression = "COALESCE(Name, '') <> ''" }))
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("Image"))
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("ImageAlt"))
+        @Html.Raw(dataContext.AddInputField<ValueList>("Key"))
+        @Html.Raw(dataContext.AddInputField<ValueList>("Text"))
+        @Html.Raw(dataContext.AddInputField<ValueList>("AltText1"))
+        @Html.Raw(dataContext.AddInputField<ValueList>("AltText2"))
+        @Html.Raw(dataContext.AddInputField<ValueList>("Abbreviation"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("Link", "url"))
-        @Html.Raw(Model.DataContext.AddInputField<MenuItem>("SortOrder"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<MenuItem>("Description", 3))
-        @Html.Raw(Model.DataContext.AddCheckBoxField<MenuItem>("Enabled"))
+        @Html.Raw(dataContext.AddInputField<ValueList>("Value"))
+        @Html.Raw(dataContext.AddCheckBoxField<ValueList>("Flag"))
+        @Html.Raw(dataContext.AddTextAreaField<ValueList>("Description", rows: 3))
+        @Html.Raw(dataContext.AddInputField<ValueList>("SortOrder"))
+        @Html.Raw(dataContext.AddCheckBoxField<ValueList>("IsDefault"))
+        @Html.Raw(dataContext.AddCheckBoxField<ValueList>("Hidden"))
+        @Html.Raw(dataContext.AddCheckBoxField<ValueList>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
-    @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
         "use strict";
-        
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<MenuItem>(ViewBag, "SortOrder", parentID))
+
+        @Html.Raw(dataContext.RenderViewModelConfiguration<ValueList>(ViewBag, "SortOrder", parentID))
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
-            // Initialize selected menu item record
-            observableRecord.MenuID(@parentID);
+            // Initialize selected value list record
+            observableRecord.GroupID(@parentID);
         });
-
-        function deriveImageSource(observableRecord) {
-            if (viewModel.dataHubIsConnected()) {
-                dataHub.getPageSetting(observableRecord.PageID, "menuImagePath", "/Images/Menu/").done(function (menuImagePath) {
-                    const menuImage = $("#menuImage" + observableRecord.ID);
-                    const imageSource = menuImagePath + observableRecord.Image;
-
-                    if (menuImage.attr("src") !== imageSource)
-                        menuImage.attr("src", imageSource);
-                });
-            }
-
-            return "/Images/Menu/" + observableRecord.Image;
-        }
 
         $(function() {
             $("#addNewEditDialog").on("shown.bs.modal", function () {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#editMenuItemDialog", window.parent.document).find("button[data-dismiss]");
+                const dismissButtons = $("#editValueListItemDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.prop("disabled", true);
                 dismissButtons.invisible();
             });
 
             $("#addNewEditDialog").on("hidden.bs.modal", function () {
                 // On add/edit dialog hidden, re-enable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#editMenuItemDialog", window.parent.document).find("button[data-dismiss]");
+                const dismissButtons = $("#editValueListItemDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.visible();
                 dismissButtons.prop("disabled", false);
             });

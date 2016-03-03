@@ -20,15 +20,14 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System.Text
 @using openSPM.Models
 @model AppModel
 @{
-    ViewBag.PageControlScripts = new StringBuilder();
+    DataContext dataContext = Model.DataContext;
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
-{   //    { "Field", "Label", "Classes" }
+    {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "PatchReference", "SPM&nbsp;Reference", "text-center" },
         new[] { "ImpactKey", "Impact", "text-center" },
@@ -41,7 +40,7 @@
     ViewBag.HideUnauthorizedControls = true;
 
     ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
 @helper BodyRows()
 {
@@ -58,9 +57,8 @@
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-@helper AddNewEditDialog()
+@helper AddNewEditDialog(DataContext dataContext)
 {
-    DataContext dataContext = Model.DataContext;
     Dictionary<string, string> patchDefaults = dataContext.LoadDatabaseSettings("patch.default");
     int defaultCriticalAlarmDays;
     string setting;
@@ -108,9 +106,8 @@
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
-    @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Patch>(ViewBag))
+        @Html.Raw(dataContext.RenderViewModelConfiguration<Patch>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
     </script>
 }

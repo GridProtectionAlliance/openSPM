@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //******************************************************************************************************
+// ReSharper disable NativeTypePrototypeExtending
 
 // Grid Solutions Framework Core Web Client Script Functions
 "use strict";
@@ -621,4 +622,25 @@ $.fn.visible = function () {
 
 $.fn.invisible = function () {
     return this.css("visibility", "hidden");
+}
+
+// The following target arrays of promises
+$.fn.whenAny = function () {
+    var finish = $.Deferred();
+
+    if (this.length === 0)
+        finish.resolve();
+    else
+        $.each(this, function (index, deferred) {
+            deferred.done(finish.resolve);
+        });
+
+    return finish.promise();
+}
+
+$.fn.whenAll = function () {
+    if (this.length > 0)
+        return $.when.apply($, this);
+
+    return $.Deferred().resolve().promise();
 }

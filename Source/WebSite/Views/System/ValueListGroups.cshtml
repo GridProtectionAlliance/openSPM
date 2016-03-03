@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  Menus.cshtml - Gbtc
+//  ValueListGroups.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,75 +16,73 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/27/2016 - Ritchie Carroll
+//  02/18/2016 - Ritchie Carroll
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System.Text
 @using openSPM.Models
 @model AppModel
 @{
-    ViewBag.PageControlScripts = new StringBuilder();
+    DataContext dataContext = Model.DataContext;
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { "ID", "ID", "text-center" },
         new[] { "Name", "&nbsp;&nbsp;&nbsp;Name", "text-left" },
         new[] { "Description", "Description", "text-left" },
-        new[] { null, "Menu&nbsp;Items", "text-center" }
+        new[] { null, "Value&nbsp;Items", "text-center" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
 @helper BodyRows()
 {
     <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
     <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="50%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Description, 1.5), attr: {title: Description}"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openMenuItemEditor.bind($data)" hub-dependent><span data-bind="attr: {id: 'menuItemMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getMenuItemCount(ID, $($element)), attr: {id: 'menuItemCount' + ID}">0</span></button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openValueListItemEditor.bind($data), enable: $parent.dataHubIsConnected"><span data-bind="attr: {id: 'valueListMode' + ID}">Edit</span>&nbsp;&nbsp;<span class="badge" data-bind="text: getValueListItemCount(ID, $($element)), attr: {id: 'valueListCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-@helper AddNewEditDialog()
+@helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        @Html.Raw(Model.DataContext.AddInputField<Menu>("Name"))
-        @Html.Raw(Model.DataContext.AddInputField<Menu>("Abbreviation"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<Menu>("Description"))
+        @Html.Raw(dataContext.AddInputField<ValueListGroup>("Name"))
+        @Html.Raw(dataContext.AddTextAreaField<ValueListGroup>("Description", rows: 3))
+        @Html.Raw(dataContext.AddCheckBoxField<ValueListGroup>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
-<div id="editMenuItemDialog" class="modal modal-wide fade" role="dialog">
+<div id="editValueListItemDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-body">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <iframe style="border: none" id="editMenuItemFrame"></iframe>
+                <iframe style="border: none" id="editValueListItemFrame"></iframe>
                 <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
 </div>
 @section Scripts {
-    @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Menu>(ViewBag))
+        @Html.Raw(dataContext.RenderViewModelConfiguration<ValueListGroup>(ViewBag))
 
-        function getMenuItemCount(pageID, element) {
+        function getValueListItemCount(groupID, element) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryMenuItemCount(pageID).done(function (count) {
-                    const menuItemMode = $("#menuItemMode" + pageID);
-                    const menuItemCount = $("#menuItemCount" + pageID);
+                dataHub.queryValueListCount(groupID).done(function (count) {
+                    const valueListMode = $("#valueListMode" + groupID);
+                    const valueListCount = $("#valueListCount" + groupID);
                     const modeText = count > 0 ? "Edit" : "Add";
 
-                    if (menuItemMode.text() !== modeText)
-                        menuItemMode.text(modeText);
+                    if (valueListMode.text() !== modeText)
+                        valueListMode.text(modeText);
 
-                    if (menuItemCount.text() !== count.toString())
-                        menuItemCount.text(count.toString());
+                    if (valueListCount.text() !== count.toString())
+                        valueListCount.text(count.toString());
                 });
             }
 
@@ -92,29 +90,29 @@
         }
 
         $(window).resize(function () {
-            $("#editMenuItemFrame").attr("height", ($(document).height() - 150) + "px");
+            $("#editValueListItemFrame").attr("height", ($(document).height() - 150) + "px");
         });
 
-        function openMenuItemEditor(record) {
-            $("#editMenuItemFrame").attr({
-                "src": "/Admin/MenuItems?ID=" + record.ID + "&Name=" + encodeURIComponent(record.Name),
+        function openValueListItemEditor(record) {
+            $("#editValueListItemFrame").attr({
+                "src": "/System/ValueListItems?ID=" + record.ID + "&Name=" + encodeURIComponent(record.Name),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
             });
 
-            $("#editMenuItemDialog").modal("show");
+            $("#editValueListItemDialog").modal("show");
         }
 
-        $("#editMenuItemDialog").on("hidden.bs.modal", function () {
+        $("#editValueListItemDialog").on("hidden.bs.modal", function () {
             // Refresh page counts after editing tasks
             viewModel.queryPageRecords();
 
             // Clear frame page
-            $("#editMenuItemFrame").attr("src", "about:blank");
+            $("#editValueListItemFrame").attr("src", "about:blank");
         });
 
         $(function() {
-            $("#editMenuItemDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#editValueListItemDialog").modal({ show: false, backdrop: "static", keyboard: false });
         });
     </script>
 }

@@ -20,12 +20,11 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using System.Text
 @using openSPM.Models
 @using Page = openSPM.Models.Page
 @model AppModel
 @{
-    ViewBag.PageControlScripts = new StringBuilder();
+    DataContext dataContext = Model.DataContext;
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
@@ -36,7 +35,7 @@
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
 @helper BodyRows()
 {
@@ -49,27 +48,26 @@
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-@helper AddNewEditDialog()
+@helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddInputField<Page>("Name"))
-        @Html.Raw(Model.DataContext.AddInputField<Page>("Title"))
-        @Html.Raw(Model.DataContext.AddSelectField<Page, Menu>("MenuID", "ID", "Name", "Name"))
-        @Html.Raw(Model.DataContext.AddInputField<Page>("PageLocation", "url"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("ServerConfiguration"))
+        @Html.Raw(dataContext.AddInputField<Page>("Name"))
+        @Html.Raw(dataContext.AddInputField<Page>("Title"))
+        @Html.Raw(dataContext.AddSelectField<Page, Menu>("MenuID", "ID", "Name", "Name"))
+        @Html.Raw(dataContext.AddInputField<Page>("PageLocation", "url"))
+        @Html.Raw(dataContext.AddTextAreaField<Page>("ServerConfiguration"))
     </div>
     <div class="col-md-6">
-        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("ClientConfiguration"))
-        @Html.Raw(Model.DataContext.AddInputField<Page>("IncludedRoles"))
-        @Html.Raw(Model.DataContext.AddInputField<Page>("ExcludedRoles"))
-        @Html.Raw(Model.DataContext.AddTextAreaField<Page>("Description", 3))
-        @Html.Raw(Model.DataContext.AddCheckBoxField<Page>("Enabled"))
+        @Html.Raw(dataContext.AddTextAreaField<Page>("ClientConfiguration"))
+        @Html.Raw(dataContext.AddInputField<Page>("IncludedRoles"))
+        @Html.Raw(dataContext.AddInputField<Page>("ExcludedRoles"))
+        @Html.Raw(dataContext.AddTextAreaField<Page>("Description", 3))
+        @Html.Raw(dataContext.AddCheckBoxField<Page>("Enabled"))
     </div>
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
-    @Html.Raw(ViewBag.PageControlScripts.ToString())
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Page>(ViewBag))
+        @Html.Raw(dataContext.RenderViewModelConfiguration<Page>(ViewBag))
     </script>
 }

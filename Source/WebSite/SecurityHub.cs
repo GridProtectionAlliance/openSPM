@@ -93,7 +93,7 @@ namespace openSPM
         /// <returns>Current application role records.</returns>
         public IEnumerable<ApplicationRole> QueryApplicationRoles()
         {
-            return m_dataContext.Table<ApplicationRole>().QueryRecords("Name", true, new RecordRestriction("NodeID={0}", MvcApplication.DefaultModel.Global.NodeID));
+            return m_dataContext.Table<ApplicationRole>().QueryRecords("Name", new RecordRestriction("NodeID={0}", MvcApplication.DefaultModel.Global.NodeID));
         }
 
         /// <summary>

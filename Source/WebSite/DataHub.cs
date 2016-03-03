@@ -735,6 +735,62 @@ namespace openSPM
 
         #endregion
 
+        #region [ LatestVendorDiscoveryResult View Operations ]
+
+        [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecordCount)]
+        public int QueryLatestVendorDiscoveryResultCount(bool showDeleted)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount();
+
+            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+        }
+
+        [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecords)]
+        public IEnumerable<LatestVendorDiscoveryResult> QueryLatestVendorDiscoveryResults(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize);
+
+            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+        }
+
+        [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.CreateNewRecord)]
+        public LatestVendorDiscoveryResult NewLatestVendorDiscoveryResult()
+        {
+            return new LatestVendorDiscoveryResult();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.AddNewRecord)]
+        public void AddNewLatestVendorDiscoveryResult(LatestVendorDiscoveryResult record)
+        {
+            DiscoveryResult result = DeriveDiscoveryResult(record);
+            result.CreatedByID = GetCurrentUserID();
+            result.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<DiscoveryResult>().AddNewRecord(result);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.UpdateRecord)]
+        public void UpdateLatestVendorDiscoveryResult(LatestVendorDiscoveryResult record)
+        {
+            m_dataContext.Table<DiscoveryResult>().UpdateRecord(DeriveDiscoveryResult(record));
+        }
+
+        private DiscoveryResult DeriveDiscoveryResult(LatestVendorDiscoveryResult record)
+        {
+            return new DiscoveryResult
+            {
+                VendorID = record.VendorID,
+                ReviewDate = record.ReviewDate,
+                ResultKey = record.ResultKey,
+                Notes = record.Notes
+            };
+        }
+
+        #endregion
+
         #region [ Miscellaneous Hub Operations ]
 
         /// <summary>

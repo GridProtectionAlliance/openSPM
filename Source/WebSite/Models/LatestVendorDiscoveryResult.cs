@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  DiscoveryResult.cs - Gbtc
+//  LatestVendorDiscoveryResult.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/27/2016 - J. Ritchie Carroll
+//  03/03/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -28,28 +28,68 @@ using openSPM.Attributes;
 namespace openSPM.Models
 {
     /// <summary>
-    /// Model for openSPM.DiscoveryResult table.
+    /// Model for openSPM.LatestVendorDiscoveryResult view.
     /// </summary>
-    public class DiscoveryResult
+    [IsDeletedFlag("IsDeleted")]
+    public class LatestVendorDiscoveryResult
     {
         [PrimaryKey(true)]
-        public int ID { get; set; }
+        public int VendorID
+        {
+            get; set;
+        }
 
-        [Label("Select Source")]
-        public int VendorID { get; set; }
+        public int DiscoveryResultID
+        {
+            get; set;
+        }
 
-        [Required]
-        [Label("Result")]
-        public int ResultKey { get; set; }
+        public int VendorTypeKey
+        {
+            get; set;
+        }
 
-        public string Notes { get; set; }
+        [StringLength(200)]
+        public string Name
+        {
+            get; set;
+        }
 
-        [Label("Review Date")]
-        [InitialValue("new Date()")]
-        public DateTime ReviewDate { get; set; }
+        [StringLength(12)]
+        public string Abbreviation
+        {
+            get; set;
+        }
 
-        public DateTime CreatedOn { get; set; }
+        [StringLength(200)]
+        public string Company
+        {
+            get; set;
+        }
 
-        public Guid CreatedByID { get; set; }
+        public int ResultKey
+        {
+            get; set;
+        }
+
+        public string Notes
+        {
+            get; set;
+        }
+
+        public DateTime ReviewDate
+        {
+            get; set;
+        }
+
+        public bool Enabled
+        {
+            get; set;
+        }
+
+        public bool IsDeleted
+        {
+            get; set;
+        }
     }
 }

@@ -124,19 +124,17 @@ namespace openSPM.Models
         /// <summary>
         /// Queries database and returns modeled table records for the specified sql statement and parameters.
         /// </summary>
-        /// <param name="sortField">Field name to order-by; defaults to primary keys.</param>
-        /// <param name="ascending">Sort ascending flag; set to <c>false</c> for descending; defaults to <c>true</c>.</param>
+        /// <param name="orderByExpression">Field name expression used for sort order, include ASC or DESC as needed - does not include ORDER BY; defaults to primary keys.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>An enumerable of modeled table row instances for queried records.</returns>
         /// <remarks>
         /// If no record restriction is provided, all rows will be returned.
         /// </remarks>
-        public IEnumerable<T> QueryRecords(string sortField = null, bool ascending = true, RecordRestriction restriction = null)
+        public IEnumerable<T> QueryRecords(string orderByExpression = null, RecordRestriction restriction = null)
         {
-            if (string.IsNullOrWhiteSpace(sortField))
-                sortField = s_primaryKeyFields;
+            if (string.IsNullOrWhiteSpace(orderByExpression))
+                orderByExpression = s_primaryKeyFields;
 
-            string orderByExpression = $"{sortField}{(ascending ? "" : " DESC")}";
             string sqlExpression = null;
 
             try
@@ -166,6 +164,9 @@ namespace openSPM.Models
         /// <param name="pageSize">Current page size.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>An enumerable of modeled table row instances for queried records.</returns>
+        /// <remarks>
+        /// This function is used for record paging. Primary keys are cached server-side, typically per user session, to maintain desired per-page sort order.
+        /// </remarks>
         public IEnumerable<T> QueryRecords(string sortField, bool ascending, int page, int pageSize, RecordRestriction restriction = null)
         {
             if ((object)m_primaryKeyCache == null || string.Compare(sortField, m_lastSortField, StringComparison.OrdinalIgnoreCase) != 0)

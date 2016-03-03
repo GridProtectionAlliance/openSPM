@@ -47,7 +47,7 @@
     menuImagePath = menuImagePath.EnsureEnd('/');
 
     // Load menu items for this page from database table
-    List<MenuItem> menuItems = dataContext.Table<MenuItem>().QueryRecords("SortOrder", true, new RecordRestriction("MenuID={0} AND Enabled <> 0", page?.MenuID ?? 0)).ToList();
+    List<MenuItem> menuItems = dataContext.Table<MenuItem>().QueryRecords("SortOrder", new RecordRestriction("MenuID={0} AND Enabled <> 0", page?.MenuID ?? 0)).ToList();
     List<MenuItem> unavailableMenuItems = new List<MenuItem>();
 
     foreach (MenuItem menuItem in menuItems) {

@@ -155,7 +155,7 @@ namespace openSPM.Models
         /// <summary>
         /// Gets the table operations for the specified modeled table <typeparamref name="T"/>.
         /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <typeparam name="T">Modeled database table (or view).</typeparam>
         /// <returns>Table operations for the specified modeled table <typeparamref name="T"/>.</returns>
         public TableOperations<T> Table<T>() where T : class, new()
         {
@@ -165,7 +165,7 @@ namespace openSPM.Models
         /// <summary>
         /// Gets the field name targeted as the primary label for the modeled table.
         /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <typeparam name="T">Modeled database table (or view).</typeparam>
         /// <returns>Field name targeted as the primary label for the modeled table.</returns>
         public string GetPrimaryLabelField<T>() where T : class, new()
         {
@@ -181,7 +181,7 @@ namespace openSPM.Models
         /// <summary>
         /// Gets the field name targeted to mark a record as deleted.
         /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <typeparam name="T">Modeled database table (or view).</typeparam>
         /// <returns>Field name targeted to mark a record as deleted.</returns>
         public string GetIsDeletedFlag<T>() where T : class, new()
         {
@@ -196,7 +196,7 @@ namespace openSPM.Models
         /// <summary>
         /// Looks up proper user roles for paged based on modeled security in <see cref="DataHub"/>.
         /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <typeparam name="T">Modeled database table (or view).</typeparam>
         /// <param name="viewBag">ViewBag for the current view.</param>
         /// <remarks>
         /// Typically used in paged view model scenarios and invoked by controller prior to view rendering.
@@ -206,28 +206,47 @@ namespace openSPM.Models
         /// </remarks>
         public void EstablishUserRolesForPage<T>(dynamic viewBag) where T : class, new()
         {
-            // Get any authorized roles for key records operations of modeled table
+            // Get any authorized roles as defined in hub for key records operations of modeled table
             Tuple<string, string>[] recordOperations = DataHub.GetRecordOperations<T>();
-            viewBag.EditRoles = recordOperations[(int)RecordOperation.UpdateRecord].Item2;
-            viewBag.AddNewRoles = recordOperations[(int)RecordOperation.AddNewRecord].Item2;
-            viewBag.DeleteRoles = recordOperations[(int)RecordOperation.DeleteRecord].Item2;
+
+            // Create a function to check if a method exists for operation - if none is defined, read-only access will be assumed (e.g. for a view)
+            Func<RecordOperation, string> getRoles = operationType =>
+            {
+                Tuple<string, string> recordOperation = recordOperations[(int)operationType];
+                return string.IsNullOrEmpty(recordOperation?.Item1) ? "" : recordOperation.Item2 ?? "";
+            };
+
+            viewBag.EditRoles = getRoles(RecordOperation.UpdateRecord);
+            viewBag.AddNewRoles = getRoles(RecordOperation.AddNewRecord);
+            viewBag.DeleteRoles = getRoles(RecordOperation.DeleteRecord);
         }
 
         /// <summary>
         /// Renders client-side configuration script for paged view model.
         /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
+        /// <typeparam name="T">Modeled database table (or view).</typeparam>
         /// <param name="viewBag">ViewBag for the view.</param>
-        /// <param name="defaultSortField">Default sort field, defaults to first primary key field.</param>
+        /// <param name="defaultSortField">Default sort field name, defaults to first primary key field. Prefix field name with a minus, i.e., '-', to default to descending sort.</param>
         /// <param name="parentKeys">Primary keys values of the parent record to load.</param>
         /// <returns>Rendered paged view model configuration script.</returns>
         public string RenderViewModelConfiguration<T>(dynamic viewBag, string defaultSortField = null, params object[] parentKeys) where T : class, new()
         {
             StringBuilder javascript = new StringBuilder();
             string[] primaryKeyFields = Table<T>().GetPrimaryKeyFieldNames();
+            string defaultSortAscending = "true";
+
+            defaultSortField = defaultSortField ?? primaryKeyFields[0];
+
+            // Handle case for desired default descending sort order
+            if (defaultSortField[0] == '-')
+            {
+                defaultSortField = defaultSortField.Substring(1);
+                defaultSortAscending = "false";
+            }
 
             javascript.Append($@"// Configure view model
-                viewModel.defaultSortField = ""{defaultSortField ?? primaryKeyFields[0]}"";
+                viewModel.defaultSortField = ""{defaultSortField}"";
+                viewModel.defaultSortAscending = {defaultSortAscending};
                 viewModel.labelField = ""{GetPrimaryLabelField<T>()}"";
                 viewModel.primaryKeyFields = [{primaryKeyFields.Select(fieldName => $"\"{fieldName}\"").ToDelimitedString(", ")}];
             ".FixForwardSpacing());
@@ -237,16 +256,16 @@ namespace openSPM.Models
             if (viewBag.IsDeletedField != null)
                 showDeletedValue = (viewBag.ShowDeleted ?? false).ToString().ToLower();
 
-            Func<string, string> toCamelCase = methodName => $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
+            Func<string, string> toCamelCase = methodName => methodName == null ? null : $"{char.ToLower(methodName[0])}{methodName.Substring(1)}";
 
             // Get method names for records operations of modeled table
             Tuple<string, string>[] recordOperations = DataHub.GetRecordOperations<T>();
-            string queryRecordCountMethod = toCamelCase(recordOperations[(int)RecordOperation.QueryRecordCount].Item1);
-            string queryRecordsMethod = toCamelCase(recordOperations[(int)RecordOperation.QueryRecords].Item1);
-            string deleteRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.DeleteRecord].Item1);
-            string createNewRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.CreateNewRecord].Item1);
-            string addNewRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.AddNewRecord].Item1);
-            string updateMethod = toCamelCase(recordOperations[(int)RecordOperation.UpdateRecord].Item1);
+            string queryRecordCountMethod = toCamelCase(recordOperations[(int)RecordOperation.QueryRecordCount]?.Item1);
+            string queryRecordsMethod = toCamelCase(recordOperations[(int)RecordOperation.QueryRecords]?.Item1);
+            string deleteRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.DeleteRecord]?.Item1);
+            string createNewRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.CreateNewRecord]?.Item1);
+            string addNewRecordMethod = toCamelCase(recordOperations[(int)RecordOperation.AddNewRecord]?.Item1);
+            string updateMethod = toCamelCase(recordOperations[(int)RecordOperation.UpdateRecord]?.Item1);
 
             string keyValues = null;
 
@@ -717,7 +736,7 @@ namespace openSPM.Models
             viewBag.AddValue("ToolTip", toolTip);
             viewBag.AddValue("OptionDataBinding", optionDataBinding);
 
-            foreach (TOption record in Table<TOption>().QueryRecords(optionSortFieldName, true, restriction))
+            foreach (TOption record in Table<TOption>().QueryRecords(optionSortFieldName, restriction))
             {
                 if (record != null)
                     options.Add(optionTableOperations.GetFieldValue(record, optionValueFieldName).ToString(), optionTableOperations.GetFieldValue(record, optionLabelFieldName).ToNonNullString(fieldLabel));

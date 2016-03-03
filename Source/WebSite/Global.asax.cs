@@ -113,6 +113,10 @@ namespace openSPM
                 global.ApplicationKeywords = appSetting["applicationKeywords"];
                 global.BootstrapTheme = appSetting["bootstrapTheme"];
 
+                // Cache application settings
+                foreach (KeyValuePair<string, string> item in appSetting)
+                    global.ApplicationSettings.Add(item.Key, item.Value);
+
                 // Cache default page settings
                 foreach (KeyValuePair<string, string> item in dataContext.LoadDatabaseSettings("page.default"))
                     global.PageDefaults.Add(item.Key, item.Value);

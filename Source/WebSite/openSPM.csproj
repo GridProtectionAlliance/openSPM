@@ -240,6 +240,7 @@
     <Compile Include="Models\ValueList.cs" />
     <Compile Include="Models\ValueListGroup.cs" />
     <Compile Include="Models\Vendor.cs" />
+    <Compile Include="Models\LatestVendorDiscoveryResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="SecurityHub.cs" />
@@ -428,7 +429,7 @@
     <Content Include="Views\Settings\Platforms.cshtml" />
     <Content Include="Views\Settings\BusinessUnitGroups.cshtml" />
     <Content Include="Views\Security\Groups.cshtml" />
-    <Content Include="Views\Main\PageTemplate2.cshtml" />
+    <Content Include="Views\Main\DiscoverPatches.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

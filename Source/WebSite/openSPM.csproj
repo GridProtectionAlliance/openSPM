@@ -428,6 +428,7 @@
     <Content Include="Views\Settings\Platforms.cshtml" />
     <Content Include="Views\Settings\BusinessUnitGroups.cshtml" />
     <Content Include="Views\Security\Groups.cshtml" />
+    <Content Include="Views\Main\PageTemplate2.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

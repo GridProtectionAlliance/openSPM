@@ -89,6 +89,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Groups()
+        {
+            m_appModel.ConfigureView<UserAccount>(m_dataContext, Url.RequestContext, "Security.Groups", ViewBag);
+            return View();
+        }
+
         #endregion
     }
 }

@@ -229,10 +229,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -279,10 +276,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<Platform>().QueryRecordCount();
 
-            return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
         }
 
         [RecordOperation(typeof(Platform), RecordOperation.QueryRecords)]
@@ -291,10 +285,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -341,10 +332,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<BusinessUnitGroup>().QueryRecordCount();
 
-            return m_dataContext.Table<BusinessUnitGroup>().QueryRecordCount(new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<BusinessUnitGroup>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
         }
 
         [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.QueryRecords)]
@@ -353,10 +341,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<BusinessUnitGroup>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_dataContext.Table<BusinessUnitGroup>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<BusinessUnitGroup>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -451,6 +436,58 @@ namespace openSPM
             record.UpdatedBy = UserInfo.CurrentUserID;
             record.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<UserAccount>().UpdateRecord(record);
+        }
+
+        #endregion
+
+        #region [ SecurityGroup Table Operations ]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(SecurityGroup), RecordOperation.QueryRecordCount)]
+        public int QuerySecurityGroupCount()
+        {
+            return m_dataContext.Table<SecurityGroup>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(SecurityGroup), RecordOperation.QueryRecords)]
+        public IEnumerable<SecurityGroup> QuerySecurityGroups(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<SecurityGroup>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(SecurityGroup), RecordOperation.DeleteRecord)]
+        public void DeleteSecurityGroup(Guid id)
+        {
+            m_dataContext.Table<SecurityGroup>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(SecurityGroup), RecordOperation.CreateNewRecord)]
+        public SecurityGroup NewSecurityGroup()
+        {
+            return new SecurityGroup();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(SecurityGroup), RecordOperation.AddNewRecord)]
+        public void AddNewSecurityGroup(SecurityGroup record)
+        {
+            record.CreatedBy = UserInfo.CurrentUserID;
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedBy = record.CreatedBy;
+            record.UpdatedOn = record.CreatedOn;
+            m_dataContext.Table<SecurityGroup>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(SecurityGroup), RecordOperation.UpdateRecord)]
+        public void UpdateSecurityGroup(SecurityGroup record)
+        {
+            record.UpdatedBy = UserInfo.CurrentUserID;
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<SecurityGroup>().UpdateRecord(record);
         }
 
         #endregion
@@ -555,22 +592,14 @@ namespace openSPM
         [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecordCount)]
         public int QueryMenuItemCount(int parentID)
         {
-            return m_dataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction
-            {
-                FilterExpression = "MenuID = {0}",
-                Parameters = new object[] { parentID }
-            });
+            return m_dataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction("MenuID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecords)]
         public IEnumerable<MenuItem> QueryMenuItems(int parentID, string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "MenuID = {0}",
-                Parameters = new object[] { parentID }
-            });
+            return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("MenuID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -665,22 +694,14 @@ namespace openSPM
         [RecordOperation(typeof(ValueList), RecordOperation.QueryRecordCount)]
         public int QueryValueListCount(int parentID)
         {
-            return m_dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction
-            {
-                FilterExpression = "GroupID = {0}",
-                Parameters = new object[] { parentID }
-            });
+            return m_dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.QueryRecords)]
         public IEnumerable<ValueList> QueryValueListItems(int parentID, string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "GroupID = {0}",
-                Parameters = new object[] { parentID }
-            });
+            return m_dataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -729,113 +750,6 @@ namespace openSPM
             Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
             AppModel model = MvcApplication.DefaultModel;
             return model.GetPageSetting(pageSettings, model.Global.PageDefaults, key, defaultValue);
-        }
-
-        /// <summary>
-        /// Gets the specified user account record.
-        /// </summary>
-        /// <param name="id">ID of requested user.</param>
-        /// <returns>Specified user account record.</returns>
-        public UserAccount QueryUserAccount(Guid id)
-        {
-            return m_dataContext.Table<UserAccount>().LoadRecord(id);
-        }
-
-        /// <summary>
-        /// Gets the current application role records.
-        /// </summary>
-        /// <returns>Current application role records.</returns>
-        public IEnumerable<ApplicationRole> QueryApplicationRoles()
-        {
-            return m_dataContext.Table<ApplicationRole>().QueryRecords(restriction: new RecordRestriction {
-                FilterExpression = "NodeID={0}",
-                Parameters = new object[] { MvcApplication.DefaultModel.Global.NodeID }
-            });
-        }
-
-        /// <summary>
-        /// Determines if user is in role based on database ID values.
-        /// </summary>
-        /// <param name="userID">User ID value.</param>
-        /// <param name="roleID">Role ID value.</param>
-        /// <returns><c>true</c> if user is in role; otherwise, <c>false</c>.</returns>
-        public bool UserIsInRole(Guid userID, Guid roleID)
-        {
-            return m_dataContext.Table<ApplicationRoleUserAccount>().QueryRecordCount(new RecordRestriction
-            {
-                FilterExpression = "UserAccountID={0} AND ApplicationRoleID={1}",
-                Parameters = new object[] { userID, roleID }
-            }) > 0;
-        }
-
-        /// <summary>
-        /// Adds user to a role.
-        /// </summary>
-        /// <param name="userID">User ID value.</param>
-        /// <param name="roleID">Role ID value.</param>
-        /// <returns><c>true</c> if user was added; otherwise <c>false</c>.</returns>
-        [AuthorizeHubRole("Administrator")]
-        public bool AddUserToRole(Guid userID, Guid roleID)
-        {
-            // Nothing to do if user is already in role
-            if (UserIsInRole(userID, roleID))
-                return false;
-
-            return m_dataContext.Table<ApplicationRoleUserAccount>().AddNewRecord(new ApplicationRoleUserAccount
-            {
-                ApplicationRoleID = roleID,
-                UserAccountID = userID
-            }) > 0;
-        }
-
-        /// <summary>
-        /// Removes user from a role.
-        /// </summary>
-        /// <param name="userID">User ID value.</param>
-        /// <param name="roleID">Role ID value.</param>
-        /// <returns><c>true</c> if user was removed; otherwise <c>false</c>.</returns>
-        [AuthorizeHubRole("Administrator")]
-        public bool RemoveUserFromRole(Guid userID, Guid roleID)
-        {
-            // Nothing to do if user is not currently in role
-            if (!UserIsInRole(userID, roleID))
-                return false;
-
-            return m_dataContext.Table<ApplicationRoleUserAccount>().DeleteRecord(new RecordRestriction
-            {
-                FilterExpression = "UserAccountID={0} AND ApplicationRoleID={1}",
-                Parameters = new object[] { userID, roleID }
-            }) > 0;
-        }
-
-        /// <summary>
-        /// Gets SID for a given user name.
-        /// </summary>
-        /// <param name="userName">User name to convert to SID.</param>
-        /// <returns>SID for a given user name.</returns>
-        public string UserNameToSID(string userName)
-        {
-            return UserInfo.UserNameToSID(userName);
-        }
-
-        /// <summary>
-        /// Gets SID for a given group name.
-        /// </summary>
-        /// <param name="groupName">Group name to convert to SID.</param>
-        /// <returns>SID for a given group name.</returns>
-        public string GroupNameToSID(string groupName)
-        {
-            return UserInfo.GroupNameToSID(groupName);
-        }
-
-        /// <summary>
-        /// Gets account name for a given SID.
-        /// </summary>
-        /// <param name="sid">SID to convert to a account name.</param>
-        /// <returns>Account name for a given SID.</returns>
-        public string SIDToAccountName(string sid)
-        {
-            return UserInfo.SIDToAccountName(sid);
         }
 
         /// <summary>

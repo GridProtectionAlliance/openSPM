@@ -39,7 +39,7 @@ using openSPM.Attributes;
 namespace openSPM.Models
 {
     /// <summary>
-    /// Defines a record restriction that can be applied to queries.
+    /// Defines a parameterized record restriction that can be applied to queries.
     /// </summary>
     public class RecordRestriction
     {
@@ -62,14 +62,14 @@ namespace openSPM.Models
         #region [ Constructors ]
 
         /// <summary>
-        /// Creates a new <see cref="RecordRestriction"/>.
+        /// Creates a new parameterized <see cref="RecordRestriction"/>.
         /// </summary>
         public RecordRestriction()
         {
         }
 
         /// <summary>
-        /// Creates a new <see cref="RecordRestriction"/> with the specified parameters.
+        /// Creates a new parameterized <see cref="RecordRestriction"/> with the specified filter and parameters.
         /// </summary>
         /// <param name="filterExpression">Filter SQL expression for restriction - does not include WHERE.</param>
         /// <param name="parameters">Restriction parameter values.</param>

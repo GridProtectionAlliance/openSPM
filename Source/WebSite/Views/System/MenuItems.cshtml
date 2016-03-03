@@ -56,7 +56,7 @@
 {
     <div class="col-md-6">
         @Html.Raw(dataContext.AddInputField<MenuItem>("Text"))
-        @Html.Raw(dataContext.AddSelectField<MenuItem, Page>("PageID", "ID", "Name", "Name", restriction: new RecordRestriction { FilterExpression = "COALESCE(Name, '') <> ''" }))
+        @Html.Raw(dataContext.AddSelectField<MenuItem, Page>("PageID", "ID", "Name", "Name", restriction: new RecordRestriction("COALESCE(Name, '') <> ''")))
         @Html.Raw(dataContext.AddInputField<MenuItem>("Image"))
         @Html.Raw(dataContext.AddInputField<MenuItem>("ImageAlt"))
     </div>

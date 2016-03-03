@@ -43,9 +43,9 @@ namespace openSPM.Models
 
         public string Notes { get; set; }
 
-        [Label("Discovery Date")]
+        [Label("Review Date")]
         [Column(TypeName = "date")]
-        public DateTime DiscoveryDate { get; set; }
+        public DateTime ReviewDate { get; set; }
 
         public DateTime CreatedOn { get; set; }
 

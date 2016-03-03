@@ -110,7 +110,7 @@
                         <div class="center-block">
                             <div id="loadingRoles">Loading role assignments&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span><hr class="full-break" /></div>
                             <table class="table-condensed table-center">
-                            @foreach (ApplicationRole role in dataContext.Table<ApplicationRole>().QueryRecords("SELECT ID FROM ApplicationRole WHERE NodeID={0} ORDER BY Name", Model.Global.NodeID)) {
+                            @foreach (ApplicationRole role in dataContext.Table<ApplicationRole>().QueryRecords("Name", true, new RecordRestriction { FilterExpression = "NodeID={0}", Parameters = new object[] { Model.Global.NodeID }})) {
                                 <tr>
                                     <td class="text-left valign-middle">
                                         <div class="checkbox" style="margin: 0">
@@ -139,66 +139,66 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
+                                @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
 
         function lookupAccountName(record) {
-            if (viewModel.dataHubIsConnected()) {
-                dataHub.sIDToAccountName(record.Name).done(function (accountName) {
-                    record.AccountName(accountName);
-                });
-            }
-        }
+                                    if (viewModel.dataHubIsConnected()) {
+                                        dataHub.sIDToAccountName(record.Name).done(function (accountName) {
+                                            record.AccountName(accountName);
+                                        });
+                                    }
+                                }
 
-        function validateAccount(observableRecord) {
-            if (observableRecord.UseDBAuthentication()) {
-                showAccountNameFeedback(null);
-            }
-            else {
-                if (viewModel.dataHubIsConnected()) {
-                    dataHub.userNameToSID(observableRecord.Name()).done(function (sid) {
-                        showAccountNameFeedback(observableRecord.Name() !== sid);
-                    });
-                }
-                else {
-                    showAccountNameFeedback(null);
-                }
-            }
+                                function validateAccount(observableRecord) {
+                                    if (observableRecord.UseDBAuthentication()) {
+                                        showAccountNameFeedback(null);
+                                    }
+                                    else {
+                                        if (viewModel.dataHubIsConnected()) {
+                                            dataHub.userNameToSID(observableRecord.Name()).done(function (sid) {
+                                                showAccountNameFeedback(observableRecord.Name() !== sid);
+                                            });
+                                        }
+                                        else {
+                                            showAccountNameFeedback(null);
+                                        }
+                                    }
 
-            return undefined;
-        }
+                                    return undefined;
+                                }
 
-        function showAccountNameFeedback(isValid) {
+                                function showAccountNameFeedback(isValid) {
             $("#accountValid").hide();
             $("#accountInvalid").hide();
 
-            if (isValid != null) {
-                if (isValid)
+                                    if (isValid != null) {
+                                        if (isValid)
                     $("#accountValid").show();
                 else
                     $("#accountInvalid").show();
-            }
-        }
+                                    }
+                                }
 
         $(viewModel).on("pageRecordsQueried", function (event, records) {
-            // Add a virtual observable field called "AccountName" that will resolve SID values to account names
-            for (let i = 0; i < records.length; i++) {
-                records[i].AccountName = ko.observable("...");
-                lookupAccountName(records[i]);
-            }
-        });
+                                    // Add a virtual observable field called "AccountName" that will resolve SID values to account names
+                                    for (let i = 0; i < records.length; i++) {
+                                        records[i].AccountName = ko.observable("...");
+                                        lookupAccountName(records[i]);
+                                    }
+                                });
 
         $(viewModel).on("newRecord", function (event, newRecord) {
-            // Make sure new records get virtual field
-            newRecord.AccountName = ko.observable("");
-        });
+                                    // Make sure new records get virtual field
+                                    newRecord.AccountName = ko.observable("");
+                                });
 
         $(viewModel).on("derivingObservableRecord", function (event, observableRecord) {
-            // Create a virtual UseDBAuthentication field that is negated state of actual UseADAuthentication field
-            observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
+                                    // Create a virtual UseDBAuthentication field that is negated state of actual UseADAuthentication field
+                                    observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
 
-            // Load human readable account name into Name field
-            if (observableRecord.AccountName)
-                observableRecord.Name(observableRecord.AccountName());
+                                    // Load human readable account name into Name field
+                                    if (observableRecord.AccountName)
+                                        observableRecord.Name(observableRecord.AccountName());
 
             @* Cannot decrypt a password hash, have to clear it and force re-entry *@
             if (!observableRecord.UseADAuthentication())

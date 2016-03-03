@@ -29,4 +29,55 @@
 <p>Body HTML goes here...</p>
 <p>(1) Add view to MainController...</p>
 
+@* Bootstrap "row" consists of 12-columns by default *@
+<div class="row">
+    @* Bootstrap "column" with default targeting for medium sized screens, spanning 4 columns *@
+    <div class="col-md-4">
+        @* Bootstrap "button" with "primary" styling *@
+        <button class="btn btn-primary" onclick="showInfoMessage('Test Info Message!', -1)">Info Test</button>
 
+        @* Bootstrap "button" with "danger" styling *@
+        <button class="btn btn-danger" onclick="showErrorMessage('Test Error Message!', -1)">Error Test</button>
+
+        <h4>Page Image Path = @ViewBag.PageImagePath</h4>
+        <h4>Page Server Configuration Settings Count = @ViewBag.PageSettings.Count</h4>
+        <h4>User = @User.Identity.Name</h4>
+        <h4>Is Authenticated = @User.Identity.IsAuthenticated</h4>
+        <h4>Is in Administrator Role = @User.IsInRole("Administrator")</h4>
+        <h4>Is in Domain Admins group = @Model.UserIsInGroup("GPA\\Domain Admins")</h4>
+
+        User Groups:
+        <ul>
+            @foreach (string group in Model.SecurityProvider?.UserData?.Groups ?? new List<string>())
+            {
+                <li>@group</li>
+            }
+        </ul>
+
+        <h2>Getting started</h2>
+        <p>
+            ASP.NET MVC gives you a powerful, patterns-based way to build dynamic websites that
+            enables a clean separation of concerns and gives you full control over markup
+            for enjoyable, agile development.
+        </p>
+        <p>
+            <a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301865">Learn more &raquo;</a>
+        </p>
+    </div>
+    @* Bootstrap "column" with default targeting for medium sized screens, spanning 4 columns *@
+    <div class="col-md-4">
+        <h2>Get more libraries</h2>
+        <p>NuGet is a free Visual Studio extension that makes it easy to add, remove, and update libraries and tools in Visual Studio projects.</p>
+        <p>
+            <a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301866">Learn more &raquo;</a>
+        </p>
+    </div>
+    @* Bootstrap "column" with default targeting for medium sized screens, spanning 4 columns *@
+    <div class="col-md-4">
+        <h2>Web Hosting</h2>
+        <p>You can easily find a web hosting company that offers the right mix of features and price for your applications.</p>
+        <p>
+            <a class="btn btn-default" href="http://go.microsoft.com/fwlink/?LinkId=301867">Learn more &raquo;</a>
+        </p>
+    </div>
+</div>

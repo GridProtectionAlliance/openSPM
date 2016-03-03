@@ -115,8 +115,14 @@ namespace openSPM.Models
 
             int key = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name={0} AND Enabled <> 0", groupName) ?? 0;
 
-            foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SELECT ID FROM ValueList WHERE GroupID={0} AND Enabled <> 0 AND Hidden = 0", key))
+            foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SortOrder", true, new RecordRestriction
+            {
+                FilterExpression = "GroupID = {0} AND Enabled <> 0 AND Hidden = 0",
+                Parameters = new object[] { key }
+            }))
+            {
                 javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
+            }
 
             javascript.AppendLine($"\r\n        function {lookupFunctionName}(value) {{");
             javascript.AppendLine($"            return {valueListName}[value];");

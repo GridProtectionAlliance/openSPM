@@ -164,10 +164,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<Patch>().QueryRecordCount();
 
-            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
         }
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
@@ -176,10 +173,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -226,10 +220,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<Vendor>().QueryRecordCount();
 
-            return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction
-            {
-                FilterExpression = "IsDeleted = 0"
-            });
+            return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
         }
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecords)]
@@ -756,7 +747,10 @@ namespace openSPM
         /// <returns>Current application role records.</returns>
         public IEnumerable<ApplicationRole> QueryApplicationRoles()
         {
-            return m_dataContext.Table<ApplicationRole>().QueryRecords("SELECT ID FROM ApplicationRole WHERE NodeID={0} ORDER BY Name", MvcApplication.DefaultModel.Global.NodeID);
+            return m_dataContext.Table<ApplicationRole>().QueryRecords(restriction: new RecordRestriction {
+                FilterExpression = "NodeID={0}",
+                Parameters = new object[] { MvcApplication.DefaultModel.Global.NodeID }
+            });
         }
 
         /// <summary>

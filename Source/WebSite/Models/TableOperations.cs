@@ -43,6 +43,10 @@ namespace openSPM.Models
     /// </summary>
     public class RecordRestriction
     {
+        #region [ Members ]
+
+        // Fields
+
         /// <summary>
         /// Defines filter SQL expression for restriction - does not include WHERE.
         /// </summary>
@@ -52,6 +56,30 @@ namespace openSPM.Models
         /// Defines restriction parameter values.
         /// </summary>
         public object[] Parameters = new object[0];
+
+        #endregion
+
+        #region [ Constructors ]
+
+        /// <summary>
+        /// Creates a new <see cref="RecordRestriction"/>.
+        /// </summary>
+        public RecordRestriction()
+        {
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="RecordRestriction"/> with the specified parameters.
+        /// </summary>
+        /// <param name="filterExpression">Filter SQL expression for restriction - does not include WHERE.</param>
+        /// <param name="parameters">Restriction parameter values.</param>
+        public RecordRestriction(string filterExpression, params object[] parameters)
+        {
+            FilterExpression = filterExpression;
+            Parameters = parameters;
+        }
+
+        #endregion
     }
 
     /// <summary>
@@ -96,21 +124,35 @@ namespace openSPM.Models
         /// <summary>
         /// Queries database and returns modeled table records for the specified sql statement and parameters.
         /// </summary>
-        /// <param name="sqlFormat">SQL expression to query.</param>
-        /// <param name="parameters">Parameters for query, if any.</param>
+        /// <param name="sortField">Field name to order-by; defaults to primary keys.</param>
+        /// <param name="ascending">Sort ascending flag; set to <c>false</c> for descending; defaults to <c>true</c>.</param>
+        /// <param name="restriction">Record restriction to apply, if any.</param>
         /// <returns>An enumerable of modeled table row instances for queried records.</returns>
         /// <remarks>
-        /// Select only needs to return primary key fields, full record will be loaded based on primary key values.
+        /// If no record restriction is provided, all rows will be returned.
         /// </remarks>
-        public IEnumerable<T> QueryRecords(string sqlFormat, params object[] parameters)
+        public IEnumerable<T> QueryRecords(string sortField = null, bool ascending = true, RecordRestriction restriction = null)
         {
+            if (string.IsNullOrWhiteSpace(sortField))
+                sortField = s_primaryKeyFields;
+
+            string orderByExpression = $"{sortField}{(ascending ? "" : " DESC")}";
+            string sqlExpression = null;
+
             try
             {
-                return m_connection.RetrieveData(sqlFormat, parameters).AsEnumerable().Select(row => LoadRecord(GetPrimaryKeys(row)));
+                if ((object)restriction == null)
+                {
+                    sqlExpression = string.Format(s_orderBySql, orderByExpression);
+                    return m_connection.RetrieveData(sqlExpression).AsEnumerable().Select(row => LoadRecord(GetPrimaryKeys(row)));
+                }
+
+                sqlExpression = string.Format(s_orderByWhereSql, restriction.FilterExpression, orderByExpression);
+                return m_connection.RetrieveData(sqlExpression, restriction.Parameters).AsEnumerable().Select(row => LoadRecord(GetPrimaryKeys(row)));
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlFormat}, {KeyList(parameters)}\": {ex.Message}", ex));
+                MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlExpression ?? "undefined"}, {KeyList(restriction?.Parameters)}: {ex.Message}", ex));
                 return Enumerable.Empty<T>();
             }
         }
@@ -126,27 +168,35 @@ namespace openSPM.Models
         /// <returns>An enumerable of modeled table row instances for queried records.</returns>
         public IEnumerable<T> QueryRecords(string sortField, bool ascending, int page, int pageSize, RecordRestriction restriction = null)
         {
-            try
+            if ((object)m_primaryKeyCache == null || string.Compare(sortField, m_lastSortField, StringComparison.OrdinalIgnoreCase) != 0)
             {
-                if ((object)m_primaryKeyCache == null || string.Compare(sortField, m_lastSortField, StringComparison.OrdinalIgnoreCase) != 0)
+                string orderByExpression = $"{sortField}{(ascending ? "" : " DESC")}";
+                string sqlExpression = null;
+
+                try
                 {
-                    string orderByExpression = $"{sortField}{(ascending ? "" : " DESC")}";
-
                     if ((object)restriction == null)
-                        m_primaryKeyCache = m_connection.RetrieveData(string.Format(s_orderBySql, orderByExpression)).AsEnumerable();
+                    {
+                        sqlExpression = string.Format(s_orderBySql, orderByExpression);
+                        m_primaryKeyCache = m_connection.RetrieveData(sqlExpression).AsEnumerable();
+                    }
                     else
-                        m_primaryKeyCache = m_connection.RetrieveData(string.Format(s_orderByWhereSql, restriction.FilterExpression, orderByExpression), restriction.Parameters).AsEnumerable();
+                    {
+                        sqlExpression = string.Format(s_orderByWhereSql, restriction.FilterExpression, orderByExpression);
+                        m_primaryKeyCache = m_connection.RetrieveData(sqlExpression, restriction.Parameters).AsEnumerable();
+                    }
 
-                    m_lastSortField = sortField;
+                }
+                catch (Exception ex)
+                {
+                    MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlExpression ?? "undefined"}, {KeyList(restriction?.Parameters)}: {ex.Message}", ex));
+                    return Enumerable.Empty<T>();
                 }
 
-                return m_primaryKeyCache.ToPagedList(page, pageSize).Select(row => LoadRecord(row.ItemArray)).Where(record => record != null);
+                m_lastSortField = sortField;
             }
-            catch (Exception ex)
-            {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{s_orderBySql}, 0:{sortField}, 1:{ascending}\": {ex.Message}", ex));
-                return Enumerable.Empty<T>();
-            }
+
+            return m_primaryKeyCache.ToPagedList(page, pageSize).Select(row => LoadRecord(row.ItemArray)).Where(record => record != null);
         }
 
         /// <summary>
@@ -208,6 +258,16 @@ namespace openSPM.Models
         }
 
         /// <summary>
+        /// Deletes the specified modeled table <paramref name="record"/> from the database.
+        /// </summary>
+        /// <param name="record">Record to delete.</param>
+        /// <returns>Number of rows affected.</returns>
+        public int DeleteRecord(T record)
+        {
+            return DeleteRecord(GetPrimaryKeys(record));
+        }
+
+        /// <summary>
         /// Deletes the record referenced by the specified <paramref name="primaryKeys"/>.
         /// </summary>
         /// <param name="primaryKeys">Primary keys values of the record to load.</param>
@@ -237,11 +297,9 @@ namespace openSPM.Models
         /// <returns>Number of rows affected.</returns>
         public int DeleteRecord(RecordRestriction restriction)
         {
-            string deleteSql = s_deleteSql.Substring(0, s_deleteSql.IndexOf(" WHERE ", StringComparison.OrdinalIgnoreCase) + 7);
-
             try
             {
-                int affectedRecords = m_connection.ExecuteNonQuery($"{deleteSql}{restriction.FilterExpression}", restriction.Parameters);
+                int affectedRecords = m_connection.ExecuteNonQuery($"{s_deleteWhereSql}{restriction.FilterExpression}", restriction.Parameters);
 
                 if (affectedRecords > 0)
                     m_primaryKeyCache = null;
@@ -250,7 +308,7 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record delete for {typeof(T).Name} \"{deleteSql}, {KeyList(restriction.Parameters)}\": {ex.Message}", ex));
+                MvcApplication.LogException(new InvalidOperationException($"Exception during record delete for {typeof(T).Name} \"{s_deleteWhereSql}, {KeyList(restriction.Parameters)}\": {ex.Message}", ex));
                 return 0;
             }
         }
@@ -288,8 +346,6 @@ namespace openSPM.Models
                 }
             }
 
-            string updateSql = s_updateSql.Substring(0, s_updateSql.IndexOf(" WHERE ", StringComparison.OrdinalIgnoreCase) + 7);
-
             try
             {
                 foreach (PropertyInfo property in s_updateProperties)
@@ -303,11 +359,11 @@ namespace openSPM.Models
                 for (int i = 0; i < restriction.Parameters.Length; i++)
                     updateWhereOffsets.Add($"{{{updateFieldIndex + i}}}");
 
-                return m_connection.ExecuteNonQuery($"{updateSql}{string.Format(restriction.FilterExpression, updateWhereOffsets.ToArray())}", values.ToArray());
+                return m_connection.ExecuteNonQuery($"{s_updateWhereSql}{string.Format(restriction.FilterExpression, updateWhereOffsets.ToArray())}", values.ToArray());
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{updateSql}, {KeyList(values)}\": {ex.Message}", ex));
+                MvcApplication.LogException(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{s_updateWhereSql}, {KeyList(values)}\": {ex.Message}", ex));
                 return 0;
             }
         }
@@ -337,6 +393,29 @@ namespace openSPM.Models
             {
                 MvcApplication.LogException(new InvalidOperationException($"Exception during record insert for {typeof(T).Name} \"{s_addNewSql}, {KeyList(values)}\": {ex.Message}", ex));
                 return 0;
+            }
+        }
+
+        /// <summary>
+        /// Gets the primary key values from the specified <paramref name="record"/>.
+        /// </summary>
+        /// <param name="record">Record of data to retrieve primary keys from.</param>
+        /// <returns>Primary key values from the specified <paramref name="record"/>.</returns>
+        public object[] GetPrimaryKeys(T record)
+        {
+            try
+            {
+                List<object> values = new List<object>();
+
+                foreach (PropertyInfo property in s_primaryKeyProperties)
+                    values.Add(property.GetValue(record));
+
+                return values.ToArray();
+            }
+            catch (Exception ex)
+            {
+                MvcApplication.LogException(new InvalidOperationException($"Exception loading primary key fields for {typeof(T).Name} \"{s_primaryKeyProperties.Select(property => property.Name).ToDelimitedString(", ")}\": {ex.Message}", ex));
+                return new object[0];
             }
         }
 
@@ -378,7 +457,7 @@ namespace openSPM.Models
         /// <returns>Array of primary key field names.</returns>
         public string[] GetPrimaryKeyFieldNames()
         {
-            return s_primaryKeyProperties.Select(property => s_fieldNames[property.Name]).ToArray();
+            return s_primaryKeyFields.Split(',').Select(fieldName => fieldName.Trim()).ToArray();
         }
 
         /// <summary>
@@ -469,7 +548,10 @@ namespace openSPM.Models
         private static readonly string s_selectSql;
         private static readonly string s_addNewSql;
         private static readonly string s_updateSql;
+        private static readonly string s_updateWhereSql;
         private static readonly string s_deleteSql;
+        private static readonly string s_deleteWhereSql;
+        private static readonly string s_primaryKeyFields;
 
         // Static Constructor
         static TableOperations()
@@ -529,14 +611,23 @@ namespace openSPM.Models
             // Have to assume all fields are primary when none are specified
             if (primaryKeyProperties.Count == 0)
             {
-                primaryKeyFields.Append("*");
-
                 foreach (PropertyInfo property in s_properties.Values)
                 {
                     string fieldName = s_fieldNames[property.Name];
                     whereFormat.Append($"{(whereFormat.Length > 0 ? "AND " : "")}{fieldName}={{{primaryKeyIndex++}}}");
+                    primaryKeyFields.Append($"{(primaryKeyFields.Length > 0 ? ", " : "")}{fieldName}");
                     primaryKeyProperties.Add(property);
                 }
+
+                s_primaryKeyFields = primaryKeyFields.ToString();
+
+                // Default to all
+                primaryKeyFields.Clear();
+                primaryKeyFields.Append("*");
+            }
+            else
+            {
+                s_primaryKeyFields = primaryKeyFields.ToString();
             }
 
             List<object> updateWhereOffsets = new List<object>();
@@ -551,6 +642,8 @@ namespace openSPM.Models
             s_addNewSql = string.Format(AddNewSqlFormat, tableName, addNewFields, addNewFormat);
             s_updateSql = string.Format(UpdateSqlFormat, tableName, updateFormat, string.Format(whereFormat.ToString(), updateWhereOffsets.ToArray()));
             s_deleteSql = string.Format(DeleteSqlFormat, tableName, whereFormat);
+            s_updateWhereSql = s_updateSql.Substring(0, s_updateSql.IndexOf(" WHERE ", StringComparison.Ordinal) + 7);
+            s_deleteWhereSql = s_deleteSql.Substring(0, s_deleteSql.IndexOf(" WHERE ", StringComparison.Ordinal) + 7);
 
             s_addNewProperties = addNewProperties.ToArray();
             s_updateProperties = updateProperties.ToArray();
@@ -570,6 +663,9 @@ namespace openSPM.Models
 
         private static string KeyList(IReadOnlyList<object> primaryKeys)
         {
+            if (primaryKeys == null)
+                return "";
+
             StringBuilder delimitedString = new StringBuilder();
 
 

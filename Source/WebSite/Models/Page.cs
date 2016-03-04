@@ -79,13 +79,13 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Label("Included Labels")]
+        [Label("Included Roles")]
         public string IncludedRoles
         {
             get; set;
         }
 
-        [Label("Excluded Labels")]
+        [Label("Excluded Roles")]
         public string ExcludedRoles
         {
             get; set;

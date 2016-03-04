@@ -87,9 +87,9 @@ namespace openSPM
                 .ToArray();
 
             int minLength = linesAndLengths
-                .Select(lineAndLength => lineAndLength.Item2)
-                .Where(length => length > 0)
-                .Min();
+                .Select(lineAndLength => (int?)lineAndLength.Item2)
+                .Where(length => length.GetValueOrDefault() > 0)
+                .Min() ?? 0;
 
             string forwardSpacing = new string(' ', spaces);
 

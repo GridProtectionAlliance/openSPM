@@ -30,15 +30,16 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.LatestVendorDiscoveryResult view.
     /// </summary>
+    [PrimaryLabel("Name")]
     [IsDeletedFlag("IsDeleted")]
     public class LatestVendorDiscoveryResult
     {
-        [PrimaryKey(true)]
         public int VendorID
         {
             get; set;
         }
 
+        [PrimaryKey(true)]
         public int DiscoveryResultID
         {
             get; set;
@@ -67,16 +68,21 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Required]
+        [Label("Security Patch Search Result")]
         public int ResultKey
         {
             get; set;
         }
 
+        [Label("Discovery Notes")]
         public string Notes
         {
             get; set;
         }
 
+        [Label("Checked Patch Availability On")]
+        [InitialValue("new Date()")]
         public DateTime ReviewDate
         {
             get; set;
@@ -88,6 +94,16 @@ namespace openSPM.Models
         }
 
         public bool IsDeleted
+        {
+            get; set;
+        }
+
+        public DateTime CreatedOn
+        {
+            get; set;
+        }
+
+        public Guid CreatedByID
         {
             get; set;
         }

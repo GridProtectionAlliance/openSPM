@@ -58,10 +58,9 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        @* Using DiscoveryResult for field model parameters *@
-        @Html.Raw(dataContext.AddDateField<DiscoveryResult>("ReviewDate"))
-        @Html.Raw(Model.AddValueListSelectField<DiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
-        @Html.Raw(dataContext.AddTextAreaField<DiscoveryResult>("Notes", 4))
+        @Html.Raw(dataContext.AddDateField<LatestVendorDiscoveryResult>("ReviewDate"))
+        @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
+        @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Notes", 4))
     </div>
 }
 @Html.Partial("PagedViewModel")

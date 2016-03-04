@@ -755,13 +755,21 @@ namespace openSPM
             return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.DeleteRecord)]
+        public void DeleteLatestVendorDiscoveryResult(int id)
+        {
+            // Delete associated DiscoveryResult record
+            m_dataContext.Table<DiscoveryResult>().DeleteRecord(id);
+        }
+
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.CreateNewRecord)]
         public LatestVendorDiscoveryResult NewLatestVendorDiscoveryResult()
         {
             return new LatestVendorDiscoveryResult();
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.AddNewRecord)]
         public void AddNewLatestVendorDiscoveryResult(LatestVendorDiscoveryResult record)
         {
@@ -771,7 +779,7 @@ namespace openSPM
             m_dataContext.Table<DiscoveryResult>().AddNewRecord(result);
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.UpdateRecord)]
         public void UpdateLatestVendorDiscoveryResult(LatestVendorDiscoveryResult record)
         {
@@ -782,10 +790,13 @@ namespace openSPM
         {
             return new DiscoveryResult
             {
+                ID = record.DiscoveryResultID,
                 VendorID = record.VendorID,
                 ReviewDate = record.ReviewDate,
                 ResultKey = record.ResultKey,
-                Notes = record.Notes
+                Notes = record.Notes,
+                CreatedByID = record.CreatedByID,
+                CreatedOn =  record.CreatedOn
             };
         }
 

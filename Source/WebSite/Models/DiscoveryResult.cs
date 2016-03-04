@@ -35,7 +35,6 @@ namespace openSPM.Models
         [PrimaryKey(true)]
         public int ID { get; set; }
 
-        [Label("Select Source")]
         public int VendorID { get; set; }
 
         [Required]

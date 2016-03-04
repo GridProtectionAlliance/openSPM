@@ -30,6 +30,7 @@ using GSF;
 using GSF.Security;
 using openSPM.Attributes;
 using RazorEngine.Templating;
+using Path = System.Web.VirtualPathUtility;
 
 namespace openSPM.Models
 {
@@ -297,11 +298,13 @@ namespace openSPM.Models
             int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
             Page page = DataContext.Table<Page>().LoadRecord(pageID);
             Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
+            string pageImagePath = Path.ToAbsolute(GetPageSetting(viewBag, "pageImagePath").Replace("{pageName}", pageName ?? ""));
+            pageImagePath = pageImagePath.EnsureEnd('/');
 
             viewBag.Page = page;
             viewBag.PageID = pageID;
             viewBag.PageName = pageName;
-            viewBag.PageImagePath = GetPageSetting(viewBag, "pageImagePath").Replace("{pageName}", pageName ?? "");
+            viewBag.PageImagePath = pageImagePath;
             viewBag.PageSettings = pageSettings;
             viewBag.RouteID = requestContext.RouteData.Values["id"] as string;
             viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");

@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-//  BusinessUnitGroups.cshtml - Gbtc
+//  BusinessUnits.cshtml - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -49,11 +49,11 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Name", initialFocus: true))
-        @Html.Raw(dataContext.AddInputField<BusinessUnitGroup>("Abbreviation"))
-        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("CoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
-        @Html.Raw(dataContext.AddSelectField<BusinessUnitGroup, UserAccount>("AlternateBUCID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
-        @Html.Raw(dataContext.AddTextAreaField<BusinessUnitGroup>("Description"))
+        @Html.Raw(dataContext.AddInputField<BusinessUnit>("Name", initialFocus: true))
+        @Html.Raw(dataContext.AddInputField<BusinessUnit>("Abbreviation"))
+        @Html.Raw(dataContext.AddSelectField<BusinessUnit, UserAccount>("CoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
+        @Html.Raw(dataContext.AddSelectField<BusinessUnit, UserAccount>("BackupCoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
+        @Html.Raw(dataContext.AddTextAreaField<BusinessUnit>("Description"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -61,7 +61,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<BusinessUnitGroup>(ViewBag))
+        @Html.Raw(dataContext.RenderViewModelConfiguration<BusinessUnit>(ViewBag))
         // Resolve option label SID to an account name
         function lookupOptionLabel(element) {
             if (viewModel.dataHubIsConnected()) {
@@ -85,7 +85,7 @@
 
         $(viewModel).on("pageRecordsQueried", function (event, records) {
             // Add a virtual observable field called "AccountName" that will resolve SID values to account names
-            for (let i = 0; i < records.length; i++) {
+            for (var i = 0; i < records.length; i++) {
                 records[i].AccountName = ko.observable(records[i].CoordinatorID);
                 lookupAccountName(records[i]);
             }

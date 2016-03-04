@@ -40,7 +40,6 @@ namespace openSPM.Models
             get; set;
         }
 
-        [Required]
         [StringLength(64)]
         public string Name
         {

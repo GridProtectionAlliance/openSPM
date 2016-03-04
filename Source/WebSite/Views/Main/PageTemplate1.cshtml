@@ -21,8 +21,10 @@
 //
 //*****************************************************************************************************@
 @using System.Data
+@using GSF
 @using GSF.Data
 @using openSPM.Models
+@using Path = System.Web.VirtualPathUtility
 @model AppModel
 @{
     // TODO: Examples of how to get to settings
@@ -58,8 +60,8 @@
 
 
     // Use helper function to get page defaults - checks for overrides in ServerConfiguration first, then attempts tp pickup default from page.default settings
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
-
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+    statusLightsImagePath = Path.ToAbsolute(statusLightsImagePath).EnsureEnd('/');
 
 
     // Get custom image path for page

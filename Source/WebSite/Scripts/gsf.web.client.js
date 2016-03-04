@@ -122,9 +122,9 @@ function joinKeyValuePairs (source, parameterDelimiter, keyValueDelimiter, start
 
     const values = [];
 
-    for (let key in source) {
+    for (var key in source) {
         if (source.hasOwnProperty(key)) {
-            let value = source[key];
+            var value = source[key];
 
             if (isBool(value))
                 value = value.toString().toLowerCase();
@@ -158,7 +158,7 @@ function Dictionary(source) {
     self.count = function () {
         var size = 0;
 
-        for (let property in self._values) {
+        for (var property in self._values) {
             if (self._values.hasOwnProperty(property))
                 size++;
         }
@@ -169,7 +169,7 @@ function Dictionary(source) {
     self.keys = function () {
         const keys = [];
 
-        for (let property in self._keys) {
+        for (var property in self._keys) {
             if (self._keys.hasOwnProperty(property))
                 keys.push(self._keys[property]);
         }
@@ -180,7 +180,7 @@ function Dictionary(source) {
     self.values = function () {
         const values = [];
 
-        for (let property in self._values) {
+        for (var property in self._values) {
             if (self._keys.hasOwnProperty(property))
                 values.push(self._values[property]);
         }
@@ -213,7 +213,7 @@ function Dictionary(source) {
     self.containsKey = function (key) {
         const lkey = String(key).toLowerCase();
 
-        for (let property in self._values) {
+        for (var property in self._values) {
             if (self._values.hasOwnProperty(property) && property === lkey)
                 return true;
         }
@@ -222,7 +222,7 @@ function Dictionary(source) {
     }
 
     self.containsValue = function (value) {
-        for (let property in self._values) {
+        for (var property in self._values) {
             if (self._values.hasOwnProperty(property) && self._values[property] === value)
                 return true;
         }
@@ -238,7 +238,7 @@ function Dictionary(source) {
     self.joinKeyValuePairs = function (parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter) {
         const keyValuePairs = [];
 
-        for (let property in self._values) {
+        for (var property in self._values) {
             if (self._values.hasOwnProperty(property))
                 keyValuePairs[self._keys[property]] = self._values[property];
         }
@@ -247,7 +247,7 @@ function Dictionary(source) {
     }
 
     self.pushAll = function (source) {
-        for (let property in source)
+        for (var property in source)
             if (source.hasOwnProperty(property))
                 self.set(property, source[property]);
     }
@@ -256,7 +256,7 @@ function Dictionary(source) {
         // See ko.observableDictionary.js
         const observableDictionary = new ko.observableDictionary();
 
-        for (let property in self._values) {
+        for (var property in self._values) {
             if (self._values.hasOwnProperty(property))
                 observableDictionary.push(useLowerKeys ? property : self._keys[property], self._values[property]);
         }
@@ -265,7 +265,7 @@ function Dictionary(source) {
     }
 
     self.updateObservableDictionary = function (observableDictionary, useLowerKeys) {
-        for (let property in self._values) {
+        for (var property in self._values) {
             if (self._values.hasOwnProperty(property))
                 observableDictionary.set(useLowerKeys ? property : self._keys[property], self._values[property]);
         }
@@ -273,12 +273,12 @@ function Dictionary(source) {
 
     // Construction
     if (source instanceof Dictionary) {
-        for (let property in source._values)
+        for (var property in source._values)
             if (source._values.hasOwnProperty(property))
                 self.set(source._keys[property], source._values[property]);
     }
     else {
-        for (let property in source) {
+        for (var property in source) {
             if (source.hasOwnProperty(property))
                 self.set(property, source[property]);
         }
@@ -378,8 +378,8 @@ String.prototype.parseKeyValuePairs = function (parameterDelimiter, keyValueDeli
     //          "normalKVP=-1; nestedKVP={p1=true; p2=false}")
     //      would be encoded as:
     //          "normalKVP=-1; nestedKVP=p1\\u003dtrue\\u003b p2\\u003dfalse")
-    for (let i = 0; i < this.length; i++) {
-        let character = this[i];
+    for (var i = 0; i < this.length; i++) {
+        var character = this[i];
 
         if (character === startValueDelimiter) {
             if (!valueEscaped) {
@@ -441,18 +441,18 @@ String.prototype.parseKeyValuePairs = function (parameterDelimiter, keyValueDeli
     }
 
     // Parse key/value pairs from escaped value
-    let pairs = escapedValue.join("").split(parameterDelimiter);
+    var pairs = escapedValue.join("").split(parameterDelimiter);
 
-    for (let i = 0; i < pairs.length; i++) {
+    for (var i = 0; i < pairs.length; i++) {
         // Separate key from value
-        let elements = pairs[i].split(keyValueDelimiter);
+        var elements = pairs[i].split(keyValueDelimiter);
 
         if (elements.length === 2) {
             // Get key
-            let key = elements[0].trim();
+            var key = elements[0].trim();
 
             // Get unescaped value
-            let unescapedValue = elements[1].trim().
+            var unescapedValue = elements[1].trim().
                 replaceAll(escapedParameterDelimiter, parameterDelimiter).
                 replaceAll(escapedKeyValueDelimiter, keyValueDelimiter).
                 replaceAll(escapedStartValueDelimiter, startValueDelimiter).

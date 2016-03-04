@@ -40,9 +40,9 @@ namespace openSPM.Models
         [Label("Patch")]
         public int PatchID { get; set; }
 
-        public string Risk { get; set; }
+        public int MitigationBasisKey { get; set; }
 
-        public string Justification { get; set; }
+        public string Risk { get; set; }
 
         public string Summary { get; set; }
 

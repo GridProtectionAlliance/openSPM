@@ -167,9 +167,6 @@ namespace openSPM.Controllers
             return View();
         }
 
-
-
-
         #endregion
     }
 }

@@ -22,6 +22,7 @@
 //*****************************************************************************************************@
 @using GSF
 @using openSPM.Models
+@using Path = System.Web.VirtualPathUtility
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
@@ -32,10 +33,10 @@
     const string okImage = "greenlight.png";
     const string warningImage = "yellowlight.png";
     const string alarmImage = "redlight.png";
-    const string violationImage = "greylight.png";
+    const string violationImage = "blacklight.png";
 
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
-    statusLightsImagePath = statusLightsImagePath.EnsureEnd('/');
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+    statusLightsImagePath = Path.ToAbsolute(statusLightsImagePath).EnsureEnd('/');
 
     if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays)) {
         discoveryWarningDays = 7;
@@ -68,7 +69,7 @@
 @helper BodyRows()
 {
 
-    <td width="5%" class="text-center valign-middle"><img src="/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
+    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
     <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Company, 1.5), attr: {title: Company}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>

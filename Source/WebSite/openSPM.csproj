@@ -204,7 +204,7 @@
     <Compile Include="Models\ApplicationRoleUserAccount.cs" />
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\Assessment.cs" />
-    <Compile Include="Models\BusinessUnitGroup.cs" />
+    <Compile Include="Models\BusinessUnit.cs" />
     <Compile Include="Models\DataContext.cs" />
     <Compile Include="Attributes\InitialValueAttribute.cs" />
     <Compile Include="Models\DiscoveryResult.cs" />
@@ -362,7 +362,8 @@
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Docs\SPP12-006.pdf" />
     <Content Include="Docs\Test.pdf" />
-    <None Include="Properties\PublishProfiles\GPAWEB.pubxml" />
+    <None Include="Properties\PublishProfiles\Deploy to GPAWeb.pubxml" />
+    <None Include="Properties\PublishProfiles\Deploy to Package File.pubxml" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\gsf.web.client.js" />
     <Content Include="Scripts\ie10-viewport-bug-workaround.js" />
@@ -430,7 +431,7 @@
     <Content Include="Views\Settings\Home.cshtml" />
     <Content Include="Views\Main\DisplayPDF.cshtml" />
     <Content Include="Views\Settings\Platforms.cshtml" />
-    <Content Include="Views\Settings\BusinessUnitGroups.cshtml" />
+    <Content Include="Views\Settings\BusinessUnits.cshtml" />
     <Content Include="Views\Security\Groups.cshtml" />
     <Content Include="Views\Main\DiscoverPatches.cshtml" />
     <Content Include="Views\Main\PageTemplate2.cshtml" />

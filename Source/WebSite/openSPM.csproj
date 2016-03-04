@@ -329,6 +329,7 @@
     <Content Include="Images\ProcessSteps\Small\7plan.png" />
     <Content Include="Images\ProcessSteps\Small\8done.png" />
     <Content Include="Images\StatusLights\Large\amberlight.png" />
+    <Content Include="Images\StatusLights\Large\blacklight.png" />
     <Content Include="Images\StatusLights\Large\bluelight.png" />
     <Content Include="Images\StatusLights\Large\disabledlight.png" />
     <Content Include="Images\StatusLights\Large\greenlight.png" />
@@ -337,6 +338,7 @@
     <Content Include="Images\StatusLights\Large\redlight.png" />
     <Content Include="Images\StatusLights\Large\yellowlight.png" />
     <Content Include="Images\StatusLights\Small\amberlight.png" />
+    <Content Include="Images\StatusLights\Small\blacklight.png" />
     <Content Include="Images\StatusLights\Small\bluelight.png" />
     <Content Include="Images\StatusLights\Small\disabledlight.png" />
     <Content Include="Images\StatusLights\Small\greenlight.png" />

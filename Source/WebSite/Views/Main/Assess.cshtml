@@ -24,8 +24,36 @@
 @model AppModel
 @{
 
-    // TODO: Add examples of how to get to settings
 }
+<p>&nbsp;</p>
+
+<p>
+    On "Patch Start" a Patch Status record is created for each BUgroup that has the platform selected (the Platform BUG Link Table).  It will be
+    typical that more that one BU will be impacted by a security patch -- and all may be.  Therefore, if "all BUs" are selected as the filter
+</p>
+<p>&nbsp;</p>
+
+<ul>
+    <li>A filter will be available at the top of the screen for "Business Unit" and default to the BUCs or SMEs BU -- or to "all" for everyone else.</li>
+    <li>This list will be sorted by assessment due date, patchID (the TVA assigned label), BUGroup, patch Title</li>
+    <li>It will inlcude a status light on the left to indicate the compliance alarm state -- grey, yellow, amber, red or black.</li>
+    <li>A button will allow the BUC for the BUGroup to "update" the status of the security patch by recoreding the assessment result -- patch, mitigate, patch & mitigate, not applicable.</li>
+    <li>This assessment is a compliance milestone.  Phase 2 -- If a patch must be "reassessed" -- i.e., the assessment result changing but the time of assessment for compliance purposes not changing -- then the Owner must make this change in the assessment result. (This may be a complex collection of SQL)</li>
+    <li>There is no need for a delete button since the BUC (or Owner) can declair the assignment of the patch to the BUG as "not applicable"</li>
+    <li>A button will be available at the bottom for the PIC to "add" a patch status record.  This will be needed if after initial patch entry that an additional BUG should have been linked to the platform.</li>
+</ul>
+<p>&nbsp;</p>
+
+<p>
+  <b>Computation of Alarm State</b> - The openSPM will "rebuild" the alarm state table on a daily basis -- e.g., at 7:30 AM.  This time of this rebuild is significant in that this will be the time that email notifications will be sent.   
+    Alarm State is based on the difference (in days) in two dates -- e.g., today's date and the date of the next compliance item in the status table.  Therefore, status will change as (1) the alarm state table is rebuilt daily or (2)
+    as the status of an individual item changes on an ad-hoc basis -- i.e., if the assessment is shown as being in critical alarm for a particular BU and the BUC completes the assessment, the alarm state must change immediately.  Given the
+    differing domain of discovery (a function of vendor), patch assessment and application (a function of the patch) and mitigation plan (a function of the plan action items) and the differences in apriori knowledge about the keys in each 
+    of these cases, 3 seperate alarm state tables are used.  The vendor alarm state will have a many rows as there are vendors (alarms based review periodicity as configured in settings.)  The patch alarm state will have as many rows as there are in the patch status table for patches that are not "complete" or 
+    "closed" (alarms based on approaching compliance date as configured in settins).  The mitigtation staus table will have as many rows as there are action items in mitigation plans that have not been marked as complete (alarms have no compliance impact and are based on "not starting on schedeule" or "late finish")
+</p>
+
+<p>&nbsp;</p>
 
 <table class="table">
     <thead>

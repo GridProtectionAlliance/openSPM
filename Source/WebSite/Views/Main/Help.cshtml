@@ -186,12 +186,28 @@
         <tr>
             <td>&nbsp;</td>
             <td>
-                <p>Definitions:</p>
+                <p><a href="Definition"></a>Definitions:</p>
                 <p><b>Business Unit Group</b> (BU Group) - An virtual organizational entity comprised of a BUC (the approval authority) and SMEs (the technical experts) that have responsibility for CCA.</p>
                 <p><b>Candidate Security Patch</b> - These are the patches that PICs and automated processes discover that may have security implications to CCA. </p>
                 <p><b>Mitigation</b> - actions taken to minimize risk without complete elimination of a specific vulnerability (e.g. implementing additional process checks, adding access control mechanisms, authoring Intrusion Detection System rules to detect anomalous activities)</p>
                 <p><b>Patch Assessment</b>- Assessments are a compliance requirement and are conducted to determine if a candidate patch is an applicable secuirty patch and if so the action required to address it -- either patch or mitigatge or both.</p>
                 <p><b>Patch Mitigation Plan</b> - The combination of risk assessment and justification for mitigation vs. patching PLUS a set of action steps that will mitigate the need to install the patch.</p>
+            </td>
+
+        </tr>
+        <tr>
+            <td>&nbsp;</td>
+            <td>
+                <p><a href="Evidence"></a>Evidence of Compliance:</p>
+                <p><b>Process Documentation</b> - TVA Transmission SPP 12.006, this help file and the functionality of openSPM.</p>
+                <p><b>Discovery Status Report </b> - f(Vendor) - min, max, avg vendor "check" durations.  Patch release dates vs. check date (min, max, avg).  Violation if check > 35 days from vendor release date.</p>
+                <p><b>Assessment Duration and Result Report</b> - f(Patch), f(BUGroup) - 35 day assessment period measured from vendor patch release date.  Violation if all BUG have not assessed an applicable patch.  Results in openSPM provide evidence of assessments.</p>
+                <p><b>Patch Installation Duration</b> - f(Patch), f(BUG) - min, max, average by platform for each BUG.  Violation if all BUGs have not patched within 35 days.</p>
+                <p><b>Patch Installation Evidence</b> - f(Patch), f(BUG) - installation notes, attached documents</p>
+                <p><b>Mitigation Plan Development Duration</b> - f(Patch), f(BUG) min, max, avg for each BUG.  Violation if all BUGs have not developed a plan within 35 days.</p>
+                <p><b>Mitgation Plan Content</b> - f(plan) - copies of the plans.</p>
+              
+             
             </td>
 
         </tr>

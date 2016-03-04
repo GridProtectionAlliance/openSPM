@@ -20,10 +20,34 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF
 @using openSPM.Models
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
+    Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
+    int discoveryWarningDays, discoveryAlarmDays, discoveryViolationDays;
+    string setting;
+
+    const string okImage = "greenlight.png";
+    const string warningImage = "yellowlight.png";
+    const string alarmImage = "redlight.png";
+    const string violationImage = "greylight.png";
+
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
+    statusLightsImagePath = statusLightsImagePath.EnsureEnd('/');
+
+    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays)) {
+        discoveryWarningDays = 7;
+    }
+
+    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays)) {
+        discoveryAlarmDays = 21;
+    }
+
+    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays)) {
+        discoveryViolationDays = 35;
+    }
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -43,16 +67,15 @@
 }
 @helper BodyRows()
 {
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
 
-    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="OK" title="OK"></td>
+    <td width="5%" class="text-center valign-middle"><img src="/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
     <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Company, 1.5), attr: {title: Company}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: $parent.addPageRecord, enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: addNewDiscoveryResult.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()" title="Only the latest discovered patch will be deleted..."><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
 @helper AddNewEditDialog(DataContext dataContext)
@@ -67,6 +90,50 @@
 @section Scripts {
     <script>
         @Html.Raw(dataContext.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
+        var currentVendorID = 0;
 
+        function addNewDiscoveryResult(record) {
+            currentVendorID = record.VendorID;
+            viewModel.addPageRecord();
+        }
+
+        $(viewModel).on("newRecord", function (event, newRecord) {
+            // Make sure new records get assigned current vendor ID
+            newRecord.VendorID = currentVendorID;
+        });
+
+        const discoveryWarningDays = @discoveryWarningDays;
+        const discoveryAlarmDays = @discoveryAlarmDays;
+        const discoveryViolationDays = @discoveryViolationDays;
+
+        function getDiscoveryStatusImage(element, record) {
+            const daysSinceLastReview = (new Date()).daysBetween(record.ReviewDate.toDate());
+            var image, title;
+
+            switch (true) {
+                case (daysSinceLastReview >= discoveryViolationDays):
+                    image = "@violationImage";
+                    title = "Violation";
+                    break;
+                case (daysSinceLastReview >= discoveryAlarmDays):
+                    image = "@alarmImage";
+                    title = "Alarm";
+                    break;
+                case (daysSinceLastReview >= discoveryWarningDays):
+                    image = "@warningImage";
+                    title = "Warning";
+                    break;
+                default:
+                    image = "@okImage";
+                    title = "OK";
+                    break;
+            }
+
+            element.attr("src", "@statusLightsImagePath" + image);
+            element.attr("alt", title);
+            element.attr("title", title);
+
+            return undefined;
+        }
     </script>
 }

@@ -471,8 +471,18 @@ String.prototype.parseKeyValuePairs = function (parameterDelimiter, keyValueDeli
 }
 
 // Date Functions
-Date.prototype.addDays = function(days) {
+Date.prototype.addDays = function (days) {
     return new Date(this.setDate(this.getDate() + days));
+}
+
+Date.prototype.toUTC = function () {
+    this.setMinutes(this.getMinutes() - this.getTimezoneOffset());
+    return this;
+}
+
+Date.prototype.daysBetween = function (startDate) {
+    const millisecondsPerDay = 24 * 60 * 60 * 1000;
+    return (this.toUTC() - startDate.toUTC()) / millisecondsPerDay;
 }
 
 String.prototype.toDate = function () {

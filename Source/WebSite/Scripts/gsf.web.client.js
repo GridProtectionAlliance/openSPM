@@ -325,6 +325,13 @@ String.prototype.padRight = function (totalWidth, paddingChar) {
     return this;
 }
 
+if (!String.prototype.startsWith) {
+    String.prototype.startsWith = function (searchString, position) {
+        position = position || 0;
+        return this.substr(position, searchString.length) === searchString;
+    }
+}
+
 String.prototype.regexEncode = function () {
     return "\\u" + this.charCodeAt(0).toString(16).padLeft(4, "0");
 }

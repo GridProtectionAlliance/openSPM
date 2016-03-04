@@ -360,6 +360,7 @@
     <Content Include="Content\bootstrap.css.map" />
     <Content Include="Docs\SPP12-006.pdf" />
     <Content Include="Docs\Test.pdf" />
+    <None Include="Properties\PublishProfiles\GPAWEB.pubxml" />
     <None Include="Scripts\jquery-2.2.0.intellisense.js" />
     <Content Include="Scripts\gsf.web.client.js" />
     <Content Include="Scripts\ie10-viewport-bug-workaround.js" />

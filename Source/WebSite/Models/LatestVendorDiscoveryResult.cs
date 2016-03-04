@@ -30,7 +30,7 @@ namespace openSPM.Models
     /// <summary>
     /// Model for openSPM.LatestVendorDiscoveryResult view.
     /// </summary>
-    [PrimaryLabel("Name")]
+    [PrimaryLabel("ReviewDate")]
     [IsDeletedFlag("IsDeleted")]
     public class LatestVendorDiscoveryResult
     {

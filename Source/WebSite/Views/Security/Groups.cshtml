@@ -29,7 +29,7 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { null, "Group Name", "text-center valign-middle" },
-        new[] { "UseADAuthentication", "Is&nbsp;AD&nbsp;Group", "text-center" },
+        new[] { null, "Is&nbsp;AD&nbsp;Group", "text-center" },
         new[] { "CreatedOn", "Date&nbsp;Added", "text-center" },
         new[] { null, "Group Roles", "text-center valign-middle" }
     };
@@ -98,7 +98,7 @@
                             </table>
                             <br />
                             <div class="text-center">
-                                <a href="/Main/Help#Roles" target="_blank">@Model.Global.ApplicationName Role Definitions</a>
+                                <a href="@Url.Action("Help", "Main")#Roles" target="_blank">@Model.Global.ApplicationName Role Definitions</a>
                             </div>
                         </div>
                     </form>
@@ -131,6 +131,10 @@
             else {
                 if (viewModel.dataHubIsConnected()) {
                     securityHub.groupNameToSID(observableRecord.Name()).done(function (sid) {
+                        if (observableRecord.Name() !== sid) {
+                            securityHub.iSGroupSid
+                        }
+
                         showAccountNameFeedback(observableRecord.Name() !== sid);
                     });
                 }

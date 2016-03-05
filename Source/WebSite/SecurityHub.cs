@@ -154,6 +154,16 @@ namespace openSPM
         }
 
         /// <summary>
+        /// Determines if SID is for a user.
+        /// </summary>
+        /// <param name="sid">Security identifier to test.</param>
+        /// <returns><c>true</c>if <paramref name="sid"/> is for a user; otherwise, <c>false</c>.</returns>
+        public bool IsUserSID(string sid)
+        {
+            return UserInfo.IsUserSID(sid);
+        }
+
+        /// <summary>
         /// Determines if group is in role based on database ID values.
         /// </summary>
         /// <param name="groupID">Group ID value.</param>
@@ -208,6 +218,16 @@ namespace openSPM
         public string GroupNameToSID(string groupName)
         {
             return UserInfo.GroupNameToSID(groupName ?? "");
+        }
+
+        /// <summary>
+        /// Determines if SID is for a group.
+        /// </summary>
+        /// <param name="sid">Security identifier to test.</param>
+        /// <returns><c>true</c>if <paramref name="sid"/> is for a group; otherwise, <c>false</c>.</returns>
+        public bool IsGroupSID(string sid)
+        {
+            return UserInfo.IsGroupSID(sid);
         }
 
         /// <summary>

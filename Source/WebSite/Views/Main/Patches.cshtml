@@ -21,6 +21,8 @@
 //
 //*****************************************************************************************************@
 @using openSPM.Models
+@using GSF
+@using Path = System.Web.VirtualPathUtility
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
@@ -44,7 +46,8 @@
 }
 @helper BodyRows()
 {
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "/Images/StatusLights/Small/");
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+    statusLightsImagePath = Path.ToAbsolute(statusLightsImagePath).EnsureEnd('/');
 
     <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchReference, click: $parent.viewPageRecord"></button></td>

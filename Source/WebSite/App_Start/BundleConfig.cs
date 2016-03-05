@@ -21,7 +21,6 @@
 //
 //******************************************************************************************************
 
-using System.Collections.Generic;
 using System.Web.Optimization;
 
 namespace openSPM
@@ -46,26 +45,25 @@ namespace openSPM
                         "~/Scripts/bootstrap.min.js",
                         "~/Scripts/ie10-viewport-bug-workaround.js",
                         "~/Scripts/respond.js",
-                        "~/Scripts/bootstrap-datepicker.min.js"));
+                        "~/Scripts/bootstrap-datepicker.min.js",
+                        "~/Scripts/bootstrap-toolkit.min.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/signalR").Include(
                         "~/Scripts/jquery.signalR-2.2.0.min.js"));
 
-            bundles.Add(new ScriptBundle("~/js.bundle/gsf.web.client").Include(
+            bundles.Add(new ScriptBundle("~/js.bundle/gsfwebclient").Include(
                         "~/Scripts/gsf.web.client.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/site").Include(
                         "~/Scripts/Site.js"));
 
-            bundles.Add(new ScriptBundle("~/js.bundle/pagedViewModel").Include(
-                        "~/Scripts/bootstrap-toolkit.min.js",
+            bundles.Add(new ScriptBundle("~/js.bundle/knockout").Include(
                         "~/Scripts/knockout-3.4.0.js",
                         "~/Scripts/knockout.mapping-latest.js",
                         "~/Scripts/knockout.validation.min.js",
                         "~/Scripts/ko-reactor.min.js",
                         "~/Scripts/ko.observableDictionary.js",
-                        "~/Scripts/js.cookie.js",
-                        "~/Scripts/pagedViewModel.js"));
+                        "~/Scripts/js.cookie.js"));
 
             bundles.Add(new StyleBundle("~/css.bundle/bootstrap").Include(
                         "~/Content/bootstrap-datepicker3.min.css",

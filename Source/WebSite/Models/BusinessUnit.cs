@@ -32,7 +32,7 @@ namespace openSPM.Models
     /// </summary>
     [PrimaryLabel("Name")]
     [IsDeletedFlag("IsDeleted")]
-    public class BusinessUnitGroup
+    public class BusinessUnit
     {
         [PrimaryKey(true)]
         public int ID { get; set; }
@@ -47,8 +47,8 @@ namespace openSPM.Models
         [Label("Coordinator")]
         public Guid CoordinatorID { get; set; }
 
-        [Label("Alternate Coordinator")]
-        public Guid? AlternateBUCID { get; set; }
+        [Label("Backup Coordinator")]
+        public Guid? BackupCoordinatorID { get; set; }
 
         public string Description { get; set; }
 

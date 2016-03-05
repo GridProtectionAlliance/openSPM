@@ -171,7 +171,7 @@
 
         $(viewModel).on("pageRecordsQueried", function (event, records) {
             // Add a virtual observable field called "AccountName" that will resolve SID values to account names
-            for (let i = 0; i < records.length; i++) {
+            for (var i = 0; i < records.length; i++) {
                 records[i].AccountName = ko.observable("...");
                 lookupAccountName(records[i]);
             }
@@ -221,7 +221,7 @@
                     if (evaluations > 0)
                         $("#loadingRoles").show();
 
-                    for (let i = 0; i < roles.length; i++) {
+                    for (var i = 0; i < roles.length; i++) {
                         securityHub.groupIsInRole(record.ID, roles[i].ID).done(function (roleID) {
                             return function (result) {
                                 $("#" + roleID).prop("checked", result);
@@ -246,7 +246,7 @@
                     const groupID = $("#currentGroupID").text();
                     const roles = $("#editRolesDialog input:checkbox");
 
-                    for (let i = 0; i < roles.length; i++) {
+                    for (var i = 0; i < roles.length; i++) {
                         const element = $(roles[i]);
                         const roleID = element.attr("id");
 

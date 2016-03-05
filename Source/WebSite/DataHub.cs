@@ -26,6 +26,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web;
 using GSF;
 using GSF.Collections;
 using GSF.Identity;
@@ -326,56 +327,56 @@ namespace openSPM
 
         #region [ BusinessUnitGroup Table Operations ]
 
-        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.QueryRecordCount)]
+        [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecordCount)]
         public int QueryBusinessUnitGroupCount(bool showDeleted)
         {
             if (showDeleted)
-                return m_dataContext.Table<BusinessUnitGroup>().QueryRecordCount();
+                return m_dataContext.Table<BusinessUnit>().QueryRecordCount();
 
-            return m_dataContext.Table<BusinessUnitGroup>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            return m_dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
         }
 
-        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.QueryRecords)]
-        public IEnumerable<BusinessUnitGroup> QueryBusinessUnitGroups(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecords)]
+        public IEnumerable<BusinessUnit> QueryBusinessUnitGroups(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
         {
             if (showDeleted)
-                return m_dataContext.Table<BusinessUnitGroup>().QueryRecords(sortField, ascending, page, pageSize);
+                return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_dataContext.Table<BusinessUnitGroup>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
-        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.DeleteRecord)]
+        [RecordOperation(typeof(BusinessUnit), RecordOperation.DeleteRecord)]
         public void DeleteBusinessUnitGroup(int id)
         {
             // For BusinessUnitGroups, we only "mark" a record as deleted
             m_dataContext.Connection.ExecuteNonQuery("UPDATE BusinessUnitGroup SET IsDeleted=1 WHERE ID={0}", id);
         }
 
-        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.CreateNewRecord)]
-        public BusinessUnitGroup NewBusinessUnitGroup()
+        [RecordOperation(typeof(BusinessUnit), RecordOperation.CreateNewRecord)]
+        public BusinessUnit NewBusinessUnitGroup()
         {
-            return new BusinessUnitGroup();
+            return new BusinessUnit();
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
-        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.AddNewRecord)]
-        public void AddNewBusinessUnitGroup(BusinessUnitGroup record)
+        [RecordOperation(typeof(BusinessUnit), RecordOperation.AddNewRecord)]
+        public void AddNewBusinessUnitGroup(BusinessUnit record)
         {
             record.CreatedByID = GetCurrentUserID();
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
-            m_dataContext.Table<BusinessUnitGroup>().AddNewRecord(record);
+            m_dataContext.Table<BusinessUnit>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
-        [RecordOperation(typeof(BusinessUnitGroup), RecordOperation.UpdateRecord)]
-        public void UpdateBusinessUnitGroup(BusinessUnitGroup record)
+        [RecordOperation(typeof(BusinessUnit), RecordOperation.UpdateRecord)]
+        public void UpdateBusinessUnitGroup(BusinessUnit record)
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<BusinessUnitGroup>().UpdateRecord(record);
+            m_dataContext.Table<BusinessUnit>().UpdateRecord(record);
         }
 
         #endregion
@@ -817,6 +818,16 @@ namespace openSPM
             Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
             AppModel model = MvcApplication.DefaultModel;
             return model.GetPageSetting(pageSettings, model.Global.PageDefaults, key, defaultValue);
+        }
+
+        /// <summary>
+        /// Gets the absolute path for a virtual path, e.g., ~/Images/Menu
+        /// </summary>
+        /// <param name="path">Virtual path o convert to absolute path.</param>
+        /// <returns>Absolute path for a virtual path.</returns>
+        public string GetAbsolutePath(string path)
+        {
+            return VirtualPathUtility.ToAbsolute(path ?? "");
         }
 
         /// <summary>

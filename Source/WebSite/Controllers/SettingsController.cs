@@ -101,9 +101,9 @@ namespace openSPM.Controllers
             return View();
         }
 
-        public ActionResult BusinessUnitGroups()
+        public ActionResult BusinessUnits()
         {
-            m_appModel.ConfigureView<BusinessUnitGroup>(m_dataContext, Url.RequestContext, "Settings.BusinessUnitGroups", ViewBag);
+            m_appModel.ConfigureView<BusinessUnit>(m_dataContext, Url.RequestContext, "Settings.BusinessUnits", ViewBag);
             return View();
         }
 

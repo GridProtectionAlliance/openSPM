@@ -22,7 +22,6 @@
 //*****************************************************************************************************@
 @using GSF
 @using openSPM.Models
-@using Path = System.Web.VirtualPathUtility
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
@@ -36,7 +35,7 @@
     const string violationImage = "blacklight.png";
 
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
-    statusLightsImagePath = Path.ToAbsolute(statusLightsImagePath).EnsureEnd('/');
+    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
     if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays)) {
         discoveryWarningDays = 7;

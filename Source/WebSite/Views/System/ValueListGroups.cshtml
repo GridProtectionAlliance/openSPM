@@ -97,7 +97,7 @@
 
         function openValueListItemEditor(record) {
             $("#editValueListItemFrame").attr({
-                "src": "/System/ValueListItems?ID=" + record.ID + "&Name=" + encodeURIComponent(record.Name),
+                "src": "@Url.Content("~/System/ValueListItems")?ID=" + record.ID + "&Name=" + encodeURIComponent(record.Name),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
             });

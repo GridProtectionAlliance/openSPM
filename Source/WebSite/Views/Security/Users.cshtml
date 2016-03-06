@@ -16,12 +16,35 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/28/2016 - J. Ritchie Carroll
+//  03/03/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
 @using openSPM.Models
 @model AppModel
+@section StyleSheets{
+    <style>
+         .account-feedback-wrapper {
+             position: relative;
+             display: table
+         }
+
+         .account-feedback-message {
+             position: absolute;
+             vertical-align: middle;
+             display: table-cell;
+             left: 10px;
+             width: 425px;
+             display: none
+         }
+
+         .account-feedback-icon {
+             font-size: large;
+             vertical-align: middle;
+             margin-top: -5px
+         }
+    </style>
+}
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -50,11 +73,12 @@
 }
 @helper AccountValidationFeedback()
 {
-    <span class="pull-right">
-        &nbsp;&nbsp;
-        <span id="accountValid" style="display: none"><span class="glyphicon glyphicon-ok-circle" style="font-size: large; vertical-align: middle; margin-top: -5px" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'green'}"></span>&nbsp;<em class="small">Resolved account name</em></span>
-        <span id="accountInvalid" style="display: none"><span class="glyphicon glyphicon-remove-circle" style="font-size: large; vertical-align: middle; margin-top: -5px" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'red'}"></span>&nbsp;<em class="small">Cannot resolve account name</em></span>
-    </span>
+    <div class="pull-right account-feedback-wrapper">
+        <span id="resolvingAccount" class="account-feedback-message"><span class="glyphicon glyphicon-refresh glyphicon-spin account-feedback-icon"></span>&nbsp;<em class="small">Resolving account details...</em></span>
+        <span id="accountValid" class="account-feedback-message"><span class="glyphicon glyphicon-ok-circle account-feedback-icon" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'green'}"></span>&nbsp;<em class="small">Resolved account name</em></span>
+        <span id="accountInvalid" class="account-feedback-message"><span class="glyphicon glyphicon-remove-circle account-feedback-icon" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'red'}"></span>&nbsp;<em class="small">Cannot resolve account name</em></span>
+        <span id="accountUnknown" class="account-feedback-message"><span class="glyphicon glyphicon-warning-sign account-feedback-icon" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'orange'}"></span>&nbsp;<em class="small">Valid account name is not a user or Active Directory access is limited</em></span>
+    </div>
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
@@ -67,8 +91,20 @@
                     @Html.Raw(dataContext.AddCheckBoxField<UserAccount>("UseADAuthentication"))
                 </div>
                 @* Adding radio buttons bound to virtual UseDBAuthentication that models negated state of UseADAuthentication field for simplified dependency field initialization *@
-                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Active Directory User</label>
-                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Database User</label>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Active&nbsp;Directory&nbsp;Group</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Database&nbsp;Group</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                    </div>
+                </div>
             </div>
             <div class="panel-body" data-bind="visible: UseDBAuthentication">
                 <div class="row">
@@ -141,45 +177,107 @@
         "use strict";
 
         @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
+        var AccountState = {
+            Invalid: 0,
+            Valid: 1,
+            Unknown: 2,
+            Resolving: 3
+        }
+
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
-                securityHub.sIDToAccountName(record.Name).done(function (accountName) {
+                securityHub.sidToAccountName(record.Name).done(function(accountName) {
                     record.AccountName(accountName);
                 });
             }
         }
 
         function validateAccount(observableRecord) {
+            showAccountNameValidityFeedback(AccountState.Resolving);
+
             if (observableRecord.UseDBAuthentication == null || observableRecord.UseDBAuthentication()) {
-                showAccountNameFeedback(null);
-            }
-            else {
+                hideAccountNameValidityFeedback();
+            } else {
                 if (viewModel.dataHubIsConnected()) {
-                    securityHub.userNameToSID(observableRecord.Name()).done(function (sid) {
-                        showAccountNameFeedback(observableRecord.Name() !== sid);
-                    });
-                }
-                else {
-                    showAccountNameFeedback(null);
+                    const accountName = observableRecord.Name();
+
+                    if (isEmpty(accountName)) {
+                        showAccountNameValidityFeedback(AccountState.Invalid);
+                    } else {
+                        securityHub.userNameToSID(accountName).done(function(sid) {
+                            if (accountName !== sid && accountName.countOccurrences("\\") < 2) {
+                                securityHub.isUserSID(sid).done(function(isUser) {
+                                    showAccountNameValidityFeedback(isUser ? AccountState.Valid : AccountState.Unknown);
+                                });
+                            } else {
+                                showAccountNameValidityFeedback(AccountState.Invalid);
+                            }
+                        });
+                    }
+                } else {
+                    hideAccountNameValidityFeedback();
                 }
             }
 
             return undefined;
         }
 
-        function showAccountNameFeedback(isValid) {
-            $("#accountValid").hide();
-            $("#accountInvalid").hide();
+        var messages = [];
+        var nextMessageName = undefined;
+        var showingMessage = false;
+        messages.push("resolvingAccount");
+        messages.push("accountValid");
+        messages.push("accountInvalid");
+        messages.push("accountUnknown");
 
-            if (isValid != null) {
-                if (isValid)
-                    $("#accountValid").show();
+        function showFeedbackMessage(messageName) {
+            if (showingMessage) {
+                nextMessageName = messageName;
+            } else {
+                showingMessage = true;
+
+                hideAccountNameValidityFeedback(messageName);
+
+                if (messageName == null)
+                    showingMessage = false;
                 else
-                    $("#accountInvalid").show();
+                    $("#" + messageName).fadeIn(function () {
+                        showingMessage = false;
+
+                        if (nextMessageName != undefined) {
+                            messageName = nextMessageName;
+                            nextMessageName = undefined;
+                            showFeedbackMessage(messageName);
+                        }
+                    });
             }
         }
 
-        $(viewModel).on("pageRecordsQueried", function (event, records) {
+        function hideAccountNameValidityFeedback(messageName) {
+            for (let i = 0; i < messages.length; i++) {
+                if (messages[i] !== messageName)
+                    $("#" + messages[i]).hide();
+            }
+        }
+
+        function showAccountNameValidityFeedback(accountState) {
+            switch (accountState) {
+                case AccountState.Valid:
+                    showFeedbackMessage("accountValid");
+                    break;
+                case AccountState.Invalid:
+                    showFeedbackMessage("accountInvalid");
+                    break;
+                case AccountState.Unknown:
+                    showFeedbackMessage("accountUnknown");
+                    break;
+                case AccountState.Resolving:
+                    showFeedbackMessage("resolvingAccount");
+                    break;
+            }
+        }
+
+        $(viewModel).on("pageRecordsQueried", function(event, records) {
             // Add a virtual observable field called "AccountName" that will resolve SID values to account names
             for (var i = 0; i < records.length; i++) {
                 records[i].AccountName = ko.observable("...");
@@ -187,12 +285,12 @@
             }
         });
 
-        $(viewModel).on("newRecord", function (event, newRecord) {
+        $(viewModel).on("newRecord", function(event, newRecord) {
             // Make sure new records get virtual field
             newRecord.AccountName = ko.observable("");
         });
 
-        $(viewModel).on("derivingObservableRecord", function (event, observableRecord) {
+        $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Create a virtual UseDBAuthentication field that is negated state of actual UseADAuthentication field
             observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
 
@@ -205,7 +303,7 @@
                 observableRecord.Password(null);
         });
 
-        $(viewModel).on("derivingJSRecord", function (event, observableRecord, promises) {
+        $(viewModel).on("derivingJSRecord", function(event, observableRecord, promises) {
             // Set state of actual field to be negated state of virtual field
             observableRecord.UseADAuthentication(!observableRecord.UseDBAuthentication());
 
@@ -215,8 +313,8 @@
 
             // Push promise to convert user name back to SID before updating record
             if (viewModel.dataHubIsConnected() && observableRecord.UseADAuthentication()) {
-                promises.push($.Deferred(function (deferred) {
-                    securityHub.userNameToSID(observableRecord.Name()).done(function (sid) {
+                promises.push($.Deferred(function(deferred) {
+                    securityHub.userNameToSID(observableRecord.Name()).done(function(sid) {
                         observableRecord.Name(sid);
                         deferred.resolve();
                     });
@@ -230,15 +328,15 @@
             $("#editRolesDialog input:checkbox").prop("checked", false);
 
             if (viewModel.dataHubIsConnected()) {
-                securityHub.queryApplicationRoles().done(function (roles) {
+                securityHub.queryApplicationRoles().done(function(roles) {
                     var evaluations = roles.length;
 
                     if (evaluations > 0)
                         $("#loadingRoles").show();
 
                     for (var i = 0; i < roles.length; i++) {
-                        securityHub.userIsInRole(record.ID, roles[i].ID).done(function (roleID) {
-                            return function (result) {
+                        securityHub.userIsInRole(record.ID, roles[i].ID).done(function(roleID) {
+                            return function(result) {
                                 $("#" + roleID).prop("checked", result);
 
                                 evaluations--;
@@ -253,10 +351,10 @@
             }
         }
 
-        $(function () {
+        $(function() {
             $("#editRolesDialog").modal({ show: false, backdrop: "static" });
 
-            $("#saveRolesButton").click(function () {
+            $("#saveRolesButton").click(function() {
                 if (viewModel.dataHubIsConnected()) {
                     const userID = $("#currentUserID").text();
                     const roles = $("#editRolesDialog input:checkbox");
@@ -266,11 +364,11 @@
                         const roleID = element.attr("id");
 
                         if (element.prop("checked")) {
-                            securityHub.addUserToRole(userID, roleID).fail(function (error) {
+                            securityHub.addUserToRole(userID, roleID).fail(function(error) {
                                 showErrorMessage(error);
                             });
                         } else {
-                            securityHub.removeUserFromRole(userID, roleID).fail(function (error) {
+                            securityHub.removeUserFromRole(userID, roleID).fail(function(error) {
                                 showErrorMessage(error);
                             });
                         }

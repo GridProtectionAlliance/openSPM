@@ -97,7 +97,7 @@
 
         function openMenuItemEditor(record) {
             $("#editMenuItemFrame").attr({
-                "src": "/System/MenuItems?ID=" + record.ID + "&Name=" + encodeURIComponent(record.Name),
+                "src": "@Url.Content("~/System/MenuItems")?ID=" + record.ID + "&Name=" + encodeURIComponent(record.Name),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
             });

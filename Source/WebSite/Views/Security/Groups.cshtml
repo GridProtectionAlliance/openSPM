@@ -22,6 +22,29 @@
 //*****************************************************************************************************@
 @using openSPM.Models
 @model AppModel
+@section StyleSheets{
+    <style>
+         .account-feedback-wrapper {
+             position: relative;
+             display: table
+         }
+
+         .account-feedback-message {
+             position: absolute;
+             vertical-align: middle;
+             display: table-cell;
+             left: 10px;
+             width: 425px;
+             display: none
+         }
+
+         .account-feedback-icon {
+             font-size: large;
+             vertical-align: middle;
+             margin-top: -5px
+         }
+    </style>
+}
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -50,11 +73,12 @@
 }
 @helper AccountValidationFeedback()
 {
-    <span class="pull-right">
-        &nbsp;&nbsp;
-        <span id="accountValid" style="display: none"><span class="glyphicon glyphicon-ok-circle" style="font-size: large; vertical-align: middle; margin-top: -5px" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'green'}"></span>&nbsp;<em class="small">Resolved account name</em></span>
-        <span id="accountInvalid" style="display: none"><span class="glyphicon glyphicon-remove-circle" style="font-size: large; vertical-align: middle; margin-top: -5px" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'red'}"></span>&nbsp;<em class="small">Cannot resolve account name</em></span>
-    </span>
+    <div class="pull-right account-feedback-wrapper">
+        <span id="resolvingAccount" class="account-feedback-message"><span class="glyphicon glyphicon-refresh glyphicon-spin account-feedback-icon"></span>&nbsp;<em class="small">Resolving account details...</em></span>
+        <span id="accountValid" class="account-feedback-message"><span class="glyphicon glyphicon-ok-circle account-feedback-icon" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'green'}"></span>&nbsp;<em class="small">Resolved account name</em></span>
+        <span id="accountInvalid" class="account-feedback-message"><span class="glyphicon glyphicon-remove-circle account-feedback-icon" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'red'}"></span>&nbsp;<em class="small">Cannot resolve account name</em></span>
+        <span id="accountUnknown" class="account-feedback-message"><span class="glyphicon glyphicon-warning-sign account-feedback-icon" data-bind="style: {color: $root.recordMode()===RecordMode.View ? 'gray' : 'orange'}"></span>&nbsp;<em class="small">Valid account name is not a group</em></span>
+    </div>
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
@@ -62,8 +86,20 @@
         @Html.Raw(dataContext.AddInputField<SecurityGroup>("Name", fieldLabel: $"Name{AccountValidationFeedback().ToString().Trim()}", customDataBinding: "attr: {'acct-valid': validateAccount($data)}", initialFocus: true))
         <div class="panel panel-default" data-bind="css: {'panel-readonly': $root.recordMode()===RecordMode.View, 'panel-primary': UseDBAuthentication}">
             <div class="panel-heading">
-                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Active Directory Group</label>
-                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}"> Database Group</label>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Active&nbsp;Directory&nbsp;Group</label>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Database&nbsp;Group</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                    </div>
+                </div>
             </div>
             <div class="panel-body" data-bind="visible: UseDBAuthentication">
                 @Html.Raw(dataContext.AddTextAreaField<SecurityGroup>("Description", 4, dependencyFieldName: "UseDBAuthentication"))
@@ -116,45 +152,111 @@
         "use strict";
 
         @Html.Raw(dataContext.RenderViewModelConfiguration<SecurityGroup>(ViewBag))
+        var AccountState = {
+            Invalid: 0,
+            Valid: 1,
+            Unknown: 2,
+            Resolving: 3
+        }
+
         function lookupAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
-                securityHub.sIDToAccountName(record.Name).done(function (accountName) {
+                securityHub.sidToAccountName(record.Name).done(function (accountName) {
                     record.AccountName(accountName);
                 });
             }
         }
 
         function validateAccount(observableRecord) {
+            showAccountNameValidityFeedback(AccountState.Resolving);
+
             if (observableRecord.UseDBAuthentication == null || observableRecord.UseDBAuthentication()) {
-                showAccountNameFeedback(null);
+                hideAccountNameValidityFeedback();
             }
             else {
                 if (viewModel.dataHubIsConnected()) {
-                    securityHub.groupNameToSID(observableRecord.Name()).done(function (sid) {
-                        if (observableRecord.Name() !== sid) {
-                            securityHub.iSGroupSid
-                        }
+                    const accountName = observableRecord.Name();
 
-                        showAccountNameFeedback(observableRecord.Name() !== sid);
-                    });
+                    if (isEmpty(accountName)) {
+                        showAccountNameValidityFeedback(AccountState.Invalid);
+                    } else {
+                        securityHub.groupNameToSID(accountName).done(function (sid) {
+                            if (accountName !== sid && accountName.countOccurrences("\\") < 2) {
+                                if (accountName.startsWith("NT AUTHORITY")) {
+                                    // This is a valid group source for things like "Authenticated Users", but is
+                                    // not technically a "group" - since SID validated, we report a valid account
+                                    showAccountNameValidityFeedback(AccountState.Valid);
+                                } else {
+                                    securityHub.isGroupSID(sid).done(function (isGroup) {
+                                        showAccountNameValidityFeedback(isGroup ? AccountState.Valid : AccountState.Unknown);
+                                    });
+                                }
+                            } else {
+                                showAccountNameValidityFeedback(AccountState.Invalid);
+                            }
+                        });
+                    }
                 }
                 else {
-                    showAccountNameFeedback(null);
+                    hideAccountNameValidityFeedback();
                 }
             }
 
             return undefined;
         }
 
-        function showAccountNameFeedback(isValid) {
-            $("#accountValid").hide();
-            $("#accountInvalid").hide();
+        var messages = [];
+        var nextMessageName = undefined;
+        var showingMessage = false;
+        messages.push("resolvingAccount");
+        messages.push("accountValid");
+        messages.push("accountInvalid");
+        messages.push("accountUnknown");
 
-            if (isValid != null) {
-                if (isValid)
-                    $("#accountValid").show();
+        function showFeedbackMessage(messageName) {
+            if (showingMessage) {
+                nextMessageName = messageName;
+            } else {
+                showingMessage = true;
+
+                hideAccountNameValidityFeedback(messageName);
+
+                if (messageName == null)
+                    showingMessage = false;
                 else
-                    $("#accountInvalid").show();
+                    $("#" + messageName).fadeIn(function () {
+                        showingMessage = false;
+
+                        if (nextMessageName != undefined) {
+                            messageName = nextMessageName;
+                            nextMessageName = undefined;
+                            showFeedbackMessage(messageName);
+                        }
+                    });
+            }
+        }
+
+        function hideAccountNameValidityFeedback(messageName) {
+            for (let i = 0; i < messages.length; i++) {
+                if (messages[i] !== messageName)
+                    $("#" + messages[i]).hide();
+            }
+        }
+
+        function showAccountNameValidityFeedback(accountState) {
+            switch (accountState) {
+                case AccountState.Valid:
+                    showFeedbackMessage("accountValid");
+                    break;
+                case AccountState.Invalid:
+                    showFeedbackMessage("accountInvalid");
+                    break;
+                case AccountState.Unknown:
+                    showFeedbackMessage("accountUnknown");
+                    break;
+                case AccountState.Resolving:
+                    showFeedbackMessage("resolvingAccount");
+                    break;
             }
         }
 

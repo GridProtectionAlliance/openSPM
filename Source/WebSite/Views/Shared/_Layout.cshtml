@@ -24,7 +24,6 @@
 @using GSF
 @using openSPM.Models
 @using Page = openSPM.Models.Page
-@using Path = System.Web.VirtualPathUtility
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
@@ -39,12 +38,12 @@
     }
 
     if (!layoutSettings.TryGetValue("copyrightUrl", out copyrightUrl)) {
-        copyrightUrl = Path.ToAbsolute("~/Main/Contact");
+        copyrightUrl = Url.Content("~/Main/Contact");
     }
 
     // Look for overridden menuImagePath from page's server configuration settings, otherwise use page default
     string menuImagePath = Model.GetPageSetting(ViewBag, layoutSettings, "menuImagePath", "~/Images/Menu/");
-    menuImagePath = Path.ToAbsolute(menuImagePath).EnsureEnd('/');
+    menuImagePath = Url.Content(menuImagePath).EnsureEnd('/');
 
     // Load menu items for this page from database table
     List<MenuItem> menuItems = dataContext.Table<MenuItem>().QueryRecords("SortOrder", new RecordRestriction("(MenuID = 0 OR MenuID = {0}) AND Enabled <> 0", page?.MenuID ?? 0)).ToList();
@@ -94,7 +93,7 @@
     <meta name="description" content="@Model.Global.ApplicationDescription" />
     <meta name="keywords" content="@Model.Global.ApplicationKeywords" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <link href="@Path.ToAbsolute(Model.Global.BootstrapTheme)" rel="stylesheet">
+    <link href="@Url.Content(Model.Global.BootstrapTheme)" rel="stylesheet">
     @if (Model.Global.BootstrapTheme.EndsWith("bootstrap.min.css")) {
     <link href="~/Content/bootstrap-theme.min.css" rel="stylesheet">
     }
@@ -153,7 +152,7 @@
                             }
                         }
                         else {
-                            <li><a href="@Html.Raw(Path.ToAbsolute(menuItem.Link))"><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@Html.Raw(menuItem.Text)</a></li>
+                            <li><a href="@Html.Raw(Url.Content(menuItem.Link))"><img src="@($"{menuImagePath}{menuItem.Image}")" alt="@menuItem.ImageAlt">@Html.Raw(menuItem.Text)</a></li>
                         }
 
                         lastMenuID = menuItem.PageID;
@@ -204,7 +203,7 @@
     @Scripts.Render("~/js.bundle/signalR")
     @Scripts.Render("~/js.bundle/gsfwebclient")
     @* ReSharper disable once Html.PathError *@
-    <script src="~/signalr/hubs"></script>
+    <script src="@Url.Content("~/signalr/hubs")"></script>
     @Scripts.Render("~/js.bundle/site")
     @Html.Raw(ViewBag.PageControlScripts?.ToString())
     @RenderSection("Scripts", false)

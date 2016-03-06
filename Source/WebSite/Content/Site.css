@@ -273,6 +273,11 @@ hr.full-break {
   }
 }
 
+.glyphicon-invert {
+   -webkit-filter: invert(1);
+   filter: invert(1);
+}
+
 .glyphicon-rotate-90 {
   filter: progid:DXImageTransform.Microsoft.BasicImage(rotation=1);
   -webkit-transform: rotate(90deg);

@@ -23,7 +23,6 @@
 @using System.Collections.Specialized
 @using openSPM.Models
 @using Page = openSPM.Models.Page
-@using Path = System.Web.VirtualPathUtility
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
@@ -74,7 +73,7 @@
         "use strict";
 
         @Html.Raw(dataContext.RenderViewModelConfiguration<MenuItem>(ViewBag, "SortOrder", parentID))
-        const defaultImagePath = "@Path.ToAbsolute("~/Images/Menu/")";
+        const defaultImagePath = "@Url.Content("~/Images/Menu/")";
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Initialize selected menu item record

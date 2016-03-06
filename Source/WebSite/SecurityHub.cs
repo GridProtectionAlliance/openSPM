@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using GSF.Identity;
 using Microsoft.AspNet.SignalR;
+using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Attributes;
 using openSPM.Models;
 
@@ -158,6 +159,7 @@ namespace openSPM
         /// </summary>
         /// <param name="sid">Security identifier to test.</param>
         /// <returns><c>true</c>if <paramref name="sid"/> is for a user; otherwise, <c>false</c>.</returns>
+        [HubMethodName("isUserSID")]
         public bool IsUserSID(string sid)
         {
             return UserInfo.IsUserSID(sid);
@@ -225,6 +227,7 @@ namespace openSPM
         /// </summary>
         /// <param name="sid">Security identifier to test.</param>
         /// <returns><c>true</c>if <paramref name="sid"/> is for a group; otherwise, <c>false</c>.</returns>
+        [HubMethodName("isGroupSID")]
         public bool IsGroupSID(string sid)
         {
             return UserInfo.IsGroupSID(sid);
@@ -235,6 +238,7 @@ namespace openSPM
         /// </summary>
         /// <param name="sid">SID to convert to a account name.</param>
         /// <returns>Account name for a given SID.</returns>
+        [HubMethodName("sidToAccountName")]
         public string SIDToAccountName(string sid)
         {
             return UserInfo.SIDToAccountName(sid ?? "");

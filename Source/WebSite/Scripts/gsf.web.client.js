@@ -325,6 +325,10 @@ String.prototype.padRight = function (totalWidth, paddingChar) {
     return this;
 }
 
+String.prototype.countOccurrences = function (searchString) {
+    return (this.split(searchString).length - 1);
+}
+
 if (!String.prototype.startsWith) {
     String.prototype.startsWith = function (searchString, position) {
         position = position || 0;

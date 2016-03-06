@@ -23,7 +23,6 @@
 @using System.Text
 @using GSF
 @using openSPM.Models
-@using Path = System.Web.VirtualPathUtility
 @model AppModel
 @{
     if (ViewBag.PageControlScripts == null) {
@@ -34,7 +33,7 @@
 
     // Setup page control scripts
     pageControlScripts.Append(Scripts.Render("~/js.bundle/knockout"));
-    pageControlScripts.Append($"<script src=\"{Path.ToAbsolute("~/Scripts/pagedViewModel.js")}\"></script>");
+    pageControlScripts.Append($"<script src=\"{Url.Content("~/Scripts/pagedViewModel.js")}\"></script>");
 
     pageControlScripts.Append(@"
     <script id=""validationMessageTemplate"" type=""text/html""><!--

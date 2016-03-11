@@ -38,40 +38,58 @@
     }
 
     if (!layoutSettings.TryGetValue("copyrightUrl", out copyrightUrl)) {
-        copyrightUrl = Url.Content("~/Main/Contact");
+        copyrightUrl = "~/Main/Contact";
     }
 
     // Look for overridden menuImagePath from page's server configuration settings, otherwise use page default
     string menuImagePath = Model.GetPageSetting(ViewBag, layoutSettings, "menuImagePath", "~/Images/Menu/");
     menuImagePath = Url.Content(menuImagePath).EnsureEnd('/');
 
-    // Load menu items for this page from database table
-    List<MenuItem> menuItems = dataContext.Table<MenuItem>().QueryRecords("SortOrder", new RecordRestriction("(MenuID = 0 OR MenuID = {0}) AND Enabled <> 0", page?.MenuID ?? 0)).ToList();
-    List<MenuItem> unavailableMenuItems = new List<MenuItem>();
+    List<MenuItem> menuItems;
+    int menuID = page?.MenuID ?? 0;
 
-    foreach (MenuItem menuItem in menuItems) {
-        // If no menu link was provided, check for page table reference
-        if (string.IsNullOrWhiteSpace(menuItem.Link) && menuItem.PageID > 0) {
-            // Look-up associated page form menu item
-            Page menuPage = dataContext.Table<Page>().LoadRecord(menuItem.PageID);
+    if (menuID == 100)
+    {
+        // Hide menu when menu ID is 100 - this currently means Null, or no menu
+        ViewBag.PageHasMenu = false;
+        menuItems = new List<MenuItem>();
+    }
+    else
+    {
+        // Load menu items for this page from database table
+        menuItems = dataContext.Table<MenuItem>().QueryRecords("SortOrder", new RecordRestriction("(MenuID = 0 OR MenuID = {0}) AND Enabled <> 0", menuID)).ToList();
+        List<MenuItem> unavailableMenuItems = new List<MenuItem>();
 
-            // Check if menu item is enabled, page location is specified and that user has rights to page
-            if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(menuPage.PageLocation) &&
-                !Model.UserIsInRole(menuPage.ExcludedRoles) && Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*"))) {
-                // Update menu item link
-                menuItem.Link = menuPage.PageLocation;
+        foreach (MenuItem menuItem in menuItems)
+        {
+            // If no menu link was provided, check for page table reference
+            if (string.IsNullOrWhiteSpace(menuItem.Link) && menuItem.PageID > 0)
+            {
+                // Look-up associated page form menu item
+                Page menuPage = dataContext.Table<Page>().LoadRecord(menuItem.PageID);
+
+                // Check if menu item is enabled, page location is specified and that user has rights to page
+                if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(menuPage.PageLocation) &&
+                    !Model.UserIsInRole(menuPage.ExcludedRoles) && Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*")))
+                {
+                    // Update menu item link
+                    menuItem.Link = menuPage.PageLocation;
+                }
+                else
+                {
+                    // Menu item is unavailable to user
+                    unavailableMenuItems.Add(menuItem);
+                }
             }
-            else {
-                // Menu item is unavailable to user
-                unavailableMenuItems.Add(menuItem);
-            }
+        }
+
+        // Remove menu items that are not available to user
+        foreach (MenuItem menuItem in unavailableMenuItems)
+        {
+            menuItems.Remove(menuItem);
         }
     }
 
-    // Remove menu items that are not available to user
-    foreach (MenuItem menuItem in unavailableMenuItems) {
-        menuItems.Remove(menuItem);
-    }
 
     // Define ViewBag.CustomTitle in page code for custom page titles
     string pageTitle = ViewBag.CustomTitle ?? ViewBag.Title;
@@ -160,7 +178,7 @@
                 </ul>
                 <footer id="footer">
                     @if (showCopyright) {
-                        <p class="small"><a href="@copyrightUrl">@copyrightText</a></p>
+                        <p class="small"><a href="@Url.Content(copyrightUrl)">@copyrightText</a></p>
                     }
                 </footer>
             </div>

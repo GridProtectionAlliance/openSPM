@@ -44,7 +44,7 @@
     <td width="10%" data-bind="text: ID" class="text-center valign-middle" nowrap></td>
     <td width="15%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="30%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: Title}"></div></td>
-    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(PageLocation)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(PageLocation, 2)"></div></a></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: AbsolutePath()}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(PageLocation, 2)"></div></a></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
@@ -53,6 +53,7 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-6">
+        @Html.Raw(dataContext.AddInputField<Page>("ID"))
         @Html.Raw(dataContext.AddInputField<Page>("Name"))
         @Html.Raw(dataContext.AddInputField<Page>("Title"))
         @Html.Raw(dataContext.AddSelectField<Page, Menu>("MenuID", "ID", "Name", "Name"))
@@ -71,5 +72,31 @@
 @section Scripts {
     <script>
         @Html.Raw(dataContext.RenderViewModelConfiguration<Page>(ViewBag))
+        function getAbsolutePath(record) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.getAbsolutePath(notNull(record.PageLocation)).done(function (absolutePath) {
+                    record.AbsolutePath(absolutePath);
+                });
+            }
+        }
+
+        $(viewModel).on("pageRecordsQueried", function(event, records) {
+            // Add a virtual observable field called "AbsolutePath" that will resolve virtual path to absolute path
+            for (var i = 0; i < records.length; i++) {
+                records[i].AbsolutePath = ko.observable("...");
+                getAbsolutePath(records[i]);
+            }
+        });
+
+        $(viewModel).on("newRecord", function(event, newRecord) {
+            // Make sure new records get virtual field
+            newRecord.AbsolutePath = ko.observable("");
+        });
+
+        $(viewModel).on("derivingJSRecord", function(event, observableRecord) {
+            // Remove virtual observable fields before serialization for record updates
+            delete observableRecord.AbsolutePath;
+        });
+
     </script>
 }

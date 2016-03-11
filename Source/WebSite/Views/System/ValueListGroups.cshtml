@@ -34,7 +34,7 @@
     };
 
     ViewBag.CustomTitle = "Edit System Value Lists";
-    ViewBag.Title = "System Value List Group";
+    ViewBag.Title = "System Value List Group Details";
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
@@ -92,7 +92,9 @@
         }
 
         $(window).resize(function () {
-            $("#editValueListItemFrame").attr("height", ($(document).height() - 150) + "px");
+            setTimeout(function() {
+                $("#editValueListItemFrame").attr("height", ($(document).height() - 150) + "px");
+            }, 500);
         });
 
         function openValueListItemEditor(record) {

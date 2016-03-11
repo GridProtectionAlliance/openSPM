@@ -387,7 +387,7 @@ namespace openSPM.Models
             tableOperations.TryGetFieldAttribute(fieldName, out stringLengthAttribute);
             tableOperations.TryGetFieldAttribute(fieldName, out regularExpressionAttribute);
 
-            if (!string.IsNullOrEmpty(regularExpressionAttribute?.ErrorMessage))
+            if (!string.IsNullOrEmpty(regularExpressionAttribute?.Pattern))
             {
                 string observableReference;
 
@@ -396,7 +396,7 @@ namespace openSPM.Models
                 else // "with: $root.connectionString"
                     observableReference = $"viewModel.{groupDataBinding.Substring(groupDataBinding.IndexOf('.') + 1)}";
 
-                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
+                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute?.ErrorMessage ?? "Invalid format.");
             }
 
             AddFieldValueInitializer<T>(fieldName);
@@ -494,7 +494,7 @@ namespace openSPM.Models
             tableOperations.TryGetFieldAttribute(fieldName, out stringLengthAttribute);
             tableOperations.TryGetFieldAttribute(fieldName, out regularExpressionAttribute);
 
-            if (!string.IsNullOrEmpty(regularExpressionAttribute?.ErrorMessage))
+            if (!string.IsNullOrEmpty(regularExpressionAttribute?.Pattern))
             {
                 string observableReference;
 
@@ -503,7 +503,7 @@ namespace openSPM.Models
                 else // "with: $root.connectionString"
                     observableReference = $"viewModel.{groupDataBinding.Substring(groupDataBinding.IndexOf('.') + 1)}";
 
-                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
+                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute?.ErrorMessage ?? "Invalid format.");
             }
 
             AddFieldValueInitializer<T>(fieldName);
@@ -589,7 +589,7 @@ namespace openSPM.Models
             tableOperations.TryGetFieldAttribute(fieldName, out stringLengthAttribute);
             tableOperations.TryGetFieldAttribute(fieldName, out regularExpressionAttribute);
 
-            if (!string.IsNullOrEmpty(regularExpressionAttribute?.ErrorMessage))
+            if (!string.IsNullOrEmpty(regularExpressionAttribute?.Pattern))
             {
                 string observableReference;
 
@@ -598,7 +598,7 @@ namespace openSPM.Models
                 else // "with: $root.connectionString"
                     observableReference = $"viewModel.{groupDataBinding.Substring(groupDataBinding.IndexOf('.') + 1)}";
 
-                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage);
+                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute?.ErrorMessage ?? "Invalid format.");
             }
 
             AddFieldValueInitializer<T>(fieldName);

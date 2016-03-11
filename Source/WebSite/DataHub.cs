@@ -827,7 +827,10 @@ namespace openSPM
         /// <returns>Absolute path for a virtual path.</returns>
         public string GetAbsolutePath(string path)
         {
-            return VirtualPathUtility.ToAbsolute(path ?? "");
+            if (string.IsNullOrWhiteSpace(path))
+                return "";
+
+            return VirtualPathUtility.ToAbsolute(path);
         }
 
         /// <summary>

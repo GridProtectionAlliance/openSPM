@@ -119,10 +119,19 @@ namespace openSPM.Models
 
         #endregion
 
+        #region [ Properties ]
+
+        /// <summary>
+        /// Gets flag that determines if modeled table has a primary key that is an identity field.
+        /// </summary>
+        public bool HasPrimaryKeyIdentityField => s_hasPrimaryKeyIdentityField;
+
+        #endregion
+
         #region [ Methods ]
 
         /// <summary>
-        /// Queries database and returns modeled table records for the specified sql statement and parameters.
+        /// Queries database and returns modeled table records for the specified parameters.
         /// </summary>
         /// <param name="orderByExpression">Field name expression used for sort order, include ASC or DESC as needed - does not include ORDER BY; defaults to primary keys.</param>
         /// <param name="restriction">Record restriction to apply, if any.</param>
@@ -234,7 +243,7 @@ namespace openSPM.Models
                 DataRow row = m_connection.RetrieveRow(s_selectSql, primaryKeys);
 
                 // Make sure record exists, return null instead of a blank record
-                if (GetPrimaryKeys(row).All(Common.IsDefaultValue))
+                if (s_hasPrimaryKeyIdentityField && GetPrimaryKeys(row).All(Common.IsDefaultValue))
                     return null;
 
                 foreach (PropertyInfo property in s_properties.Values)
@@ -553,6 +562,7 @@ namespace openSPM.Models
         private static readonly string s_deleteSql;
         private static readonly string s_deleteWhereSql;
         private static readonly string s_primaryKeyFields;
+        private static readonly bool s_hasPrimaryKeyIdentityField;
 
         // Static Constructor
         static TableOperations()
@@ -577,6 +587,7 @@ namespace openSPM.Models
             s_fieldNames = s_properties.ToDictionary(kvp => kvp.Key, kvp => GetFieldName(kvp.Value), StringComparer.OrdinalIgnoreCase);
             s_propertyNames = s_fieldNames.ToDictionary(kvp => kvp.Value, kvp => kvp.Key, StringComparer.OrdinalIgnoreCase);
             s_attributes = new Dictionary<PropertyInfo, HashSet<Type>>();
+            s_hasPrimaryKeyIdentityField = false;
 
             foreach (PropertyInfo property in s_properties.Values)
             {
@@ -586,7 +597,11 @@ namespace openSPM.Models
 
                 if ((object)primaryKeyAttribute != null)
                 {
-                    if (!primaryKeyAttribute.IsIdentity)
+                    if (primaryKeyAttribute.IsIdentity)
+                    {
+                        s_hasPrimaryKeyIdentityField = true;
+                    }
+                    else
                     {
                         addNewFields.Append($"{(addNewFields.Length > 0 ? ", " : "")}{fieldName}");
                         addNewFormat.Append($"{(addNewFormat.Length > 0 ? ", " : "")}{{{addNewFieldIndex++}}}");

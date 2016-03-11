@@ -52,6 +52,7 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
+        @Html.Raw(dataContext.AddInputField<Menu>("ID"))
         @Html.Raw(dataContext.AddInputField<Menu>("Name"))
         @Html.Raw(dataContext.AddInputField<Menu>("Abbreviation"))
         @Html.Raw(dataContext.AddTextAreaField<Menu>("Description"))
@@ -92,7 +93,10 @@
         }
 
         $(window).resize(function () {
-            $("#editMenuItemFrame").attr("height", ($(document).height() - 150) + "px");
+            setTimeout(function () {
+                $("#editMenuItemFrame").attr("height", ($(document).height() - 150) + "px");
+            }, 500);
+
         });
 
         function openMenuItemEditor(record) {

@@ -28,7 +28,7 @@
     NameValueCollection parameters = Request.QueryString;
     int parentID = int.Parse(parameters["ID"] ?? "0");
 
-    ViewBag.CustomTitle = "Edit Value List Items for \"" + parameters["Name"] + "\" Page";
+    ViewBag.CustomTitle = "Edit Items in \"" + parameters["Name"] + "\" Value List";
     ViewBag.PageHasMenu = false;
 
     ViewBag.HeaderColumns = new[]

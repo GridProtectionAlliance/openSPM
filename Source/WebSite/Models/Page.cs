@@ -35,6 +35,8 @@ namespace openSPM.Models
     {
         // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]
         [PrimaryKey]
+        [Label("Page ID")]
+        [RegularExpression("^[1-9][0-9]*$", ErrorMessage = "Value must be greater than zero.")]
         public int ID
         {
             get; set;
@@ -53,6 +55,7 @@ namespace openSPM.Models
             get; set;
         }
 
+        [Required]
         [Label("Menu")]
         public int MenuID
         {

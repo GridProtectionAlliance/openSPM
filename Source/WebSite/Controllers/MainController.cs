@@ -50,7 +50,7 @@ namespace openSPM.Controllers
         public MainController()
         {
             // Establish data context for the view
-            m_dataContext = new DataContext();
+            m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
             ViewData.Add("DataContext", m_dataContext);
 
             // Set default model for pages used by layout

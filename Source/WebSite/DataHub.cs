@@ -53,7 +53,7 @@ namespace openSPM
 
         public DataHub()
         {
-            m_dataContext = new DataContext();
+            m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
         }
 
         #endregion
@@ -840,7 +840,7 @@ namespace openSPM
         public Guid GetCurrentUserID()
         {
             Guid userID;
-            MvcApplication.UserIDCache.TryGetValue(UserInfo.CurrentUserID, out userID);
+            AuthorizationCache.UserIDs.TryGetValue(UserInfo.CurrentUserID, out userID);
             return userID;
         }
 

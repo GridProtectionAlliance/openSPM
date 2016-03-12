@@ -46,7 +46,7 @@ namespace openSPM
 
         public SecurityHub()
         {
-            m_dataContext = new DataContext();
+            m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
         }
 
         #endregion

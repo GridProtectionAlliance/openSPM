@@ -101,6 +101,7 @@ namespace openSPM.Models
 
         // Fields
         private readonly AdoDataConnection m_connection;
+        private readonly Action<Exception> m_exceptionHandler;
         private IEnumerable<DataRow> m_primaryKeyCache;
         private string m_lastSortField;
 
@@ -115,6 +116,20 @@ namespace openSPM.Models
         public TableOperations(AdoDataConnection connection)
         {
             m_connection = connection;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="TableOperations{T}"/>.
+        /// </summary>
+        /// <param name="connection"><see cref="AdoDataConnection"/> instance to use for database operations.</param>
+        /// <param name="exceptionHandler">Delegate to handle table operation exceptions.</param>
+        /// <remarks>
+        /// When exception handler is provided, table operations will not throw exceptions for database calls, any
+        /// encountered exceptions will be passed to handler for processing.
+        /// </remarks>
+        public TableOperations(AdoDataConnection connection, Action<Exception> exceptionHandler) : this(connection)
+        {
+            m_exceptionHandler = exceptionHandler;
         }
 
         #endregion
@@ -159,7 +174,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlExpression ?? "undefined"}, {KeyList(restriction?.Parameters)}: {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlExpression ?? "undefined"}, {KeyList(restriction?.Parameters)}: {ex.Message}", ex));
                 return Enumerable.Empty<T>();
             }
         }
@@ -199,7 +217,10 @@ namespace openSPM.Models
                 }
                 catch (Exception ex)
                 {
-                    MvcApplication.LogException(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlExpression ?? "undefined"}, {KeyList(restriction?.Parameters)}: {ex.Message}", ex));
+                    if ((object)m_exceptionHandler == null)
+                        throw;
+
+                    m_exceptionHandler(new InvalidOperationException($"Exception during record query for {typeof(T).Name} \"{sqlExpression ?? "undefined"}, {KeyList(restriction?.Parameters)}: {ex.Message}", ex));
                     return Enumerable.Empty<T>();
                 }
 
@@ -225,7 +246,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record count query for {typeof(T).Name} \"{s_countSql}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception during record count query for {typeof(T).Name} \"{s_countSql}\": {ex.Message}", ex));
                 return -1;
             }
         }
@@ -254,7 +278,10 @@ namespace openSPM.Models
                     }
                     catch (Exception ex)
                     {
-                        MvcApplication.LogException(new InvalidOperationException($"Exception during record load field assignment for \"{typeof(T).Name}.{property.Name} = {row[s_fieldNames[property.Name]]}\": {ex.Message}", ex));
+                        if ((object)m_exceptionHandler == null)
+                            throw;
+
+                        m_exceptionHandler(new InvalidOperationException($"Exception during record load field assignment for \"{typeof(T).Name}.{property.Name} = {row[s_fieldNames[property.Name]]}\": {ex.Message}", ex));
                     }
                 }
 
@@ -262,7 +289,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record load for {typeof(T).Name} \"{s_selectSql}, {KeyList(primaryKeys)}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception during record load for {typeof(T).Name} \"{s_selectSql}, {KeyList(primaryKeys)}\": {ex.Message}", ex));
                 return null;
             }
         }
@@ -295,7 +325,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record delete for {typeof(T).Name} \"{s_deleteSql}, {KeyList(primaryKeys)}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception during record delete for {typeof(T).Name} \"{s_deleteSql}, {KeyList(primaryKeys)}\": {ex.Message}", ex));
                 return 0;
             }
         }
@@ -318,7 +351,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record delete for {typeof(T).Name} \"{s_deleteWhereSql}, {KeyList(restriction.Parameters)}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception during record delete for {typeof(T).Name} \"{s_deleteWhereSql}, {KeyList(restriction.Parameters)}\": {ex.Message}", ex));
                 return 0;
             }
         }
@@ -351,7 +387,10 @@ namespace openSPM.Models
                 }
                 catch (Exception ex)
                 {
-                    MvcApplication.LogException(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{s_updateSql}, {KeyList(values)}\": {ex.Message}", ex));
+                    if ((object)m_exceptionHandler == null)
+                        throw;
+
+                    m_exceptionHandler(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{s_updateSql}, {KeyList(values)}\": {ex.Message}", ex));
                     return 0;
                 }
             }
@@ -373,7 +412,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{s_updateWhereSql}, {KeyList(values)}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception during record update for {typeof(T).Name} \"{s_updateWhereSql}, {KeyList(values)}\": {ex.Message}", ex));
                 return 0;
             }
         }
@@ -401,7 +443,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception during record insert for {typeof(T).Name} \"{s_addNewSql}, {KeyList(values)}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception during record insert for {typeof(T).Name} \"{s_addNewSql}, {KeyList(values)}\": {ex.Message}", ex));
                 return 0;
             }
         }
@@ -424,7 +469,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception loading primary key fields for {typeof(T).Name} \"{s_primaryKeyProperties.Select(property => property.Name).ToDelimitedString(", ")}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception loading primary key fields for {typeof(T).Name} \"{s_primaryKeyProperties.Select(property => property.Name).ToDelimitedString(", ")}\": {ex.Message}", ex));
                 return new object[0];
             }
         }
@@ -447,7 +495,10 @@ namespace openSPM.Models
             }
             catch (Exception ex)
             {
-                MvcApplication.LogException(new InvalidOperationException($"Exception loading primary key fields for {typeof(T).Name} \"{s_primaryKeyProperties.Select(property => property.Name).ToDelimitedString(", ")}\": {ex.Message}", ex));
+                if ((object)m_exceptionHandler == null)
+                    throw;
+
+                m_exceptionHandler(new InvalidOperationException($"Exception loading primary key fields for {typeof(T).Name} \"{s_primaryKeyProperties.Select(property => property.Name).ToDelimitedString(", ")}\": {ex.Message}", ex));
                 return new object[0];
             }
         }

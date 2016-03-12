@@ -47,6 +47,7 @@ namespace openSPM.Models
         // Fields
         private AdoDataConnection m_connection;
         private readonly Dictionary<Type, object> m_tableOperations;
+        private readonly Action<Exception> m_exceptionHandler;
         private readonly Dictionary<string, Tuple<string, string>> m_fieldValidationParameters;
         private readonly List<Tuple<string, string>> m_fieldValueInitializers; 
         private readonly List<string> m_definedDateFields; 
@@ -64,10 +65,12 @@ namespace openSPM.Models
         /// </summary>
         /// <param name="connection"><see cref="AdoDataConnection"/> to use; defaults to a new connection.</param>
         /// <param name="disposeConnection">Set to <c>true</c> to dispose the provided <paramref name="connection"/>.</param>
-        public DataContext(AdoDataConnection connection = null, bool disposeConnection = false)
+        /// <param name="exceptionHandler">Delegate to handle exceptions.</param>
+        public DataContext(AdoDataConnection connection = null, bool disposeConnection = false, Action<Exception> exceptionHandler = null)
         {
             m_connection = connection;
             m_tableOperations = new Dictionary<Type, object>();
+            m_exceptionHandler = exceptionHandler;
             m_fieldValidationParameters = new Dictionary<string, Tuple<string, string>>();
             m_fieldValueInitializers = new List<Tuple<string, string>>();
             m_definedDateFields = new List<string>();
@@ -79,9 +82,11 @@ namespace openSPM.Models
         /// Creates a new <see cref="DataContext"/> using the specified <paramref name="settingsCategory"/>.
         /// </summary>
         /// <param name="settingsCategory">Setting category that contains the connection settings.</param>
-        public DataContext(string settingsCategory)
+        /// <param name="exceptionHandler">Delegate to handle exceptions.</param>
+        public DataContext(string settingsCategory, Action<Exception> exceptionHandler = null)
         {
             m_tableOperations = new Dictionary<Type, object>();
+            m_exceptionHandler = exceptionHandler;
             m_fieldValidationParameters = new Dictionary<string, Tuple<string, string>>();
             m_settingsCategory = settingsCategory;
             m_disposeConnection = true;
@@ -159,7 +164,7 @@ namespace openSPM.Models
         /// <returns>Table operations for the specified modeled table <typeparamref name="T"/>.</returns>
         public TableOperations<T> Table<T>() where T : class, new()
         {
-            return m_tableOperations.GetOrAdd(typeof(T), type => new TableOperations<T>(Connection)) as TableOperations<T>;
+            return m_tableOperations.GetOrAdd(typeof(T), type => new TableOperations<T>(Connection, m_exceptionHandler)) as TableOperations<T>;
         }
 
         /// <summary>
@@ -387,7 +392,7 @@ namespace openSPM.Models
             tableOperations.TryGetFieldAttribute(fieldName, out stringLengthAttribute);
             tableOperations.TryGetFieldAttribute(fieldName, out regularExpressionAttribute);
 
-            if (!string.IsNullOrEmpty(regularExpressionAttribute?.Pattern))
+            if ((object)regularExpressionAttribute != null)
             {
                 string observableReference;
 
@@ -396,7 +401,7 @@ namespace openSPM.Models
                 else // "with: $root.connectionString"
                     observableReference = $"viewModel.{groupDataBinding.Substring(groupDataBinding.IndexOf('.') + 1)}";
 
-                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute?.ErrorMessage ?? "Invalid format.");
+                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage ?? "Invalid format.");
             }
 
             AddFieldValueInitializer<T>(fieldName);
@@ -424,7 +429,7 @@ namespace openSPM.Models
         /// <returns>Generated HTML for new date based input field based on specified parameters.</returns>
         public string AddDateField(string fieldName, bool required, int maxLength = 0, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
-            RazorView<CSharp> addDateFieldTemplate = new RazorView<CSharp>(AddDateFieldTemplate, MvcApplication.DefaultModel);
+            RazorView<CSharp> addDateFieldTemplate = new RazorView<CSharp>(AddDateFieldTemplate, m_exceptionHandler);
             DynamicViewBag viewBag = addDateFieldTemplate.ViewBag;
 
             if (string.IsNullOrEmpty(fieldID))
@@ -494,7 +499,7 @@ namespace openSPM.Models
             tableOperations.TryGetFieldAttribute(fieldName, out stringLengthAttribute);
             tableOperations.TryGetFieldAttribute(fieldName, out regularExpressionAttribute);
 
-            if (!string.IsNullOrEmpty(regularExpressionAttribute?.Pattern))
+            if ((object)regularExpressionAttribute != null)
             {
                 string observableReference;
 
@@ -503,7 +508,7 @@ namespace openSPM.Models
                 else // "with: $root.connectionString"
                     observableReference = $"viewModel.{groupDataBinding.Substring(groupDataBinding.IndexOf('.') + 1)}";
 
-                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute?.ErrorMessage ?? "Invalid format.");
+                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage ?? "Invalid format.");
             }
 
             AddFieldValueInitializer<T>(fieldName);
@@ -531,7 +536,7 @@ namespace openSPM.Models
         /// <returns>Generated HTML for new input field based on specified parameters.</returns>
         public string AddInputField(string fieldName, bool required, int maxLength = 0, string inputType = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
-            RazorView<CSharp> addInputFieldTemplate = new RazorView<CSharp>(AddInputFieldTemplate, MvcApplication.DefaultModel);
+            RazorView<CSharp> addInputFieldTemplate = new RazorView<CSharp>(AddInputFieldTemplate, m_exceptionHandler);
             DynamicViewBag viewBag = addInputFieldTemplate.ViewBag;
 
             if (string.IsNullOrEmpty(fieldID))
@@ -589,7 +594,7 @@ namespace openSPM.Models
             tableOperations.TryGetFieldAttribute(fieldName, out stringLengthAttribute);
             tableOperations.TryGetFieldAttribute(fieldName, out regularExpressionAttribute);
 
-            if (!string.IsNullOrEmpty(regularExpressionAttribute?.Pattern))
+            if ((object)regularExpressionAttribute != null)
             {
                 string observableReference;
 
@@ -598,7 +603,7 @@ namespace openSPM.Models
                 else // "with: $root.connectionString"
                     observableReference = $"viewModel.{groupDataBinding.Substring(groupDataBinding.IndexOf('.') + 1)}";
 
-                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute?.ErrorMessage ?? "Invalid format.");
+                AddFieldValidation(observableReference, regularExpressionAttribute.Pattern, regularExpressionAttribute.ErrorMessage ?? "Invalid format.");
             }
 
             AddFieldValueInitializer<T>(fieldName);
@@ -626,7 +631,7 @@ namespace openSPM.Models
         /// <returns>Generated HTML for new text area field based on specified parameters.</returns>
         public string AddTextAreaField(string fieldName, bool required, int maxLength = 0, int rows = 2, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string requiredDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
-            RazorView<CSharp> addTextAreaTemplate = new RazorView<CSharp>(AddTextAreaFieldTemplate, MvcApplication.DefaultModel);
+            RazorView<CSharp> addTextAreaTemplate = new RazorView<CSharp>(AddTextAreaFieldTemplate, m_exceptionHandler);
             DynamicViewBag viewBag = addTextAreaTemplate.ViewBag;
 
             if (string.IsNullOrEmpty(fieldID))
@@ -709,7 +714,7 @@ namespace openSPM.Models
         /// <returns>Generated HTML for new text field based on specified parameters.</returns>
         public string AddSelectField<TOption>(string fieldName, bool required, string optionValueFieldName, string optionLabelFieldName = null, string optionSortFieldName = null, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string optionDataBinding = null, string toolTip = null, bool initialFocus = false, RecordRestriction restriction = null) where TOption : class, new()
         {
-            RazorView<CSharp> addSelectFieldTemplate = new RazorView<CSharp>(AddSelectFieldTemplate, MvcApplication.DefaultModel);
+            RazorView<CSharp> addSelectFieldTemplate = new RazorView<CSharp>(AddSelectFieldTemplate, m_exceptionHandler);
             DynamicViewBag viewBag = addSelectFieldTemplate.ViewBag;
             TableOperations<TOption> optionTableOperations = Table<TOption>();
             Dictionary<string, string> options = new Dictionary<string, string>();
@@ -791,7 +796,7 @@ namespace openSPM.Models
         /// <returns>Generated HTML for new check box field based on specified parameters.</returns>
         public string AddCheckBoxField(string fieldName, string fieldLabel = null, string fieldID = null, string groupDataBinding = null, string labelDataBinding = null, string customDataBinding = null, string dependencyFieldName = null, string toolTip = null, bool initialFocus = false)
         {
-            RazorView<CSharp> addCheckBoxFieldTemplate = new RazorView<CSharp>(AddCheckBoxFieldTemplate, MvcApplication.DefaultModel);
+            RazorView<CSharp> addCheckBoxFieldTemplate = new RazorView<CSharp>(AddCheckBoxFieldTemplate, m_exceptionHandler);
             DynamicViewBag viewBag = addCheckBoxFieldTemplate.ViewBag;
 
             if (string.IsNullOrEmpty(fieldID))
@@ -851,19 +856,6 @@ namespace openSPM.Models
         public static string AddCheckBoxFieldTemplate => s_addCheckBoxFieldTemplate ?? (s_addCheckBoxFieldTemplate = $"{RazorView<CSharp>.TemplatePath}AddCheckBoxField.cshtml");
 
         // Static Methods
-        private static string ParamList(IReadOnlyList<object> parameters)
-        {
-            if (parameters == null)
-                return "";
-
-            StringBuilder delimitedString = new StringBuilder();
-
-            for (int i = 0; i < parameters.Count; i++)
-                delimitedString.AppendFormat(", {0}:{1}", i, parameters[i]);
-
-            return delimitedString.ToString();
-        }
-
         private static bool IsNumericType(Type type)
         {
             return

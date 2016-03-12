@@ -73,14 +73,16 @@ namespace openSPM.Models
         {
         }
 
-        public RazorView(string templateName)
+        public RazorView(string templateName, Action<Exception> exceptionHandler = null)
         {
-            this.TemplateName = templateName;
+            TemplateName = templateName;
+            ExceptionHandler = exceptionHandler;
         }
 
-        public RazorView(string templateName, AppModel model) : this(templateName)
+        public RazorView(string templateName, object model, Type modelType, Action<Exception> exceptionHandler = null) : this(templateName, exceptionHandler)
         {
-            this.Model = model;
+            Model = model;
+            ModelType = modelType;
         }
 
         #endregion
@@ -92,7 +94,17 @@ namespace openSPM.Models
             get; set;
         }
 
-        public AppModel Model
+        public object Model
+        {
+            get; set;
+        }
+
+        public Type ModelType
+        {
+            get; set;
+        }
+
+        public Action<Exception> ExceptionHandler
         {
             get; set;
         }
@@ -121,16 +133,16 @@ namespace openSPM.Models
 
         public string Execute()
         {
-            using (DataContext dataContext = new DataContext())
+            using (DataContext dataContext = new DataContext(exceptionHandler: ExceptionHandler))
             {
                 m_viewBag.AddValue("DataContext", dataContext);
-                return s_engineService.RunCompile(TemplateName, typeof(AppModel), Model, m_viewBag);
+                return s_engineService.RunCompile(TemplateName, ModelType, Model, m_viewBag);
             }
         }
 
         public string Execute(HttpRequestMessage requestMessage, dynamic postData)
         {
-            using (DataContext dataContext = new DataContext())
+            using (DataContext dataContext = new DataContext(exceptionHandler: ExceptionHandler))
             {
                 m_viewBag.AddValue("DataContext", dataContext);
                 m_viewBag.AddValue("Request", requestMessage);
@@ -145,7 +157,7 @@ namespace openSPM.Models
                     m_viewBag.AddValue("PostData", postData);
                 }
 
-                return s_engineService.RunCompile(TemplateName, typeof(AppModel), Model, m_viewBag);
+                return s_engineService.RunCompile(TemplateName, ModelType, Model, m_viewBag);
             }
         }
 

@@ -23,7 +23,7 @@
 @using System.Collections.Generic
 @using openSPM.Models
 @using RazorEngine.Templating
-@inherits TemplateBase<AppModel>
+@inherits TemplateBase
 @{
     string fieldName = ViewBag.FieldName;
     bool required = ViewBag.Required;
@@ -37,33 +37,41 @@
     string optionDataBinding = ViewBag.OptionDataBinding;
     Dictionary<string, string> options = ViewBag.Options;
 
-    if (!string.IsNullOrEmpty(dependencyFieldName)) {
-        if (string.IsNullOrEmpty(customDataBinding)) {
+    if (!string.IsNullOrEmpty(dependencyFieldName))
+    {
+        if (string.IsNullOrEmpty(customDataBinding))
+        {
             customDataBinding = string.Format("enable: {0}", dependencyFieldName);
         }
 
-        if (string.IsNullOrEmpty(labelDataBinding)) {
+        if (string.IsNullOrEmpty(labelDataBinding))
+        {
             labelDataBinding = string.Format("css: {{disabled: !{0}()}}", dependencyFieldName);
         }
     }
 
-    if (!string.IsNullOrEmpty(groupDataBinding)) {
+    if (!string.IsNullOrEmpty(groupDataBinding))
+    {
         groupDataBinding = string.Format(" data-bind=\"{0}\"", groupDataBinding);
     }
 
-    if (!string.IsNullOrEmpty(labelDataBinding)) {
+    if (!string.IsNullOrEmpty(labelDataBinding))
+    {
         labelDataBinding = string.Format(" data-bind=\"{0}\"", labelDataBinding);
     }
 
-    if (!string.IsNullOrEmpty(customDataBinding)) {
+    if (!string.IsNullOrEmpty(customDataBinding))
+    {
         customDataBinding = string.Format(", {0}", customDataBinding);
     }
 
-    if (!string.IsNullOrEmpty(toolTip)) {
+    if (!string.IsNullOrEmpty(toolTip))
+    {
         toolTip = string.Format(" data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"{0}\"", toolTip);
     }
 
-    if (!string.IsNullOrEmpty(optionDataBinding)) {
+    if (!string.IsNullOrEmpty(optionDataBinding))
+    {
         optionDataBinding = string.Format(" data-bind=\"{0}\"", optionDataBinding);
     }
 }

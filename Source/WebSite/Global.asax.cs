@@ -50,11 +50,6 @@ namespace openSPM
         public static readonly AppModel DefaultModel = new AppModel();
 
         /// <summary>
-        /// Gets the current user ID cache.
-        /// </summary>
-        public static readonly ConcurrentDictionary<string, Guid> UserIDCache = new ConcurrentDictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
         /// Gets the list of currently connected hub clients.
         /// </summary>
         public static IHubConnectionContext<dynamic> HubClients => s_clients.Value;
@@ -94,7 +89,7 @@ namespace openSPM
             global.PasswordRequirementsError = securityProvider["PasswordRequirementsError"].Value;
 
             // Load database driven model settings
-            using (DataContext dataContext = new DataContext())
+            using (DataContext dataContext = new DataContext(exceptionHandler: LogException))
             {
                 // Make sure default NodeID record exists
                 global.NodeID = Guid.Parse(systemSettings["NodeID"].Value);

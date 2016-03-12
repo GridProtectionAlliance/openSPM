@@ -112,11 +112,11 @@ namespace openSPM.Attributes
                 throw new SecurityException($"Access is denied for user '{userName}' defined: minimum required roles = {AllowedRoles.ToDelimitedString(", ")}.");
 
             // Make sure current user ID is cached
-            if (!MvcApplication.UserIDCache.ContainsKey(userName))
+            if (!AuthorizationCache.UserIDs.ContainsKey(userName))
             {
                 using (DataContext dataContext = new DataContext())
                 {
-                    MvcApplication.UserIDCache.TryAdd(userName, dataContext.Connection.ExecuteScalar<Guid?>("SELECT ID FROM UserAccount WHERE Name={0}", UserInfo.UserNameToSID(userName)) ?? Guid.Empty);
+                    AuthorizationCache.UserIDs.TryAdd(userName, dataContext.Connection.ExecuteScalar<Guid?>("SELECT ID FROM UserAccount WHERE Name={0}", UserInfo.UserNameToSID(userName)) ?? Guid.Empty);
                 }
             }
 

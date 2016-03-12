@@ -39,19 +39,44 @@ namespace openSPM.Attributes
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, Inherited = false)]
     public class AuthorizeControllerRoleAttribute : FilterAttribute, IAuthorizationFilter, IExceptionFilter
     {
+        #region [ Members ]
+
+        // Fields
+
+        /// <summary>
+        /// Gets allowed roles as a string array.
+        /// </summary>
         public readonly string[] AllowedRoles;
 
+        #endregion
+
+        #region [ Constructors ]
+
+        /// <summary>
+        /// Creates a new MVC based authorization attribute.
+        /// </summary>
         public AuthorizeControllerRoleAttribute()
         {
             AllowedRoles = new string[0];
         }
 
+        /// <summary>
+        /// Creates a new MVC based authorization attribute for specified roles.
+        /// </summary>
         public AuthorizeControllerRoleAttribute(string allowedRoles)
         {
             AllowedRoles = allowedRoles?.Split(',').Select(role => role.Trim()).
                 Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0];
         }
 
+        #endregion
+
+        #region [ Methods ]
+
+        /// <summary>
+        /// Called when authorization is required.
+        /// </summary>
+        /// <param name="filterContext">The filter context.</param>
         public void OnAuthorization(AuthorizationContext filterContext)
         {
             // Initialize the security principal from caller's windows identity if uninitialized.
@@ -72,13 +97,19 @@ namespace openSPM.Attributes
                 throw new SecurityException($"Access is denied for user '{userName}' defined: minimum required roles = {AllowedRoles.ToDelimitedString(", ")}.");
 
             // Make sure current user ID is cached
-            if (!MvcApplication.UserIDCache.ContainsKey(userName)) {
-                using (DataContext dataContext = new DataContext()) {
-                    MvcApplication.UserIDCache.TryAdd(userName, dataContext.Connection.ExecuteScalar<Guid?>("SELECT ID FROM UserAccount WHERE Name={0}", UserInfo.UserNameToSID(userName)) ?? Guid.Empty);
+            if (!AuthorizationCache.UserIDs.ContainsKey(userName))
+            {
+                using (DataContext dataContext = new DataContext())
+                {
+                    AuthorizationCache.UserIDs.TryAdd(userName, dataContext.Connection.ExecuteScalar<Guid?>("SELECT ID FROM UserAccount WHERE Name={0}", UserInfo.UserNameToSID(userName)) ?? Guid.Empty);
                 }
             }
         }
 
+        /// <summary>
+        /// Called when an exception occurs.
+        /// </summary>
+        /// <param name="filterContext">The filter context.</param>
         public void OnException(ExceptionContext filterContext)
         {
             if (filterContext.Exception is SecurityException)
@@ -94,5 +125,7 @@ namespace openSPM.Attributes
                 filterContext.ExceptionHandled = true;
             }
         }
+
+        #endregion
     }
 }

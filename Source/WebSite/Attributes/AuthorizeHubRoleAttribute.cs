@@ -54,6 +54,7 @@ namespace openSPM.Attributes
         /// </summary>
         public AuthorizeHubRoleAttribute()
         {
+            SettingsCategory = "securityProvider";
         }
 
         /// <summary>
@@ -62,11 +63,20 @@ namespace openSPM.Attributes
         public AuthorizeHubRoleAttribute(string allowedRoles)
         {
             Roles = allowedRoles;
+            SettingsCategory = "securityProvider";
         }
 
         #endregion
 
         #region [ Properties ]
+
+        /// <summary>
+        /// Gets or sets settings category to use for loading data context for security info.
+        /// </summary>
+        public string SettingsCategory
+        {
+            get; set;
+        }
 
         /// <summary>
         /// Gets the allowed <see cref="AuthorizeAttribute.Roles"/> as a string array.
@@ -114,7 +124,7 @@ namespace openSPM.Attributes
             // Make sure current user ID is cached
             if (!AuthorizationCache.UserIDs.ContainsKey(userName))
             {
-                using (DataContext dataContext = new DataContext())
+                using (DataContext dataContext = new DataContext(SettingsCategory))
                 {
                     AuthorizationCache.UserIDs.TryAdd(userName, dataContext.Connection.ExecuteScalar<Guid?>("SELECT ID FROM UserAccount WHERE Name={0}", UserInfo.UserNameToSID(userName)) ?? Guid.Empty);
                 }

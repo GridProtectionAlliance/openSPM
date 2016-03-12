@@ -58,6 +58,7 @@ namespace openSPM.Attributes
         public AuthorizeControllerRoleAttribute()
         {
             AllowedRoles = new string[0];
+            SettingsCategory = "securityProvider";
         }
 
         /// <summary>
@@ -67,6 +68,20 @@ namespace openSPM.Attributes
         {
             AllowedRoles = allowedRoles?.Split(',').Select(role => role.Trim()).
                 Where(role => !string.IsNullOrEmpty(role)).ToArray() ?? new string[0];
+
+            SettingsCategory = "securityProvider";
+        }
+
+        #endregion
+
+        #region [ Properties ]
+
+        /// <summary>
+        /// Gets or sets settings category to use for loading data context for security info.
+        /// </summary>
+        public string SettingsCategory
+        {
+            get; set;
         }
 
         #endregion
@@ -99,7 +114,7 @@ namespace openSPM.Attributes
             // Make sure current user ID is cached
             if (!AuthorizationCache.UserIDs.ContainsKey(userName))
             {
-                using (DataContext dataContext = new DataContext())
+                using (DataContext dataContext = new DataContext(SettingsCategory))
                 {
                     AuthorizationCache.UserIDs.TryAdd(userName, dataContext.Connection.ExecuteScalar<Guid?>("SELECT ID FROM UserAccount WHERE Name={0}", UserInfo.UserNameToSID(userName)) ?? Guid.Empty);
                 }

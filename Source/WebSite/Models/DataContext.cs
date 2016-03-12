@@ -88,6 +88,8 @@ namespace openSPM.Models
             m_tableOperations = new Dictionary<Type, object>();
             m_exceptionHandler = exceptionHandler;
             m_fieldValidationParameters = new Dictionary<string, Tuple<string, string>>();
+            m_fieldValueInitializers = new List<Tuple<string, string>>();
+            m_definedDateFields = new List<string>();
             m_settingsCategory = settingsCategory;
             m_disposeConnection = true;
         }

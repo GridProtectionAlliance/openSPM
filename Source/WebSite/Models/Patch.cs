@@ -56,7 +56,7 @@ namespace openSPM.Models
         [Required]
         [Label("SPM Patch Identifier")]
         [StringLength(64)]
-        public string PatchReference
+        public string PatchMnemonic
         {
             get; set;
         }
@@ -64,7 +64,7 @@ namespace openSPM.Models
         [Required]
         [Label("Vendor Patch Name/Identifier")]
         [StringLength(64)]
-        public string VendorReference
+        public string VendorPatchName
         {
             get; set;
         }
@@ -79,13 +79,6 @@ namespace openSPM.Models
 
         [Label("Vendor Stated Impact")]
         public int ImpactKey
-        {
-            get; set;
-        }
-
-        [Required]
-        [Label("Assigned to SME Group")]
-        public int SMEGroupID
         {
             get; set;
         }

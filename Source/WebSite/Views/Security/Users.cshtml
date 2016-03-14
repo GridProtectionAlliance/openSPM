@@ -176,7 +176,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<UserAccount>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<UserAccount>(ViewBag))
         var AccountState = {
             Invalid: 0,
             Valid: 1,

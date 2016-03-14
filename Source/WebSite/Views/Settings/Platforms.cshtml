@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web.Model
 @using openSPM.Models
 @model AppModel
 @{
@@ -56,6 +57,6 @@
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
-        @Html.Raw(dataContext.RenderViewModelConfiguration<Platform>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<Platform>(ViewBag))
     </script>
 }

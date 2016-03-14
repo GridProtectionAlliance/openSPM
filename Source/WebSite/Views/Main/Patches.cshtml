@@ -22,6 +22,7 @@
 //*****************************************************************************************************@
 @using openSPM.Models
 @using GSF
+@using GSF.Web.Model
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
@@ -108,7 +109,7 @@
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
-        @Html.Raw(dataContext.RenderViewModelConfiguration<Patch>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
     </script>
 }

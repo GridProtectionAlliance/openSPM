@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using GSF
+@using GSF.Web.Model
 @using openSPM.Models
 @model AppModel
 @{
@@ -89,7 +90,7 @@
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
-        @Html.Raw(dataContext.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
+        @Html.Raw(Model.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
         var currentVendorID = 0;
 
         function addNewDiscoveryResult(record) {

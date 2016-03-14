@@ -20,6 +20,9 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Data.Model
+@using GSF.Security.Model
+@using GSF.Web.Model
 @using openSPM.Models
 @model AppModel
 @section StyleSheets{
@@ -151,7 +154,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<SecurityGroup>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<SecurityGroup>(ViewBag))
         var AccountState = {
             Invalid: 0,
             Valid: 1,

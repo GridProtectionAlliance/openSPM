@@ -21,6 +21,8 @@
 //
 //*****************************************************************************************************@
 @using System.Collections.Specialized
+@using GSF.Data.Model
+@using GSF.Web.Model
 @using openSPM.Models
 @using Page = openSPM.Models.Page
 @model AppModel
@@ -72,7 +74,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<MenuItem>(ViewBag, "SortOrder", parentID))
+        @Html.Raw(Model.RenderViewModelConfiguration<MenuItem>(ViewBag, "SortOrder", parentID))
         const defaultImagePath = "@Url.Content("~/Images/Menu/")";
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {

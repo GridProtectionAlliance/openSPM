@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using System.Collections.Specialized
+@using GSF.Web.Model
 @using openSPM.Models
 @model AppModel
 @{
@@ -75,7 +76,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<ValueList>(ViewBag, "SortOrder", parentID))
+        @Html.Raw(Model.RenderViewModelConfiguration<ValueList>(ViewBag, "SortOrder", parentID))
 
         $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
             // Initialize selected value list record

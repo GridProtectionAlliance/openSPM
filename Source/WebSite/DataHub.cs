@@ -29,11 +29,14 @@ using System.Threading.Tasks;
 using System.Web;
 using GSF;
 using GSF.Collections;
+using GSF.Data.Model;
 using GSF.Identity;
 using GSF.Reflection;
 using GSF.Security;
+using GSF.Security.Model;
+using GSF.Web.Model;
+using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
-using openSPM.Attributes;
 using openSPM.Models;
 
 namespace openSPM
@@ -418,7 +421,7 @@ namespace openSPM
             if (!record.UseADAuthentication && !string.IsNullOrWhiteSpace(record.Password))
                 record.Password = SecurityProviderUtility.EncryptPassword(record.Password);
 
-            record.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
+            record.DefaultNodeID = SecurityHub.DefaultNodeID;
             record.CreatedBy = UserInfo.CurrentUserID;
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedBy = record.CreatedBy;
@@ -433,7 +436,7 @@ namespace openSPM
             if (!record.UseADAuthentication && !string.IsNullOrWhiteSpace(record.Password))
                 record.Password = SecurityProviderUtility.EncryptPassword(record.Password);
 
-            record.DefaultNodeID = MvcApplication.DefaultModel.Global.NodeID;
+            record.DefaultNodeID = SecurityHub.DefaultNodeID;
             record.UpdatedBy = UserInfo.CurrentUserID;
             record.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<UserAccount>().UpdateRecord(record);

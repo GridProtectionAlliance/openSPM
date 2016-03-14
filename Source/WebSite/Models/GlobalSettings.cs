@@ -28,12 +28,6 @@ namespace openSPM.Models
 {
     public class GlobalSettings
     {
-        public Guid NodeID
-        {
-            get;
-            set;
-        }
-
         public string CompanyName
         {
             get;

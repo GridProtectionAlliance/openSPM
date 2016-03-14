@@ -22,7 +22,8 @@
 //******************************************************************************************************
 
 using System.Web.Mvc;
-using openSPM.Attributes;
+using GSF.Web.Model;
+using GSF.Web.Security;
 using openSPM.Models;
 
 namespace openSPM.Controllers
@@ -91,13 +92,13 @@ namespace openSPM.Controllers
 
         public ActionResult Patches()
         {
-            m_appModel.ConfigureView<Patch>(m_dataContext, Url.RequestContext, "Patches", ViewBag);
+            m_appModel.ConfigureView<Patch>(Url.RequestContext, "Patches", ViewBag);
             return View();
         }
 
         public ActionResult DiscoverPatches()
         {
-            m_appModel.ConfigureView<LatestVendorDiscoveryResult>(m_dataContext, Url.RequestContext, "Check", ViewBag);
+            m_appModel.ConfigureView<LatestVendorDiscoveryResult>(Url.RequestContext, "Check", ViewBag);
             return View();
         }
 

@@ -22,7 +22,6 @@
 //******************************************************************************************************
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -36,6 +35,8 @@ using GSF.Configuration;
 using GSF.Data;
 using GSF.Identity;
 using GSF.Security;
+using GSF.Web.Model;
+using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Models;
@@ -56,8 +57,14 @@ namespace openSPM
 
         private static readonly Lazy<IHubConnectionContext<dynamic>> s_clients = new Lazy<IHubConnectionContext<dynamic>>(() => GlobalHost.ConnectionManager.GetHubContext<DataHub>().Clients);
 
+        public static RecordOperationsCache DataHubCache = new RecordOperationsCache(typeof(DataHub));
+
         protected void Application_Start()
         {
+            // TODO: Verify this is necessary
+            SecurityHub hubInstance = new SecurityHub();
+
+
             AreaRegistration.RegisterAllAreas();
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
@@ -91,10 +98,6 @@ namespace openSPM
             // Load database driven model settings
             using (DataContext dataContext = new DataContext(exceptionHandler: LogException))
             {
-                // Make sure default NodeID record exists
-                global.NodeID = Guid.Parse(systemSettings["NodeID"].Value);
-                ValidateDefaultNode(dataContext.Connection, global.NodeID);
-
                 // Validate default security roles exist
                 ValidateSecurityRoles(dataContext.Connection, systemSettings["DefaultSecurityRoles"].Value);
 
@@ -175,28 +178,6 @@ namespace openSPM
                 }
 #endif
             }, DataHub.CurrentConnectionID);
-        }
-
-        /// <summary>
-        /// Data operation to validate and ensure there is a node in the database.
-        /// </summary>
-        /// <param name="database">Data connection to use for database operations.</param>
-        /// <param name="nodeID">Node ID to validate.</param>        
-        private static void ValidateDefaultNode(AdoDataConnection database, Guid nodeID)
-        {
-            // Queries
-            const string NodeCountFormat = "SELECT COUNT(*) FROM Node";
-            const string NodeInsertFormat = "INSERT INTO Node(Name, Description, Enabled) VALUES('Default', 'Default node', 1)";
-            const string NodeUpdateFormat = "UPDATE Node SET ID = {0}";
-
-            // Determine whether the node exists in the database and create it if it doesn't.
-            int nodeCount = database.ExecuteScalar<int?>(NodeCountFormat) ?? 0;
-
-            if (nodeCount == 0)
-            {
-                database.ExecuteNonQuery(NodeInsertFormat);
-                database.ExecuteNonQuery(NodeUpdateFormat, database.Guid(nodeID));
-            }
         }
 
         /// <summary>

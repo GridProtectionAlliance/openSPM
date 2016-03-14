@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web.Model
 @using openSPM.Models
 @model AppModel
 @{
@@ -72,7 +73,7 @@
 </div>
 @section Scripts {
     <script>
-        @Html.Raw(Model.DataContext.RenderViewModelConfiguration<Menu>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<Menu>(ViewBag))
 
         function getMenuItemCount(pageID, element) {
             if (viewModel.dataHubIsConnected()) {

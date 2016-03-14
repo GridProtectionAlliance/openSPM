@@ -22,7 +22,8 @@
 //******************************************************************************************************
 
 using System.Web.Mvc;
-using openSPM.Attributes;
+using GSF.Web.Model;
+using GSF.Web.Security;
 using openSPM.Models;
 
 namespace openSPM.Controllers
@@ -91,31 +92,31 @@ namespace openSPM.Controllers
 
         public ActionResult Pages()
         {
-            m_appModel.ConfigureView<Page>(m_dataContext, Url.RequestContext, "System.Pages", ViewBag);
+            m_appModel.ConfigureView<Page>(Url.RequestContext, "System.Pages", ViewBag);
             return View();
         }
 
         public ActionResult Menus()
         {
-            m_appModel.ConfigureView<Menu>(m_dataContext, Url.RequestContext, "System.Menus", ViewBag);
+            m_appModel.ConfigureView<Menu>(Url.RequestContext, "System.Menus", ViewBag);
             return View();
         }
 
         public ActionResult MenuItems()
         {
-            m_appModel.ConfigureView<MenuItem>(m_dataContext, Url.RequestContext, "System.MenuItems", ViewBag);
+            m_appModel.ConfigureView<MenuItem>(Url.RequestContext, "System.MenuItems", ViewBag);
             return View();
         }
 
         public ActionResult ValueListGroups()
         {
-            m_appModel.ConfigureView<ValueListGroup>(m_dataContext, Url.RequestContext, "System.ValueListGroups", ViewBag);
+            m_appModel.ConfigureView<ValueListGroup>(Url.RequestContext, "System.ValueListGroups", ViewBag);
             return View();
         }
 
         public ActionResult ValueListItems()
         {
-            m_appModel.ConfigureView<ValueList>(m_dataContext, Url.RequestContext, "System.ValueListItems", ViewBag);
+            m_appModel.ConfigureView<ValueList>(Url.RequestContext, "System.ValueListItems", ViewBag);
             return View();
         }
 

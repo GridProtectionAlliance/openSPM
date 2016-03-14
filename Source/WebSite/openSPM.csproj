@@ -182,12 +182,6 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
-    <Compile Include="Attributes\AuthorizationCache.cs" />
-    <Compile Include="Attributes\AuthorizeHubRoleAttribute.cs" />
-    <Compile Include="Attributes\AuthorizeControllerRoleAttribute.cs" />
-    <Compile Include="Attributes\IsDeletedFlagAttribute.cs" />
-    <Compile Include="Attributes\PrimaryLabelAttribute.cs" />
-    <Compile Include="Attributes\RecordOperationAttribute.cs" />
     <Compile Include="Controllers\ErrorController.cs" />
     <Compile Include="Controllers\MainController.cs" />
     <Compile Include="Controllers\SystemController.cs" />
@@ -197,34 +191,22 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\AccessLog.cs" />
     <Compile Include="Models\ActionItem.cs" />
     <Compile Include="Models\ActionStatus.cs" />
-    <Compile Include="Models\ApplicationRole.cs" />
-    <Compile Include="Models\ApplicationRoleSecurityGroup.cs" />
-    <Compile Include="Models\ApplicationRoleUserAccount.cs" />
     <Compile Include="Models\AppModel.cs" />
     <Compile Include="Models\Assessment.cs" />
     <Compile Include="Models\BusinessUnit.cs" />
-    <Compile Include="Models\DataContext.cs" />
-    <Compile Include="Attributes\InitialValueAttribute.cs" />
     <Compile Include="Models\DiscoveryResult.cs" />
     <Compile Include="Models\Document.cs" />
     <Compile Include="Models\GlobalSettings.cs" />
-    <Compile Include="Attributes\FieldNameAttribute.cs" />
     <Compile Include="Models\Install.cs" />
     <Compile Include="Models\InstallDocLink.cs" />
     <Compile Include="Models\MenuItem.cs" />
-    <Compile Include="Models\ModelExtensions.cs" />
-    <Compile Include="Models\Node.cs" />
     <Compile Include="Models\NoticeLog.cs" />
     <Compile Include="Models\NoticeUserLink.cs" />
     <Compile Include="Models\Page.cs" />
     <Compile Include="Models\Menu.cs" />
-    <Compile Include="Models\PagedList.cs" />
     <Compile Include="Models\Patch.cs" />
-    <Compile Include="Attributes\PrimaryKeyAttribute.cs" />
-    <Compile Include="Attributes\LabelAttribute.cs" />
     <Compile Include="Models\PatchDocLink.cs" />
     <Compile Include="Models\PatchStatus.cs" />
     <Compile Include="Models\Plan.cs" />
@@ -232,11 +214,7 @@
     <Compile Include="Models\PlanDocLink.cs" />
     <Compile Include="Models\Platform.cs" />
     <Compile Include="Models\PlatformBUGLink.cs" />
-    <Compile Include="Models\RazorView.cs" />
-    <Compile Include="Models\SecurityGroup.cs" />
     <Compile Include="Models\Settings.cs" />
-    <Compile Include="Models\TableOperations.cs" />
-    <Compile Include="Models\UserAccount.cs" />
     <Compile Include="Models\UserBUGLink.cs" />
     <Compile Include="Models\ValueList.cs" />
     <Compile Include="Models\ValueListGroup.cs" />
@@ -244,7 +222,6 @@
     <Compile Include="Models\LatestVendorDiscoveryResult.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
-    <Compile Include="SecurityHub.cs" />
     <Compile Include="WebExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -411,16 +388,11 @@
     <Content Include="Views\Main\Contact.cshtml" />
     <Content Include="Views\Main\Home.cshtml" />
     <Content Include="Scripts\knockout.validation.min.js.map" />
-    <Content Include="Views\Shared\Templates\AddInputField.cshtml" />
-    <Content Include="Views\Shared\Templates\AddSelectField.cshtml" />
     <Content Include="Views\Shared\PagedViewModel.cshtml" />
     <Content Include="Views\System\Pages.cshtml" />
     <Content Include="Views\System\Home.cshtml" />
     <Content Include="Views\System\MenuItems.cshtml" />
-    <Content Include="Views\Shared\Templates\AddTextAreaField.cshtml" />
-    <Content Include="Views\Shared\Templates\AddCheckBoxField.cshtml" />
     <Content Include="Views\Main\Patches.cshtml" />
-    <Content Include="Views\Shared\Templates\AddDateField.cshtml" />
     <Content Include="Views\System\ValueListGroups.cshtml" />
     <Content Include="Views\System\ValueListItems.cshtml" />
     <Content Include="Views\Shared\SecurityError.cshtml" />

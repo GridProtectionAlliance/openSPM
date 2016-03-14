@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web.Model
 @using openSPM.Models
 @model AppModel
 @{
@@ -61,7 +62,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(dataContext.RenderViewModelConfiguration<BusinessUnit>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<BusinessUnit>(ViewBag))
         // Resolve option label SID to an account name
         function lookupOptionLabel(element) {
             if (viewModel.dataHubIsConnected()) {

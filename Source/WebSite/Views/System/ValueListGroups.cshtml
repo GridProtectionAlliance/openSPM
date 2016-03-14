@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web.Model
 @using openSPM.Models
 @model AppModel
 @{
@@ -71,7 +72,7 @@
 </div>
 @section Scripts {
     <script>
-        @Html.Raw(dataContext.RenderViewModelConfiguration<ValueListGroup>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<ValueListGroup>(ViewBag))
 
         function getValueListItemCount(groupID, element) {
             if (viewModel.dataHubIsConnected()) {

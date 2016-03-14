@@ -22,7 +22,8 @@
 //******************************************************************************************************
 
 using System.Web.Mvc;
-using openSPM.Attributes;
+using GSF.Web.Model;
+using GSF.Web.Security;
 using openSPM.Models;
 
 namespace openSPM.Controllers
@@ -91,19 +92,19 @@ namespace openSPM.Controllers
 
         public ActionResult Vendors()
         {
-            m_appModel.ConfigureView<Vendor>(m_dataContext, Url.RequestContext, "Settings.Vendors", ViewBag);
+            m_appModel.ConfigureView<Vendor>(Url.RequestContext, "Settings.Vendors", ViewBag);
             return View();
         }
 
         public ActionResult Platforms()
         {
-            m_appModel.ConfigureView<Platform>(m_dataContext, Url.RequestContext, "Settings.Platforms", ViewBag);
+            m_appModel.ConfigureView<Platform>(Url.RequestContext, "Settings.Platforms", ViewBag);
             return View();
         }
 
         public ActionResult BusinessUnits()
         {
-            m_appModel.ConfigureView<BusinessUnit>(m_dataContext, Url.RequestContext, "Settings.BusinessUnits", ViewBag);
+            m_appModel.ConfigureView<BusinessUnit>(Url.RequestContext, "Settings.BusinessUnits", ViewBag);
             return View();
         }
 

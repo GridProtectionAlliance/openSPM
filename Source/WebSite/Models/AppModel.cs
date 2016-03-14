@@ -27,9 +27,10 @@ using System.Linq;
 using System.Text;
 using System.Web.Routing;
 using GSF;
+using GSF.Data.Model;
 using GSF.Security;
-using openSPM.Attributes;
-using RazorEngine.Templating;
+using GSF.Web;
+using GSF.Web.Model;
 using Path = System.Web.VirtualPathUtility;
 
 namespace openSPM.Models
@@ -255,26 +256,37 @@ namespace openSPM.Models
             return groups.Any(UserIsInGroup);
         }
 
+        /// <summary>
+        /// Renders client-side configuration script for paged view model.
+        /// </summary>
+        /// <typeparam name="T">Modeled database table (or view).</typeparam>
+        /// <param name="viewBag">ViewBag for the view.</param>
+        /// <param name="defaultSortField">Default sort field name, defaults to first primary key field. Prefix field name with a minus, i.e., '-', to default to descending sort.</param>
+        /// <param name="parentKeys">Primary keys values of the parent record to load.</param>
+        /// <returns>Rendered paged view model configuration script.</returns>
+        public string RenderViewModelConfiguration<T>(object viewBag, string defaultSortField = null, params object[] parentKeys) where T : class, new()
+        {
+            return DataContext.RenderViewModelConfiguration<T>(MvcApplication.DataHubCache, viewBag, defaultSortField, parentKeys);
+        }
 
         /// <summary>
         /// Looks up page info based on defined page name and establishes user roles for page based on specified modeled table <typeparamref name="T"/>.
         /// </summary>
-        /// <param name="dataContext">DataContext for view.</param>
         /// <param name="requestContext">Url.RequestContext for view.</param>
         /// <param name="pageName">Page name as defined in Page table.</param>
         /// <param name="viewBag">Current view bag.</param>
         /// <remarks>
         /// This is normally called from controller before returning view action result.
         /// </remarks>
-        public void ConfigureView<T>(DataContext dataContext, RequestContext requestContext, string pageName, dynamic viewBag) where T : class, new()
+        public void ConfigureView<T>(RequestContext requestContext, string pageName, dynamic viewBag) where T : class, new()
         {
             // Attempt to establish roles based on hub defined security for specified modeled table
-            dataContext.EstablishUserRolesForPage<T>(viewBag);
+            DataContext.EstablishUserRolesForPage<T>(MvcApplication.DataHubCache, viewBag);
 
             ConfigureView(requestContext, pageName, viewBag);
 
             // See if modeled table has a flag field that represents a deleted row
-            string isDeletedField = dataContext.GetIsDeletedFlag<T>();
+            string isDeletedField = DataContext.GetIsDeletedFlag<T>();
 
             if (!string.IsNullOrWhiteSpace(isDeletedField))
             {

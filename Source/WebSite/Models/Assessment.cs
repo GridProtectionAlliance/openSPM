@@ -22,7 +22,7 @@
 //******************************************************************************************************
 
 using System;
-using openSPM.Attributes;
+using GSF.Data.Model;
 
 namespace openSPM.Models
 {

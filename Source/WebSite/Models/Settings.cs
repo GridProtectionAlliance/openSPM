@@ -22,7 +22,7 @@
 //******************************************************************************************************
 
 using System.ComponentModel.DataAnnotations;
-using openSPM.Attributes;
+using GSF.Data.Model;
 
 namespace openSPM.Models
 {

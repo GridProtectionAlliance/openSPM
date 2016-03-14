@@ -22,7 +22,9 @@
 //******************************************************************************************************
 
 using System.Web.Mvc;
-using openSPM.Attributes;
+using GSF.Security.Model;
+using GSF.Web.Model;
+using GSF.Web.Security;
 using openSPM.Models;
 
 namespace openSPM.Controllers
@@ -85,13 +87,13 @@ namespace openSPM.Controllers
 
         public ActionResult Users()
         {
-            m_appModel.ConfigureView<UserAccount>(m_dataContext, Url.RequestContext, "Security.Users", ViewBag);
+            m_appModel.ConfigureView<UserAccount>(Url.RequestContext, "Security.Users", ViewBag);
             return View();
         }
 
         public ActionResult Groups()
         {
-            m_appModel.ConfigureView<UserAccount>(m_dataContext, Url.RequestContext, "Security.Groups", ViewBag);
+            m_appModel.ConfigureView<UserAccount>(Url.RequestContext, "Security.Groups", ViewBag);
             return View();
         }
 

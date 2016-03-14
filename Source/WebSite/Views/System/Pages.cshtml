@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web.Model
 @using openSPM.Models
 @using Page = openSPM.Models.Page
 @model AppModel
@@ -71,7 +72,7 @@
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
-        @Html.Raw(dataContext.RenderViewModelConfiguration<Page>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<Page>(ViewBag))
         function getAbsolutePath(record) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.getAbsolutePath(notNull(record.PageLocation)).done(function (absolutePath) {

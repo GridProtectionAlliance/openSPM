@@ -16,8 +16,8 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  01/22/2016 - J. Ritchie Carroll
-//       Generated original version of source code.
+//  03/14/2016 - F. Russell Robertson
+//      Documented Process following discussions with TVA
 //
 //*****************************************************************************************************@
 @using openSPM.Models
@@ -44,21 +44,18 @@
                         The <b>Patch Source</b> (or Vendor) List.  This is the list that the Patch Input Coordinator (PIC) must check for applicable security patches.
                     </li>
                     <li>
-                        The <b>Target Platform</b> List.  This list exists to provide a convenient way for the PIC to assign a Business Unit (BU) a candidate security
-                         patch for assessment.  As new patches are added to the system, they must be assigned to a Target Platform.
+                        The <b>Target Platform</b> List.   As new patches are added to the system, they are assigned a Target Platform.  Subject Matter Experts (SMEs)
+                        are authtorized to perform patch assessments for their business unit for one or more target platforms.  
+                         
                     </li>
                     <li>
-                        The <b>Business Unit Group</b> (BU Group) List.  Defines the BU Coordinator (BUC) that is accountable for one or more Platforms within openSPM. 
-                        While there is typically just one BU Group per business unit, Owners can create as many groups as are needed to manage BUC / SME 
-                        accountability relationships.  In addition, the BU Group menu item allows management of 2 additional lists:
-                        <ul>
-                            <li>
-                                The list of applicable platforms for each BU Group.
-                            </li>
-                            <li>
-                                The list of Subject Matter Experts (SMEs) for each BU Group
-                            </li>
-                        </ul>
+                        The <b>Business Unit</b> (BU) List.  Business units represent the logical grouping of SMEs into an approval authority or Business Unit Coordinator.
+                        Within the BU table, an Alternate Business Unit approval authority can be designated.
+                        Owners can create as many business units as necessary to manage  BUC to SME accountability relationships. SME's can belong to multiple BUs -- but it 
+                        is not good practice to do so.
+                    </li>
+                    <li>
+                        The <b>User's BU</b> List. Each SME must be associated with a BU in order to have permission to enter this BU's patch assessment.
                     </li>
                 </ol>
             </td>
@@ -83,7 +80,7 @@
                     <li>Vendor patch tracking ID</li>
                     <li>Patch title (80 characters max)</li>
                     <li>Vendor patch release date (this is used as the default start date for the 35-day period allowed for assessment)</li>
-                    <li>Target Platform(s) (from drop-down menu) that directs the patch to one or more BUs for assessment.</li>
+                    <li>Target Platform(s) (from drop-down menu) that directs the patch to one or more SMEs for assessment for their BU.</li>
                 </ul>
                 <p>As much information as is available from the vendor should be added to define the patch.  Fields are provided in the openSPM patch
                     entry from for this additional information.  Documents, such as PDFs, can be attached if they available from the vendor.</p>
@@ -95,8 +92,8 @@
         <tr valign="middle">
             <td v><img src="~/Images/ProcessSteps/Small/4start.png" /></td>
             <td>
-                <p>openSPM sessions), the PIC notifies the affected BUCs (as well as the SMEs within that BU) that they have CCA with platforms targeted
-                by this patch – by clicking on the “start” button from the “Active Patches” menu selection.</p>
+                <p>The PIC notifies the affected SMEs that they have CCA with platforms targeted
+                by this patch by clicking on the “start” button from the “Active Patches” menu selection.</p>
                <p>The PIC is asked to confirm the start date for compliance timers as part of this process.  The PIC will work with the Owner to assign
                  an appropriate start date if using the compliance default start of the “vendor release date” does not allow sufficient time for patch
                  assessment prior to expiration of the 35-day assessment period.  This compliance defect in “patch discovery” will be logged by openSPM,
@@ -109,24 +106,23 @@
         <tr>
             <td ><img src="~/Images/ProcessSteps/Small/5assess.png" /></td>
             <td>
-                <p>Starting the 35-day timer for patch assessment (as measured from the day that the patch was released by the vendor), requires the one,
-                or typically more, BUCs with CCA platforms addressed by this patch to “assess” the patch for applicability.  To facilitate communication,
-                all SMEs within the impacted Business Units are copied on the notification that a new security patch is available.  The BUC (or if 
-                configured the BUC alternate) must enter the results of the assessment for their business unit in openSPM.  The minimum required information 
-                that must be entered is one of the four “Assessment Results” that drop down:</p>
+                <p>Starting the 35-day timer for patch assessment (as typcially measured from the day that the patch was released by the vendor), requires the one SME within
+                the BU “assess” the patch for applicability.  If multiple SMEs within the BU are associated with the target platform, then any have permission to provide
+                the assessment of the patch for the BU.  Only one assessment is allowed per BU.</p>
+                
+                <p> The minimum required information that must be entered is one of the four “Assessment Results” that drop down:</p>
                 <ul>
                     <li>Install the patch</li>
-                    <li>Develop a mitigation plan</li>
-                    <li>Install the patch & Develop a mitigate plan</li>
-                    <li>The patch is NOT an applicable security patch for this business unit</li>
+                    <li>Develop a mitigation plan (which includes patching some, but not all, devices)</li>
+                    <li>Declaring that patch is NOT an applicable security patch for this BU</li>
                 </ul>
-                <p>If the assessment results in decision to develop a mitigation plan, the BUC must enter (and/or attach documents) that describes the basis
-                for mitigation in lieu of patching.</p>
-                <p>If the assessment results in a decision to apply the patch, the BUC is not required to enter a basis for this decision – but may do so on
+                <p>If the assessment results in decision to develop a mitigation plan, the SME must enter (and/or attach documents) that describes the basis
+                for mitigation in lieu of patching by clicking on the "mitigation plan" menu item (See Step 7 below.)</p>
+                <p>If the assessment results in a decision to apply the patch, the SME is not required to enter a basis for this decision – but may do so on
                  a case-by-case basis.</p>
                 <p>
-                    Selecting “Patch” and/or “Mitigation Plan” starts a new 35-day timer for this business unit for the action of (1) installing the patch
-                    and/or (2) developing a mitigation plan.
+                    Finishing the assessment starts a new 35-day timer for this business unit for the action of (1) installing the patch
+                    or (2) developing a mitigation plan.
                 </p>
                 <p>Notifications will be sent to the BUC and SMEs in this Business Unit (as well as the Owner) as the 35-day compliance date approaches.</p>
 
@@ -137,7 +133,7 @@
             <td ><img src="~/Images/ProcessSteps/Small/6install.png" /></td>
             <td>
                 <p>
-                    Once the patch has been installed on all CCA within the BU, an SME in the impacted business unit must enter the “patch installation
+                    Once the patch has been installed on all CCA within the BU, an SME for the target platform in the impacted business unit must enter the “patch installation
                     completion” date in openSPM.
                 </p>
                 <p>The SME should also enter notes and/or attach documents that provide details and evidence of the installation.</p>
@@ -149,12 +145,18 @@
         <tr>
             <td ><img src="~/Images/ProcessSteps/Small/7plan.png" /></td>
             <td>
-                <p>If a Mitigation Plan must be developed to address the patch, then this plan must be developed and the action steps of this plan
-                 must be entered into openSPM -- and be approved by the BUC within 35-days of completion of the patch assessment. The BUC or 
-                any SME within the BU may enter the mitigation plan. The mitigation plan requires entry of:</p>
+                <p>If a Mitigation Plan must be developed to address the patch, then:</p>
+                <ol>
+                    <li>A short justificaiton for mitigation must be entered into openSPM under this tab.</li>
+                    <li>A mitgation plan reference number is assigned by the system: e.g., "MP-[BU Abvr]-[Patch ID]-00x"</li>
+                    <li>A full mitigation plan must be developed and the action steps of this plan
+                        must be entered into the companion application called "MiPlan</li>        
+                </ol>
+                
+                <p>The mitigation plan must be entered and approved by the BUC within 35-days of completion of the patch assessment. 
+                Any SME within the BU may enter the mitigation plan. The mitigation plan requires entry of:</p>
                 <ul>
                     <li>Risks from not patching</li>
-                    <li>Justification for mitigation</li>
                     <li>Short plan summary</li>
                 </ul>
                 <p>Mitigation Plans must include at least two action steps – and may include as many action steps as are needed.  
@@ -165,7 +167,6 @@
                 </ul>
                 <p>Each action step requires:</p>
                 <ul>
-                    <li>Type</li>
                     <li>Title (80 characters max)</li>
                     <li>Scheduled start date</li>
                     <li>Scheduled end date</li>
@@ -176,10 +177,10 @@
         <tr>
             <td ><img src="~/Images/ProcessSteps/Small/8done.png" /></td>
             <td>
-                <p>After patches have been assessed, installed and/or mitigation plans developed, the PIC conducts a 
+                <p>After patches have been assessed, installed and mitigation plans developed (but not completed), the PIC conducts a 
                 final assessment of the information logged about the security patch and the compliance evidence that
                  has been provided.   Following this evaluation, the patch is flagged as “done” and removed from the
-                 “active patch list”</p>
+                 “active patch list”.</p>
             </td>
         </tr>
 

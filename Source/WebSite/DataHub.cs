@@ -42,7 +42,7 @@ using openSPM.Models;
 namespace openSPM
 {
     [AuthorizeHubRole]
-    public class DataHub : Hub
+    public class DataHub : Hub, IRecordOperationsHub
     {
         #region [ Members ]
 
@@ -58,6 +58,15 @@ namespace openSPM
         {
             m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
         }
+
+        #endregion
+
+        #region [ Properties ]
+
+        /// <summary>
+        /// Gets <see cref="IRecordOperationsHub.RecordOperationsCache"/> for SignalR hub.
+        /// </summary>
+        public RecordOperationsCache RecordOperationsCache => s_recordOperationsCache;
 
         #endregion
 
@@ -119,41 +128,13 @@ namespace openSPM
         // Static Fields
         private static volatile int s_connectCount;
         private static readonly ThreadLocal<string> s_connectionID = new ThreadLocal<string>();
-        private static readonly Dictionary<Type, Tuple<string, string>[]> s_recordOperations = new Dictionary<Type, Tuple<string, string>[]>();
+        private static readonly RecordOperationsCache s_recordOperationsCache;
 
         // Static Constructor
         static DataHub()
         {
-            int recordOperations = Enum.GetValues(typeof(RecordOperation)).Length;
-
-            // Analyze and cache data hub methods that are targeted for record operations
-            foreach (MethodInfo method in typeof(DataHub).GetMethods(BindingFlags.Public | BindingFlags.Instance))
-            {
-                AuthorizeHubRoleAttribute authorizeHubRoleAttribute;
-                RecordOperationAttribute recordOperationAttribute;
-
-                method.TryGetAttribute(out authorizeHubRoleAttribute);
-
-                if (method.TryGetAttribute(out recordOperationAttribute))
-                {
-                    // Cache method name and any defined authorized roles for current record operation
-                    s_recordOperations.GetOrAdd(recordOperationAttribute.ModelType,
-                        type => new Tuple<string, string>[recordOperations])[(int)recordOperationAttribute.Operation] =
-                        new Tuple<string, string>(method.Name, authorizeHubRoleAttribute?.Roles);
-                }
-            }
-        }
-
-        // Static Methods
-
-        /// <summary>
-        /// Gets record operation methods for specified modeled table.
-        /// </summary>
-        /// <typeparam name="T">Modeled table.</typeparam>
-        /// <returns>record operation methods for specified modeled table.</returns>
-        public static Tuple<string, string>[] GetRecordOperations<T>() where T : class, new()
-        {
-            return s_recordOperations[typeof(T)];
+            // Analyze and cache record operations of security hub
+            s_recordOperationsCache = new RecordOperationsCache(typeof(DataHub));
         }
 
         #endregion
@@ -380,118 +361,6 @@ namespace openSPM
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<BusinessUnit>().UpdateRecord(record);
-        }
-
-        #endregion
-
-        #region [ UserAccount Table Operations ]
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(UserAccount), RecordOperation.QueryRecordCount)]
-        public int QueryUserAccountCount()
-        {
-            return m_dataContext.Table<UserAccount>().QueryRecordCount();
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(UserAccount), RecordOperation.QueryRecords)]
-        public IEnumerable<UserAccount> QueryUserAccounts(string sortField, bool ascending, int page, int pageSize)
-        {
-            return m_dataContext.Table<UserAccount>().QueryRecords(sortField, ascending, page, pageSize);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(UserAccount), RecordOperation.DeleteRecord)]
-        public void DeleteUserAccount(Guid id)
-        {
-            m_dataContext.Table<UserAccount>().DeleteRecord(id);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(UserAccount), RecordOperation.CreateNewRecord)]
-        public UserAccount NewUserAccount()
-        {
-            return new UserAccount();
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(UserAccount), RecordOperation.AddNewRecord)]
-        public void AddNewUserAccount(UserAccount record)
-        {
-            if (!record.UseADAuthentication && !string.IsNullOrWhiteSpace(record.Password))
-                record.Password = SecurityProviderUtility.EncryptPassword(record.Password);
-
-            record.DefaultNodeID = SecurityHub.DefaultNodeID;
-            record.CreatedBy = UserInfo.CurrentUserID;
-            record.CreatedOn = DateTime.UtcNow;
-            record.UpdatedBy = record.CreatedBy;
-            record.UpdatedOn = record.CreatedOn;
-            m_dataContext.Table<UserAccount>().AddNewRecord(record);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(UserAccount), RecordOperation.UpdateRecord)]
-        public void UpdateUserAccount(UserAccount record)
-        {
-            if (!record.UseADAuthentication && !string.IsNullOrWhiteSpace(record.Password))
-                record.Password = SecurityProviderUtility.EncryptPassword(record.Password);
-
-            record.DefaultNodeID = SecurityHub.DefaultNodeID;
-            record.UpdatedBy = UserInfo.CurrentUserID;
-            record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<UserAccount>().UpdateRecord(record);
-        }
-
-        #endregion
-
-        #region [ SecurityGroup Table Operations ]
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(SecurityGroup), RecordOperation.QueryRecordCount)]
-        public int QuerySecurityGroupCount()
-        {
-            return m_dataContext.Table<SecurityGroup>().QueryRecordCount();
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(SecurityGroup), RecordOperation.QueryRecords)]
-        public IEnumerable<SecurityGroup> QuerySecurityGroups(string sortField, bool ascending, int page, int pageSize)
-        {
-            return m_dataContext.Table<SecurityGroup>().QueryRecords(sortField, ascending, page, pageSize);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(SecurityGroup), RecordOperation.DeleteRecord)]
-        public void DeleteSecurityGroup(Guid id)
-        {
-            m_dataContext.Table<SecurityGroup>().DeleteRecord(id);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(SecurityGroup), RecordOperation.CreateNewRecord)]
-        public SecurityGroup NewSecurityGroup()
-        {
-            return new SecurityGroup();
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(SecurityGroup), RecordOperation.AddNewRecord)]
-        public void AddNewSecurityGroup(SecurityGroup record)
-        {
-            record.CreatedBy = UserInfo.CurrentUserID;
-            record.CreatedOn = DateTime.UtcNow;
-            record.UpdatedBy = record.CreatedBy;
-            record.UpdatedOn = record.CreatedOn;
-            m_dataContext.Table<SecurityGroup>().AddNewRecord(record);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(SecurityGroup), RecordOperation.UpdateRecord)]
-        public void UpdateSecurityGroup(SecurityGroup record)
-        {
-            record.UpdatedBy = UserInfo.CurrentUserID;
-            record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<SecurityGroup>().UpdateRecord(record);
         }
 
         #endregion

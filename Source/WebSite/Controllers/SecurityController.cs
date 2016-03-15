@@ -87,13 +87,15 @@ namespace openSPM.Controllers
 
         public ActionResult Users()
         {
-            m_appModel.ConfigureView<UserAccount>(Url.RequestContext, "Security.Users", ViewBag);
+            m_appModel.ConfigureView(Url.RequestContext, "Security.Users", ViewBag);
+            m_dataContext.ConfigureView<UserAccount, SecurityHub>(Url.RequestContext, ViewBag);
             return View();
         }
 
         public ActionResult Groups()
         {
-            m_appModel.ConfigureView<UserAccount>(Url.RequestContext, "Security.Groups", ViewBag);
+            m_appModel.ConfigureView(Url.RequestContext, "Security.Groups", ViewBag);
+            m_dataContext.ConfigureView<UserAccount, SecurityHub>(Url.RequestContext, ViewBag);
             return View();
         }
 

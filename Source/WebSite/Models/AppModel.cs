@@ -21,14 +21,11 @@
 //
 //******************************************************************************************************
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Web.Routing;
 using GSF;
 using GSF.Data.Model;
-using GSF.Security;
 using GSF.Web;
 using GSF.Web.Model;
 using Path = System.Web.VirtualPathUtility;
@@ -75,17 +72,11 @@ namespace openSPM.Models
         }
 
         /// <summary>
-        /// Gets reference to user specific security provider instance.
-        /// </summary>
-        public AdoSecurityProvider SecurityProvider => SecurityProviderCache.CurrentProvider as AdoSecurityProvider;
-
-        /// <summary>
         /// Gets or sets data context for model.
         /// </summary>
         public DataContext DataContext
         {
             get;
-            private set;
         }
 
         #endregion
@@ -158,146 +149,20 @@ namespace openSPM.Models
         }
 
         /// <summary>
-        /// Adds field initialization, and optional validation, from a page-defined (e.g., loaded from database) parameter definition.
-        /// </summary>
-        /// <param name="fieldName">Target field name.</param>
-        /// <param name="initialValue">Javascript based initial value for field.</param>
-        /// <param name="validationPattern">Regex based validation pattern, if any.</param>
-        /// <param name="errorMessage">Optional error message to display when pattern fails.</param>
-        public void AddPageDefinedFieldInitialization(string fieldName, string initialValue, string validationPattern = null, string errorMessage = null)
-        {
-            DataContext.AddFieldValueInitializer(fieldName, initialValue);
-
-            if (!string.IsNullOrEmpty(validationPattern))
-                DataContext.AddFieldValidation($"viewModel.currentRecord().{fieldName}", validationPattern, errorMessage);
-        }
-
-        /// <summary>
-        /// Determines if user is in a specific role or list of roles (comma separated).
-        /// </summary>
-        /// <param name="role">Role or comma separated list of roles.</param>
-        /// <returns><c>true</c> if user is in <paramref name="role"/>(s); otherwise, <c>false</c>.</returns>
-        /// <remarks>
-        /// Set to * for any role.
-        /// </remarks>
-        public bool UserIsInRole(string role)
-        {
-            if (string.IsNullOrWhiteSpace(role))
-                return false;
-
-            role = role.Trim();
-
-            string[] roles = role.Split(',').Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
-
-            if (roles.Length > 1)
-                return UserIsInRole(roles);
-
-            List<string> userRoles = SecurityProvider?.UserData?.Roles ?? new List<string>();
-
-            if (role.Equals("*") && userRoles.Count > 0)
-                return true;
-
-            foreach (string userRole in userRoles)
-                if (userRole.Equals(role, StringComparison.OrdinalIgnoreCase))
-                    return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// Determines if user is in one of the provided of roles.
-        /// </summary>
-        /// <param name="roles">List of role names.</param>
-        /// <returns><c>true</c> if user is in one of the <paramref name="roles"/>; otherwise, <c>false</c>.</returns>
-        public bool UserIsInRole(string[] roles)
-        {
-            return roles.Any(UserIsInRole);
-        }
-
-        /// <summary>
-        /// Determines if user is in a specific group or list of groups (comma separated).
-        /// </summary>
-        /// <param name="group">Group or comma separated list of groups.</param>
-        /// <returns><c>true</c> if user is in <paramref name="group"/>(s); otherwise, <c>false</c>.</returns>
-        /// <remarks>
-        /// Set to * for any group.
-        /// </remarks>
-        public bool UserIsInGroup(string group)
-        {
-            if (string.IsNullOrWhiteSpace(group))
-                return false;
-
-            group = group.Trim();
-
-            string[] groups = group.Split(',').Where(value => !string.IsNullOrWhiteSpace(value)).ToArray();
-
-            if (groups.Length > 1)
-                return UserIsInGroup(groups);
-
-            List<string> userGroups = SecurityProvider?.UserData?.Groups ?? new List<string>();
-
-            if (group.Equals("*") && userGroups.Count > 0)
-                return true;
-
-            foreach (string userGroup in userGroups)
-                if (userGroup.Equals(group, StringComparison.OrdinalIgnoreCase))
-                    return true;
-
-            return false;
-        }
-
-        /// <summary>
-        /// Determines if user is in one of the provided of groups.
-        /// </summary>
-        /// <param name="groups">List of group names.</param>
-        /// <returns><c>true</c> if user is in one of the <paramref name="groups"/>; otherwise, <c>false</c>.</returns>
-        public bool UserIsInGroup(string[] groups)
-        {
-            return groups.Any(UserIsInGroup);
-        }
-
-        /// <summary>
         /// Renders client-side configuration script for paged view model.
         /// </summary>
-        /// <typeparam name="T">Modeled database table (or view).</typeparam>
+        /// <typeparam name="TModel">Modeled database table (or view).</typeparam>
         /// <param name="viewBag">ViewBag for the view.</param>
         /// <param name="defaultSortField">Default sort field name, defaults to first primary key field. Prefix field name with a minus, i.e., '-', to default to descending sort.</param>
         /// <param name="parentKeys">Primary keys values of the parent record to load.</param>
         /// <returns>Rendered paged view model configuration script.</returns>
-        public string RenderViewModelConfiguration<T>(object viewBag, string defaultSortField = null, params object[] parentKeys) where T : class, new()
+        public string RenderViewModelConfiguration<TModel>(object viewBag, string defaultSortField = null, params object[] parentKeys) where TModel : class, new()
         {
-            return DataContext.RenderViewModelConfiguration<T>(MvcApplication.DataHubCache, viewBag, defaultSortField, parentKeys);
+            return DataContext.RenderViewModelConfiguration<TModel, DataHub>(viewBag, defaultSortField, "dataHub", parentKeys);
         }
 
         /// <summary>
-        /// Looks up page info based on defined page name and establishes user roles for page based on specified modeled table <typeparamref name="T"/>.
-        /// </summary>
-        /// <param name="requestContext">Url.RequestContext for view.</param>
-        /// <param name="pageName">Page name as defined in Page table.</param>
-        /// <param name="viewBag">Current view bag.</param>
-        /// <remarks>
-        /// This is normally called from controller before returning view action result.
-        /// </remarks>
-        public void ConfigureView<T>(RequestContext requestContext, string pageName, dynamic viewBag) where T : class, new()
-        {
-            // Attempt to establish roles based on hub defined security for specified modeled table
-            DataContext.EstablishUserRolesForPage<T>(MvcApplication.DataHubCache, viewBag);
-
-            ConfigureView(requestContext, pageName, viewBag);
-
-            // See if modeled table has a flag field that represents a deleted row
-            string isDeletedField = DataContext.GetIsDeletedFlag<T>();
-
-            if (!string.IsNullOrWhiteSpace(isDeletedField))
-            {
-                // See if user has requested to show deleted records
-                viewBag.ShowDeleted = viewBag.RouteID?.Equals("ShowDeleted", StringComparison.OrdinalIgnoreCase) ?? false;
-                viewBag.IsDeletedField = isDeletedField;
-            }
-        }
-
-        /// <summary>
-        /// Looks up page info based on defined page name.
+        /// Configures a simple view with common view bag parameters based on page name.
         /// </summary>
         /// <param name="requestContext">Url.RequestContext for view.</param>
         /// <param name="pageName">Page name as defined in Page table.</param>
@@ -306,6 +171,28 @@ namespace openSPM.Models
         /// This is normally called from controller before returning view action result.
         /// </remarks>
         public void ConfigureView(RequestContext requestContext, string pageName, dynamic viewBag)
+        {
+            DataContext.ConfigureView(requestContext, viewBag);
+            ConfigureView(pageName, viewBag);
+        }
+
+        /// <summary>
+        /// Configures a view establishing user roles based on page name, modeled table <typeparamref name="TModel"/> and SignalR <see cref="DataHub"/>.
+        /// </summary>
+        /// <param name="requestContext">Url.RequestContext for view.</param>
+        /// <param name="pageName">Page name as defined in Page table.</param>
+        /// <param name="viewBag">Current view bag.</param>
+        /// <remarks>
+        /// This is normally called from controller before returning view action result.
+        /// </remarks>
+        public void ConfigureView<TModel>(RequestContext requestContext, string pageName, dynamic viewBag) where TModel : class, new()
+        {
+            DataContext.ConfigureView<TModel, DataHub>(requestContext, viewBag);
+            ConfigureView(pageName, viewBag);
+        }
+
+        // Handles querying page details from Page table
+        private void ConfigureView(string pageName, dynamic viewBag)
         {
             int pageID = DataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Page WHERE Name={0} AND Enabled <> 0", pageName ?? "") ?? 0;
             Page page = DataContext.Table<Page>().LoadRecord(pageID);
@@ -318,25 +205,7 @@ namespace openSPM.Models
             viewBag.PageName = pageName;
             viewBag.PageImagePath = pageImagePath;
             viewBag.PageSettings = pageSettings;
-            viewBag.RouteID = requestContext.RouteData.Values["id"] as string;
             viewBag.Title = page?.Title ?? (pageName == null ? "<pageName is undefined>" : $"<Page record for \"{pageName}\" does not exist>");
-            viewBag.PageControlScripts = new StringBuilder();
-
-            // Setup default roles if none are defined. Important to check only for null here as empty string will
-            // be treated as none-allowed, e.g., read-only for modeled views
-            if (viewBag.EditRoles == null)
-                viewBag.EditRoles = "*";
-
-            if (viewBag.AddNewRoles == null)
-                viewBag.AddNewRoles = viewBag.EditRoles;
-
-            if (viewBag.DeleteRoles == null)
-                viewBag.DeleteRoles = viewBag.EditRoles;
-
-            // Check current allowed roles for user
-            viewBag.CanEdit = UserIsInRole(viewBag.EditRoles);
-            viewBag.CanAddNew = UserIsInRole(viewBag.AddNewRoles);
-            viewBag.CanDelete = UserIsInRole(viewBag.DeleteRoles);
         }
 
         /// <summary>

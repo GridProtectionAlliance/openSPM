@@ -23,6 +23,7 @@
 @using GSF.Data.Model
 @using GSF.Security.Model
 @using GSF.Web.Model
+@using GSF.Web.Security
 @using openSPM.Models
 @model AppModel
 @section StyleSheets{
@@ -125,7 +126,7 @@
                         <div class="center-block">
                             <div id="loadingRoles">Loading role assignments&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span><hr class="full-break" /></div>
                             <table class="table-condensed table-center">
-                            @foreach (ApplicationRole role in dataContext.Table<ApplicationRole>().QueryRecords("Name", new RecordRestriction("NodeID={0}", Model.Global.NodeID))) {
+                            @foreach (ApplicationRole role in dataContext.Table<ApplicationRole>().QueryRecords("Name", new RecordRestriction("NodeID={0}", SecurityHub.DefaultNodeID))) {
                                 <tr>
                                     <td class="text-left valign-middle">
                                         <div class="checkbox" style="margin: 0">
@@ -137,6 +138,7 @@
                             </table>
                             <br />
                             <div class="text-center">
+                                @* ReSharper disable once Html.IdNotResolved *@
                                 <a href="@Url.Action("Help", "Main")#Roles" target="_blank">@Model.Global.ApplicationName Role Definitions</a>
                             </div>
                         </div>
@@ -154,7 +156,7 @@
     <script>
         "use strict";
 
-        @Html.Raw(Model.RenderViewModelConfiguration<SecurityGroup>(ViewBag))
+        @Html.Raw(dataContext.RenderViewModelConfiguration<SecurityGroup, SecurityHub>(ViewBag))
         var AccountState = {
             Invalid: 0,
             Valid: 1,

@@ -72,7 +72,7 @@
 
                 // Check if menu item is enabled, page location is specified and that user has rights to page
                 if (menuPage != null && menuPage.Enabled && !string.IsNullOrWhiteSpace(menuPage.PageLocation) &&
-                    !Model.UserIsInRole(menuPage.ExcludedRoles) && Model.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*")))
+                    !dataContext.UserIsInRole(menuPage.ExcludedRoles) && dataContext.UserIsInRole(menuPage.IncludedRoles.ToNonNullNorWhiteSpace("*")))
                 {
                     // Update menu item link
                     menuItem.Link = menuPage.PageLocation;

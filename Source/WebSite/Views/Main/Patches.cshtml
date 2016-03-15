@@ -97,7 +97,7 @@
         @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
         @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
         @{
-            Model.AddPageDefinedFieldInitialization("AlarmCriticalDays",
+            dataContext.AddPageDefinedFieldInitialization("AlarmCriticalDays",
                 /* Initial Value: */ defaultCriticalAlarmDays.ToString(),
                 /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
                 /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");

@@ -21,6 +21,7 @@
 //
 //******************************************************************************************************
 
+using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
 using Owin;
 
@@ -30,6 +31,10 @@ namespace openSPM
     {
         public void Configuration(IAppBuilder app)
         {
+            // Load security hub in application domain before establishing SignalR hub configuration
+            // ReSharper disable once UnusedVariable
+            using (SecurityHub securityHub = new SecurityHub()) {}
+
             HubConfiguration hubConfig = new HubConfiguration();
 #if DEBUG
             // Enabled detailed client errors

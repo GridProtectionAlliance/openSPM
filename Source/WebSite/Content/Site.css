@@ -29,6 +29,33 @@
     display: block;
 }
 
+.custom-text{
+    font-size:x-small;
+    color: lightgrey;
+}
+
+a.custom-text:link {
+    color: cornflowerblue;
+    text-decoration: none;
+}
+
+a.custom-text:visited {
+    color: grey;
+    text-decoration: none;
+}
+
+a.custom-text:hover {
+    color: black;
+    background-color: yellow;
+    text-decoration: none;
+}
+
+a.custom-text:active {
+    color: grey;
+    text-decoration: underline;
+}
+
+
 @media(min-width: 768px) {
     #pageWrapper #footer {
         display: block;

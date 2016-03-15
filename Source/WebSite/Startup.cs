@@ -32,8 +32,7 @@ namespace openSPM
         public void Configuration(IAppBuilder app)
         {
             // Load security hub in application domain before establishing SignalR hub configuration
-            // ReSharper disable once UnusedVariable
-            using (SecurityHub securityHub = new SecurityHub()) {}
+            using (new SecurityHub()) {}
 
             HubConfiguration hubConfig = new HubConfiguration();
 #if DEBUG

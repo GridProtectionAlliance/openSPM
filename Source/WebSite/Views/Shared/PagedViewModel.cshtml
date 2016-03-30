@@ -85,6 +85,9 @@
         if (value.EndsWith("IES", StringComparison.Ordinal))
             return value.Substring(0, value.Length - 3) + "Y";
 
+        if (value.EndsWith("ces", StringComparison.OrdinalIgnoreCase))
+            return value.Substring(0, value.Length - 1);
+
         if (value.EndsWith("es", StringComparison.OrdinalIgnoreCase))
             return value.Substring(0, value.Length - 2);
 
@@ -183,7 +186,7 @@
                     <span data-bind="visible: recordMode()===RecordMode.View">View</span>
                     <span data-bind="visible: recordMode()===RecordMode.Edit">Edit</span>
                     <span data-bind="visible: recordMode()===RecordMode.AddNew">Add New</span>
-                    @SingularForm(ViewBag.Title ?? "")
+                    @(ViewBag.AddNewEditTitle ?? SingularForm(ViewBag.Title ?? ""))
                 </h4>
             </div>
             <div class="modal-body auto-height" data-bind="with: currentRecord, validationOptions: {messageTemplate: 'validationMessageTemplate'}, css: {'modal-readonly': recordMode()===RecordMode.View}">

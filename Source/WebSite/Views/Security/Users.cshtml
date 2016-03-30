@@ -63,6 +63,7 @@
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "User";
 }
 @helper BodyRows()
 {
@@ -99,10 +100,10 @@
                     <div class="col-md-8">
                         <div class="row">
                             <div class="col-md-4">
-                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Active&nbsp;Directory&nbsp;Group</label>
+                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: false, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Active&nbsp;Directory&nbsp;User</label>
                             </div>
                             <div class="col-md-8">
-                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Database&nbsp;Group</label>
+                                <label class="radio-inline"><input type="radio" name="radioUseDBAuthentication" data-bind="checkedValue: true, checked: UseDBAuthentication, attr: {'disabled': ($root.recordMode()===RecordMode.View ? true : undefined)}">&nbsp;Database&nbsp;User</label>
                             </div>
                         </div>
                     </div>

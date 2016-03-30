@@ -35,10 +35,9 @@
         new[] { "Title", "Title", "text-left" }
     };
 
-    ViewBag.CustomTitle = "Edit System Pages";
-    ViewBag.Title = "System Page";
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "System Page";
 }
 @helper BodyRows()
 {

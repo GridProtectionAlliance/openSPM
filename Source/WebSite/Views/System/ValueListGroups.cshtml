@@ -34,10 +34,9 @@
         new[] { null, "Value&nbsp;Items", "text-center valign-middle" }
     };
 
-    ViewBag.CustomTitle = "Edit System Value Lists";
-    ViewBag.Title = "System Value List Group Details";
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "System Value List Group Detail";
 }
 @helper BodyRows()
 {

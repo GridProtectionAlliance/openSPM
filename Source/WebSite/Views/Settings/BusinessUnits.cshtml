@@ -110,17 +110,15 @@
             delete observableRecord.AccountName;
         });
 
-        $(function() {
-            $("#inputTest").puiautocomplete({
-                effect: "fade",
-                effectSpeed: "fast",
-                completeSource: function (request, response) {
-                    if (viewModel.dataHubIsConnected()) {
-                        dataHub.searchUserAccounts(request.query).done(function (userAccountNames) {
-                            //response.call(this, userAccountNames);
-                        });
-                    }
-                }
+        $(function () {
+            $("#addNewEditDialog").on("shown.bs.modal", function () {
+                // On add/edit dialog shown, initialize auto-complete functionality
+                $("#inputTest").puiautocomplete({
+                    effect: "fade",
+                    effectSpeed: "fast",
+                    minQueryLength: 2,
+                    completeSource: new Array("GPA", "TVA", "Test")
+                });
             });
         });
     </script>

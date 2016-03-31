@@ -33,6 +33,9 @@ namespace openSPM
             bundles.Add(new ScriptBundle("~/js.bundle/jquery").Include(
                         "~/Scripts/jquery-{version}.js"));
 
+            bundles.Add(new ScriptBundle("~/js.bundle/jqueryui").Include(
+                        "~/Scripts/jquery-ui.min.js"));
+
             bundles.Add(new ScriptBundle("~/js.bundle/jqueryval").Include(
                         "~/Scripts/jquery.validate*"));
 
@@ -47,6 +50,11 @@ namespace openSPM
                         "~/Scripts/respond.js",
                         "~/Scripts/bootstrap-datepicker.min.js",
                         "~/Scripts/bootstrap-toolkit.min.js"));
+
+            bundles.Add(new ScriptBundle("~/js.bundle/primeui").Include(
+                        "~/Scripts/primeui.min.js",
+                        "~/Scripts/plugins-all.js",
+                        "~/Scripts/mustache.min.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/signalR").Include(
                         "~/Scripts/jquery.signalR-2.2.0.min.js"));
@@ -68,6 +76,14 @@ namespace openSPM
             bundles.Add(new StyleBundle("~/css.bundle/bootstrap").Include(
                         "~/Content/bootstrap-datepicker3.min.css",
                         "~/Content/bootstrap-sidebar.css"));
+
+            bundles.Add(new StyleBundle("~/css.bundle/jqueryui").Include(
+                        "~/Content/themes/base/all.css"));
+
+            bundles.Add(new StyleBundle("~/css.bundle/primeui").Include(
+                        "~/Content/primeui-theme.css",
+                        "~/Content/font-awesome.min.css",
+                        "~/Content/primeui-all.min.css"));
 
             bundles.Add(new StyleBundle("~/css.bundle/site").Include(
                         "~/Content/Site.css"));

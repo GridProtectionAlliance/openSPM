@@ -118,6 +118,8 @@
     <link href="~/Content/bootstrap-theme.min.css" rel="stylesheet">
     }
     @Styles.Render("~/css.bundle/bootstrap")
+    @Styles.Render("~/css.bundle/jqueryui")
+    @Styles.Render("~/css.bundle/primeui")
     @Styles.Render("~/css.bundle/site")
     @RenderSection("StyleSheets", false)
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
@@ -219,7 +221,9 @@
     </div>
     <!-- /#pageWrapper -->
     @Scripts.Render("~/js.bundle/jquery")
+    @Scripts.Render("~/js.bundle/jqueryui")
     @Scripts.Render("~/js.bundle/bootstrap")
+    @Scripts.Render("~/js.bundle/primeui")
     @Scripts.Render("~/js.bundle/signalR")
     @Scripts.Render("~/js.bundle/gsfwebclient")
     @* ReSharper disable once Html.PathError *@

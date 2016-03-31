@@ -205,7 +205,7 @@
     <Compile Include="Model\AppModel.cs" />
     <Compile Include="Model\Assessment.cs" />
     <Compile Include="Model\BusinessUnit.cs" />
-    <Compile Include="Model\DiscoveryDocument.cs" />
+    <Compile Include="Model\DiscoveryResultDocument.cs" />
     <Compile Include="Model\DiscoveryResult.cs" />
     <Compile Include="Model\Document.cs" />
     <Compile Include="GlobalSettings.cs" />

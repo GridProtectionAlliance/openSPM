@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  DiscoveryDocument.cs - Gbtc
+//  DiscoveryResultDocument.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -24,11 +24,11 @@
 namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.DiscoveryDocument table.
+    /// Model for openSPM.DiscoveryResultDocument table.
     /// </summary>
-    public class DiscoveryDocument
+    public class DiscoveryResultDocument
     {
-        public int DiscoveryID { get; set; }
+        public int DiscoveryResultID { get; set; }
 
         public int DocumentID { get; set; }
     }

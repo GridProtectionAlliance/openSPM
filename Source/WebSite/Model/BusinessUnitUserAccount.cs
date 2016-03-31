@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  PatchDocLink.cs - Gbtc
+//  BusinessUnitUserAccountLink.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,15 +21,17 @@
 //
 //******************************************************************************************************
 
-namespace openSPM.Models
+using System;
+
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.PatchDocLink table.
+    /// Model for openSPM.BusinessUnitUserAccountLink table.
     /// </summary>
-    public class PatchDocLink
+    public class BusinessUnitUserAccount
     {
-        public int PatchID { get; set; }
+        public int BusinessUnitID { get; set; }
 
-        public int DocumentID { get; set; }
+        public Guid UserAccountID { get; set; }
     }
 }

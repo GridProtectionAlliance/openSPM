@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  ValueList.cs - Gbtc
+//  ValueListGroup.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -25,13 +25,13 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.ValueList table.
+    /// Model for openSPM.ValueListGroup table.
     /// </summary>
-    [PrimaryLabel("Text")]
-    public class ValueList
+    [PrimaryLabel("Name")]
+    public class ValueListGroup
     {
         [PrimaryKey(true)]
         public int ID
@@ -39,73 +39,13 @@ namespace openSPM.Models
             get; set;
         }
 
-        public int GroupID
-        {
-            get; set;
-        }
-
-        [Label("Key (Option Value)")]
-        public int Key
-        {
-            get; set;
-        }
-
-        [Label("Text (Option Label)")]
         [StringLength(200)]
-        public string Text
-        {
-            get; set;
-        }
-
-
-        [Label("Alternate Text 1")]
-        [StringLength(200)]
-        public string AltText1
-        {
-            get; set;
-        }
-
-        [Label("Alternate Text 2")]
-        [StringLength(200)]
-        public string AltText2
-        {
-            get; set;
-        }
-
-        [StringLength(12)]
-        public string Abbreviation
-        {
-            get; set;
-        }
-
-        [Label("Numeric Value")]
-        public int Value
-        {
-            get; set;
-        }
-
-        public bool Flag
+        public string Name
         {
             get; set;
         }
 
         public string Description
-        {
-            get; set;
-        }
-
-        [Label("Sort Order")]
-        public int SortOrder
-        {
-            get; set;
-        }
-
-        public bool Hidden
-        {
-            get; set;
-        }
-
-        public bool IsDefault
         {
             get; set;
         }

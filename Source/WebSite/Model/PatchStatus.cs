@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Platform.cs - Gbtc
+//  PatchStatus.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -22,38 +22,30 @@
 //******************************************************************************************************
 
 using System;
-using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.Platform table.
+    /// Model for openSPM.PatchStatus table.
     /// </summary>
-    [PrimaryLabel("Name")]
-    [IsDeletedFlag("IsDeleted")]
-    public class Platform
+    public class PatchStatus
     {
         [PrimaryKey(true)]
         public int ID { get; set; }
 
-        [Required]
-        [Label("Patch Vendor")]
-        public int VendorID { get; set; }
+        [Label("Patch")]
+        public int PatchID { get; set; }
 
-        [Required]
-        public string Name { get; set; }
+        [Label("Patch Status")]
+        public int PatchStatusKey { get; set; }
 
-        [Required]
-        public string Abbreviation { get; set; }
+        [Label("Status Change On")]
+        [Column(TypeName = "date")]
+        public DateTime? StatusChangeOn { get; set; }
 
-        public string Description { get; set; }
-
-        public bool IsDeleted { get; set; }
-
-        public DateTime UpdatedOn { get; set; }
-
-        public Guid UpdatedByID { get; set; }
+        public string Notes { get; set; }
 
         public DateTime CreatedOn { get; set; }
 

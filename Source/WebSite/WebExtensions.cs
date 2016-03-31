@@ -24,7 +24,7 @@
 using System.Collections.Generic;
 using GSF.Data.Model;
 using GSF.Web.Model;
-using openSPM.Models;
+using openSPM.Model;
 
 namespace openSPM
 {

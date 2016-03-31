@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Menu.cs - Gbtc
+//  MenuItem.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,41 +16,69 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/23/2016 - J. Ritchie Carroll
+//  02/17/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System;
 using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.Menu table.
+    /// Model for openSPM.MenuItem table.
     /// </summary>
-    [PrimaryLabel("Name")]
-    public class Menu
+    [PrimaryLabel("Text")]
+    public class MenuItem
     {
-        // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]
-        [PrimaryKey]
-        [Label("Menu ID")]
-        [RegularExpression("^[0-9]*$", ErrorMessage = "Value must be greater than or equal zero.")]
+        [PrimaryKey(true)]
         public int ID
         {
             get; set;
         }
 
-        [StringLength(64)]
-        public string Name
+        public int MenuID
+        {
+            get; set;
+        }
+
+        public int PageID
         {
             get; set;
         }
 
         [Required]
-        [StringLength(12)]
-        public string Abbreviation
+        [Label("Image Source")]
+        [StringLength(200)]
+        public string Image
+        {
+            get; set;
+        }
+
+        [StringLength(200)]
+        [Label("Image Alternate Text")]
+        public string ImageAlt
+        {
+            get; set;
+        }
+        
+        [Label("Menu Text")]
+        [StringLength(20)]
+        public string Text
+        {
+            get; set;
+        }
+
+        [Label("URL")]
+        [StringLength(200)]
+        public string Link
+        {
+            get; set;
+        }
+
+        [Label("Sort Order")]
+        public int SortOrder
         {
             get; set;
         }
@@ -60,7 +88,8 @@ namespace openSPM.Models
             get; set;
         }
 
-        public DateTime CreatedOn
+        [InitialValue("true")]
+        public bool Enabled
         {
             get; set;
         }

@@ -37,7 +37,7 @@ using GSF.Security.Model;
 using GSF.Web.Model;
 using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
-using openSPM.Models;
+using openSPM.Model;
 
 namespace openSPM
 {

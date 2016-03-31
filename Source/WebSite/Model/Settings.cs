@@ -1,5 +1,5 @@
-﻿@*******************************************************************************************************
-//  History.cshtml - Gbtc
+﻿//******************************************************************************************************
+//  Settings.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,16 +16,51 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  03/03/2016 - Russell Robertson
+//  02/18/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
-//*****************************************************************************************************@
-@model openSPM.Model.AppModel
-@{
+//******************************************************************************************************
 
-  
+using System.ComponentModel.DataAnnotations;
+using GSF.Data.Model;
+
+namespace openSPM.Model
+{
+    public class Settings
+    {
+        [PrimaryKey(true)]
+        public int ID
+        {
+            get; set;
+        }
+
+        [StringLength(64)]
+        public string Scope
+        {
+            get; set;
+        }
+
+        [StringLength(64)]
+        public string Name
+        {
+            get; set;
+        }
+
+        [StringLength(512)]
+        public string Value
+        {
+            get; set;
+        }
+
+        public bool ApplicationInstance
+        {
+            get; set;
+        }
+
+        [StringLength(200)]
+        public string Roles
+        {
+            get; set;
+        }
+    }
 }
-
-<p>To be developed.  Will enable browsing of inactive patches.  A new menu will be provided to produce complaince evenidence reports.</p>
-
-

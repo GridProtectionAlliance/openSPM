@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  PatchStatus.cs - Gbtc
+//  Plan.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -22,33 +22,48 @@
 //******************************************************************************************************
 
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.PatchStatus table.
+    /// Model for openSPM.Plan table.
     /// </summary>
-    public class PatchStatus
+    [PrimaryLabel("ID")]
+    [IsDeletedFlag("IsDeleted")]
+    public class Plan
     {
         [PrimaryKey(true)]
         public int ID { get; set; }
 
         [Label("Patch")]
-        public int PatchID { get; set; }
+        public int PatchStatusID { get; set; }
 
-        [Label("Patch Status")]
-        public int PatchStatusKey { get; set; }
+        public int MiPlanID { get; set; }
 
-        [Label("Status Change On")]
-        [Column(TypeName = "date")]
-        public DateTime? StatusChangeOn { get; set; }
+        [Label("Plan URL")]
+        [StringLength(512)]
+        [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
+        public string PlanURL { get; set; }
 
-        public string Notes { get; set; }
+        public string Justification { get; set; }
+
+        [Label("Approved On")]
+        public DateTime? ApprovedOn { get; set; }
+
+        [Label("Approved By")]
+        [StringLength(200)]
+        public string ApprovedByName { get; set; }
+
+        public bool IsDeleted { get; set; }
 
         public DateTime CreatedOn { get; set; }
 
         public Guid CreatedByID { get; set; }
+
+        public DateTime UpdatedOn { get; set; }
+
+        public Guid UpdatedByID { get; set; }
     }
 }

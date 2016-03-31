@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Plan.cs - Gbtc
+//  NoticeLog.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -22,17 +22,15 @@
 //******************************************************************************************************
 
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.Plan table.
+    /// Model for openSPM.NoticeLog table.
     /// </summary>
-    [PrimaryLabel("Summary")]
-    [IsDeletedFlag("IsDeleted")]
-    public class Plan
+    public class NoticeLog
     {
         [PrimaryKey(true)]
         public int ID { get; set; }
@@ -40,29 +38,24 @@ namespace openSPM.Models
         [Label("Patch")]
         public int PatchID { get; set; }
 
-        public int MitigationBasisKey { get; set; }
+        [Label("Notice Method")]
+        public int? NoticeMethodKey { get; set; }
 
-        public string Risk { get; set; }
+        [Label("Notice Level")]
+        public int? NoticeLevelKey { get; set; }
 
-        public string Summary { get; set; }
+        [Label("To Users")]
+        [StringLength(1024)]
+        public string ToUsers { get; set; }
 
-        public string Detail { get; set; }
+        [Label("XC Users")]
+        [StringLength(1024)]
+        public string XcUsers { get; set; }
 
-        [Label("Completed Date")]
-        [Column(TypeName = "date")]
-        public DateTime? CompletedDate { get; set; }
+        public string Text { get; set; }
 
-        [Label("Completed Notes")]
-        public string CompletedNotes { get; set; }
-
-        public bool IsDeleted { get; set; }
+        public DateTime? SentOn { get; set; }
 
         public DateTime CreatedOn { get; set; }
-
-        public Guid CreatedByID { get; set; }
-
-        public DateTime UpdatedOn { get; set; }
-
-        public Guid UpdatedByID { get; set; }
     }
 }

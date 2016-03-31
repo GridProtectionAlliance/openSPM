@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  Settings.cs - Gbtc
+//  Menu.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,26 +16,28 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/18/2016 - J. Ritchie Carroll
+//  02/23/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
+using System;
 using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
-    public class Settings
+    /// <summary>
+    /// Model for openSPM.Menu table.
+    /// </summary>
+    [PrimaryLabel("Name")]
+    public class Menu
     {
-        [PrimaryKey(true)]
+        // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]
+        [PrimaryKey]
+        [Label("Menu ID")]
+        [RegularExpression("^[0-9]*$", ErrorMessage = "Value must be greater than or equal zero.")]
         public int ID
-        {
-            get; set;
-        }
-
-        [StringLength(64)]
-        public string Scope
         {
             get; set;
         }
@@ -46,19 +48,19 @@ namespace openSPM.Models
             get; set;
         }
 
-        [StringLength(512)]
-        public string Value
+        [Required]
+        [StringLength(12)]
+        public string Abbreviation
         {
             get; set;
         }
 
-        public bool ApplicationInstance
+        public string Description
         {
             get; set;
         }
 
-        [StringLength(200)]
-        public string Roles
+        public DateTime CreatedOn
         {
             get; set;
         }

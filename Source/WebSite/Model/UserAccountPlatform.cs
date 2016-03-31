@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Assessment.cs - Gbtc
+//  UserAccountPlatform.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -22,37 +22,16 @@
 //******************************************************************************************************
 
 using System;
-using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.Assessment table.
+    /// Model for openSPM.UserAccountPlatform table.
     /// </summary>
-    [PrimaryLabel("PatchResult")]
-    public class Assessment
+    public class UserAccountPlatform
     {
-        [PrimaryKey(true)]
-        public int ID { get; set; }
+        public Guid UserAccountID { get; set;  }
 
-        [Label("Patch")]
-        public int PatchID { get; set; }
-
-        [Label("Assessment Result")]
-        public int AssessmentResultKey { get; set; }
-
-        [Label("Patch Result")]
-        public string PatchResult { get; set; }
-
-        [Label("Mitigate Result")]
-        public string MitigateResult { get; set; }
-
-        public DateTime UpdatedOn { get; set; }
-
-        public Guid UpdatedByID { get; set; }
-
-        public DateTime CreatedOn { get; set; }
-
-        public Guid CreatedByID { get; set; }
+        public int PlatformID { get; set; }
     }
 }

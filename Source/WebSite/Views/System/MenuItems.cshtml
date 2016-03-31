@@ -23,9 +23,9 @@
 @using System.Collections.Specialized
 @using GSF.Data.Model
 @using GSF.Web.Model
-@using openSPM.Models
-@using Page = openSPM.Models.Page
-@model AppModel
+@using openSPM.Model
+@using Page = openSPM.Model.Page
+@model openSPM.Model.AppModel
 @{
     DataContext dataContext = Model.DataContext;
     NameValueCollection parameters = Request.QueryString;

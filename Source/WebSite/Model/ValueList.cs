@@ -1,12 +1,12 @@
 ﻿//******************************************************************************************************
-//  Page.cs - Gbtc
+//  ValueList.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
 //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
 //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
-//  file except in compliance with the License. You may obtain a copy of the License at:
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may
+//  not use this file except in compliance with the License. You may obtain a copy of the License at:
 //
 //      http://opensource.org/licenses/MIT
 //
@@ -16,7 +16,7 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/17/2016 - J. Ritchie Carroll
+//  02/21/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
@@ -25,75 +25,87 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.Page table.
+    /// Model for openSPM.ValueList table.
     /// </summary>
-    [PrimaryLabel("Name")]
-    public class Page
+    [PrimaryLabel("Text")]
+    public class ValueList
     {
-        // This is NOT currently an identity field - if this changes, set to [PrimaryKey(true)]
-        [PrimaryKey]
-        [Label("Page ID")]
-        [RegularExpression("^[1-9][0-9]*$", ErrorMessage = "Value must be greater than zero.")]
+        [PrimaryKey(true)]
         public int ID
         {
             get; set;
         }
 
-        [StringLength(64)]
-        public string Name
+        public int GroupID
         {
             get; set;
         }
 
-        [Required]
-        [StringLength(64)]
-        public string Title
+        [Label("Key (Option Value)")]
+        public int Key
         {
             get; set;
         }
 
-        [Required]
-        [Label("Menu")]
-        public int MenuID
+        [Label("Text (Option Label)")]
+        [StringLength(200)]
+        public string Text
         {
             get; set;
         }
 
-        [Required]
-        [Label("Page Location")]
-        public string PageLocation
+
+        [Label("Alternate Text 1")]
+        [StringLength(200)]
+        public string AltText1
         {
             get; set;
         }
 
-        [Label("Server-side Configuration Parameters")]
-        public string ServerConfiguration
+        [Label("Alternate Text 2")]
+        [StringLength(200)]
+        public string AltText2
         {
             get; set;
         }
 
-        [Label("Client-side Configuration Parameters")]
-        public string ClientConfiguration
+        [StringLength(12)]
+        public string Abbreviation
         {
             get; set;
         }
 
-        [Label("Included Roles")]
-        public string IncludedRoles
+        [Label("Numeric Value")]
+        public int Value
         {
             get; set;
         }
 
-        [Label("Excluded Roles")]
-        public string ExcludedRoles
+        public bool Flag
         {
             get; set;
         }
 
         public string Description
+        {
+            get; set;
+        }
+
+        [Label("Sort Order")]
+        public int SortOrder
+        {
+            get; set;
+        }
+
+        public bool Hidden
+        {
+            get; set;
+        }
+
+        public bool IsDefault
         {
             get; set;
         }

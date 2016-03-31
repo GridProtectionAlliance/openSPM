@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  PlanActionLink.cs - Gbtc
+//  PatchDocument.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,15 +21,15 @@
 //
 //******************************************************************************************************
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.PlanActionLink table.
+    /// Model for openSPM.PatchDocument table.
     /// </summary>
-    public class PlanActionLink
+    public class PatchDocument
     {
-        public int PlanID { get; set; }
+        public int PatchID { get; set; }
 
-        public int ActionItemID { get; set; }
+        public int DocumentID { get; set; }
     }
 }

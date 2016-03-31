@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  UserBUGLink.cs - Gbtc
+//  Document.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -22,16 +22,34 @@
 //******************************************************************************************************
 
 using System;
+using System.ComponentModel.DataAnnotations;
+using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.UserBUGLink table.
+    /// Model for openSPM.Document table.
     /// </summary>
-    public class UserBUGLink
+    [PrimaryLabel("Filename")]
+    public class Document
     {
-        public int BUGroupID { get; set; }
+        [PrimaryKey(true)]
+        public int ID { get; set; }
 
-        public Guid UserID { get; set; }
+        [Required]
+        [StringLength(200)]
+        public string Filename { get; set; }
+
+        [Label("Document Type")]
+        public int? DocumentTypeKey { get; set; }
+
+        public byte[] DocumentBlob { get; set; }
+
+        [InitialValue("true")]
+        public bool Enabled { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+
+        public Guid CreatedByID { get; set; }
     }
 }

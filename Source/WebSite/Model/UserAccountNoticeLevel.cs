@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Install.cs - Gbtc
+//  UserAccountNoticeLevel.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,38 +21,15 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using GSF.Data.Model;
-
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.Install table.
+    /// Model for openSPM.UserAccountNoticeLevel table.
     /// </summary>
-    [PrimaryLabel("Summary")]
-    public class Install
+    public class UserAccountNoticeLevel
     {
-        [PrimaryKey(true)]
-        public int ID { get; set; }
+        public int UserID { get; set; }
 
-        [Label("Patch")]
-        public int PatchID { get; set; }
-
-        public string Summary { get; set; }
-
-        [Column(TypeName = "date")]
-        public DateTime? CompletedOn { get; set; }
-
-        [Label("Completed Notes")]
-        public string CompletedNotes { get; set; }
-
-        public DateTime CreatedOn { get; set; }
-
-        public Guid CreatedByID { get; set; }
-
-        public DateTime UpdatedOn { get; set; }
-
-        public Guid UpdatedByID { get; set; }
+        public int NoticeLevelKey { get; set; }
     }
 }

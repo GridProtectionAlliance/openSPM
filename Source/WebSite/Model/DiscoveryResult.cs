@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  PlatformBUGLink.cs - Gbtc
+//  DiscoveryResult.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,15 +21,34 @@
 //
 //******************************************************************************************************
 
-namespace openSPM.Models
+using System;
+using System.ComponentModel.DataAnnotations;
+using GSF.Data.Model;
+
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.PlatformBUGLink table.
+    /// Model for openSPM.DiscoveryResult table.
     /// </summary>
-    public class PlatformBUGLink
+    public class DiscoveryResult
     {
-        public int PlatformID { get; set; }
+        [PrimaryKey(true)]
+        public int ID { get; set; }
 
-        public int BUGroupID { get; set; }
+        public int VendorID { get; set; }
+
+        [Required]
+        [Label("Result")]
+        public int ResultKey { get; set; }
+
+        public string Notes { get; set; }
+
+        [Label("Review Date")]
+        [InitialValue("new Date()")]
+        public DateTime ReviewDate { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+
+        public Guid CreatedByID { get; set; }
     }
 }

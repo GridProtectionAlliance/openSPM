@@ -25,7 +25,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
     /// Model for openSPM.LatestVendorDiscoveryResult view.

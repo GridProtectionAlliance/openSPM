@@ -30,7 +30,7 @@ using GSF.Web;
 using GSF.Web.Model;
 using Path = System.Web.VirtualPathUtility;
 
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
     /// Defines a base application model with convenient global settings and functions.

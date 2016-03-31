@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  ActionStatus.cs - Gbtc
+//  DiscoveryDocument.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,38 +16,20 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/27/2016 - J. Ritchie Carroll
+//  03/27/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using GSF.Data.Model;
-
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.ActionStatus table.
+    /// Model for openSPM.DiscoveryDocument table.
     /// </summary>
-    public class ActionStatus
+    public class DiscoveryDocument
     {
-        [PrimaryKey(true)]
-        public int ID { get; set; }
+        public int DiscoveryID { get; set; }
 
-        public int ActionID { get; set; }
-
-        [Label("Action Status")]
-        public int ActionStatusKey { get; set; }
-
-        public string Notes { get; set; }
-
-        [Label("Status Change Date")]
-        [Column(TypeName = "date")]
-        public DateTime StatusChangeDate { get; set; }
-
-        public DateTime CreatedOn { get; set; }
-
-        public int CreatedByID { get; set; }
+        public int DocumentID { get; set; }
     }
 }

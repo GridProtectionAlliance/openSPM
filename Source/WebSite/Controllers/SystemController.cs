@@ -24,7 +24,7 @@
 using System.Web.Mvc;
 using GSF.Web.Model;
 using GSF.Web.Security;
-using openSPM.Models;
+using openSPM.Model;
 
 namespace openSPM.Controllers
 {

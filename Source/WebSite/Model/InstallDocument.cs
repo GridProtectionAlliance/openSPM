@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  BusinessUnitGroup.cs - Gbtc
+//  InstallDocument.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,45 +21,15 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.ComponentModel.DataAnnotations;
-using GSF.Data.Model;
-
-namespace openSPM.Models
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.BusinessUnitGroup table.
+    /// Model for openSPM.InstallDocument table.
     /// </summary>
-    [PrimaryLabel("Name")]
-    [IsDeletedFlag("IsDeleted")]
-    public class BusinessUnit
+    public class InstallDocument
     {
-        [PrimaryKey(true)]
-        public int ID { get; set; }
+        public int InstallID { get; set; }
 
-        [Required]
-        public string Name { get; set; }
-
-        [Required]
-        public string Abbreviation { get; set; }
-
-        [Required]
-        [Label("Coordinator")]
-        public Guid CoordinatorID { get; set; }
-
-        [Label("Backup Coordinator")]
-        public Guid? BackupCoordinatorID { get; set; }
-
-        public string Description { get; set; }
-
-        public bool IsDeleted { get; set; }
-
-        public DateTime UpdatedOn { get; set; }
-
-        public Guid UpdatedByID { get; set; }
-
-        public DateTime CreatedOn { get; set; }
-
-        public Guid CreatedByID { get; set; }
+        public int DocumentID { get; set; }
     }
 }

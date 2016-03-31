@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  NoticeUserLink.cs - Gbtc
+//  Platform.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -21,15 +21,42 @@
 //
 //******************************************************************************************************
 
-namespace openSPM.Models
+using System;
+using System.ComponentModel.DataAnnotations;
+using GSF.Data.Model;
+
+namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.NoticeUserLink table.
+    /// Model for openSPM.Platform table.
     /// </summary>
-    public class NoticeUserLink
+    [PrimaryLabel("Name")]
+    [IsDeletedFlag("IsDeleted")]
+    public class Platform
     {
-        public int UserID { get; set; }
+        [PrimaryKey(true)]
+        public int ID { get; set; }
 
-        public int NoticeLevelKey { get; set; }
+        [Required]
+        [Label("Patch Vendor")]
+        public int VendorID { get; set; }
+
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string Abbreviation { get; set; }
+
+        public string Description { get; set; }
+
+        public bool IsDeleted { get; set; }
+
+        public DateTime UpdatedOn { get; set; }
+
+        public Guid UpdatedByID { get; set; }
+
+        public DateTime CreatedOn { get; set; }
+
+        public Guid CreatedByID { get; set; }
     }
 }

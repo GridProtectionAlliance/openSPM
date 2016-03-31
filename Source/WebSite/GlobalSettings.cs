@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  MenuItem.cs - Gbtc
+//  GlobalSettings.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,82 +16,87 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  02/17/2016 - J. Ritchie Carroll
+//  02/19/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
-using System.ComponentModel.DataAnnotations;
-using GSF.Data.Model;
+using System.Collections.Generic;
 
-namespace openSPM.Models
+namespace openSPM
 {
-    /// <summary>
-    /// Model for openSPM.MenuItem table.
-    /// </summary>
-    [PrimaryLabel("Text")]
-    public class MenuItem
+    public class GlobalSettings
     {
-        [PrimaryKey(true)]
-        public int ID
+        public string CompanyName
         {
-            get; set;
+            get;
+            set;
         }
 
-        public int MenuID
+        public string CompanyAcronym
         {
-            get; set;
+            get;
+            set;
         }
 
-        public int PageID
+        public string ApplicationName
         {
-            get; set;
+            get;
+            set;
         }
 
-        [Required]
-        [Label("Image Source")]
-        [StringLength(200)]
-        public string Image
+        public string ApplicationDescription
         {
-            get; set;
+            get;
+            set;
         }
 
-        [StringLength(200)]
-        [Label("Image Alternate Text")]
-        public string ImageAlt
+        public string ApplicationKeywords
         {
-            get; set;
-        }
-        
-        [Label("Menu Text")]
-        [StringLength(20)]
-        public string Text
-        {
-            get; set;
+            get;
+            set;
         }
 
-        [Label("URL")]
-        [StringLength(200)]
-        public string Link
+        public string DateFormat
         {
-            get; set;
+            get;
+            set;
         }
 
-        [Label("Sort Order")]
-        public int SortOrder
+        public string TimeFormat
         {
-            get; set;
+            get;
+            set;
         }
 
-        public string Description
+        public string DateTimeFormat
         {
-            get; set;
+            get;
+            set;
         }
 
-        [InitialValue("true")]
-        public bool Enabled
+        public string PasswordRequirementsRegex
         {
-            get; set;
+            get;
+            set;
         }
+
+        public string PasswordRequirementsError
+        {
+            get;
+            set;
+        }
+
+        public string BootstrapTheme
+        {
+            get;
+            set;
+        }
+
+        public readonly Dictionary<string, string> ApplicationSettings = new Dictionary<string, string>();
+
+        public readonly Dictionary<string, string> LayoutSettings = new Dictionary<string, string>();
+
+        public readonly Dictionary<string, string> PageDefaults = new Dictionary<string, string>();
     }
 }

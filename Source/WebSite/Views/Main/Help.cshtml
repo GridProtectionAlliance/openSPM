@@ -20,8 +20,7 @@
 //      Documented Process following discussions with TVA
 //
 //*****************************************************************************************************@
-@using openSPM.Models
-@model AppModel
+@model openSPM.Model.AppModel
 
 @section StyleSheets{
     <style>
@@ -43,11 +42,8 @@
             margin-top: 0em;
             margin-bottom: 1em;
         }
-
     </style>
 }
-
-
 <table class="table table-striped">
 
     <colgroup>
@@ -70,7 +66,7 @@
                         <li>
                             The <b>Platform</b> List.   As new patches are added to the system, they are assigned a Platform (or a "Target Platform" for the patch).
                             Subject Matter Experts (SMEs)
-                            are authtorized to perform patch assessments for their business unit for one or more platforms.
+                            are authorized to perform patch assessments for their business unit for one or more platforms.
 
                         </li>
                         <li>
@@ -79,7 +75,7 @@
                             Owners can create as many business units as necessary to manage BU Coordinator to SME accountability relationships.
                         </li>
                         <li>
-                            The <b>SME's Platform</b> Responsiblity List. Each SME must be associated with one or more platforms.
+                            The <b>SME's Platform</b> Responsibility List. Each SME must be associated with one or more platforms.
                         </li>
                         <li>
                             The <b>User's BU</b> List. Each SME must be associated with a BU in order to have permission to enter this BU's patch assessment.  Currently,
@@ -143,7 +139,7 @@
             <td ><img src="~/Images/ProcessSteps/Small/5assess.png" class="image-wrap"/>
                 <p class="image-wrap">
                     <div>
-                        After the PIC clicks on "start" each BU has 35 days (typcially from the vendor's patch release date) to "assess" the patch.  This assessment can be
+                        After the PIC clicks on "start" each BU has 35 days (typically from the vendor's patch release date) to "assess" the patch.  This assessment can be
                         performed by any SME in the BU which is associated with one of the platforms linked to the patch.
                         If multiple SMEs within a BU have been associated with the platform, then all these SMEs have permission to represent the BU in the assessment
                         of the patch.  Only one assessment is allowed per patch per BU.
@@ -158,7 +154,7 @@
                     <div>
                         If the assessment results in decision to develop a mitigation plan, a dialog box pops up so that the SME must enter a short description
                         (and/or attach documents) of the basis
-                        for mitigation in lieu of patching.  As this dialog box closes, a new mitigation plan "placekeeper" is created in the MiPlan application.
+                        for mitigation in lieu of patching.  As this dialog box closes, a new mitigation plan "place-keeper" is created in the MiPlan application.
                         An SME in the BU has 35 days to develop this plan and have it approved
                         by the BU Coordinator.
                     </div>
@@ -171,13 +167,13 @@
                         <i>
                             The
                             corporation is non-compliant if all BU's with Platforms have not assessed the patch within the 35-day assessment period.
-                            Similarily, the corporation is not compliant if any individual BU
+                            Similarly, the corporation is not compliant if any individual BU
                             takes longer than 35 days to install the patch or development the mitigation plan.
                             Note since individual BUs can complete assessments on differing dates, the timer for compliance for patch installation or mitigation
                             plan development is on a BU-by-BU basis.
                         </i>
                     </div>
-                    <div>Notifications will be sent to the BU Cooordinator and SMEs in this Business Unit (as well as the Owner) as the 35-day compliance date approaches.</div>
+                    <div>Notifications will be sent to the BU Coordinator and SMEs in this Business Unit (as well as the Owner) as the 35-day compliance date approaches.</div>
 
             </p></td>
         </tr>
@@ -199,15 +195,15 @@
             <td ><img src="~/Images/ProcessSteps/Small/7plan.png" class="image-wrap"/>
                 <p class="image-wrap">
                     <div>
-                        If an assessment calls for a Mitgation Plan, a "placekeeper" new plan is automatically created in the companion MiPlan application by openSPM.
+                        If an assessment calls for a Mitigation Plan, a "place-keeper" new plan is automatically created in the companion MiPlan application by openSPM.
                         The MiPlan application is used to (1) house the plan [<i>a piece of compliance evidence</i>] and (2) track the completion of mitigation plan action items
-                        [<i>not currently a factor in patch mangagement compliance</i>].
+                        [<i>not currently a factor in patch management compliance</i>].
                     </div>
                     <div>
                         Clicking on this menu item shows the list of mitigation plans that are pending development and approval. Once approved by the BU Coordinator, plans disappear from
                         this list for this BU and this step ends the required compliance actions for this BU.
                     </div>
-                    Mitgiation Plan development states that are set within the MiPlan application are:
+                    Mitigation Plan development states that are set within the MiPlan application are:
                     <ul class="image-wrap small">
                         <li>Pending - The plan is under development by an SME </li>
                         <li>Submitted - The plan has been submitted for approval by the SME </li>
@@ -216,7 +212,7 @@
                         <li>Completed - All action steps have been completed.</li>
                         <li>Closed - The plan has been reviewed and closed by the BU.</li>
                     </ul>
-                    <div>Go the the <a href="">MiPlan Web Site</a> to learn more about mitigation planning.</div>               
+                    <div>Go the <a href="">MiPlan Web Site</a> to learn more about mitigation planning.</div>
             </p></td>
         </tr>
 

@@ -57,6 +57,12 @@
         @Html.Raw(dataContext.AddSelectField<BusinessUnit, UserAccount>("CoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
         @Html.Raw(dataContext.AddSelectField<BusinessUnit, UserAccount>("BackupCoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
         @Html.Raw(dataContext.AddTextAreaField<BusinessUnit>("Description"))
+
+
+
+        <label for="inputTest">Coordinator:</label>
+        <input type="text" class="form-control" id="inputTest" name="inputTest">
+
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -102,6 +108,20 @@
         $(viewModel).on("derivingJSRecord", function (event, observableRecord) {
             // Remove virtual observable field before serialization for record updates
             delete observableRecord.AccountName;
+        });
+
+        $(function() {
+            $("#inputTest").puiautocomplete({
+                effect: "fade",
+                effectSpeed: "fast",
+                completeSource: function (request, response) {
+                    if (viewModel.dataHubIsConnected()) {
+                        dataHub.searchUserAccounts(request.query).done(function (userAccountNames) {
+                            //response.call(this, userAccountNames);
+                        });
+                    }
+                }
+            });
         });
     </script>
 }

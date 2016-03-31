@@ -36,7 +36,6 @@ using GSF.Data;
 using GSF.Identity;
 using GSF.Security;
 using GSF.Web.Model;
-using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using openSPM.Model;

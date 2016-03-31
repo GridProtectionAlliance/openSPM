@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -309,10 +310,16 @@ namespace openSPM
 
         #endregion
 
-        #region [ BusinessUnitGroup Table Operations ]
+        #region [ BusinessUnit Table Operations ]
+
+        public IEnumerable<string> SearchUserAccounts(string searchText)
+        {
+            return m_dataContext.Table<UserAccount>().QueryRecords().Select(record => UserInfo.SIDToAccountName(record.Name ?? "")).Where(name => name.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase));
+        }
+
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecordCount)]
-        public int QueryBusinessUnitGroupCount(bool showDeleted)
+        public int QueryBusinessUnitCount(bool showDeleted)
         {
             if (showDeleted)
                 return m_dataContext.Table<BusinessUnit>().QueryRecordCount();
@@ -321,7 +328,7 @@ namespace openSPM
         }
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecords)]
-        public IEnumerable<BusinessUnit> QueryBusinessUnitGroups(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<BusinessUnit> QueryBusinessUnits(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
         {
             if (showDeleted)
                 return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize);
@@ -331,21 +338,21 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(BusinessUnit), RecordOperation.DeleteRecord)]
-        public void DeleteBusinessUnitGroup(int id)
+        public void DeleteBusinessUnit(int id)
         {
-            // For BusinessUnitGroups, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE BusinessUnitGroup SET IsDeleted=1 WHERE ID={0}", id);
+            // For BusinessUnits, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE BusinessUnit SET IsDeleted=1 WHERE ID={0}", id);
         }
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.CreateNewRecord)]
-        public BusinessUnit NewBusinessUnitGroup()
+        public BusinessUnit NewBusinessUnit()
         {
             return new BusinessUnit();
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(BusinessUnit), RecordOperation.AddNewRecord)]
-        public void AddNewBusinessUnitGroup(BusinessUnit record)
+        public void AddNewBusinessUnit(BusinessUnit record)
         {
             record.CreatedByID = GetCurrentUserID();
             record.CreatedOn = DateTime.UtcNow;
@@ -356,7 +363,7 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(BusinessUnit), RecordOperation.UpdateRecord)]
-        public void UpdateBusinessUnitGroup(BusinessUnit record)
+        public void UpdateBusinessUnit(BusinessUnit record)
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;

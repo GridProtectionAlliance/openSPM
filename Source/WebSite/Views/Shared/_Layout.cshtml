@@ -223,11 +223,11 @@
     @Scripts.Render("~/js.bundle/jquery")
     @Scripts.Render("~/js.bundle/jqueryui")
     @Scripts.Render("~/js.bundle/bootstrap")
-    @Scripts.Render("~/js.bundle/primeui")
     @Scripts.Render("~/js.bundle/signalR")
     @Scripts.Render("~/js.bundle/gsfwebclient")
-    @* ReSharper disable once Html.PathError *@
+    @*ReSharper disable once Html.PathError*@ 
     <script src="@Url.Content("~/signalr/hubs")"></script>
+    @Scripts.Render("~/js.bundle/primeui")
     @Scripts.Render("~/js.bundle/site")
     @Html.Raw(ViewBag.PageControlScripts?.ToString())
     @RenderSection("Scripts", false)

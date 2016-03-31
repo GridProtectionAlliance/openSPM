@@ -268,9 +268,9 @@
     <Content Include="Content\jquery-ui.theme.min.css" />
     <Content Include="Content\Popup.css" />
     <Content Include="Content\bootstrap-sidebar.css" />
-    <Content Include="Content\primeui-all.css" />
-    <Content Include="Content\primeui-all.min.css" />
     <Content Include="Content\primeui-theme.css" />
+    <Content Include="Content\primeui.css" />
+    <Content Include="Content\primeui.min.css" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />

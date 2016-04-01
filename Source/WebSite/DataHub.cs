@@ -24,16 +24,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using GSF;
-using GSF.Collections;
 using GSF.Data.Model;
 using GSF.Identity;
-using GSF.Reflection;
-using GSF.Security;
 using GSF.Security.Model;
 using GSF.Web.Model;
 using GSF.Web.Security;
@@ -311,21 +307,6 @@ namespace openSPM
         #endregion
 
         #region [ BusinessUnit Table Operations ]
-
-        public class Label
-        {
-            public string label;
-
-            public Label(string label)
-            {
-                this.label = label;
-            }
-        }
-
-        public IEnumerable<Label> SearchUserAccounts(string searchText)
-        {
-            return m_dataContext.Table<UserAccount>().QueryRecords().Select(record => UserInfo.SIDToAccountName(record.Name ?? "")).Where(name => name.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase)).Select(name => new Label(name));
-        }
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecordCount)]
         public int QueryBusinessUnitCount(bool showDeleted)
@@ -692,6 +673,36 @@ namespace openSPM
         #endregion
 
         #region [ Miscellaneous Hub Operations ]
+
+        // TODO: Switch to use SecurityHub implementation at next GSF update
+
+        /// <summary>
+        /// Searches user accounts by resolved names.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <returns>Search results as "Labels" - serialized as JSON [{ label : "value" }, ...]; useful for dynamic lookup lists.</returns>
+        public IEnumerable<Label> SearchUserAccounts(string searchText)
+        {
+            return m_dataContext
+                .Table<UserAccount>()
+                .QueryRecords()
+                .Select(record => UserInfo.SIDToAccountName(record.Name ?? ""))
+                .Where(name => name.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase))
+                .Select(Label.Create);
+        }
+
+        // TODO: Switch to use SecurityHub implementation at next GSF update
+
+            /// <summary>
+        /// Finds the specified user account record by SID or database account name.
+        /// </summary>
+        /// <param name="accountName">SID or database account name of requested user.</param>
+        /// <returns>Specified user account record.</returns>
+        public UserAccount QueryUserAccountByName(string accountName)
+        {
+            return m_dataContext.Table<UserAccount>().QueryRecords(restriction: 
+                new RecordRestriction("Name = {0}", accountName)).FirstOrDefault();
+        }
 
         /// <summary>
         /// Gets page setting for specified page.

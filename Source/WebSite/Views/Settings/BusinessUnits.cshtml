@@ -20,10 +20,9 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using GSF.Security.Model
 @using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -54,14 +53,17 @@
     <div class="col-md-12">
         @Html.Raw(dataContext.AddInputField<BusinessUnit>("Name", initialFocus: true))
         @Html.Raw(dataContext.AddInputField<BusinessUnit>("Abbreviation"))
-        @Html.Raw(dataContext.AddSelectField<BusinessUnit, UserAccount>("CoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
-        @Html.Raw(dataContext.AddSelectField<BusinessUnit, UserAccount>("BackupCoordinatorID", "ID", "Name", optionDataBinding: "text: lookupOptionLabel($($element))"))
+        @Html.Raw(dataContext.AddInputField<BusinessUnit>("CoordinatorID"))
+        @Html.Raw(dataContext.AddInputField<BusinessUnit>("BackupCoordinatorID"))
         @Html.Raw(dataContext.AddTextAreaField<BusinessUnit>("Description"))
 
+        <label for="inputNewSME">Add SME to Business Group:</label>
+        <div class="input-group">
+            <input type="text" class="form-control" data-bind="attr: {'readonly': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="inputNewSME" required>
+            <span id="inputNewSMEAdd" class="input-group-addon" data-bind="style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}"><i class="glyphicon glyphicon-plus"></i></span>
+        </div>
 
-        <label for="inputCoordinatorID">Coordinator:</label>
-        <input type="text" class="form-control" data-bind="attr: {'readonly': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="inputCoordinatorID" autocomplete="off" required>
-
+        <div id="tblremotelazy"></div>
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -70,66 +72,203 @@
         "use strict";
 
         @Html.Raw(Model.RenderViewModelConfiguration<BusinessUnit>(ViewBag))
-        // Resolve option label SID to an account name
-        function lookupOptionLabel(element) {
+        // Lookup coordinator account name as store in virutal observable field (for display in table)
+        function lookupCoordinatorAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
-                securityHub.sidToAccountName(element.text()).done(function (accountName) {
-                    element.text(accountName);
-                });
-            }
-
-            return element.text();
-        }
-
-        function lookupAccountName(record) {
-            if (viewModel.dataHubIsConnected()) {
-                securityHub.queryUserAccount(record.CoordinatorID).done(function (userAccount) {
-                    securityHub.sidToAccountName(userAccount.Name).done(function (accountName) {
+                securityHub.queryUserAccount(record.CoordinatorID).done(function(userAccount) {
+                    securityHub.sidToAccountName(userAccount.Name).done(function(accountName) {
                         record.AccountName(accountName);
                     });
                 });
             }
         }
 
-        $(viewModel).on("pageRecordsQueried", function (event, records) {
-            // Add a virtual observable field called "AccountName" that will resolve SID values to account names
+        $(viewModel).on("pageRecordsQueried", function(event, records) {
+            // Add a virtual observable field called "AccountName" that will lookup coordinator SID value and resolve it to an account name
             for (var i = 0; i < records.length; i++) {
                 records[i].AccountName = ko.observable(records[i].CoordinatorID);
-                lookupAccountName(records[i]);
+                lookupCoordinatorAccountName(records[i]);
             }
         });
 
-        $(viewModel).on("newRecord", function (event, newRecord) {
+        $(viewModel).on("newRecord", function(event, newRecord) {
             // Make sure new records get virtual field
             newRecord.AccountName = ko.observable("");
         });
 
-        $(viewModel).on("derivingJSRecord", function (event, observableRecord) {
-            // Remove virtual observable field before serialization for record updates
-            delete observableRecord.AccountName;
-        });
-
-        $(function () {
-            $("#addNewEditDialog").on("shown.bs.modal", function () {
-                // On add/edit dialog shown, initialize auto-complete functionality
-                const input = $("#inputCoordinatorID");
-
-                input.puiautocomplete({
-                    effect: "fade",
-                    effectSpeed: "fast",
-                    completeSource: function(request, response) {
-                        const self = this;
-
-                        if (viewModel.dataHubIsConnected()) {
-                            dataHub.searchUserAccounts(request.query).done(function(userAccounts) {
-                                response.call(self, userAccounts);
-                                self.panel.css("z-index", 9999);
+        // Before editing record, we want to convert Guid based user account ID's into human readable user names
+        $(viewModel).on("derivingObservableRecord", function(event, observableRecord, promises) {
+            // Push promises to convert user account IDs to user names before binding current record
+            if (viewModel.dataHubIsConnected()) {
+                // Add promise to convert coordinator user account ID to a user name
+                promises.push($.Deferred(function (deferred) {
+                    securityHub.queryUserAccount(observableRecord.CoordinatorID()).done(function (userAccount) {
+                        if (userAccount) {
+                            securityHub.sidToAccountName(userAccount.Name).done(function (accountName) {
+                                observableRecord.CoordinatorID(accountName);
+                                deferred.resolve();
                             });
                         }
-                    }
-                });
+                        else {
+                            observableRecord.CoordinatorID("");
+                            deferred.resolve();
+                        }
+                    });
+                }).promise());
 
-                input.parent().css("display", "initial");
+                // Add promise to convert backup coordinator user account ID to a user name
+                promises.push($.Deferred(function (deferred) {
+                    securityHub.queryUserAccount(observableRecord.BackupCoordinatorID()).done(function (userAccount) {
+                        if (userAccount) {
+                            securityHub.sidToAccountName(userAccount.Name).done(function (accountName) {
+                                observableRecord.BackupCoordinatorID(accountName);
+                                deferred.resolve();
+                            });
+                        }
+                        else {
+                            observableRecord.BackupCoordinatorID("");
+                            deferred.resolve();
+                        }
+                    });
+                }).promise());
+            }
+        });
+
+        // Before saving record, we want to convert human readable user names back into Guid based user account ID's
+        $(viewModel).on("derivingJSRecord", function (event, observableRecord, promises) {
+            // Remove virtual observable field before serialization for record updates
+            delete observableRecord.AccountName;
+
+            // Push promises to convert user names back to user account IDs before updating record
+            if (viewModel.dataHubIsConnected()) {
+                // Add promise to convert coordinator user name back to user account ID
+                promises.push($.Deferred(function (deferred) {
+                    securityHub.userNameToSID(observableRecord.CoordinatorID()).done(function (sid) {
+                        dataHub.queryUserAccountByName(sid).done(function (userAccount) {
+                            if (userAccount)
+                                observableRecord.CoordinatorID(userAccount.ID);
+                            else
+                                observableRecord.CoordinatorID(null);
+
+                            deferred.resolve();
+                        });
+                    });
+                }).promise());
+
+                // Add promise to convert backup coordinator user name back to user account ID
+                promises.push($.Deferred(function (deferred) {
+                    securityHub.userNameToSID(observableRecord.BackupCoordinatorID()).done(function (sid) {
+                        dataHub.queryUserAccountByName(sid).done(function (userAccount) {
+                            if (userAccount)
+                                observableRecord.BackupCoordinatorID(userAccount.ID);
+                            else
+                                observableRecord.BackupCoordinatorID(null);
+
+                            deferred.resolve();
+                        });
+                    });
+                }).promise());
+            }
+        });
+
+        function initializeDynamicLookupField(fieldName, isObservable) {
+            if (isObservable === undefined)
+                isObservable = false;
+
+            const inputFieldID = "input" + fieldName;
+            const inputField = $("#" + inputFieldID);
+
+            // Turn off browser remembered field values
+            inputField.attr("autocomplete", "off");
+
+            if (isObservable)
+                inputField.wrap("<div class=\"input-group\"></div>");
+
+            // Insert drop-down button after input field
+            inputField.after("<span id=\"" + inputFieldID + "ShowAll\" class=\"input-group-addon\" data-bind=\"style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}\"><i class=\"glyphicon glyphicon-triangle-bottom\"></i></span>");
+
+            const inputFieldDropDown = $("#" + inputFieldID + "ShowAll");
+
+            // Set on-click handler for drop-down button
+            inputFieldDropDown.click(function () {
+                // Search all records when user clicks drop-down button
+                if (viewModel.dataHubIsConnected() && viewModel.recordMode() !== RecordMode.View)
+                    inputField.puiautocomplete("search", "");
+            });
+
+            // Apply data bindings to newly added drop-down button
+            ko.applyBindings(viewModel, inputFieldDropDown[0]);
+
+            inputField.puiautocomplete({
+                effect: "fade",
+                effectSpeed: "fast",
+                forceSelection: true,
+                completeSource: function (request, response) {
+                    const self = this;
+
+                    if (viewModel.dataHubIsConnected()) {
+                        dataHub.searchUserAccounts(request.query).done(function (userAccounts) {
+                            response.call(self, userAccounts);
+
+                            // Set z-index of panel to be above pop-up dialog
+                            self.panel.css("z-index", $("#addNewEditDialog").css("z-index") + 1);
+
+                            // Auto-size panel to full width of input field area (including input group buttons)
+                            setTimeout(function () { self.panel.width(inputField.parent().parent().width()); }, 25);
+                        });
+                    }
+                },
+                select: function (event, item) {
+                    // Make sure knockout sees any selection - it can't always pickup non-user initiated changes
+                    if (isObservable && item)
+                        viewModel.currentRecord()[fieldName](item.text());
+                }
+            });
+
+            // Override jQUery UI display style added by puiautocomplete (messes with bootstrap form-element formatting)
+            inputField.parent().css("display", "initial");
+
+            // Get access to autocomplete widget
+            //inputField.data("primeui-puiautocomplete").panel.width(inputField.parent().parent().width());
+        }
+
+        $(function() {
+            $("#addNewEditDialog").on("shown.bs.modal", function () {
+                // Initialize dynamic lookup fields each time modal window is shown
+                initializeDynamicLookupField("CoordinatorID", true);
+                initializeDynamicLookupField("BackupCoordinatorID", true);
+                initializeDynamicLookupField("NewSME");
+
+                //$('#tblremotelazy').puidatatable({
+                //    lazy: true,
+                //    caption: 'Remote Restful Webservice - Lazy',
+                //    paginator: {
+                //        rows: 5
+                //    },
+                //    columns: [
+                //        { field: 'UserAccountName', headerText: 'User Name' },
+                //        { field: 'brand', headerText: 'Brand' },
+                //        { field: 'year', headerText: 'Year' },
+                //        { field: 'color', headerText: 'Color' }
+                //    ],
+                //    datasource: function (callback, ui) {
+                //        var uri = 'showcase/resources/data/cars-large.json';
+                //        if (ui.sortField) {
+                //            uri += '/' + ui.sortField + '/' + ui.sortOrder;
+                //        }
+
+                //        $.ajax({
+                //            type: "GET",
+                //            url: uri,
+                //            dataType: "json",
+                //            context: this,
+                //            success: function (response) {
+                //                //imitate lazy loading by slicing a new list from whole data, in real application the response should actually contain just the new chunk
+                //                callback.call(this, response.slice(ui.first, ui.first + 10));
+                //            }
+                //        });
+                //    }
+                //});
             });
         });
     </script>

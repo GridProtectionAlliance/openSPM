@@ -117,7 +117,9 @@
                     effect: "fade",
                     effectSpeed: "fast",
                     minQueryLength: 2,
-                    completeSource: new Array("GPA", "TVA", "Test")
+                    completeSource: function(request, response) {
+                        alert(request.query);
+                    }
                 });
             });
         });

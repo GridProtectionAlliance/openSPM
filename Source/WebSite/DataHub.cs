@@ -312,11 +312,20 @@ namespace openSPM
 
         #region [ BusinessUnit Table Operations ]
 
-        public IEnumerable<string> SearchUserAccounts(string searchText)
+        public class Label
         {
-            return m_dataContext.Table<UserAccount>().QueryRecords().Select(record => UserInfo.SIDToAccountName(record.Name ?? "")).Where(name => name.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase));
+            public string label;
+
+            public Label(string label)
+            {
+                this.label = label;
+            }
         }
 
+        public IEnumerable<Label> SearchUserAccounts(string searchText)
+        {
+            return m_dataContext.Table<UserAccount>().QueryRecords().Select(record => UserInfo.SIDToAccountName(record.Name ?? "")).Where(name => name.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase)).Select(name => new Label(name));
+        }
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecordCount)]
         public int QueryBusinessUnitCount(bool showDeleted)

@@ -59,9 +59,8 @@
         @Html.Raw(dataContext.AddTextAreaField<BusinessUnit>("Description"))
 
 
-
-        <label for="inputTest">Coordinator:</label>
-        <input type="text" class="form-control" id="inputTest" name="inputTest">
+        <label for="inputCoordinatorID">Coordinator:</label>
+        <input type="text" class="form-control" data-bind="attr: {'readonly': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="inputCoordinatorID" autocomplete="off" required>
 
     </div>
 }
@@ -113,14 +112,24 @@
         $(function () {
             $("#addNewEditDialog").on("shown.bs.modal", function () {
                 // On add/edit dialog shown, initialize auto-complete functionality
-                $("#inputTest").puiautocomplete({
+                const input = $("#inputCoordinatorID");
+
+                input.puiautocomplete({
                     effect: "fade",
                     effectSpeed: "fast",
-                    minQueryLength: 2,
                     completeSource: function(request, response) {
-                        alert(request.query);
+                        const self = this;
+
+                        if (viewModel.dataHubIsConnected()) {
+                            dataHub.searchUserAccounts(request.query).done(function(userAccounts) {
+                                response.call(self, userAccounts);
+                                self.panel.css("z-index", 9999);
+                            });
+                        }
                     }
                 });
+
+                input.parent().css("display", "initial");
             });
         });
     </script>

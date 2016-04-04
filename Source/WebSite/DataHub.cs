@@ -674,36 +674,6 @@ namespace openSPM
 
         #region [ Miscellaneous Hub Operations ]
 
-        // TODO: Switch to use SecurityHub implementation at next GSF update
-
-        /// <summary>
-        /// Searches user accounts by resolved names.
-        /// </summary>
-        /// <param name="searchText">Search text to lookup.</param>
-        /// <returns>Search results as "Labels" - serialized as JSON [{ label : "value" }, ...]; useful for dynamic lookup lists.</returns>
-        public IEnumerable<Label> SearchUserAccounts(string searchText)
-        {
-            return m_dataContext
-                .Table<UserAccount>()
-                .QueryRecords()
-                .Select(record => UserInfo.SIDToAccountName(record.Name ?? ""))
-                .Where(name => name.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase))
-                .Select(Label.Create);
-        }
-
-        // TODO: Switch to use SecurityHub implementation at next GSF update
-
-            /// <summary>
-        /// Finds the specified user account record by SID or database account name.
-        /// </summary>
-        /// <param name="accountName">SID or database account name of requested user.</param>
-        /// <returns>Specified user account record.</returns>
-        public UserAccount QueryUserAccountByName(string accountName)
-        {
-            return m_dataContext.Table<UserAccount>().QueryRecords(restriction: 
-                new RecordRestriction("Name = {0}", accountName)).FirstOrDefault();
-        }
-
         /// <summary>
         /// Gets page setting for specified page.
         /// </summary>

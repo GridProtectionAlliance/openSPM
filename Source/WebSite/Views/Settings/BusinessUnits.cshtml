@@ -144,7 +144,7 @@
                 // Add promise to convert coordinator user name back to user account ID
                 promises.push($.Deferred(function (deferred) {
                     securityHub.userNameToSID(observableRecord.CoordinatorID()).done(function (sid) {
-                        dataHub.queryUserAccountByName(sid).done(function (userAccount) {
+                        securityHub.queryUserAccountByName(sid).done(function (userAccount) {
                             if (userAccount)
                                 observableRecord.CoordinatorID(userAccount.ID);
                             else
@@ -158,7 +158,7 @@
                 // Add promise to convert backup coordinator user name back to user account ID
                 promises.push($.Deferred(function (deferred) {
                     securityHub.userNameToSID(observableRecord.BackupCoordinatorID()).done(function (sid) {
-                        dataHub.queryUserAccountByName(sid).done(function (userAccount) {
+                        securityHub.queryUserAccountByName(sid).done(function (userAccount) {
                             if (userAccount)
                                 observableRecord.BackupCoordinatorID(userAccount.ID);
                             else
@@ -207,7 +207,7 @@
                     const self = this;
 
                     if (viewModel.dataHubIsConnected()) {
-                        dataHub.searchUserAccounts(request.query).done(function (userAccounts) {
+                        securityHub.searchUserAccounts(request.query).done(function (userAccounts) {
                             response.call(self, userAccounts);
 
                             // Set z-index of panel to be above pop-up dialog

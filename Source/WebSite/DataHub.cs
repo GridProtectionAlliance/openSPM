@@ -23,14 +23,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using GSF;
 using GSF.Data.Model;
 using GSF.Identity;
-using GSF.Security.Model;
 using GSF.Web.Model;
 using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
@@ -362,6 +360,37 @@ namespace openSPM
 
         #endregion
 
+        #region [ BusinessUnitUserAccount Table Operations ]
+
+        public int QueryBusinessUnitUserAccountCount(int businessUnitID)
+        {
+            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
+        }
+
+        public IEnumerable<BusinessUnitUserAccount> QueryBusinessUnitUserAccounts(int businessUnitID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        public void DeleteBusinessUnitUserAccount(int businessUnitID, int userAccountID)
+        {
+            m_dataContext.Table<BusinessUnitUserAccount>().DeleteRecord(businessUnitID, userAccountID);
+        }
+
+        public BusinessUnitUserAccount NewBusinessUnitUserAccount()
+        {
+            return new BusinessUnitUserAccount();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        public void AddNewBusinessUnitUserAccount(BusinessUnitUserAccount record)
+        {
+            m_dataContext.Table<BusinessUnitUserAccount>().AddNewRecord(record);
+        }
+
+        #endregion
+
         #region [ Page Table Operations ]
 
         [AuthorizeHubRole("Administrator")]
@@ -673,36 +702,6 @@ namespace openSPM
         #endregion
 
         #region [ Miscellaneous Hub Operations ]
-
-        // TODO: Switch to use SecurityHub implementation at next GSF update
-
-        /// <summary>
-        /// Searches user accounts by resolved names.
-        /// </summary>
-        /// <param name="searchText">Search text to lookup.</param>
-        /// <returns>Search results as "Labels" - serialized as JSON [{ label : "value" }, ...]; useful for dynamic lookup lists.</returns>
-        public IEnumerable<Label> SearchUserAccounts(string searchText)
-        {
-            return m_dataContext
-                .Table<UserAccount>()
-                .QueryRecords()
-                .Select(record => UserInfo.SIDToAccountName(record.Name ?? ""))
-                .Where(name => name.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase))
-                .Select(Label.Create);
-        }
-
-        // TODO: Switch to use SecurityHub implementation at next GSF update
-
-            /// <summary>
-        /// Finds the specified user account record by SID or database account name.
-        /// </summary>
-        /// <param name="accountName">SID or database account name of requested user.</param>
-        /// <returns>Specified user account record.</returns>
-        public UserAccount QueryUserAccountByName(string accountName)
-        {
-            return m_dataContext.Table<UserAccount>().QueryRecords(restriction: 
-                new RecordRestriction("Name = {0}", accountName)).FirstOrDefault();
-        }
 
         /// <summary>
         /// Gets page setting for specified page.

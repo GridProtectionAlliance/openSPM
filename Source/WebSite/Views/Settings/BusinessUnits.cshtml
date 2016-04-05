@@ -63,7 +63,7 @@
             <span id="inputNewSMEAdd" class="input-group-addon" data-bind="style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}"><i class="glyphicon glyphicon-plus"></i></span>
         </div>
 
-        <div id="tblremotelazy"></div>
+        <div id="businessSMEs"></div>
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -72,6 +72,7 @@
         "use strict";
 
         @Html.Raw(Model.RenderViewModelConfiguration<BusinessUnit>(ViewBag))
+
         // Lookup coordinator account name as store in virutal observable field (for display in table)
         function lookupCoordinatorAccountName(record) {
             if (viewModel.dataHubIsConnected()) {
@@ -101,15 +102,14 @@
             // Push promises to convert user account IDs to user names before binding current record
             if (viewModel.dataHubIsConnected()) {
                 // Add promise to convert coordinator user account ID to a user name
-                promises.push($.Deferred(function (deferred) {
-                    securityHub.queryUserAccount(observableRecord.CoordinatorID()).done(function (userAccount) {
+                promises.push($.Deferred(function(deferred) {
+                    securityHub.queryUserAccount(observableRecord.CoordinatorID()).done(function(userAccount) {
                         if (userAccount) {
-                            securityHub.sidToAccountName(userAccount.Name).done(function (accountName) {
+                            securityHub.sidToAccountName(userAccount.Name).done(function(accountName) {
                                 observableRecord.CoordinatorID(accountName);
                                 deferred.resolve();
                             });
-                        }
-                        else {
+                        } else {
                             observableRecord.CoordinatorID("");
                             deferred.resolve();
                         }
@@ -117,15 +117,14 @@
                 }).promise());
 
                 // Add promise to convert backup coordinator user account ID to a user name
-                promises.push($.Deferred(function (deferred) {
-                    securityHub.queryUserAccount(observableRecord.BackupCoordinatorID()).done(function (userAccount) {
+                promises.push($.Deferred(function(deferred) {
+                    securityHub.queryUserAccount(observableRecord.BackupCoordinatorID()).done(function(userAccount) {
                         if (userAccount) {
-                            securityHub.sidToAccountName(userAccount.Name).done(function (accountName) {
+                            securityHub.sidToAccountName(userAccount.Name).done(function(accountName) {
                                 observableRecord.BackupCoordinatorID(accountName);
                                 deferred.resolve();
                             });
-                        }
-                        else {
+                        } else {
                             observableRecord.BackupCoordinatorID("");
                             deferred.resolve();
                         }
@@ -135,16 +134,16 @@
         });
 
         // Before saving record, we want to convert human readable user names back into Guid based user account ID's
-        $(viewModel).on("derivingJSRecord", function (event, observableRecord, promises) {
+        $(viewModel).on("derivingJSRecord", function(event, observableRecord, promises) {
             // Remove virtual observable field before serialization for record updates
             delete observableRecord.AccountName;
 
             // Push promises to convert user names back to user account IDs before updating record
             if (viewModel.dataHubIsConnected()) {
                 // Add promise to convert coordinator user name back to user account ID
-                promises.push($.Deferred(function (deferred) {
-                    securityHub.userNameToSID(observableRecord.CoordinatorID()).done(function (sid) {
-                        securityHub.queryUserAccountByName(sid).done(function (userAccount) {
+                promises.push($.Deferred(function(deferred) {
+                    securityHub.userNameToSID(observableRecord.CoordinatorID()).done(function(sid) {
+                        securityHub.queryUserAccountByName(sid).done(function(userAccount) {
                             if (userAccount)
                                 observableRecord.CoordinatorID(userAccount.ID);
                             else
@@ -156,9 +155,9 @@
                 }).promise());
 
                 // Add promise to convert backup coordinator user name back to user account ID
-                promises.push($.Deferred(function (deferred) {
-                    securityHub.userNameToSID(observableRecord.BackupCoordinatorID()).done(function (sid) {
-                        securityHub.queryUserAccountByName(sid).done(function (userAccount) {
+                promises.push($.Deferred(function(deferred) {
+                    securityHub.userNameToSID(observableRecord.BackupCoordinatorID()).done(function(sid) {
+                        securityHub.queryUserAccountByName(sid).done(function(userAccount) {
                             if (userAccount)
                                 observableRecord.BackupCoordinatorID(userAccount.ID);
                             else
@@ -190,7 +189,7 @@
             const inputFieldDropDown = $("#" + inputFieldID + "ShowAll");
 
             // Set on-click handler for drop-down button
-            inputFieldDropDown.click(function () {
+            inputFieldDropDown.click(function() {
                 // Search all records when user clicks drop-down button
                 if (viewModel.dataHubIsConnected() && viewModel.recordMode() !== RecordMode.View)
                     inputField.puiautocomplete("search", "");
@@ -203,22 +202,22 @@
                 effect: "fade",
                 effectSpeed: "fast",
                 forceSelection: true,
-                completeSource: function (request, response) {
+                completeSource: function(request, response) {
                     const self = this;
 
                     if (viewModel.dataHubIsConnected()) {
-                        securityHub.searchUserAccounts(request.query).done(function (userAccounts) {
+                        securityHub.searchUserAccounts(request.query).done(function(userAccounts) {
                             response.call(self, userAccounts);
 
                             // Set z-index of panel to be above pop-up dialog
                             self.panel.css("z-index", $("#addNewEditDialog").css("z-index") + 1);
 
                             // Auto-size panel to full width of input field area (including input group buttons)
-                            setTimeout(function () { self.panel.width(inputField.parent().parent().width()); }, 25);
+                            setTimeout(function() { self.panel.width(inputField.parent().parent().width()); }, 25);
                         });
                     }
                 },
-                select: function (event, item) {
+                select: function(event, item) {
                     // Make sure knockout sees any selection - it can't always pickup non-user initiated changes
                     if (isObservable && item)
                         viewModel.currentRecord()[fieldName](item.text());
@@ -233,42 +232,49 @@
         }
 
         $(function() {
-            $("#addNewEditDialog").on("shown.bs.modal", function () {
+            $("#addNewEditDialog").on("shown.bs.modal", function() {
                 // Initialize dynamic lookup fields each time modal window is shown
                 initializeDynamicLookupField("CoordinatorID", true);
                 initializeDynamicLookupField("BackupCoordinatorID", true);
                 initializeDynamicLookupField("NewSME");
 
-                //$('#tblremotelazy').puidatatable({
-                //    lazy: true,
-                //    caption: 'Remote Restful Webservice - Lazy',
-                //    paginator: {
-                //        rows: 5
-                //    },
-                //    columns: [
-                //        { field: 'UserAccountName', headerText: 'User Name' },
-                //        { field: 'brand', headerText: 'Brand' },
-                //        { field: 'year', headerText: 'Year' },
-                //        { field: 'color', headerText: 'Color' }
-                //    ],
-                //    datasource: function (callback, ui) {
-                //        var uri = 'showcase/resources/data/cars-large.json';
-                //        if (ui.sortField) {
-                //            uri += '/' + ui.sortField + '/' + ui.sortOrder;
-                //        }
+                $("#businessSMEs").puidatatable({
+                    lazy: true,
+                    caption: "Business Unit SME's",
+                    paginator: {
+                        rows: 5
+                    },
+                    columns: [
+                        { field: "UserAccountID", headerText: "User Name" },
+                        { content: function (row) { "<button>Platforms</button>" }, headerText: "Brand" }
+                    ],
+                    datasource: function (callback, ui) {
+                        const self = this;
 
-                //        $.ajax({
-                //            type: "GET",
-                //            url: uri,
-                //            dataType: "json",
-                //            context: this,
-                //            success: function (response) {
-                //                //imitate lazy loading by slicing a new list from whole data, in real application the response should actually contain just the new chunk
-                //                callback.call(this, response.slice(ui.first, ui.first + 10));
-                //            }
-                //        });
-                //    }
-                //});
+                        if (viewModel.dataHubIsConnected()) {
+                            dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID, ui.sortField, ui.sortOrder === 1, ui.first / ui.rows, ui.rows).done(function (businessUnitUserAccounts) {
+                                callback.call(self, userAccounts);
+                            });
+                        }
+                    }
+                });
+            });
+
+            $("#inputNewSMEAdd").click(function() {
+                const newSME = $("#inputNewSME").text();
+
+                if (newSME && newSME.length > 0) {
+                    if (viewModel.dataHubIsConnected()) {
+                        dataHub.newBusinessUnitUserAccount().done(function(businessUnitUserAccount) {
+                            businessUnitUserAccount.BusinessUnitID = viewModel.currentRecord().ID;
+                            businessUnitUserAccount.UserAccountID = 0;
+
+                            dataHub.addNewBusinessUnitUserAccount(businessUnitUserAccount).done(function() {
+                                // Refresh list
+                            });
+                        });
+                    }
+                }
             });
         });
     </script>

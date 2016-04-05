@@ -23,14 +23,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using GSF;
 using GSF.Data.Model;
 using GSF.Identity;
-using GSF.Security.Model;
 using GSF.Web.Model;
 using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
@@ -358,6 +356,37 @@ namespace openSPM
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<BusinessUnit>().UpdateRecord(record);
+        }
+
+        #endregion
+
+        #region [ BusinessUnitUserAccount Table Operations ]
+
+        public int QueryBusinessUnitUserAccountCount(int businessUnitID)
+        {
+            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
+        }
+
+        public IEnumerable<BusinessUnitUserAccount> QueryBusinessUnitUserAccounts(int businessUnitID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        public void DeleteBusinessUnitUserAccount(int businessUnitID, int userAccountID)
+        {
+            m_dataContext.Table<BusinessUnitUserAccount>().DeleteRecord(businessUnitID, userAccountID);
+        }
+
+        public BusinessUnitUserAccount NewBusinessUnitUserAccount()
+        {
+            return new BusinessUnitUserAccount();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        public void AddNewBusinessUnitUserAccount(BusinessUnitUserAccount record)
+        {
+            m_dataContext.Table<BusinessUnitUserAccount>().AddNewRecord(record);
         }
 
         #endregion

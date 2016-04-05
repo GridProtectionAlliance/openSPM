@@ -79,7 +79,7 @@
 
     <div class="col-md-4">
         @Html.Raw(dataContext.AddInputField<Patch>("PatchMnemonic", initialFocus: true))
-        @Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))
+        @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))*@
         @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
         @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName"))
         @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))

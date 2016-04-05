@@ -61,7 +61,7 @@ namespace openSPM
             bundles.Add(new ScriptBundle("~/js.bundle/primeui").Include(
                         "~/Scripts/plugins-all.js",
                         $"~/Scripts/mustache{min}.js",
-                        $"~/Scripts/primeui{min}.js"));
+                        $"~/Scripts/primeui.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/signalR").Include(
                         $"~/Scripts/jquery.signalR-2.2.0{min}.js"));
@@ -90,7 +90,7 @@ namespace openSPM
             bundles.Add(new StyleBundle("~/css.bundle/primeui").Include(
                         "~/Content/primeui-theme.css",
                         $"~/Content/font-awesome{min}.css",
-                        $"~/Content/primeui{min}.css"));
+                        $"~/Content/primeui.css"));
 
             bundles.Add(new StyleBundle("~/css.bundle/site").Include(
                         "~/Content/Site.css"));

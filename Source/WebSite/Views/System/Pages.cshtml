@@ -93,7 +93,7 @@
             newRecord.AbsolutePath = ko.observable("");
         });
 
-        $(viewModel).on("derivingJSRecord", function(event, observableRecord) {
+        $(viewModel).on("beforeSave", function(event, observableRecord) {
             // Remove virtual observable fields before serialization for record updates
             delete observableRecord.AbsolutePath;
         });

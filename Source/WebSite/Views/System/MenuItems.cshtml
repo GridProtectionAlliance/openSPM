@@ -77,7 +77,7 @@
         @Html.Raw(Model.RenderViewModelConfiguration<MenuItem>(ViewBag, "SortOrder", parentID))
         const defaultImagePath = "@Url.Content("~/Images/Menu/")";
 
-        $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
+        $(viewModel).on("beforeEdit", function(event, observableRecord) {
             // Initialize selected menu item record
             observableRecord.MenuID(@parentID);
         });

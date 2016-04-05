@@ -307,7 +307,7 @@
     if (dataContext.DefinedDateFields.Count > 0) {
         pageControlScripts.AppendFormat(@"
 
-        $(viewModel).on(""derivingObservableRecord"", function(event, observableRecord) {{
+        $(viewModel).on(""beforeEdit"", function(event, observableRecord) {{
             // Convert date objects to strings");
 
         foreach (string dateField in dataContext.DefinedDateFields) {
@@ -318,7 +318,7 @@
 
         pageControlScripts.AppendFormat(@"
 
-        $(viewModel).on(""derivingJSRecord"", function(event, observableRecord) {{
+        $(viewModel).on(""beforeSave"", function(event, observableRecord) {{
             // Convert date strings back to date objects before serialization");
 
         foreach (string dateField in dataContext.DefinedDateFields) {

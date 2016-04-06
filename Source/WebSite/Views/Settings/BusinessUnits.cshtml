@@ -98,7 +98,7 @@
         });
 
         // Before editing record, we want to convert Guid based user account ID's into human readable user names
-        $(viewModel).on("beforeEdit", function (event, observableRecord, promises) {
+        $(viewModel).on("beforeEdit", function(event, observableRecord, promises) {
             // Push promises to convert user account IDs to user names before binding current record
             if (viewModel.dataHubIsConnected()) {
                 // Add promise to convert coordinator user account ID to a user name
@@ -108,11 +108,17 @@
                             securityHub.sidToAccountName(userAccount.Name).done(function(accountName) {
                                 observableRecord.CoordinatorID(accountName);
                                 deferred.resolve();
+                            }).fail(function() {
+                                observableRecord.CoordinatorID("");
+                                deferred.resolve();
                             });
                         } else {
                             observableRecord.CoordinatorID("");
                             deferred.resolve();
                         }
+                    }).fail(function() {
+                        observableRecord.CoordinatorID("");
+                        deferred.resolve();
                     });
                 }).promise());
 
@@ -123,11 +129,17 @@
                             securityHub.sidToAccountName(userAccount.Name).done(function(accountName) {
                                 observableRecord.BackupCoordinatorID(accountName);
                                 deferred.resolve();
+                            }).fail(function() {
+                                observableRecord.BackupCoordinatorID("");
+                                deferred.resolve();
                             });
                         } else {
                             observableRecord.BackupCoordinatorID("");
                             deferred.resolve();
                         }
+                    }).fail(function() {
+                        observableRecord.BackupCoordinatorID("");
+                        deferred.resolve();
                     });
                 }).promise());
             }
@@ -150,7 +162,13 @@
                                 observableRecord.CoordinatorID(null);
 
                             deferred.resolve();
+                        }).fail(function() {
+                            observableRecord.CoordinatorID(null);
+                            deferred.resolve();
                         });
+                    }).fail(function() {
+                        observableRecord.CoordinatorID(null);
+                        deferred.resolve();
                     });
                 }).promise());
 
@@ -164,7 +182,13 @@
                                 observableRecord.BackupCoordinatorID(null);
 
                             deferred.resolve();
+                        }).fail(function() {
+                            observableRecord.BackupCoordinatorID(null);
+                            deferred.resolve();
                         });
+                    }).fail(function() {
+                        observableRecord.BackupCoordinatorID(null);
+                        deferred.resolve();
                     });
                 }).promise());
             }
@@ -231,6 +255,31 @@
             //inputField.data("primeui-puiautocomplete").panel.width(inputField.parent().parent().width());
         }
 
+        function initializeBusinessUnitSMETable() {
+            const targetRows = 5;
+
+            $("#businessSMEs").puidatatable({
+                lazy: true,
+                caption: "Business Unit SME's",
+                paginator: {
+                    rows: targetRows
+                },
+                columns: [
+                    { field: "UserAccountID", headerText: "User Name" },
+                    { content: function() { return "<button>Platforms</button>" }, headerText: "SME Platforms" }
+                ],
+                datasource: function(callback, ui) {
+                    const self = this;
+
+                    if (viewModel.dataHubIsConnected()) {
+                        dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID(), notNull(ui.sortField, "UserAccountID"), ui.sortOrder === 1, ui.first / targetRows, targetRows).done(function(businessUnitUserAccounts) {
+                            callback.call(self, businessUnitUserAccounts);
+                        });
+                    }
+                }
+            });
+        }
+
         $(function() {
             $("#addNewEditDialog").on("shown.bs.modal", function() {
                 // Initialize dynamic lookup fields each time modal window is shown
@@ -238,43 +287,40 @@
                 initializeDynamicLookupField("BackupCoordinatorID", true);
                 initializeDynamicLookupField("NewSME");
 
-                $("#businessSMEs").puidatatable({
-                    lazy: true,
-                    caption: "Business Unit SME's",
-                    paginator: {
-                        rows: 5
-                    },
-                    columns: [
-                        { field: "UserAccountID", headerText: "User Name" },
-                        { content: function (row) { "<button>Platforms</button>" }, headerText: "Brand" }
-                    ],
-                    datasource: function (callback, ui) {
-                        const self = this;
+                // Initialize SME table
+                initializeBusinessUnitSMETable();
 
+                // Initialize add new SME button
+                $("#inputNewSMEAdd").click(function() {
+                    const newSME = $("#inputNewSME").val();
+
+                    if (newSME && newSME.length > 0) {
                         if (viewModel.dataHubIsConnected()) {
-                            dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID, ui.sortField, ui.sortOrder === 1, ui.first / ui.rows, ui.rows).done(function (businessUnitUserAccounts) {
-                                callback.call(self, userAccounts);
+                            // Create a new instance of the BusinessUnitUserAccount model
+                            dataHub.newBusinessUnitUserAccount().done(function(businessUnitUserAccount) {
+                                // Assign current business unit ID
+                                businessUnitUserAccount.BusinessUnitID = viewModel.currentRecord().ID();
+
+                                // Convert human readable account name to a security identifier
+                                securityHub.userNameToSID(newSME).done(function(sid) {
+                                    // Lookup associated user account record for specified SID
+                                    securityHub.queryUserAccountByName(sid).done(function(userAccount) {
+                                        if (userAccount) {
+                                            // Assign user account ID to new BusinessUnitUserAccount model instance
+                                            businessUnitUserAccount.UserAccountID = userAccount.ID;
+
+                                            // Add new BusinessUnitUserAccount model instance to database
+                                            dataHub.addNewBusinessUnitUserAccount(businessUnitUserAccount).done(function() {
+                                                // Refresh the data table
+                                                setTimeout(function() { $("#businessSMEs").puidatatable("reload"); }, 50);
+                                            });
+                                        }
+                                    });
+                                });
                             });
                         }
                     }
                 });
-            });
-
-            $("#inputNewSMEAdd").click(function() {
-                const newSME = $("#inputNewSME").text();
-
-                if (newSME && newSME.length > 0) {
-                    if (viewModel.dataHubIsConnected()) {
-                        dataHub.newBusinessUnitUserAccount().done(function(businessUnitUserAccount) {
-                            businessUnitUserAccount.BusinessUnitID = viewModel.currentRecord().ID;
-                            businessUnitUserAccount.UserAccountID = 0;
-
-                            dataHub.addNewBusinessUnitUserAccount(businessUnitUserAccount).done(function() {
-                                // Refresh list
-                            });
-                        });
-                    }
-                }
             });
         });
     </script>

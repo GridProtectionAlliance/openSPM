@@ -98,7 +98,7 @@
         });
 
         // Before editing record, we want to convert Guid based user account ID's into human readable user names
-        $(viewModel).on("derivingObservableRecord", function(event, observableRecord, promises) {
+        $(viewModel).on("beforeEdit", function (event, observableRecord, promises) {
             // Push promises to convert user account IDs to user names before binding current record
             if (viewModel.dataHubIsConnected()) {
                 // Add promise to convert coordinator user account ID to a user name
@@ -134,7 +134,7 @@
         });
 
         // Before saving record, we want to convert human readable user names back into Guid based user account ID's
-        $(viewModel).on("derivingJSRecord", function(event, observableRecord, promises) {
+        $(viewModel).on("beforeSave", function(event, observableRecord, promises) {
             // Remove virtual observable field before serialization for record updates
             delete observableRecord.AccountName;
 

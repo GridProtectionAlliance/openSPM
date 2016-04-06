@@ -634,6 +634,59 @@ namespace openSPM
 
         #endregion
 
+        #region [Assessment Table Operations]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Assessment), RecordOperation.QueryRecordCount)]
+        public int QueryAssessmentCount()
+        {
+            return m_dataContext.Table<Assessment>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Assessment), RecordOperation.QueryRecords)]
+        public IEnumerable<Assessment> QueryAssessments(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<Assessment>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Assessment), RecordOperation.DeleteRecord)]
+        public void DeleteAssessment(int id)
+        {
+            m_dataContext.Table<Assessment>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Assessment), RecordOperation.CreateNewRecord)]
+        public Assessment NewAssessment()
+        {
+            return new Assessment();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Assessment), RecordOperation.AddNewRecord)]
+        public void AddNewAssessment(Assessment record)
+        {
+
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Assessment>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Assessment), RecordOperation.UpdateRecord)]
+        public void UpdateAssessment(Assessment record)
+        {
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Assessment>().UpdateRecord(record);
+        }
+
+        #endregion
+
         #region [ LatestVendorDiscoveryResult View Operations ]
 
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecordCount)]
@@ -700,7 +753,7 @@ namespace openSPM
         }
 
         #endregion
-
+       
         #region [ Miscellaneous Hub Operations ]
 
         /// <summary>

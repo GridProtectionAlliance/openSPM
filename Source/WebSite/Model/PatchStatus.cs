@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using GSF.Data.Model;
 
@@ -37,6 +38,10 @@ namespace openSPM.Model
 
         [Label("Patch")]
         public int PatchID { get; set; }
+
+        [Label("Business Unit ID")]
+        [Required]
+        public int BusinessUnitID { get; set; }
 
         [Label("Patch Status")]
         public int PatchStatusKey { get; set; }

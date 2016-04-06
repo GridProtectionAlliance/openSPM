@@ -21,7 +21,16 @@
 //
 //******************************************************************************************************
 
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Web.Mvc;
+using System.Linq;
+using System.Text;
+using GSF;
+using GSF.Data;
+using GSF.Data.Model;
+using GSF.Web;
 using GSF.Web.Model;
 using GSF.Web.Security;
 using openSPM.Model;
@@ -40,6 +49,8 @@ namespace openSPM.Controllers
         private readonly DataContext m_dataContext;
         private readonly AppModel m_appModel;
         private bool m_disposed;
+
+    
 
         #endregion
 
@@ -167,6 +178,16 @@ namespace openSPM.Controllers
             m_appModel.ConfigureView(Url.RequestContext, "Done", ViewBag);
             return View();
         }
+
+        public ActionResult Assessments()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "Assessments", ViewBag);
+            return View();
+        }
+
+        
+
+       
 
         #endregion
     }

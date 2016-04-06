@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
 
 namespace openSPM.Model
@@ -34,21 +35,33 @@ namespace openSPM.Model
         [PrimaryKey(true)]
         public int ID { get; set; }
 
+        [Required]
         [Label("Patch")]
         public int PatchStatusID { get; set; }
 
+        [Required]
         [Label("Assessment Result")]
         public int AssessmentResultKey { get; set; }
 
         [Label("Assessment Details")]
         public string Details { get; set; }
 
+        [Required]
+        [Label("Updated On")]
+        [InitialValue("new Date()")]
         public DateTime UpdatedOn { get; set; }
 
+        [Required]
+        [Label("Updated By")]
         public Guid UpdatedByID { get; set; }
 
+        [Required]
+        [Label("Created On")]
+        [InitialValue("new Date()")]
         public DateTime CreatedOn { get; set; }
 
+        [Required]
+        [Label("Created By")]
         public Guid CreatedByID { get; set; }
     }
 }

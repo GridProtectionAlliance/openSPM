@@ -121,6 +121,36 @@ namespace openSPM.Model
         }
 
         /// <summary>
+        /// Renders client-side Javascript function for looking up single values from a table.
+        /// </summary>
+        /// <param name="valueFieldName">Table field name as defined in the table.</param>
+        /// <param name="idFieldName">Name of primary key field, defaults to "ID".</param>
+        /// <returns>Client-side Javascript lookup function.</returns>
+        public string RenderAbstract<T>(string valueFieldName, string idFieldName = "ID") where T : class, new()
+        {
+            StringBuilder javascript = new StringBuilder();
+
+            var lookupFunctionName = $"lookup{valueFieldName}Value";
+            TableOperations<T> operations = DataContext.Table<T>() as TableOperations<T>;
+
+            javascript.AppendLine($"var {valueFieldName} = [];\r\n");
+            foreach (T record in operations.QueryRecords())
+            {
+                var valueField = operations.GetFieldValue(record, valueFieldName);
+                var idField = operations.GetFieldValue(record, idFieldName);
+
+                javascript.AppendLine($"        {valueFieldName}[{idField.ToString().JavaScriptEncode()}] = \"{valueField?.ToString().JavaScriptEncode()}\";");
+            }
+
+            javascript.AppendLine($"\r\n        function {lookupFunctionName}(value) {{");
+            javascript.AppendLine($"            return {valueFieldName}[value];");
+            javascript.AppendLine("        }");
+
+            return javascript.ToString();
+        }
+
+
+        /// <summary>
         /// Generates template based select field based on reflected modeled table field attributes with values derived from ValueList table.
         /// </summary>
         /// <typeparam name="T">Modeled table for select field.</typeparam>

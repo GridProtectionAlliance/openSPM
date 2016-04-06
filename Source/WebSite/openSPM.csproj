@@ -459,6 +459,7 @@
     <Content Include="Views\Main\Notification.cshtml" />
     <Content Include="Views\Main\Done.cshtml" />
     <Content Include="Views\Main\Test.cshtml" />
+    <Content Include="Views\Main\Assessments.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

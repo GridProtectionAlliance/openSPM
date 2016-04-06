@@ -289,7 +289,7 @@
             newRecord.AccountName = ko.observable("");
         });
 
-        $(viewModel).on("derivingObservableRecord", function (event, observableRecord) {
+        $(viewModel).on("beforeEdit", function (event, observableRecord) {
             // Load human readable account name into Name field
             if (observableRecord.AccountName)
                 observableRecord.Name(observableRecord.AccountName());
@@ -298,7 +298,7 @@
             observableRecord.UseDBAuthentication = ko.observable(!useADAuthentication(notNull(observableRecord.Name())));
         });
 
-        $(viewModel).on("derivingJSRecord", function (event, observableRecord, promises) {
+        $(viewModel).on("beforeSave", function (event, observableRecord, promises) {
             const isADGroup = !observableRecord.UseDBAuthentication();
 
             // Remove virtual observable fields before serialization for record updates

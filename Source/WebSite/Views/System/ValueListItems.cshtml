@@ -78,7 +78,7 @@
 
         @Html.Raw(Model.RenderViewModelConfiguration<ValueList>(ViewBag, "SortOrder", parentID))
 
-        $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
+        $(viewModel).on("beforeEdit", function(event, observableRecord) {
             // Initialize selected value list record
             observableRecord.GroupID(@parentID);
         });

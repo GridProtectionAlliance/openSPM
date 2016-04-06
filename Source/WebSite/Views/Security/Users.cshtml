@@ -295,7 +295,7 @@
             newRecord.AccountName = ko.observable("");
         });
 
-        $(viewModel).on("derivingObservableRecord", function(event, observableRecord) {
+        $(viewModel).on("beforeEdit", function(event, observableRecord) {
             // Create a virtual UseDBAuthentication field that is negated state of actual UseADAuthentication field
             observableRecord.UseDBAuthentication = ko.observable(!observableRecord.UseADAuthentication());
 
@@ -308,7 +308,7 @@
                 observableRecord.Password(null);
         });
 
-        $(viewModel).on("derivingJSRecord", function(event, observableRecord, promises) {
+        $(viewModel).on("beforeSave", function(event, observableRecord, promises) {
             // Set state of actual field to be negated state of virtual field
             observableRecord.UseADAuthentication(!observableRecord.UseDBAuthentication());
 

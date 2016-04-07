@@ -259,15 +259,14 @@
         {
             dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function (count) {
                 const businessSMEs = $("#businessSMEs");
-                const paginator = businessSMEs.puidatatable("getPaginator");
-                paginator.puipaginator("option", "totalRecords", count);
-                paginator.puipaginator("option", "page", 0);
-                businessSMEs.puidatatable("reload");
+                businessSMEs.puidatatable('setTotalRecords', count);
+                businessSMEs.puidatatable("getPaginator").puipaginator("setPage", 0);
+                //businessSMEs.puidatatable("reload");
             });
         }
 
-        function deleteBusinessUnitSME(userAccountID) {
-            if (viewModel.dataHubIsConnected()) {
+        function deleteBusinessUnitSME(userAccountID, userAccountName) {
+            if (viewModel.dataHubIsConnected() && confirm("Are you sure you want to remove user '" + userAccountName + "' from '" + viewModel.currentRecord().Name() + "' SMEs?")) {
                 dataHub.deleteBusinessUnitUserAccount(viewModel.currentRecord().ID(), userAccountID).done(function() {
                     refreshBusinessUnitSMETable();
                 });
@@ -302,7 +301,7 @@
                             },
                             {
                                 content: function (record) {
-                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteBusinessUnitSME('" + record.UserAccountID + "')\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteBusinessUnitSME('" + record.UserAccountID + "', '" + record.UserAccountName.replace("\\", "\\\\") + "')\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
                                 },
                                 headerText: "",
                                 headerStyle: "width: 10%",

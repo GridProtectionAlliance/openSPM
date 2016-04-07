@@ -141,6 +141,7 @@ function joinKeyValuePairs (source, parameterDelimiter, keyValueDelimiter, start
     return values.join(parameterDelimiter + " ");
 };
 
+// TODO: This interferes with PrimeUI - need to evaluate why...
 //Array.prototype.joinKeyValuePairs = function (parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter) {
 //    return joinKeyValuePairs(this, parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter);
 //};

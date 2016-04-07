@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using GSF.Data.Model;
 
 namespace openSPM.Model
 {
@@ -30,8 +31,10 @@ namespace openSPM.Model
     /// </summary>
     public class BusinessUnitUserAccount
     {
+        [PrimaryKey]
         public int BusinessUnitID { get; set; }
 
+        [PrimaryKey]
         public Guid UserAccountID { get; set; }
     }
 }

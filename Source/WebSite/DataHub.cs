@@ -23,6 +23,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
@@ -367,13 +368,19 @@ namespace openSPM
             return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
         }
 
-        public IEnumerable<BusinessUnitUserAccount> QueryBusinessUnitUserAccounts(int businessUnitID, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<BusinessUnitUserAccountDetail> QueryBusinessUnitUserAccounts(int businessUnitID, string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
+            return m_dataContext.Table<BusinessUnitUserAccountDetail>().
+                QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
+                Select(account =>
+                {
+                    account.UserAccountName = UserInfo.SIDToAccountName(account.UserAccountName);
+                    return account;
+                });
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
-        public void DeleteBusinessUnitUserAccount(int businessUnitID, int userAccountID)
+        public void DeleteBusinessUnitUserAccount(int businessUnitID, Guid userAccountID)
         {
             m_dataContext.Table<BusinessUnitUserAccount>().DeleteRecord(businessUnitID, userAccountID);
         }
@@ -386,7 +393,8 @@ namespace openSPM
         [AuthorizeHubRole("Administrator, Owner")]
         public void AddNewBusinessUnitUserAccount(BusinessUnitUserAccount record)
         {
-            m_dataContext.Table<BusinessUnitUserAccount>().AddNewRecord(record);
+            if (m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0} AND UserAccountID = {1}", record.BusinessUnitID, record.UserAccountID)) == 0)
+                m_dataContext.Table<BusinessUnitUserAccount>().AddNewRecord(record);
         }
 
         #endregion

@@ -1,5 +1,5 @@
 ﻿//******************************************************************************************************
-//  BusinessUnitUserAccountName.cs - Gbtc
+//  BusinessUnitUserAccountDetail.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -16,31 +16,27 @@
 //
 //  Code Modification History:
 //  ----------------------------------------------------------------------------------------------------
-//  04/07/2016 - Ritchie Carroll
+//  04/07/2016 - J. Ritchie Carroll
 //       Generated original version of source code.
 //
 //******************************************************************************************************
 
+using System;
+using GSF.Data.Model;
+
 namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.BusinessUnitUserAccountName  - extends BusinessUnitUserAccount data.
+    /// Model for openSPM.BusinessUnitUserAccountDetail view.
     /// </summary>
-    public class BusinessUnitUserAccountName : BusinessUnitUserAccount
+    public class BusinessUnitUserAccountDetail
     {
-        public BusinessUnitUserAccountName()
-        {
-        }
+        [PrimaryKey]
+        public int BusinessUnitID { get; set; }
 
-        public BusinessUnitUserAccountName(BusinessUnitUserAccount buuc)
-        {
-            BusinessUnitID = buuc.BusinessUnitID;
-            UserAccountID = buuc.UserAccountID;
-        }
+        [PrimaryKey]
+        public Guid UserAccountID { get; set; }
 
-        public string UserAccountName
-        {
-            get; set;
-        }
+        public string UserAccountName { get; set; }
     }
 }

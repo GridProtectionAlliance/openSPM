@@ -255,6 +255,24 @@
             //inputField.data("primeui-puiautocomplete").panel.width(inputField.parent().parent().width());
         }
 
+        function refreshBusinessUnitSMETable()
+        {
+            dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function (count) {
+                const businessSMEs = $("#businessSMEs");
+                businessSMEs.puidatatable('setTotalRecords', count);
+                businessSMEs.puidatatable("getPaginator").puipaginator("setPage", 0);
+                //businessSMEs.puidatatable("reload");
+            });
+        }
+
+        function deleteBusinessUnitSME(userAccountID, userAccountName) {
+            if (viewModel.dataHubIsConnected() && confirm("Are you sure you want to remove user '" + userAccountName + "' from '" + viewModel.currentRecord().Name() + "' SMEs?")) {
+                dataHub.deleteBusinessUnitUserAccount(viewModel.currentRecord().ID(), userAccountID).done(function() {
+                    refreshBusinessUnitSMETable();
+                });
+            }
+        }
+
         function initializeBusinessUnitSMETable() {
             const targetRows = 3;
 
@@ -268,8 +286,28 @@
                             totalRecords: count
                         },
                         columns: [
-                            { field: "UserAccountID", headerText: "User Name" },
-                            { content: function () { return "<button>Platforms</button>" }, headerText: "SME Platforms" }
+                            {
+                                field: "UserAccountName",
+                                headerText: "User Name",
+                                headerStyle: "width: 60%"
+                            },
+                            {
+                                content: function (record) {
+                                    return "<button type=\"button\" class=\"btn btn-xs\">Platforms</button>";
+                                },
+                                headerText: "",
+                                headerStyle: "width: 30%",
+                                bodyClass: "text-center"
+                            },
+                            {
+                                content: function (record) {
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteBusinessUnitSME('" + record.UserAccountID + "', '" + record.UserAccountName.replace("\\", "\\\\") + "')\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
+                                },
+                                headerText: "",
+                                headerStyle: "width: 10%",
+                                bodyStyle: "margin-right: 5px",
+                                bodyClass: "text-center"
+                            }
                         ],
                         datasource: function (callback, ui) {
                             const self = this;
@@ -317,11 +355,8 @@
                                             // Add new BusinessUnitUserAccount model instance to database
                                             dataHub.addNewBusinessUnitUserAccount(businessUnitUserAccount).done(function() {
                                                 // Refresh the data table
-                                                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
-                                                    const businessSMEs = $("#businessSMEs");
-                                                    businessSMEs.puidatatable("setTotalRecords", count);
-                                                    businessSMEs.puidatatable("reload");
-                                                });
+                                                refreshBusinessUnitSMETable();
+                                                $("#inputNewSME").val("");
                                             });
                                         }
                                     });

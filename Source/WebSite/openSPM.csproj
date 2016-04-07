@@ -204,7 +204,7 @@
     <Compile Include="Model\AppModel.cs" />
     <Compile Include="Model\Assessment.cs" />
     <Compile Include="Model\BusinessUnit.cs" />
-    <Compile Include="Model\BusinessUnitUserAccountName.cs" />
+    <Compile Include="Model\BusinessUnitUserAccountDetail.cs" />
     <Compile Include="Model\DiscoveryResultDocument.cs" />
     <Compile Include="Model\DiscoveryResult.cs" />
     <Compile Include="Model\Document.cs" />
@@ -386,6 +386,7 @@
     <Content Include="Scripts\jquery-2.2.1.js" />
     <Content Include="Scripts\jquery-2.2.1.min.js" />
     <Content Include="Scripts\jquery-2.2.1.min.map" />
+    <None Include="Properties\PublishProfiles\Export Package.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to GPAWEB.pubxml" />
     <None Include="Scripts\jquery-2.2.2.intellisense.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />
@@ -460,7 +461,6 @@
     <Content Include="Views\Main\Plan.cshtml" />
     <Content Include="Views\Main\Notification.cshtml" />
     <Content Include="Views\Main\Done.cshtml" />
-    <Content Include="Views\Main\Test.cshtml" />
     <Content Include="Views\Main\Assessments.cshtml" />
   </ItemGroup>
   <ItemGroup>

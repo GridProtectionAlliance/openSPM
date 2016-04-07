@@ -20,24 +20,62 @@
     //       Generated original version of source code.
     //
     //*****************************************************************************************************@
+@using System.Security.AccessControl
+@using GSF.Data.Model
 @using GSF.Security.Model
 @using GSF.Web.Model
 @using openSPM.Model
 @using GSF.Web
+@using GSF
+@using RazorEngine.Templating
 @model openSPM.Model.AppModel
 
 @{
     DataContext dataContext = Model.DataContext;
+    Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
+    int discoveryWarningDays, discoveryAlarmDays, discoveryCriticalAlarmDays, discoveryViolationDays;
+    string setting;
+
+    const string noneImage = "disabledlight.png";
+    const string warningImage = "yellowlight.png";
+    const string alarmImage = "amberlight.png";
+    const string criticalAlarmImage = "redlight.png";
+    const string violationImage = "blacklight.png";
+
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
+
+    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays))
+    {
+        discoveryWarningDays = 7;
+    }
+
+    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays))
+    {
+        discoveryAlarmDays = 14;
+    }
+
+    if (!appSettings.TryGetValue("discoveryCriticalAlarmDays", out setting) || !int.TryParse(setting, out discoveryCriticalAlarmDays))
+    {
+        discoveryCriticalAlarmDays = 21;
+    }
+
+    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays))
+    {
+        discoveryViolationDays = 35;
+    }
+
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
-    {   //    { "Field", "Label", "Classes" }
-        new[] { null, "Status", "text-center valign-middle" },
-        new[] { "ID", "Patch Status Identifier", "text-left" },
+{   //    { "Field", "Label", "Classes" }
+        new[] { null, "Alarm", "text-center valign-middle" },
+        new[] { "ID", "SPM Reference", "text-left" },
         new[] { null, "Business Unit", "text-left"},
-        new[] { null, "Patch Title", "text-left"},
-        new[] { "AssessmentResultKey", "Assessment Result", "text-left" },
+        new[] { null, "Title", "text-left"},
+        new[] { "AssessmentResultKey", "Result", "text-left" },
         new[] { "Details", "Basis", "text-left"},
+        new[] { null, "Due Date", "text-left"},
         new[] { null, "Patch&nbsp;Status", "text-center valign-middle" }
 
     };
@@ -49,23 +87,26 @@
 @helper BodyRows()
 {
 
-    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="lookupAlarmstateValue(PatchStatusID)"></td>
+    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
     <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupPatchMnemonicValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupTitleValue(lookupPatchIDValue(PatchStatusID))"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Update...</button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
-        @*<button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>*@
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
 
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    <div class="col-md-12">
-        @Html.Raw(dataContext.AddSelectField<Assessment, PatchStatus>("PatchStatusID", "ID", "PatchID"))
+    
+    <div class="col-md-12" data-bind="data: queryPatchStatusAssessmentDetails($data)">
+
+        @Html.Raw(dataContext.AddSelectField<Assessment,PatchStatusAssessmentDetail>("PatchStatusID", "ID", "PatchMnemonic"))
         @Html.Raw(Model.AddValueListSelectField<Assessment>("AssessmentResultKey", "assessAction"))
         @Html.Raw(dataContext.AddTextAreaField<Assessment>("Details"))
     </div>
@@ -83,6 +124,55 @@
         @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
         @Html.Raw(Model.RenderAbstract<Patch>("Title"))
+
+        function queryPatchStatusAssessmentDetails(record) {
+            console.log(record);
+            return record;
+        }
+
+        function getDueDate(day) {
+            var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);
+            var date = newdate.getDate();
+            var month = newdate.getMonth() + 1;
+            var year = newdate.getFullYear();
+            var processeddate = month + '/' + date + '/' + year;
+            //console.log(processeddate);
+            return processeddate;
+        }
+
+        function getDiscoveryStatusImage(element, record) {
+            const daysSinceLastReview = (new Date()).daysBetween(record.CreatedOn.toDate());
+            var image, title;
+
+            switch (true) {
+                case (daysSinceLastReview >= @discoveryViolationDays):
+                    image = "@violationImage";
+                    title = "Violation";
+                    break;
+                case (daysSinceLastReview >= @discoveryCriticalAlarmDays):
+                    image = "@criticalAlarmImage";
+                    title = "Critical Alarm";
+                    break;
+                case (daysSinceLastReview >= @discoveryAlarmDays):
+                    image = "@alarmImage";
+                    title = "Alarm";
+                    break;
+                case (daysSinceLastReview >= @discoveryWarningDays):
+                    image = "@warningImage";
+                    title = "Warning";
+                    break;
+                default:
+                    image = "@noneImage";
+                    title = "OK";
+                    break;
+            }
+
+            element.attr("src", "@statusLightsImagePath" + image);
+            element.attr("alt", title);
+            element.attr("title", title);
+
+            return undefined;
+        }
     </script>
 }
 

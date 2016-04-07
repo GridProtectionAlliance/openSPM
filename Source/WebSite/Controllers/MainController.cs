@@ -182,6 +182,7 @@ namespace openSPM.Controllers
         public ActionResult Assessments()
         {
             m_appModel.ConfigureView(Url.RequestContext, "Assessments", ViewBag);
+            ViewBag.psag = m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords();
             return View();
         }
 

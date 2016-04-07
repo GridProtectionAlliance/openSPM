@@ -256,28 +256,33 @@
         }
 
         function initializeBusinessUnitSMETable() {
-            const targetRows = 5;
+            const targetRows = 3;
 
-            $("#businessSMEs").puidatatable({
-                lazy: true,
-                caption: "Business Unit SME's",
-                paginator: {
-                    rows: targetRows
-                },
-                columns: [
-                    { field: "UserAccountID", headerText: "User Name" },
-                    { content: function() { return "<button>Platforms</button>" }, headerText: "SME Platforms" }
-                ],
-                datasource: function(callback, ui) {
-                    const self = this;
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
+                    $("#businessSMEs").puidatatable({
+                        lazy: true,
+                        caption: "Business Unit SME's",
+                        paginator: {
+                            rows: targetRows,
+                            totalRecords: count
+                        },
+                        columns: [
+                            { field: "UserAccountID", headerText: "User Name" },
+                            { content: function () { return "<button>Platforms</button>" }, headerText: "SME Platforms" }
+                        ],
+                        datasource: function (callback, ui) {
+                            const self = this;
 
-                    if (viewModel.dataHubIsConnected()) {
-                        dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID(), notNull(ui.sortField, "UserAccountID"), ui.sortOrder === 1, ui.first / targetRows, targetRows).done(function(businessUnitUserAccounts) {
-                            callback.call(self, businessUnitUserAccounts);
-                        });
-                    }
-                }
-            });
+                            if (viewModel.dataHubIsConnected()) {
+                                dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID(), notNull(ui.sortField, "UserAccountID"), ui.sortOrder === 1, Math.floor(ui.first / targetRows) + 1, targetRows).done(function (businessUnitUserAccounts) {
+                                    callback.call(self, businessUnitUserAccounts);
+                                });
+                            }
+                        }
+                    });
+                });
+            }
         }
 
         $(function() {
@@ -312,7 +317,11 @@
                                             // Add new BusinessUnitUserAccount model instance to database
                                             dataHub.addNewBusinessUnitUserAccount(businessUnitUserAccount).done(function() {
                                                 // Refresh the data table
-                                                setTimeout(function() { $("#businessSMEs").puidatatable("reload"); }, 50);
+                                                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
+                                                    const businessSMEs = $("#businessSMEs");
+                                                    businessSMEs.puidatatable("setTotalRecords", count);
+                                                    businessSMEs.puidatatable("reload");
+                                                });
                                             });
                                         }
                                     });

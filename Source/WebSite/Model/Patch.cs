@@ -54,6 +54,13 @@ namespace openSPM.Model
         }
 
         [Required]
+        [Label("Target Platform / Device")]
+        public int PlatformID
+        {
+            get; set;
+        }
+
+        [Required]
         [Label("SPM Patch Identifier")]
         [StringLength(64)]
         public string PatchMnemonic
@@ -86,12 +93,6 @@ namespace openSPM.Model
         [Label("Patch Title")]
         [StringLength(80)]
         public string Title
-        {
-            get; set;
-        }
-
-        [Label("Target Platform / Device")]
-        public string Target
         {
             get; set;
         }

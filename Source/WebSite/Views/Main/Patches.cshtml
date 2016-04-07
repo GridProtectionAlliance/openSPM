@@ -88,7 +88,7 @@
     </div>
     <div class="col-md-4">
         @Html.Raw(dataContext.AddInputField<Patch>("Title"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("Target"))
+        @Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))

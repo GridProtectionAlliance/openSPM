@@ -212,7 +212,9 @@
     <Compile Include="Model\Install.cs" />
     <Compile Include="Model\InstallDocument.cs" />
     <Compile Include="Model\MenuItem.cs" />
+    <Compile Include="Model\MitigationPlan.cs" />
     <Compile Include="Model\NoticeLog.cs" />
+    <Compile Include="Model\PatchPatchStatusDetail.cs" />
     <Compile Include="Model\PatchStatusAssessmentDetail.cs" />
     <Compile Include="Model\UserAccountNoticeLevel.cs" />
     <Compile Include="Model\Page.cs" />
@@ -220,7 +222,6 @@
     <Compile Include="Model\Patch.cs" />
     <Compile Include="Model\PatchDocument.cs" />
     <Compile Include="Model\PatchStatus.cs" />
-    <Compile Include="Model\Plan.cs" />
     <Compile Include="Model\Platform.cs" />
     <Compile Include="Model\UserAccountPlatform.cs" />
     <Compile Include="Model\Settings.cs" />
@@ -462,6 +463,9 @@
     <Content Include="Views\Main\Notification.cshtml" />
     <Content Include="Views\Main\Done.cshtml" />
     <Content Include="Views\Main\Assessments.cshtml" />
+    <Content Include="Views\Main\InstallDocument.cshtml" />
+    <Content Include="Views\Main\_PartialPage1.cshtml" />
+    <Content Include="Views\Main\MitigationPlan.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

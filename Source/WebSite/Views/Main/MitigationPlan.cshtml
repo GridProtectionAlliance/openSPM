@@ -1,0 +1,164 @@
+﻿@*******************************************************************************************************
+//  Plan.cshtml - Gbtc
+//
+//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+//  file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  03/03/2016 - Russell Robertson
+//       Generated original version of source code.
+//
+//*****************************************************************************************************@
+@using GSF.Web.Model
+@using GSF
+@using openSPM.Model
+@model openSPM.Model.AppModel
+@{
+    DataContext dataContext = Model.DataContext;
+
+    // Define column headers, use null for field name to make column non-sortable
+    ViewBag.HeaderColumns = new[]
+    {   //    { "Field", "Label", "Classes" }
+        new[] { "PatchStatusID", "Patch ID", "text-left" },
+        new[] { null, "Business Group", "text-left" },
+        new[] { null, "Title", "text-left"}
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "Midigation Plan";
+
+}
+<p>&nbsp;</p>
+<ul>
+    <li>A list of "open" mitigation plans will be displayed.</li>
+    <li>A filter will be available at the top of the screen for "Business Unit" and default to the BUCs or SMEs BU -- or to "all" for everyone else.</li>
+    <li>There can be multiple plans available for each patch.</li>
+    <li>The list will be sorted by patchID (the TVA assigned label), BUG, and title.</li>
+    <li>An SPM can create a new plan for this patch for their BU.  Only one plan per BUgroup per patch is allowed.</li>
+    <li>
+        A BUC can delete a plan for their BUG provided they have not approved it.  Following plan approval, only the Owner can remove it.  It will be marked as deleted in the database -- but will have no GUI tools available to retrieve it -- since there
+        can only be one plan per patch per BUG.
+    </li>
+    <li>
+        Unfortunately, if a plan is required then this plan is for this BUG only.  If it turns out there is a common plan that is shared among BUs, then this plan must be replicated since the action items for execution of the plan are assigned the BUG
+        that owns it.
+    </li>
+    <li>The BUC must approve the plan as a whole to stop the compliance timer.</li>
+    <li>A BUC can add or remove action items in a Plan following approval without compliance impact.</li>
+
+</ul>
+<p>&nbsp;</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Required Fields</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Patch Identifier</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Justification</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Summary</td>
+        </tr>
+
+    </tbody>
+</table>
+<p>&nbsp;</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Optional Fields</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>1</td>
+            <td>Risk</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Detail</td>
+        </tr>
+
+    </tbody>
+</table>
+
+@helper BodyRows()
+{
+    <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupPatchMnemonicValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
+    <td width="40%" class="text-left valign-middle" data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></td>
+    <td width="45%" class="text-left valign-middle" data-bind="text: lookupTitleValue(lookupPatchIDValue(PatchStatusID))"></td>
+    <td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+    </td>
+}
+@helper AddNewEditDialog(DataContext dataContext)
+{
+    <div class="col-md-6">
+        <div class="form-group">
+            <label for="selectPatchStatusID">Patch:</label>
+            <select class="form-control" id="selectPatchStatusID" data-bind="value: PatchStatusID, options: patches, optionsText: 'PatchMnemonic', optionsValue: 'PatchStatusID'"></select>
+        </div>  
+        @Html.Raw(dataContext.AddInputField<MitigationPlan>("MiPlanID"))
+        @Html.Raw(dataContext.AddInputField<MitigationPlan>("PlanURL"))
+        @Html.Raw(dataContext.AddTextAreaField<MitigationPlan>("Justification"))
+        @Html.Raw(dataContext.AddTextAreaField<MitigationPlan>("Summary"))
+    </div>
+    <div class="col-md-6">
+        @Html.Raw(dataContext.AddTextAreaField<MitigationPlan>("Risk"))
+        @Html.Raw(dataContext.AddTextAreaField<MitigationPlan>("Detail"))
+        @Html.Raw(dataContext.AddDateField<MitigationPlan>("ApprovedOn"))
+        @Html.Raw(dataContext.AddInputField<MitigationPlan>("ApprovedByName"))
+    </div>
+
+        }
+        @Html.Partial("PagedViewModel")
+        @section Scripts {
+            <script>
+                @Html.Raw(Model.RenderViewModelConfiguration<MitigationPlan>(ViewBag))
+                @Html.Raw(Model.RenderAbstract<Patch>("PatchMnemonic"))
+                @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
+                @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
+                @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+                @Html.Raw(Model.RenderAbstract<Patch>("Title"))
+
+
+                $(viewModel).on("beforeEdit", function (event, observableRecord) {
+                    observableRecord.patches = ko.observableArray();
+
+                    if (viewModel.dataHubIsConnected()) {
+                        dataHub.queryPatchPatchStatusDetails().done(function (records) {
+                            observableRecord.patches.removeAll();
+                            observableRecord.patches(records);
+                        });
+                    }
+                });
+
+                $(viewModel).on("beforeSave", function (event, observableRecord) {
+                    delete observableRecord.patches;
+                });
+            </script>
+        }
+

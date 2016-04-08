@@ -695,6 +695,160 @@ namespace openSPM
 
         #endregion
 
+        #region [Install Table Operations]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Install), RecordOperation.QueryRecordCount)]
+        public int QueryInstallCount()
+        {
+            return m_dataContext.Table<Install>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Install), RecordOperation.QueryRecords)]
+        public IEnumerable<Install> QueryInstalls(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Install), RecordOperation.DeleteRecord)]
+        public void DeleteInstall(int id)
+        {
+            m_dataContext.Table<Install>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Install), RecordOperation.CreateNewRecord)]
+        public Install NewInstall()
+        {
+            return new Install();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Install), RecordOperation.AddNewRecord)]
+        public void AddNewInstall(Install record)
+        {
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Install>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(Install), RecordOperation.UpdateRecord)]
+        public void UpdateInstall(Install record)
+        {
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Install>().UpdateRecord(record);
+        }
+
+        #endregion
+
+        #region [InstallDocument Table Operations]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(InstallDocument), RecordOperation.QueryRecordCount)]
+        public int QueryInstallDocumentCount()
+        {
+            return m_dataContext.Table<InstallDocument>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(InstallDocument), RecordOperation.QueryRecords)]
+        public IEnumerable<InstallDocument> QueryInstallDocuments()
+        {
+            return m_dataContext.Table<InstallDocument>().QueryRecords("InstallID");
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(InstallDocument), RecordOperation.DeleteRecord)]
+        public void DeleteInstallDocument(int id)
+        {
+            m_dataContext.Table<InstallDocument>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(InstallDocument), RecordOperation.CreateNewRecord)]
+        public InstallDocument NewInstallDocument()
+        {
+            return new InstallDocument();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(InstallDocument), RecordOperation.AddNewRecord)]
+        public void AddNewInstallDocument(InstallDocument record)
+        {
+            m_dataContext.Table<InstallDocument>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(InstallDocument), RecordOperation.UpdateRecord)]
+        public void UpdateInstallDocument(InstallDocument record)
+        {
+            m_dataContext.Table<InstallDocument>().UpdateRecord(record);
+        }
+
+        #endregion
+
+        #region [MitigationPlan Table Operations]
+
+        [RecordOperation(typeof(MitigationPlan), RecordOperation.QueryRecordCount)]
+        public int QueryMitigationPlanCount(bool showDeleted)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<MitigationPlan>().QueryRecordCount();
+
+            return m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+        }
+
+        [RecordOperation(typeof(MitigationPlan), RecordOperation.QueryRecords)]
+        public IEnumerable<MitigationPlan> QueryMitigationPlans(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+                return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize);
+
+            return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(MitigationPlan), RecordOperation.DeleteRecord)]
+        public void DeleteMitigationPlan(int id)
+        {
+            // For MitigationPlanes, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE MitigationPlan SET IsDeleted=1 WHERE ID={0}", id);
+        }
+
+        [RecordOperation(typeof(MitigationPlan), RecordOperation.CreateNewRecord)]
+        public MitigationPlan NewMitigationPlan()
+        {
+            return new MitigationPlan();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(MitigationPlan), RecordOperation.AddNewRecord)]
+        public void AddNewMitigationPlan(MitigationPlan record)
+        {
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            m_dataContext.Table<MitigationPlan>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(MitigationPlan), RecordOperation.UpdateRecord)]
+        public void UpdateMitigationPlan(MitigationPlan record)
+        {
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<MitigationPlan>().UpdateRecord(record);
+        }
+
+        #endregion
+
         #region [PatchStatusAssessmentDetail Table Operations]
 
         [AuthorizeHubRole("Administrator")]
@@ -714,7 +868,29 @@ namespace openSPM
         {
             return new PatchStatusAssessmentDetail();
         }
-        
+
+        #endregion
+
+        #region [PatchPatchStatusDetail Table Operations]
+
+        [AuthorizeHubRole("Administrator")]
+        public int QueryPatchPatchStatusDetailCount()
+        {
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails()
+        {
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords("PatchMnemonic");
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        public PatchPatchStatusDetail NewPatchPatchStatusDetail()
+        {
+            return new PatchPatchStatusDetail();
+        }
+
         #endregion
 
         #region [ LatestVendorDiscoveryResult View Operations ]

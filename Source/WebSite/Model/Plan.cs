@@ -23,6 +23,7 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Web.DynamicData;
 using GSF.Data.Model;
 
 namespace openSPM.Model
@@ -32,6 +33,7 @@ namespace openSPM.Model
     /// </summary>
     [PrimaryLabel("ID")]
     [IsDeletedFlag("IsDeleted")]
+    [TableName("[Plan]")]
     public class Plan
     {
         [PrimaryKey(true)]

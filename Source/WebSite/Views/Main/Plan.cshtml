@@ -20,10 +20,24 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web.Model
+@using GSF
+@using openSPM.Model
 @model openSPM.Model.AppModel
 @{
+    DataContext dataContext = Model.DataContext;
 
-   
+    // Define column headers, use null for field name to make column non-sortable
+    ViewBag.HeaderColumns = new[]
+    {   //    { "Field", "Label", "Classes" }
+        new[] { "PatchStatusID", "Patch ID", "text-left" },
+        new[] { "Justification", "Justification", "text-left" }
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "Install Documents";
+
 }
 <p>&nbsp;</p>
 <ul>
@@ -86,4 +100,25 @@
     </tbody>
 </table>
 
+@helper BodyRows()
+{
+    <td width="95%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchStatusID, click: $parent.viewPageRecord"></button></td>
+    <td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+    </td>
+}
+@helper AddNewEditDialog(DataContext dataContext)
+{
+    <div class="col-md-12">
+        @Html.Raw(Model.AddValueListSelectField<Plan>("ID", "PlatchStatusID"))
+    </div>
+
+}
+@Html.Partial("PagedViewModel")
+@section Scripts {
+    <script>
+        @Html.Raw(Model.RenderViewModelConfiguration<Plan>(ViewBag))
+    </script>
+}
 

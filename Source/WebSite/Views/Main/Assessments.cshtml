@@ -103,16 +103,16 @@
 
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    
-    <div class="col-md-12" data-bind="data: queryPatchStatusAssessmentDetails($data)">
 
-        @Html.Raw(dataContext.AddSelectField<Assessment,PatchStatusAssessmentDetail>("PatchStatusID", "ID", "PatchMnemonic"))
+    <div class="col-md-12">
+        <div class="form-group">
+            <label for="selectPatchStatusID">Patch:</label>
+            <select class="form-control" id="selectPatchStatusID" data-bind="value: PatchStatusID, options: patchStatuses, optionsText: 'PatchMnemonic', optionsValue: 'ID'"></select>
+        </div>    
         @Html.Raw(Model.AddValueListSelectField<Assessment>("AssessmentResultKey", "assessAction"))
         @Html.Raw(dataContext.AddTextAreaField<Assessment>("Details"))
     </div>
 }
-
-
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
@@ -124,11 +124,6 @@
         @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
         @Html.Raw(Model.RenderAbstract<Patch>("Title"))
-
-        function queryPatchStatusAssessmentDetails(record) {
-            console.log(record);
-            return record;
-        }
 
         function getDueDate(day) {
             var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);
@@ -173,6 +168,21 @@
 
             return undefined;
         }
+        
+        $(viewModel).on("beforeEdit", function(event, observableRecord) {
+            observableRecord.patchStatuses = ko.observableArray();
+            
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryPatchStatusAssessmentDetails().done(function(records) {
+                    observableRecord.patchStatuses.removeAll();
+                    observableRecord.patchStatuses(records);
+                });
+            }
+        });
+
+        $(viewModel).on("beforeSave", function(event, observableRecord) {
+            delete observableRecord.PatchStatuses;
+        });
     </script>
 }
 

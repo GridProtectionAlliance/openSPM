@@ -698,27 +698,23 @@ namespace openSPM
         #region [PatchStatusAssessmentDetail Table Operations]
 
         [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(PatchStatusAssessmentDetail), RecordOperation.QueryRecordCount)]
         public int QueryPatchStatusAssessmentDetailCount()
         {
             return m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(PatchStatusAssessmentDetail), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchStatusAssessmentDetail> QueryPatchStatusAssessmentDetails(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<PatchStatusAssessmentDetail> QueryPatchStatusAssessmentDetails()
         {
-            return m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords(sortField, ascending, page, pageSize);
+            return m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords("PatchMnemonic");
         }
 
         [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(PatchStatusAssessmentDetail), RecordOperation.CreateNewRecord)]
         public PatchStatusAssessmentDetail NewPatchStatusAssessmentDetail()
         {
             return new PatchStatusAssessmentDetail();
         }
         
-
         #endregion
 
         #region [ LatestVendorDiscoveryResult View Operations ]

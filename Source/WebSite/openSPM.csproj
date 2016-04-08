@@ -213,6 +213,7 @@
     <Compile Include="Model\InstallDocument.cs" />
     <Compile Include="Model\MenuItem.cs" />
     <Compile Include="Model\NoticeLog.cs" />
+    <Compile Include="Model\PatchStatusAssessmentDetail.cs" />
     <Compile Include="Model\UserAccountNoticeLevel.cs" />
     <Compile Include="Model\Page.cs" />
     <Compile Include="Model\Menu.cs" />

@@ -1,0 +1,92 @@
+﻿@*******************************************************************************************************
+    //  Platforms.cshtml - Gbtc
+    //
+    //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+    //
+    //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+    //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+    //  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+    //  file except in compliance with the License. You may obtain a copy of the License at:
+    //
+    //      http://opensource.org/licenses/MIT
+    //
+    //  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+    //  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+    //  License for the specific language governing permissions and limitations.
+    //
+    //  Code Modification History:
+    //  ----------------------------------------------------------------------------------------------------
+    //  02/29/2016 - Ritchie Carroll
+    //       Generated original version of source code.
+    //
+    //*****************************************************************************************************@
+@using GSF.Security.Model
+@using GSF.Web.Model
+@using openSPM.Model
+@using GSF.Web
+@model openSPM.Model.AppModel
+
+@{
+    DataContext dataContext = Model.DataContext;
+
+    // Define column headers, use null for field name to make column non-sortable
+    ViewBag.HeaderColumns = new[]
+    {   //    { "Field", "Label", "Classes" }
+        new[] { null, "Status", "text-center valign-middle" },
+        new[] { "ID", "Patch Status Identifier", "text-left" },
+        new[] { null, "Business Unit", "text-left"},
+        new[] { null, "Patch Title", "text-left"},
+        new[] { "AssessmentResultKey", "Assessment Result", "text-left" },
+        new[] { "Details", "Basis", "text-left"},
+        new[] { null, "Patch&nbsp;Status", "text-center valign-middle" }
+
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "Assessment";
+}
+@helper BodyRows()
+{
+
+    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="lookupAlarmstateValue(PatchStatusID)"></td>
+    <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupPatchMnemonicValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupTitleValue(lookupPatchIDValue(PatchStatusID))"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Update...</button></td>
+    <td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        @*<button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>*@
+    </td>
+}
+
+@helper AddNewEditDialog(DataContext dataContext)
+{
+    <div class="col-md-12">
+        @Html.Raw(dataContext.AddSelectField<Assessment, PatchStatus>("PatchStatusID", "ID", "PatchID"))
+        @Html.Raw(Model.AddValueListSelectField<Assessment>("AssessmentResultKey", "assessAction"))
+        @Html.Raw(dataContext.AddTextAreaField<Assessment>("Details"))
+    </div>
+}
+
+
+@Html.Partial("PagedViewModel")
+@section Scripts {
+    <script>
+        @Html.Raw(Model.RenderViewModelConfiguration<Assessment>(ViewBag))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
+        @Html.Raw(Model.RenderAbstract<Patch>("PatchMnemonic"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+        @Html.Raw(Model.RenderAbstract<Patch>("Title"))
+    </script>
+}
+
+
+
+
+

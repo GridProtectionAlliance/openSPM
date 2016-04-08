@@ -20,9 +20,12 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web.Model
+@using openSPM.Model
+@using GSF
 @model openSPM.Model.AppModel
 @{
-
+    DataContext dataContext = Model.DataContext;
     // TODO: Add examples of how to get to settings
 }
 
@@ -52,22 +55,78 @@
 <p>&nbsp;</p>
 <table class="table">
     <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>Optional Fields</th>
-        </tr>
+    <tr>
+        <th>&nbsp;</th>
+        <th>Optional Fields</th>
+    </tr>
     </thead>
     <tbody>
-        <tr>
-            <td>1</td>
-            <td>Installation Notes</td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td>Description</td>
-        </tr>
-       
+    <tr>
+        <td>1</td>
+        <td>Installation Notes</td>
+    </tr>
+    <tr>
+        <td>2</td>
+        <td>Description</td>
+    </tr>
+
     </tbody>
 </table>
+
+
+@{
+    ViewBag.HeaderColumns = new[]
+{
+        //    { "Field", "Label", "Classes" }
+        new[] { "PatchID", "SPM Reference", "text-left" },
+        new[] { "Summary", "Summary", "text-left"},
+        new[] { "CompletedNotes", "Installation Notes", "text-left"},
+        new[] { "CompletedOn", "Completion Date", "text-left"},
+        new[] { null, "Documents", "text-center"}
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "Install";
+}
+@helper BodyRows()
+{
+
+    
+    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupPatchMnemonicValue(PatchID), click: $parent.viewPageRecord"></button></td>
+    <td width="30%" class="text-left valign-middle"><div nowrap data-bind="text: Summary"></div></td>
+    <td width="30%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedNotes"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedOn.formatDate(DateFormat)"></div></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" id="newWindow" onclick="showWindow();" class="btn btn-danger btn-sm">View</button></td>
+    <td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+    </td>
+}
+
+@helper AddNewEditDialog(DataContext dataContext)
+{
+
+    <div class="col-md-12">
+        @Html.Raw(dataContext.AddSelectField<Install,Patch>("PatchID", "ID", "PatchMnemonic"))
+        @Html.Raw(dataContext.AddTextAreaField<Install>("Summary"))
+        @Html.Raw(dataContext.AddTextAreaField<Install>("CompletedNotes"))
+        @Html.Raw(dataContext.AddDateField<Install>("CompletedOn"))
+
+
+    </div>
+}
+@Html.Partial("PagedViewModel")
+@section Scripts {
+    <script>
+        @Html.Raw(Model.RenderViewModelConfiguration<Install>(ViewBag))
+        @Html.Raw(Model.RenderAbstract<Patch>("PatchMnemonic"))
+
+       function showWindow() {
+           window.open('/Main/InstallDocument', 'PopupWindow', 'width=400px,height=400px,top=150,left=250');
+        };
+        
+    </script>
+}
 
 

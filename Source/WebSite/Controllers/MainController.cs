@@ -143,7 +143,13 @@ namespace openSPM.Controllers
 
         public ActionResult Install()
         {
-            m_appModel.ConfigureView(Url.RequestContext, "Install", ViewBag);
+            m_appModel.ConfigureView<Install>(Url.RequestContext, "Install", ViewBag);
+            return View();
+        }
+
+        public ActionResult InstallDocument()
+        {
+            m_appModel.ConfigureView<InstallDocument>(Url.RequestContext, "InstallDocument", ViewBag);
             return View();
         }
 
@@ -165,6 +171,11 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult MitigationPlan()
+        {
+            m_appModel.ConfigureView<MitigationPlan>(Url.RequestContext, "MitigationPlan", ViewBag);
+            return View();
+        }
 
         public ActionResult Notification()
         {
@@ -181,7 +192,7 @@ namespace openSPM.Controllers
 
         public ActionResult Assessments()
         {
-            m_appModel.ConfigureView(Url.RequestContext, "Assessments", ViewBag);
+            m_appModel.ConfigureView<Assessment>(Url.RequestContext, "Assessments", ViewBag);
             ViewBag.psag = m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords();
             return View();
         }

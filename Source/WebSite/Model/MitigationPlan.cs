@@ -1,5 +1,5 @@
 //******************************************************************************************************
-//  Install.cs - Gbtc
+//  Plan.cs - Gbtc
 //
 //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
 //
@@ -23,51 +23,55 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Web.DynamicData;
 using GSF.Data.Model;
 
 namespace openSPM.Model
 {
     /// <summary>
-    /// Model for openSPM.Install table.
+    /// Model for openSPM.Plan table.
     /// </summary>
-    [PrimaryLabel("Summary")]
-    public class Install
+    [PrimaryLabel("ID")]
+    [IsDeletedFlag("IsDeleted")]
+    public class MitigationPlan
     {
         [PrimaryKey(true)]
         public int ID { get; set; }
 
-        [Required]
         [Label("Patch")]
-        public int PatchID { get; set; }
+        [Required]
+        public int PatchStatusID { get; set; }
 
-        [Label("Summary")]
+        [Required]
+        [Label("MiPlan ID")]
+        public int MiPlanID { get; set; }
+
+        [Label("Plan URL")]
+        [StringLength(512)]
+        [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
+        public string PlanURL { get; set; }
+
+        [Required]
+        public string Justification { get; set; }
+        [Required]
         public string Summary { get; set; }
+        public string Risk { get; set; }
+        public string Detail { get; set; }
 
-        [Required]
-        [Label("Completion Date")]
-        [InitialValue("new Date()")]
-        public DateTime? CompletedOn { get; set; }
+        [Label("Approved On")]
+        [InitialValue(null)]
+        public DateTime? ApprovedOn { get; set; }
 
-        [Required]
-        [Label("Completed Notes")]
-        public string CompletedNotes { get; set; }
+        [Label("Approved By")]
+        [StringLength(200)]
+        public string ApprovedByName { get; set; }
 
-        [Required]
-        [Label("Created On")]
-        [InitialValue("new Date()")]
+       public bool IsDeleted { get; set; }
+
+       
         public DateTime CreatedOn { get; set; }
-
-        [Required]
-        [Label("Created By")]
         public Guid CreatedByID { get; set; }
-
-        [Required]
-        [Label("Updated On")]
-        [InitialValue("new Date()")]
         public DateTime UpdatedOn { get; set; }
-
-        [Required]
-        [Label("Updated By")]
         public Guid UpdatedByID { get; set; }
     }
 }

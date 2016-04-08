@@ -21,15 +21,23 @@
 //
 //******************************************************************************************************
 
+using GSF.Data.Model;
+
 namespace openSPM.Model
 {
     /// <summary>
     /// Model for openSPM.InstallDocument table.
     /// </summary>
+    [PrimaryLabel("InstallID")]
     public class InstallDocument
     {
+        [PrimaryKey]
+        public int ID { get; set; }
+
+        [Label("Install ID")]
         public int InstallID { get; set; }
 
+        [Label("Document ID")]
         public int DocumentID { get; set; }
     }
 }

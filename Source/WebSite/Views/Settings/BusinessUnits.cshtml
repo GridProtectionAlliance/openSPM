@@ -57,7 +57,7 @@
         @Html.Raw(dataContext.AddInputField<BusinessUnit>("BackupCoordinatorID"))
         @Html.Raw(dataContext.AddTextAreaField<BusinessUnit>("Description"))
 
-        <label for="inputNewSME">Add SME to Business Group:</label>
+        <label for="inputNewSME">Add SME to Business Unit:</label>
         <div class="input-group">
             <input type="text" class="form-control" data-bind="attr: {'readonly': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="inputNewSME" required>
             <span id="inputNewSMEAdd" class="input-group-addon" data-bind="style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}"><i class="glyphicon glyphicon-plus"></i></span>
@@ -274,15 +274,15 @@
         }
 
         function initializeBusinessUnitSMETable() {
-            const targetRows = 3;
+            const rowsPerPage = 3;
 
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
+                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function (count) {                    
                     $("#businessSMEs").puidatatable({
                         lazy: true,
                         caption: "Business Unit SME's",
                         paginator: {
-                            rows: targetRows,
+                            rows: rowsPerPage,
                             totalRecords: count
                         },
                         columns: [
@@ -301,7 +301,8 @@
                             },
                             {
                                 content: function (record) {
-                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteBusinessUnitSME('" + record.UserAccountID + "', '" + record.UserAccountName.replace("\\", "\\\\") + "')\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
+                                    const userName = record.UserAccountName;
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteBusinessUnitSME('" + record.UserAccountID + "', '" + userName.replace("\\", "\\\\") + "')\" title=\"Delete '" + userName + "'\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
                                 },
                                 headerText: "",
                                 headerStyle: "width: 10%",
@@ -313,12 +314,14 @@
                             const self = this;
 
                             if (viewModel.dataHubIsConnected()) {
-                                dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID(), notNull(ui.sortField, "UserAccountID"), ui.sortOrder === 1, Math.floor(ui.first / targetRows) + 1, targetRows).done(function (businessUnitUserAccounts) {
+                                dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID(), notNull(ui.sortField, "UserAccountName"), ui.sortOrder === 1, Math.floor(ui.first / rowsPerPage) + 1, rowsPerPage).done(function (businessUnitUserAccounts) {
                                     callback.call(self, businessUnitUserAccounts);
                                 });
                             }
                         }
                     });
+
+                    //$("#businessSMEs").find("table > thead").hide();
                 });
             }
         }

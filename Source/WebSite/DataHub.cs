@@ -758,9 +758,9 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(InstallDocument), RecordOperation.QueryRecords)]
-        public IEnumerable<InstallDocument> QueryInstallDocuments()
+        public IEnumerable<InstallDocument> QueryInstallDocuments(string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<InstallDocument>().QueryRecords("InstallID");
+            return m_dataContext.Table<InstallDocument>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator")]

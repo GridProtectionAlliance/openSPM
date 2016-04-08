@@ -8,12 +8,12 @@
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "DocumentID", "Documents", "text-center" }
+        new[] { "DocumentID", "Documents", "text-left" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
-    ViewBag.AddNewEditTitle = "Install Documents";
+    ViewBag.AddNewEditTitle = "InstallDocument";
 }
 @helper BodyRows()
 {
@@ -32,7 +32,7 @@
     </div>
     
 }
-
+@Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<InstallDocument>(ViewBag))

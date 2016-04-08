@@ -61,13 +61,16 @@ namespace openSPM
             bundles.Add(new ScriptBundle("~/js.bundle/primeui").Include(
                         "~/Scripts/plugins-all.js",
                         $"~/Scripts/mustache{min}.js",
-                        $"~/Scripts/primeui.js"));
+                        "~/Scripts/primeui.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/signalR").Include(
                         $"~/Scripts/jquery.signalR-2.2.0{min}.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/gsfwebclient").Include(
                         "~/Scripts/gsf.web.client.js"));
+
+            bundles.Add(new ScriptBundle("~/js.bundle/gsfwebprimeui").Include(
+                        "~/Scripts/gsf.web.primeui.js"));
 
             bundles.Add(new ScriptBundle("~/js.bundle/site").Include(
                         "~/Scripts/Site.js"));

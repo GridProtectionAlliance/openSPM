@@ -303,6 +303,52 @@ namespace openSPM
             m_dataContext.Table<Platform>().UpdateRecord(record);
         }
 
+        /// <summary>
+        /// Searches platforms by name.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <returns>Search results as "IDLabel" values - serialized as JSON [{ id: "value", label : "name" }, ...]; useful for dynamic lookup lists.</returns>
+        public IEnumerable<IDLabel> SearchPlatforms(string searchText)
+        {
+            return m_dataContext
+                .Table<Platform>()
+                .QueryRecords()
+                .Where(record => record?.Name?.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase) ?? false)
+                .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+        }
+
+        #endregion
+
+        #region [ UserAccountPlatform Table Operations ]
+
+        public int QueryUserAccountPlatformCount(Guid userAccountID)
+        {
+            return m_dataContext.Table<UserAccountPlatform>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", userAccountID));
+        }
+
+        public IEnumerable<UserAccountPlatformDetail> QueryUserAccountPlatforms(Guid userAccountID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<UserAccountPlatformDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", userAccountID));
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        public void DeleteUserAccountPlatform(Guid userAccountID, int platformID)
+        {
+            m_dataContext.Table<UserAccountPlatform>().DeleteRecord(userAccountID, platformID);
+        }
+
+        public UserAccountPlatform NewUserAccountPlatform()
+        {
+            return new UserAccountPlatform();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        public void AddNewUserAccountPlatform(UserAccountPlatform record)
+        {
+            if (m_dataContext.Table<UserAccountPlatform>().QueryRecordCount(new RecordRestriction("UserAccountID = {0} AND PlatformID = {1}", record.UserAccountID, record.PlatformID)) == 0)
+                m_dataContext.Table<UserAccountPlatform>().AddNewRecord(record);
+        }
+
         #endregion
 
         #region [ BusinessUnit Table Operations ]
@@ -368,15 +414,20 @@ namespace openSPM
             return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
         }
 
-        public IEnumerable<BusinessUnitUserAccountDetail> QueryBusinessUnitUserAccounts(int businessUnitID, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<BusinessUnitUserAccountDetail> QueryBusinessUnitUserAccounts(int businessUnitID, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<BusinessUnitUserAccountDetail>().
-                QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
+            IEnumerable<BusinessUnitUserAccountDetail> resolvedAccountRecords = m_dataContext.Table<BusinessUnitUserAccountDetail>().
+                QueryRecords("UserAccountName", ascending, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
                 Select(account =>
                 {
                     account.UserAccountName = UserInfo.SIDToAccountName(account.UserAccountName);
                     return account;
                 });
+
+            if (ascending)
+                return resolvedAccountRecords.OrderBy(key => key.UserAccountName);
+
+            return resolvedAccountRecords.OrderByDescending(key => key.UserAccountName);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]

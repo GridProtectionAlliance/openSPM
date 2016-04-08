@@ -63,10 +63,48 @@
             <span id="inputNewSMEAdd" class="input-group-addon" data-bind="style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}"><i class="glyphicon glyphicon-plus"></i></span>
         </div>
 
-        <div id="businessSMEs"></div>
+        <div id="businessSMEs">
+            <div id="loadingbusinessSMEs">
+                Loading&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
+            </div>            
+        </div>
     </div>
 }
 @Html.Partial("PagedViewModel")
+<div id="editSMEPlatformsDialog" class="modal fade" role="dialog">
+    <div class="modal-vertical-align-container">
+        <div class="modal-dialog modal-md modal-vertical-align-center">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">
+                        Edit <span id="editSMEPlatformsUserTitle"></span> Platforms
+                    </h4>
+                </div>
+                <div class="modal-body auto-height">
+                    <form role="form">
+                        <div class="col-md-12">
+                            <label for="inputNewPlatform">Add Platform for SME:</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="inputNewPlatform" required>
+                                <span id="inputNewPlatformAdd" class="input-group-addon"><i class="glyphicon glyphicon-plus"></i></span>
+                            </div>
+
+                            <div id="smePlatforms">
+                                <div id="loadingSMEPlatforms">
+                                    Loading&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         "use strict";
@@ -194,75 +232,35 @@
             }
         });
 
-        function initializeDynamicLookupField(fieldName, isObservable) {
-            if (isObservable === undefined)
-                isObservable = false;
-
-            const inputFieldID = "input" + fieldName;
-            const inputField = $("#" + inputFieldID);
-
-            // Turn off browser remembered field values
-            inputField.attr("autocomplete", "off");
-
-            if (isObservable)
-                inputField.wrap("<div class=\"input-group\"></div>");
-
-            // Insert drop-down button after input field
-            inputField.after("<span id=\"" + inputFieldID + "ShowAll\" class=\"input-group-addon\" data-bind=\"style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}\"><i class=\"glyphicon glyphicon-triangle-bottom\"></i></span>");
-
-            const inputFieldDropDown = $("#" + inputFieldID + "ShowAll");
-
-            // Set on-click handler for drop-down button
-            inputFieldDropDown.click(function() {
-                // Search all records when user clicks drop-down button
-                if (viewModel.dataHubIsConnected() && viewModel.recordMode() !== RecordMode.View)
-                    inputField.puiautocomplete("search", "");
-            });
-
-            // Apply data bindings to newly added drop-down button
-            ko.applyBindings(viewModel, inputFieldDropDown[0]);
-
-            inputField.puiautocomplete({
-                effect: "fade",
-                effectSpeed: "fast",
-                forceSelection: true,
-                completeSource: function(request, response) {
-                    const self = this;
-
-                    if (viewModel.dataHubIsConnected()) {
-                        securityHub.searchUserAccounts(request.query).done(function(userAccounts) {
-                            response.call(self, userAccounts);
-
-                            // Set z-index of panel to be above pop-up dialog
-                            self.panel.css("z-index", $("#addNewEditDialog").css("z-index") + 1);
-
-                            // Auto-size panel to full width of input field area (including input group buttons)
-                            setTimeout(function() { self.panel.width(inputField.parent().parent().width()); }, 25);
-                        });
-                    }
-                },
-                select: function(event, item) {
-                    // Make sure knockout sees any selection - it can't always pickup non-user initiated changes
-                    if (isObservable && item)
-                        viewModel.currentRecord()[fieldName](item.text());
-                }
-            });
-
-            // Override jQUery UI display style added by puiautocomplete (messes with bootstrap form-element formatting)
-            inputField.parent().css("display", "initial");
-
-            // Get access to autocomplete widget
-            //inputField.data("primeui-puiautocomplete").panel.width(inputField.parent().parent().width());
-        }
-
-        function refreshBusinessUnitSMETable()
-        {
-            dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function (count) {
+        function refreshBusinessUnitSMETable() {
+            dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
                 const businessSMEs = $("#businessSMEs");
                 businessSMEs.puidatatable('setTotalRecords', count);
                 businessSMEs.puidatatable("getPaginator").puipaginator("setPage", 0);
                 //businessSMEs.puidatatable("reload");
             });
+        }
+
+        var currentBusinessUnitUserAccounts = [];
+        var selectedBusinessUnitUserAccount = null;
+
+        function editBusinessUnitSMEPlatforms(userAccountID) {
+            // Lookup user account record from current page of business unit user accounts
+            selectedBusinessUnitUserAccount = null;
+
+            for (var i = 0; i < currentBusinessUnitUserAccounts.length; i++) {
+                if (currentBusinessUnitUserAccounts[i].UserAccountID === userAccountID) {
+                    selectedBusinessUnitUserAccount = currentBusinessUnitUserAccounts[i];
+                    break;
+                }
+            }
+
+            if (selectedBusinessUnitUserAccount == null) {
+                alert("Failed to find user account record '" + userAccountID + "' in current page cache.");
+            } else {
+                $("#editSMEPlatformsUserTitle").text(selectedBusinessUnitUserAccount.UserAccountName);
+                $("#editSMEPlatformsDialog").modal("show");
+            }
         }
 
         function deleteBusinessUnitSME(userAccountID, userAccountName) {
@@ -277,7 +275,7 @@
             const rowsPerPage = 3;
 
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function (count) {                    
+                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
                     $("#businessSMEs").puidatatable({
                         lazy: true,
                         caption: "Business Unit SME's",
@@ -289,24 +287,74 @@
                             {
                                 field: "UserAccountName",
                                 headerText: "User Name",
-                                headerStyle: "width: 60%"
+                                bodyStyle: "width: 100%"
                             },
                             {
-                                content: function (record) {
-                                    return "<button type=\"button\" class=\"btn btn-xs\">Platforms</button>";
+                                content: function(record) {
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"editBusinessUnitSMEPlatforms('" + record.UserAccountID + "')\" title=\"Edit '" + record.UserAccountName + "' platforms...\">Platforms</button>";
                                 },
                                 headerText: "",
-                                headerStyle: "width: 30%",
-                                bodyClass: "text-center"
+                                bodyClass: "text-center",
+                                bodyStyle: "width: 110px; padding: 1px"
                             },
                             {
-                                content: function (record) {
+                                content: function(record) {
                                     const userName = record.UserAccountName;
-                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteBusinessUnitSME('" + record.UserAccountID + "', '" + userName.replace("\\", "\\\\") + "')\" title=\"Delete '" + userName + "'\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteBusinessUnitSME('" + record.UserAccountID + "', '" + userName.replace("\\", "\\\\") + "')\" title=\"Delete '" + userName + "'...\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
                                 },
                                 headerText: "",
-                                headerStyle: "width: 10%",
-                                bodyStyle: "margin-right: 5px",
+                                bodyStyle: "width: 50px; padding: 1px",
+                                bodyClass: "text-center"
+                            }
+                        ],
+                        datasource: function(callback, ui) {
+                            const self = this;
+
+                            if (viewModel.dataHubIsConnected()) {
+                                dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID(), ui.sortOrder === 1, Math.floor(ui.first / rowsPerPage) + 1, rowsPerPage).done(function(businessUnitUserAccounts) {
+                                    callback.call(self, businessUnitUserAccounts);
+                                    currentBusinessUnitUserAccounts = businessUnitUserAccounts;
+                                    $("#loadingbusinessSMEs").hide();
+                                });
+                            }
+                        }
+                    });
+
+                    $("#businessSMEs").find("table > thead").hide();
+                });
+            }
+        }
+
+        function initializeSMEPlatformsTable() {
+            const rowsPerPage = 3;
+
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function (count) {
+                    $("#smePlatforms").puidatatable({
+                        lazy: true,
+                        caption: "SME Platforms's",
+                        paginator: {
+                            rows: rowsPerPage,
+                            totalRecords: count
+                        },
+                        columns: [
+                            {
+                                field: "PlatformName",
+                                headerText: "Platform Name",
+                                bodyStyle: "width: 500%"
+                            },
+                            {
+                                field: "VendorName",
+                                headerText: "Vendor Name",
+                                bodyStyle: "width: 500%"
+                            },
+                            {
+                                content: function (record) {
+                                    const platformName = record.PlatformName;
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteSMEPlatform('" + record.UserAccountID + "', '" + record.PlatformID + "', '" + platformName.replace("\\", "\\\\") + "')\" title=\"Delete '" + platformName + "'...\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
+                                },
+                                headerText: "",
+                                bodyStyle: "width: 50px; padding: 1px",
                                 bodyClass: "text-center"
                             }
                         ],
@@ -314,24 +362,64 @@
                             const self = this;
 
                             if (viewModel.dataHubIsConnected()) {
-                                dataHub.queryBusinessUnitUserAccounts(viewModel.currentRecord().ID(), notNull(ui.sortField, "UserAccountName"), ui.sortOrder === 1, Math.floor(ui.first / rowsPerPage) + 1, rowsPerPage).done(function (businessUnitUserAccounts) {
-                                    callback.call(self, businessUnitUserAccounts);
+                                dataHub.queryUserAccountPlatforms(viewModel.currentRecord().ID(), notNull(ui.sortField, "PlatformName"), ui.sortOrder === 1, Math.floor(ui.first / rowsPerPage) + 1, rowsPerPage).done(function (userAccountPlatforms) {
+                                    callback.call(self, userAccountPlatforms);
+                                    $("#loadingSMEPlatforms").hide();
                                 });
                             }
                         }
                     });
 
-                    //$("#businessSMEs").find("table > thead").hide();
+                    $("#smePlatforms").find("table > thead").hide();
                 });
             }
         }
 
         $(function() {
+            // Disallow lost-focus window close on dialog to edit SME platforms
+            $("#editSMEPlatformsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            var editSMEPlatformsDialogInitialized = false;
+            var selectedPlatformID;
+
+            $("#editSMEPlatformsDialog").on("shown.bs.modal", function () {
+                selectedPlatformID = null;
+
+                if (!editSMEPlatformsDialogInitialized) {
+                    editSMEPlatformsDialogInitialized = true;
+
+                    initializeAutoCompleteLookupField("NewPlatform", dataHub.searchPlatforms, false);
+
+                    $("#inputNewPlatform").puiautocomplete({
+                        select: function (event, item) {
+                            selectedPlatformID = parseInt(item.data("id"));                            
+                        }
+                    });
+
+                    $("#inputNewPlatformAdd").click(function () {
+                        const newSME = $("#inputNewPlatform").val();
+
+                        if (viewModel.dataHubIsConnected() && selectedBusinessUnitUserAccount != null && selectedPlatformID != null) {
+                            dataHub.newUserAccountPlatform().done(function (userAccountPlatform) {
+                                userAccountPlatform.UserAccountID = selectedBusinessUnitUserAccount.UserAccountID;
+                                userAccountPlatform.PlatformID = selectedPlatformID;
+
+                                dataHub.addNewUserAccountPlatform(userAccountPlatform).done(function () {
+                                    showInfoMessage("Added new " + selectedPlatformID + " for SME...");
+                                    $("#inputNewPlatform").val("");
+                                });
+                            });
+                        }
+                    });
+
+                    initializeSMEPlatformsTable();
+                }
+            });
+
             $("#addNewEditDialog").on("shown.bs.modal", function() {
-                // Initialize dynamic lookup fields each time modal window is shown
-                initializeDynamicLookupField("CoordinatorID", true);
-                initializeDynamicLookupField("BackupCoordinatorID", true);
-                initializeDynamicLookupField("NewSME");
+                initializeAutoCompleteLookupField("CoordinatorID", securityHub.searchUserAccounts);
+                initializeAutoCompleteLookupField("BackupCoordinatorID", securityHub.searchUserAccounts);
+                initializeAutoCompleteLookupField("NewSME", securityHub.searchUserAccounts, false);
 
                 // Initialize SME table
                 initializeBusinessUnitSMETable();

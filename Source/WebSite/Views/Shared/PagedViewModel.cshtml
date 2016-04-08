@@ -34,7 +34,9 @@
 
     // Setup page control scripts
     pageControlScripts.Append(Scripts.Render("~/js.bundle/knockout"));
+    // TODO: Currently the bundler will fail to properly compress paged view model, check again after updates...
     pageControlScripts.Append($"<script src=\"{Url.Content("~/Scripts/pagedViewModel.js")}\"></script>");
+    pageControlScripts.Append(Scripts.Render("~/js.bundle/gsfwebprimeui"));
 
     pageControlScripts.Append(@"
     <script id=""validationMessageTemplate"" type=""text/html""><!--

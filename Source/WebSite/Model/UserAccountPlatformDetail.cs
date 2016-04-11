@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using GSF.Data.Model;
 
 namespace openSPM.Model
 {
@@ -30,8 +31,10 @@ namespace openSPM.Model
     /// </summary>
     public class UserAccountPlatformDetail
     {
+        [PrimaryKey]
         public Guid UserAccountID { get; set; }
 
+        [PrimaryKey]
         public int PlatformID { get; set; }
 
         public string VendorName { get; set; }
@@ -40,6 +43,6 @@ namespace openSPM.Model
 
         public string PlatformName { get; set; }
 
-        public string PlaftformAbbreviation { get; set; }
+        public string PlatformAbbreviation { get; set; }
     }
 }

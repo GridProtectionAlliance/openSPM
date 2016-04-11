@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using GSF.Data.Model;
 
 namespace openSPM.Model
 {
@@ -30,8 +31,10 @@ namespace openSPM.Model
     /// </summary>
     public class UserAccountPlatform
     {
+        [PrimaryKey]
         public Guid UserAccountID { get; set;  }
 
+        [PrimaryKey]
         public int PlatformID { get; set; }
     }
 }

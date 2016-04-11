@@ -28,6 +28,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using GSF;
+using GSF.Collections;
 using GSF.Data.Model;
 using GSF.Identity;
 using GSF.Web.Model;
@@ -416,18 +417,31 @@ namespace openSPM
 
         public IEnumerable<BusinessUnitUserAccountDetail> QueryBusinessUnitUserAccounts(int businessUnitID, bool ascending, int page, int pageSize)
         {
-            IEnumerable<BusinessUnitUserAccountDetail> resolvedAccountRecords = m_dataContext.Table<BusinessUnitUserAccountDetail>().
-                QueryRecords("UserAccountName", ascending, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
+            return m_dataContext.Table<BusinessUnitUserAccountDetail>().QueryRecords("UserAccountName", true, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
                 Select(account =>
                 {
                     account.UserAccountName = UserInfo.SIDToAccountName(account.UserAccountName);
                     return account;
                 });
 
-            if (ascending)
-                return resolvedAccountRecords.OrderBy(key => key.UserAccountName);
+            // The following will properly return a list sorted by user name, but on systems with slow AD response,
+            // resolution of a large list of users could be slow - note that entire list needs to be resolved at
+            // each query to ensure proper sort. Caching full list at client side might help...
 
-            return resolvedAccountRecords.OrderByDescending(key => key.UserAccountName);
+            //IEnumerable<BusinessUnitUserAccountDetail> resolvedAccountRecords = m_dataContext.Table<BusinessUnitUserAccountDetail>().
+            //    QueryRecords(restriction: new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
+            //    Select(account =>
+            //    {
+            //        account.UserAccountName = UserInfo.SIDToAccountName(account.UserAccountName);
+            //        return account;
+            //    });
+
+            //if (ascending)
+            //    resolvedAccountRecords = resolvedAccountRecords.OrderBy(key => key.UserAccountName);
+            //else
+            //    resolvedAccountRecords = resolvedAccountRecords.OrderByDescending(key => key.UserAccountName);
+
+            //return resolvedAccountRecords.ToPagedList(page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]

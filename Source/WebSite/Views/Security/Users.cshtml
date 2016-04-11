@@ -87,7 +87,7 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        @Html.Raw(dataContext.AddInputField<UserAccount>("Name", fieldLabel: $"Name{AccountValidationFeedback().ToString().Trim()}", customDataBinding: "attr: {'acct-valid': validateAccount($data)}", initialFocus: true))
+        @Html.Raw(dataContext.AddInputField<UserAccount>("Name", fieldLabel: $"Name{AccountValidationFeedback().ToString().Trim()}", customDataBinding: "attr: {'acct-valid': validateAccount($data), 'autocomplete': 'off'}", initialFocus: true))
         <div class="panel panel-default" data-bind="css: {'panel-readonly': $root.recordMode()===RecordMode.View, 'panel-primary': UseDBAuthentication}">
             <div class="panel-heading">
                 @* Adding actual UseADAuthentication field check-box, but hidden, to pick-up any model based field initializers *@

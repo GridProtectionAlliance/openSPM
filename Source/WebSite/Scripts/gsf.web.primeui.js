@@ -95,5 +95,5 @@ function initializeAutoCompleteLookupField(fieldName, loadRecordsHubFunction, is
     }
 
     // Override jQuery UI display style added by puiautocomplete (messes with bootstrap form-element formatting)
-    inputField.parent().css("display", "initial");
+    inputField.parent().css("display", "inline");
 }

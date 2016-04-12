@@ -120,6 +120,7 @@
 
         var currentBusinessUnitUserAccounts = [];
         var selectedBusinessUnitUserAccount = null;
+        var businessUnitSMETableInitialized = false;
 
         // Lookup coordinator account name as store in virutal observable field (for display in table)
         function lookupCoordinatorAccountName(record) {
@@ -242,12 +243,16 @@
             }
         });
 
-        $(viewModel).on("recordModeChanged", function(event, oldMode, newMode) {
-            if (oldMode === RecordMode.View)
+        $(viewModel).on("recordModeChanged", function (event, oldMode, newMode) {
+            // When transitioning from View to Edit mode, redraw table elements to apply enabled buttons
+            if (oldMode === RecordMode.View && newMode === RecordMode.Edit)
                 refreshBusinessUnitSMETable();
         });
 
         function refreshBusinessUnitSMETable() {
+            if (!businessUnitSMETableInitialized)
+                return;
+
             dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
                 const businessSMEs = $("#businessSMEs");
                 businessSMEs.puidatatable('setTotalRecords', count);
@@ -339,6 +344,7 @@
                     });
 
                     businessSMEs.find("table > thead").hide();
+                    businessUnitSMETableInitialized = true;
                 });
             }
         }

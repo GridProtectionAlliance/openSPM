@@ -28,7 +28,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using GSF;
-using GSF.Collections;
 using GSF.Data.Model;
 using GSF.Identity;
 using GSF.Web.Model;
@@ -460,6 +459,56 @@ namespace openSPM
         {
             if (m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0} AND UserAccountID = {1}", record.BusinessUnitID, record.UserAccountID)) == 0)
                 m_dataContext.Table<BusinessUnitUserAccount>().AddNewRecord(record);
+        }
+
+        #endregion
+
+        #region [ Document Table Operations ]
+
+        [RecordOperation(typeof(Document), RecordOperation.QueryRecordCount)]
+        public int QueryDocumentCount()
+        {
+            return m_dataContext.Table<Document>().QueryRecordCount();
+        }
+
+        //[RecordOperation(typeof(Document), RecordOperation.QueryRecords)]
+        //public IEnumerable<Document> QueryDocuments(int sourceID, string sourceField, string tableName)
+        //{
+        //    IEnumerable<int> documentIDs =
+        //        m_dataContext.Connection.RetrieveData($"SELECT DocumentID FROM {tableName} WHERE {sourceField} = {{0}}", sourceID)
+        //            .AsEnumerable()
+        //            .Select(row => row.ConvertField<int>("DocumentID", 0));            
+
+        //    return m_dataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})"));
+        //}
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(Document), RecordOperation.DeleteRecord)]
+        public void DeleteDocument(int id)
+        {
+            m_dataContext.Table<Document>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(Document), RecordOperation.CreateNewRecord)]
+        public Document NewDocument()
+        {
+            return new Document();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(Document), RecordOperation.AddNewRecord)]
+        public void AddNewDocument(Document record)
+        {
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Document>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(Document), RecordOperation.UpdateRecord)]
+        public void UpdateDocument(Document record)
+        {
+            m_dataContext.Table<Document>().UpdateRecord(record);
         }
 
         #endregion

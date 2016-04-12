@@ -198,6 +198,9 @@
     <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="DataHub.cs" />
+    <Compile Include="FileUploadHandler.ashx.cs">
+      <DependentUpon>FileUploadHandler.ashx</DependentUpon>
+    </Compile>
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -238,6 +241,9 @@
   <ItemGroup>
     <Content Include="Content\bootstrap-datepicker3.css" />
     <Content Include="Content\bootstrap-datepicker3.min.css" />
+    <Content Include="Content\fileinput.css" />
+    <Content Include="Content\images\loading-sm.gif" />
+    <Content Include="Content\images\loading.gif" />
     <Content Include="Content\bootstrap-theme-cerulean.css" />
     <Content Include="Content\bootstrap-theme-cosmo.css" />
     <Content Include="Content\bootstrap-theme-cyborg.css" />
@@ -381,8 +387,11 @@
     <Content Include="fonts\fontawesome-webfont.woff" />
     <Content Include="fonts\fontawesome-webfont.woff2" />
     <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="FileUploadHandler.ashx" />
     <None Include="Properties\PublishProfiles\Deploy to GPAWeb.pubxml" />
     <None Include="Properties\PublishProfiles\Deploy to Package File.pubxml" />
+    <Content Include="Scripts\fileinput.js" />
+    <Content Include="Scripts\fileinput.min.js" />
     <Content Include="Scripts\gsf.web.client.js" />
     <Content Include="Scripts\gsf.web.primeui.js" />
     <Content Include="Scripts\ie10-viewport-bug-workaround.js" />
@@ -466,7 +475,6 @@
     <Content Include="Views\Main\Done.cshtml" />
     <Content Include="Views\Main\Assessments.cshtml" />
     <Content Include="Views\Main\InstallDocument.cshtml" />
-    <Content Include="Views\Main\_PartialPage1.cshtml" />
     <Content Include="Views\Main\MitigationPlan.cshtml" />
   </ItemGroup>
   <ItemGroup>

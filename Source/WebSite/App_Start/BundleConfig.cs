@@ -58,6 +58,9 @@ namespace openSPM
                         $"~/Scripts/bootstrap-datepicker{min}.js",
                         $"~/Scripts/bootstrap-toolkit{min}.js"));
 
+            bundles.Add(new ScriptBundle("~/js.bundle/fileinput").Include(
+                        $"~/Scripts/fileinput{min}.js"));
+
             bundles.Add(new ScriptBundle("~/js.bundle/primeui").Include(
                         "~/Scripts/plugins-all.js",
                         $"~/Scripts/mustache{min}.js",
@@ -86,6 +89,9 @@ namespace openSPM
             bundles.Add(new StyleBundle("~/css.bundle/bootstrap").Include(
                         $"~/Content/bootstrap-datepicker3{min}.css",
                         "~/Content/bootstrap-sidebar.css"));
+
+            bundles.Add(new StyleBundle("~/css.bundle/fileinput").Include(
+                        "~/Content/fileinput.css"));
 
             bundles.Add(new StyleBundle("~/css.bundle/jqueryui").Include(
                         "~/Content/themes/base/all.css"));

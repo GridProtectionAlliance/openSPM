@@ -64,6 +64,9 @@ namespace openSPM
         /// </summary>
         public RecordOperationsCache RecordOperationsCache => s_recordOperationsCache;
 
+        // Get hub's data context
+        internal DataContext DataContext => m_dataContext;
+
         #endregion
 
         #region [ Methods ]

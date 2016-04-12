@@ -70,18 +70,46 @@ namespace openSPM
                 }
             }
 
-            // TODO: Add role restriction check to file upload processing - load from AppSettings or, better, check DataHub record operations cache...
             if (context.Request.Files.Count > 0 && context.User.Identity.IsAuthenticated)
             {
                 NameValueCollection parameters = context.Request.QueryString;
                 int sourceID = int.Parse(parameters["SourceID"] ?? "0");
                 string sourceField = parameters["SourceField"];
                 string tableName = parameters["TableName"];
+                string modelName = parameters["TableName"];
 
                 if (sourceID > 0 && !string.IsNullOrEmpty(sourceField) && !string.IsNullOrEmpty(tableName))
                 {
-                    using (DataContext dataContext = new DataContext(exceptionHandler: MvcApplication.LogException))
+                    using (DataHub dataHub = new DataHub())
                     {
+                        // TODO: Complete role restriction check (at next GSF roll-down / update) that checks DataHub record operations cache for rights...
+                        //if (string.IsNullOrEmpty(modelName))
+                        //{
+                        //    string currentNamespace = GetType().FullName;
+                        //    int lastPeriodIndex = currentNamespace.LastIndexOf('.');
+
+                        //    if (lastPeriodIndex > 0)
+                        //        currentNamespace = currentNamespace.Substring(0, lastPeriodIndex);
+
+                        //    modelName = $"{currentNamespace}.{tableName}Document";
+                        //}
+
+                        //Type associatedModel = Type.GetType(modelName);
+
+                        //// Get any authorized roles as defined in hub for key records operations of modeled table
+                        //Tuple<string, string>[] recordOperations = dataHub.RecordOperationsCache.GetRecordOperations(associatedModel);
+
+                        //// Create a function to check if a method exists for operation - if none is defined, read-only access will be assumed (e.g. for a view)
+                        //Func<RecordOperation, string> getRoles = operationType =>
+                        //{
+                        //    Tuple<string, string> recordOperation = recordOperations[(int)operationType];
+                        //    return string.IsNullOrEmpty(recordOperation?.Item1) ? "" : recordOperation.Item2 ?? "";
+                        //};
+
+                        //// EditRoles = getRoles(RecordOperation.UpdateRecord);
+
+                        DataContext dataContext = dataHub.DataContext;
+                    
                         IEnumerable<int> documentIDs = dataContext.Connection.
                             RetrieveData($"SELECT DocumentID FROM {tableName} WHERE {sourceField} = {{0}}", sourceID).AsEnumerable().
                             Select(row => row.ConvertField<int>("DocumentID", 0));
@@ -105,8 +133,8 @@ namespace openSPM
 
                             // Attempt to match file type to document type keys as defined in value list
                             int groupID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='fileType' AND Enabled <> 0") ?? 0;
-                            Dictionary<string, int> documentTypeKeys = dataContext.Table<ValueList>().QueryRecords("SortOrder", new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", groupID)).ToDictionary(vl => vl.AltText1, vl => vl.Key);
-                            string extension = FilePath.GetExtension(filename);
+                            Dictionary<string, int> documentTypeKeys = dataContext.Table<ValueList>().QueryRecords("SortOrder", new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", groupID)).ToDictionary(vl => vl.AltText1.Trim().ToUpperInvariant(), vl => vl.Key);
+                            string extension = FilePath.GetExtension(filename).Trim().ToUpperInvariant();
                             int documentTypeKey, defaultDocumentTypeKey;
 
                             // Get default document type key, i.e., "Other"
@@ -115,8 +143,8 @@ namespace openSPM
                             if (!string.IsNullOrWhiteSpace(extension))
                             {
                                 // Only worry about first the characters of any extension to determine type
-                                if (extension.Length > 3)
-                                    extension = extension.Substring(0, 3);
+                                if (extension.Length > 4)
+                                    extension = extension.Substring(1, 3);
 
                                 if (!documentTypeKeys.TryGetValue(extension, out documentTypeKey))
                                     documentTypeKey = defaultDocumentTypeKey;

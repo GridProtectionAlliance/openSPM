@@ -26,7 +26,7 @@
 @using GSF.Web.Model
 @using openSPM.Model
 @using Page = openSPM.Model.Page
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> layoutSettings = Model.Global.LayoutSettings;
@@ -91,7 +91,6 @@
             menuItems.Remove(menuItem);
         }
     }
-
 
     // Define ViewBag.CustomTitle in page code for custom page titles
     string pageTitle = ViewBag.CustomTitle ?? ViewBag.Title;

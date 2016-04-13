@@ -307,16 +307,35 @@ namespace openSPM
         }
 
         /// <summary>
-        /// Searches platforms by name.
+        /// Searches platforms by name with no limit on total returned records.
         /// </summary>
         /// <param name="searchText">Search text to lookup.</param>
         /// <returns>Search results as "IDLabel" values - serialized as JSON [{ id: "value", label : "name" }, ...]; useful for dynamic lookup lists.</returns>
         public IEnumerable<IDLabel> SearchPlatforms(string searchText)
         {
+            return SearchPlatforms(searchText, -1);
+        }
+
+        /// <summary>
+        /// Searches platforms by name limited to the specified number of records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <param name="limit">Limit of number of record to return.</param>
+        /// <returns>Search results as "IDLabel" values - serialized as JSON [{ id: "value", label : "name" }, ...]; useful for dynamic lookup lists.</returns>
+        public IEnumerable<IDLabel> SearchPlatforms(string searchText, int limit)
+        {
+            if (limit < 1)
+                return m_dataContext
+                    .Table<Platform>()
+                    .QueryRecords()
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
+                    .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+
             return m_dataContext
                 .Table<Platform>()
                 .QueryRecords()
-                .Where(record => record?.Name?.StartsWith(searchText, StringComparison.InvariantCultureIgnoreCase) ?? false)
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
+                .Take(limit)
                 .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
         }
 

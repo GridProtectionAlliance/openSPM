@@ -30,12 +30,15 @@ function getPrimeUIWidget(jqueryElement, widgetType) {
 }
 
 // Adds auto-complete lookup functionality to an input field element associated with a paged-view model 
-function initializeAutoCompleteLookupField(fieldName, loadRecordsHubFunction, isObservable, addShowAllDropDown) {
+function initializeAutoCompleteLookupField(fieldName, loadRecordsHubFunction, isObservable, addShowAllDropDown, limit) {
     if (isObservable === undefined)
         isObservable = true;
 
     if (addShowAllDropDown === undefined)
         addShowAllDropDown = true;
+
+    if (limit === undefined)
+        limit = 50;
 
     const inputFieldID = "input" + fieldName;
     const inputField = $("#" + inputFieldID);
@@ -71,7 +74,11 @@ function initializeAutoCompleteLookupField(fieldName, loadRecordsHubFunction, is
             const self = this;
 
             if (viewModel.dataHubIsConnected()) {
-                loadRecordsHubFunction(request.query).done(function (records) {
+                loadRecordsHubFunction(request.query, limit).done(function (records) {
+                    if (limit > 0 && records.length >= limit) {
+                        records.push({ id: null, label: "Search results truncated..." });
+                    }
+
                     response.call(self, records);
 
                     // Set z-index of panel to be above pop-up dialog

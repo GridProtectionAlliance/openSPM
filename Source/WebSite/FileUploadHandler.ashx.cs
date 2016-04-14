@@ -26,7 +26,10 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Data;
 using System.Linq;
+using System.Security;
+using System.Threading;
 using System.Web;
+using GSF.Collections;
 using GSF.Data;
 using GSF.Data.Model;
 using GSF.Identity;
@@ -57,132 +60,133 @@ namespace openSPM
         /// <param name="context">An <see cref="HttpContext"/> object that provides references to the intrinsic server objects (for example, Request, Response, Session, and Server) used to service HTTP requests. </param>
         public void ProcessRequest(HttpContext context)
         {
-            // Initialize the security principal from caller's windows identity if uninitialized, note that
-            // simply by checking current provider any existing cached security principal will be restored,
-            // if no current provider exists we create a new one
-            if (SecurityProviderCache.CurrentProvider == null)
+            try
             {
-                lock (typeof(FileUploadHandler))
+                // Initialize the security principal from caller's windows identity if uninitialized, note that
+                // simply by checking current provider any existing cached security principal will be restored,
+                // if no current provider exists we create a new one
+                if (SecurityProviderCache.CurrentProvider == null)
                 {
-                    // Let's see if we won the race...
-                    if (SecurityProviderCache.CurrentProvider == null)
-                        SecurityProviderCache.CurrentProvider = SecurityProviderUtility.CreateProvider(string.Empty);
-                }
-            }
-
-            if (context.Request.Files.Count > 0 && context.User.Identity.IsAuthenticated)
-            {
-                NameValueCollection parameters = context.Request.QueryString;
-                int sourceID = int.Parse(parameters["SourceID"] ?? "0");
-                string sourceField = parameters["SourceField"];
-                string tableName = parameters["TableName"];
-                string modelName = parameters["TableName"];
-
-                if (sourceID > 0 && !string.IsNullOrEmpty(sourceField) && !string.IsNullOrEmpty(tableName))
-                {
-                    using (DataHub dataHub = new DataHub())
+                    lock (typeof(FileUploadHandler))
                     {
-                        // TODO: Complete role restriction check (at next GSF roll-down / update) that checks DataHub record operations cache for rights...
-                        //if (string.IsNullOrEmpty(modelName))
-                        //{
-                        //    string currentNamespace = GetType().FullName;
-                        //    int lastPeriodIndex = currentNamespace.LastIndexOf('.');
+                        // Let's see if we won the race...
+                        if (SecurityProviderCache.CurrentProvider == null)
+                            SecurityProviderCache.CurrentProvider = SecurityProviderUtility.CreateProvider(string.Empty);
+                    }
+                }
 
-                        //    if (lastPeriodIndex > 0)
-                        //        currentNamespace = currentNamespace.Substring(0, lastPeriodIndex);
+                if (context.Request.Files.Count > 0 && context.User.Identity.IsAuthenticated)
+                {
+                    NameValueCollection parameters = context.Request.QueryString;
+                    int sourceID = int.Parse(parameters["SourceID"] ?? "0");
+                    string sourceField = parameters["SourceField"];
+                    string tableName = parameters["TableName"];
+                    string modelName = parameters["ModelName"]; // If provided, must include namespace
 
-                        //    modelName = $"{currentNamespace}.{tableName}Document";
-                        //}
-
-                        //Type associatedModel = Type.GetType(modelName);
-
-                        //// Get any authorized roles as defined in hub for key records operations of modeled table
-                        //Tuple<string, string>[] recordOperations = dataHub.RecordOperationsCache.GetRecordOperations(associatedModel);
-
-                        //// Create a function to check if a method exists for operation - if none is defined, read-only access will be assumed (e.g. for a view)
-                        //Func<RecordOperation, string> getRoles = operationType =>
-                        //{
-                        //    Tuple<string, string> recordOperation = recordOperations[(int)operationType];
-                        //    return string.IsNullOrEmpty(recordOperation?.Item1) ? "" : recordOperation.Item2 ?? "";
-                        //};
-
-                        //// EditRoles = getRoles(RecordOperation.UpdateRecord);
-
-                        DataContext dataContext = dataHub.DataContext;
-                    
-                        IEnumerable<int> documentIDs = dataContext.Connection.
-                            RetrieveData($"SELECT DocumentID FROM {tableName} WHERE {sourceField} = {{0}}", sourceID).AsEnumerable().
-                            Select(row => row.ConvertField<int>("DocumentID", 0));
-
-                        Document[] documents = dataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})")).ToArray();
-
-                        HttpFileCollection files = context.Request.Files;
-
-                        for (int i = 0; i < files.Count; i++)
+                    if (sourceID > 0 && !string.IsNullOrEmpty(sourceField) && !string.IsNullOrEmpty(tableName))
+                    {
+                        // If model name parameter was not provided, assume default pattern of tableName + Document
+                        if (string.IsNullOrEmpty(modelName))
                         {
-                            HttpPostedFile file = files[i];
-                            string filename = FilePath.GetFileName(file.FileName);
-                            Document document = new Document
+                            string currentNamespace = GetType().FullName;
+                            int lastPeriodIndex = currentNamespace.LastIndexOf('.');
+
+                            if (lastPeriodIndex > 0)
+                                currentNamespace = currentNamespace.Substring(0, lastPeriodIndex);
+
+                            modelName = $"{currentNamespace}.Model.{tableName}Document";
+                        }
+
+                        Type associatedModel = Type.GetType(modelName);
+
+                        // Get any authorized update roles as defined in hub records operations for modeled table
+                        Tuple<string, string> recordOperation = DataHub.GetRecordOperationsCache().GetRecordOperations(associatedModel)[(int)RecordOperation.UpdateRecord];
+                        string editRoles = string.IsNullOrEmpty(recordOperation?.Item1) ? "" : recordOperation.Item2 ?? "";
+
+                        using (DataContext dataContext = new DataContext(exceptionHandler: MvcApplication.LogException))
+                        {
+                            if (!dataContext.UserIsInRole(editRoles))
+                                throw new SecurityException($"Access is denied for user '{Thread.CurrentPrincipal.Identity.Name}': minimum required roles = {editRoles.ToDelimitedString(", ")}.");
+
+                            IEnumerable<int> documentIDs = dataContext.Connection.
+                                RetrieveData($"SELECT DocumentID FROM {tableName} WHERE {sourceField} = {{0}}", sourceID).AsEnumerable().
+                                Select(row => row.ConvertField("DocumentID", 0));
+
+                            Document[] documents = dataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})")).ToArray();
+
+                            HttpFileCollection files = context.Request.Files;
+
+                            for (int i = 0; i < files.Count; i++)
                             {
-                                Filename = filename,
-                                DocumentBlob = file.InputStream.ReadStream(),
-                                Enabled = true,
-                                CreatedOn = DateTime.UtcNow,
-                                CreatedByID = GetCurrentUserID()
-                            };
-
-                            // Attempt to match file type to document type keys as defined in value list
-                            int groupID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='fileType' AND Enabled <> 0") ?? 0;
-                            Dictionary<string, int> documentTypeKeys = dataContext.Table<ValueList>().QueryRecords("SortOrder", new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", groupID)).ToDictionary(vl => vl.AltText1.Trim().ToUpperInvariant(), vl => vl.Key);
-                            string extension = FilePath.GetExtension(filename).Trim().ToUpperInvariant();
-                            int documentTypeKey, defaultDocumentTypeKey;
-
-                            // Get default document type key, i.e., "Other"
-                            documentTypeKeys.TryGetValue("*", out defaultDocumentTypeKey);
-
-                            if (!string.IsNullOrWhiteSpace(extension))
-                            {
-                                // Only worry about first the characters of any extension to determine type
-                                if (extension.Length > 4)
-                                    extension = extension.Substring(1, 3);
-
-                                if (!documentTypeKeys.TryGetValue(extension, out documentTypeKey))
-                                    documentTypeKey = defaultDocumentTypeKey;
-                            }
-                            else
-                            {
-                                documentTypeKey = defaultDocumentTypeKey;
-                            }
-
-                            document.DocumentTypeKey = documentTypeKey;
-
-                            if (documents.Count(doc => doc.Filename.Equals(filename, StringComparison.OrdinalIgnoreCase)) == 0)
-                            {
-                                // Upload new document
-                                dataContext.Table<Document>().AddNewRecord(document);
-                            }
-                            else
-                            {
-                                // Update existing document
-                                int documentID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID WHERE Filename = {0}", filename) ?? 0;
-
-                                if (documentID == 0)
+                                HttpPostedFile file = files[i];
+                                string filename = FilePath.GetFileName(file.FileName);
+                                Document document = new Document
                                 {
+                                    Filename = filename,
+                                    DocumentBlob = file.InputStream.ReadStream(),
+                                    Enabled = true,
+                                    CreatedOn = DateTime.UtcNow,
+                                    CreatedByID = GetCurrentUserID()
+                                };
+
+                                // Attempt to match file type to document type keys as defined in value list
+                                int groupID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name='fileType' AND Enabled <> 0") ?? 0;
+                                Dictionary<string, int> documentTypeKeys = dataContext.Table<ValueList>().QueryRecords("SortOrder", new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", groupID)).ToDictionary(vl => vl.AltText1.Trim().ToUpperInvariant(), vl => vl.Key);
+                                string extension = FilePath.GetExtension(filename).Trim().ToUpperInvariant();
+                                int documentTypeKey, defaultDocumentTypeKey;
+
+                                // Get default document type key, i.e., "Other"
+                                documentTypeKeys.TryGetValue("*", out defaultDocumentTypeKey);
+
+                                if (!string.IsNullOrWhiteSpace(extension))
+                                {
+                                    // Only worry about first the characters of any extension to determine type
+                                    if (extension.Length > 4)
+                                        extension = extension.Substring(1, 3);
+
+                                    if (!documentTypeKeys.TryGetValue(extension, out documentTypeKey))
+                                        documentTypeKey = defaultDocumentTypeKey;
+                                }
+                                else
+                                {
+                                    documentTypeKey = defaultDocumentTypeKey;
+                                }
+
+                                document.DocumentTypeKey = documentTypeKey;
+
+                                if (documents.Count(doc => doc.Filename.Equals(filename, StringComparison.OrdinalIgnoreCase)) == 0)
+                                {
+                                    // Upload new document
                                     dataContext.Table<Document>().AddNewRecord(document);
                                 }
                                 else
                                 {
-                                    document.ID = documentID;
-                                    dataContext.Table<Document>().UpdateRecord(document);
+                                    // Update existing document
+                                    int documentID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID WHERE Filename = {0}", filename) ?? 0;
+
+                                    if (documentID == 0)
+                                    {
+                                        dataContext.Table<Document>().AddNewRecord(document);
+                                    }
+                                    else
+                                    {
+                                        document.ID = documentID;
+                                        dataContext.Table<Document>().UpdateRecord(document);
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
 
-            context.Response.ContentType = "application/json";
-            context.Response.Write("{}");
+                context.Response.ContentType = "application/json";
+                context.Response.Write("{}");
+            }
+            catch (Exception ex)
+            {
+                context.Response.ContentType = "application/json";
+                context.Response.Write($"{{error: \"{ex.Message}\"}}");
+            }
         }
 
         private Guid GetCurrentUserID()

@@ -32,12 +32,9 @@ namespace openSPM.Model
     public class InstallDocument
     {
         [PrimaryKey]
-        public int ID { get; set; }
-
-        [Label("Install ID")]
         public int InstallID { get; set; }
 
-        [Label("Document ID")]
+        [PrimaryKey]
         public int DocumentID { get; set; }
     }
 }

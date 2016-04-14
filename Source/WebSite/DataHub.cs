@@ -64,9 +64,6 @@ namespace openSPM
         /// </summary>
         public RecordOperationsCache RecordOperationsCache => s_recordOperationsCache;
 
-        // Get hub's data context
-        internal DataContext DataContext => m_dataContext;
-
         #endregion
 
         #region [ Methods ]
@@ -128,6 +125,14 @@ namespace openSPM
         private static volatile int s_connectCount;
         private static readonly ThreadLocal<string> s_connectionID = new ThreadLocal<string>();
         private static readonly RecordOperationsCache s_recordOperationsCache;
+
+        // Static Methods
+
+        /// <summary>
+        /// Gets statically cached instance of <see cref="RecordOperationsCache"/> for <see cref="DataHub"/> instances.
+        /// </summary>
+        /// <returns>Statically cached instance of <see cref="RecordOperationsCache"/> for <see cref="DataHub"/> instances.</returns>
+        public static RecordOperationsCache GetRecordOperationsCache() => s_recordOperationsCache;
 
         // Static Constructor
         static DataHub()

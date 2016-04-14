@@ -21,6 +21,8 @@
 //
 //******************************************************************************************************
 
+using GSF.Data.Model;
+
 namespace openSPM.Model
 {
     /// <summary>
@@ -28,8 +30,10 @@ namespace openSPM.Model
     /// </summary>
     public class PatchDocument
     {
+        [PrimaryKey]
         public int PatchID { get; set; }
 
+        [PrimaryKey]
         public int DocumentID { get; set; }
     }
 }

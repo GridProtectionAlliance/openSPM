@@ -21,16 +21,7 @@
 //
 //******************************************************************************************************
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Web.Mvc;
-using System.Linq;
-using System.Text;
-using GSF;
-using GSF.Data;
-using GSF.Data.Model;
-using GSF.Web;
 using GSF.Web.Model;
 using GSF.Web.Security;
 using openSPM.Model;
@@ -107,6 +98,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Documents()
+        {
+            m_appModel.ConfigureView<DocumentDetail>(Url.RequestContext, "Documents", ViewBag);
+            return View();
+        }
+
         public ActionResult DiscoverPatches()
         {
             m_appModel.ConfigureView<LatestVendorDiscoveryResult>(Url.RequestContext, "Check", ViewBag);
@@ -144,12 +141,6 @@ namespace openSPM.Controllers
         public ActionResult Install()
         {
             m_appModel.ConfigureView<Install>(Url.RequestContext, "Install", ViewBag);
-            return View();
-        }
-
-        public ActionResult InstallDocument()
-        {
-            m_appModel.ConfigureView<InstallDocument>(Url.RequestContext, "InstallDocument", ViewBag);
             return View();
         }
 
@@ -196,10 +187,6 @@ namespace openSPM.Controllers
             ViewBag.psag = m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords();
             return View();
         }
-
-        
-
-       
 
         #endregion
     }

@@ -543,16 +543,24 @@ namespace openSPM
         #region [ DocumentDetail View Operations ]
 
         [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecordCount)]
-        public int QueryDocumentDetailCount()
+        public int QueryDocumentDetailCount(string sourceTable, int sourceID)
         {
-            return m_dataContext.Table<DocumentDetail>().QueryRecordCount();
+            return m_dataContext.Table<DocumentDetail>().QueryRecordCount(new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
+        }
+
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecords)]
+        public IEnumerable<DocumentDetail> QueryDocumentDetailResults(string sourceTable, int sourceID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<DocumentDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(DocumentDetail), RecordOperation.DeleteRecord)]
-        public void DeleteDocumentDetail(int id)
+        public void DeleteDocumentDetail(string sourceTable, int sourceID)
         {
-            m_dataContext.Table<DocumentDetail>().DeleteRecord(id);
+            DocumentDetail record = m_dataContext.Table<DocumentDetail>().LoadRecord(sourceTable, sourceID);
+            m_dataContext.Table<Document>().DeleteRecord(record.DocumentID);
+            m_dataContext.Connection.ExecuteNonQuery($"DELETE FROM {sourceTable}Document WHERE {sourceTable}ID = {{0}} AND DocumentID = {{1}}", sourceID, record.DocumentID);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
@@ -561,42 +569,6 @@ namespace openSPM
         {
             return new DocumentDetail();
         }
-
-        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
-        [RecordOperation(typeof(DocumentDetail), RecordOperation.AddNewRecord)]
-        public void AddNewDocumentDetail(DocumentDetail record)
-        {
-            record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<DocumentDetail>().AddNewRecord(record);
-        }
-
-        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
-        [RecordOperation(typeof(DocumentDetail), RecordOperation.UpdateRecord)]
-        public void UpdateDocumentDetail(DocumentDetail record)
-        {
-            m_dataContext.Table<DocumentDetail>().UpdateRecord(record);
-        }
-
-        private Document DeriveDocument(DocumentDetail record)
-        {
-            return new Document
-            {
-                ID = record.DocumentID,
-                Filename = record.Filename,
-                DocumentTypeKey = record.DocumentTypeKey,
-                Enabled = record.Enabled,
-                CreatedByID = record.CreatedByID,
-                CreatedOn = record.CreatedOn
-            };
-        }
-
-        //private InstallDocument DeriveInstallDocument(DocumentDetail record)
-        //{
-        //    return new InstallDocument
-        //    {
-        //        InstallID = record.
-        //    };
-        //}
 
         #endregion
 

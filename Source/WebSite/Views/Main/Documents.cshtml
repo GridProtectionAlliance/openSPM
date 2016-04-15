@@ -23,35 +23,36 @@
 @using System.Collections.Specialized
 @using GSF.Web.Model
 @using openSPM.Model
+@section StyleSheets {
+    @Styles.Render("~/css.bundle/fileinput")
+}
 @model AppModel
 @{
     DataContext dataContext = Model.DataContext;
     NameValueCollection parameters = Request.QueryString;
-    string parentTable = parameters["source"];
-    int parentID = int.Parse(parameters["ID"] ?? "0");
+    string sourceTable = parameters["SourceTable"];
+    int sourceID = int.Parse(parameters["SourceID"] ?? "0");
 
-    if (string.IsNullOrEmpty(parentTable) || parentID < 1)
+    if (string.IsNullOrEmpty(sourceTable) || sourceID < 1)
     {
-        throw new ArgumentException("Expected page parameters are missing or invalid");
+        throw new ArgumentException("Expected source document page parameters are missing or invalid");
     }
 
-    ViewBag.CustomTitle = parentTable + " Documents";
+    ViewBag.CustomTitle = "Manage \"" + parameters["Name"] + "\" " + sourceTable + " Documents";
     ViewBag.PageHasMenu = false;
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "Text", "Menu Text", "text-left" },
-        new[] { "Link", "URL", "text-left" },
-        new[] { "SortOrder", "Sort&nbsp;Order", "text-center" }
+        new[] { "Filename", "File Name", "text-left" },
+        new[] { null, "Document Type", "text-center" }
     };
 
-    ViewBag.HideUnauthorizedControls = true;
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
 }
 @helper BodyRows()
 {
-    <td width="80%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: notNull(Filename)}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Filename, 2)"></div></a></td>
+    <td width="80%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: '@(Url.Content("~/FileDownloadHandler.ashx"))?ID=' + ID}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Filename, 2)"></div></a></td>
     <td width="15%" class="text-center valign-middle" data-bind="text: lookupFileTypeValue(DocumentTypeKey)"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -66,9 +67,10 @@
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
+    @Scripts.Render("~/js.bundle/fileinput")
     <script>
         "use strict";
-        @Html.Raw(Model.RenderViewModelConfiguration<Document>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<DocumentDetail>(ViewBag, "Filename", $"'{sourceTable}'", sourceID))
         @Html.Raw(Model.RenderValueListClientLookupFunction("fileType"))
 
         $(function() {

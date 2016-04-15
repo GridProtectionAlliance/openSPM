@@ -35,7 +35,8 @@
         new[] { "ImpactKey", "Impact", "text-center" },
         new[] { "Title", "Title", "text-left" },
         new[] { null, "Patch&nbsp;Status", "text-center valign-middle" },
-        new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" }
+        new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
+        new[] { null, "Documents", "text-center valign-middle" }
     };
 
     ViewBag.HideAddNewButton = true;
@@ -52,10 +53,11 @@
 
     <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchMnemonic, click: $parent.viewPageRecord"></button></td>
-    <td width="15%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: Title}"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Start...</button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -107,9 +109,58 @@
     </div>
 }
 @Html.Partial("PagedViewModel")
+<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <iframe style="border: none" id="manageDocumentsFrame"></iframe>
+                <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
+
+        function getDocumentCount(sourceID, element) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryDocumentDetailCount("Patch", sourceID).done(function (count) {
+                    $("#documentCount" + sourceID).text(count.toString());
+                });
+            }
+
+            return element.text();
+        }
+
+        $(window).resize(function () {
+            setTimeout(function () {
+                $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
+            }, 500);
+        });
+
+        function openManageDocumentsDialog(record) {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents")?SourceTable=Patch&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "height": ($(document).height() - 150) + "px",
+                "width": "100%"
+            });
+
+            $("#manageDocumentsDialog").modal("show");
+        }
+
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+            // Refresh page counts after editing tasks
+            viewModel.queryPageRecords();
+
+            // Clear frame page
+            $("#manageDocumentsFrame").attr("src", "about:blank");
+        });
+
+        $(function() {
+            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+        });
     </script>
 }

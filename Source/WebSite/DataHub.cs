@@ -540,6 +540,66 @@ namespace openSPM
 
         #endregion
 
+        #region [ DocumentDetail View Operations ]
+
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecordCount)]
+        public int QueryDocumentDetailCount()
+        {
+            return m_dataContext.Table<DocumentDetail>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.DeleteRecord)]
+        public void DeleteDocumentDetail(int id)
+        {
+            m_dataContext.Table<DocumentDetail>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.CreateNewRecord)]
+        public DocumentDetail NewDocumentDetail()
+        {
+            return new DocumentDetail();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.AddNewRecord)]
+        public void AddNewDocumentDetail(DocumentDetail record)
+        {
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<DocumentDetail>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.UpdateRecord)]
+        public void UpdateDocumentDetail(DocumentDetail record)
+        {
+            m_dataContext.Table<DocumentDetail>().UpdateRecord(record);
+        }
+
+        private Document DeriveDocument(DocumentDetail record)
+        {
+            return new Document
+            {
+                ID = record.DocumentID,
+                Filename = record.Filename,
+                DocumentTypeKey = record.DocumentTypeKey,
+                Enabled = record.Enabled,
+                CreatedByID = record.CreatedByID,
+                CreatedOn = record.CreatedOn
+            };
+        }
+
+        //private InstallDocument DeriveInstallDocument(DocumentDetail record)
+        //{
+        //    return new InstallDocument
+        //    {
+        //        InstallID = record.
+        //    };
+        //}
+
+        #endregion
+
         #region [ Page Table Operations ]
 
         [AuthorizeHubRole("Administrator")]

@@ -50,30 +50,30 @@
 
             <tr>
                 <td>Total</td>
-                <td align="right">17</td>
-                <td align="right">20</td>
-                <td align="right">19</td>
+                <td align="right">@ViewBag.todaysTotalPatchCount</td>
+                <td align="right">@ViewBag.lastWeeksTotalPatchCount</td>
+                <td align="right">@ViewBag.lastTwoWeeksTotalPatchCount</td>
             </tr>
 
             <tr>
-                <td>Wating Assessment</td>
-                <td align="right">5</td>
-                <td align="right">12</td>      
-                <td align="right">11</td>
+                <td>Waiting Assessment</td>
+                <td align="right">@ViewBag.todaysWaitingAssessmentPatchCount</td>
+                <td align="right">@ViewBag.lastWeeksWaitingAssessmentPatchCount</td>      
+                <td align="right">@ViewBag.lastTwoWeeksWaitingAssessmentPatchCount</td>
             </tr>
 
             <tr>
                 <td>Requiring Patch</td>
-                <td align="right">10</td>
-                <td align="right">6</td>
-                <td align="right">4</td>
+                <td align="right">@ViewBag.todaysRequiringPatchCount</td>
+                <td align="right">@ViewBag.lastWeeksRequiringPatchCount</td>
+                <td align="right">@ViewBag.lastTwoWeeksRequiringPatchCount</td>
             </tr>
 
             <tr>
                 <td>Requiring Mit Plan</td>
-                <td align="right">2</td>
-                <td align="right">2</td>
-                <td align="right">4</td>
+                <td align="right">@ViewBag.todaysRequiringMitigationCount</td>
+                <td align="right">@ViewBag.lastWeeksRequiringMitigationCount</td>
+                <td align="right">@ViewBag.lastTwoWeeksRequiringMitigationCount</td>
             </tr>
 
         </table>
@@ -84,24 +84,24 @@
                 <td colspan="3"><b>Year-To-Date</b></td>
             </tr>
             <tr>
-                <td align="left">Pataches Assessed</td>
+                <td align="left">Patches Assessed</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">613</td>
+                <td align="right">@ViewBag.YTDPatchesAssesed</td>
             </tr>
             <tr>
                 <td align="left">Patches Not Applicable&nbsp;&nbsp;</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">87</td>
+                <td align="right">@ViewBag.YTDPatchesNotApplicaple</td>
             </tr>
             <tr>
                 <td align="left">Patches Applied</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">587</td>
+                <td align="right">@ViewBag.YTDPatchesApplied</td>
             </tr>
             <tr>
                 <td align="left">Mitigation Plans</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">28</td>
+                <td align="right">@ViewBag.YTDPatchesMitigationPlans</td>
             </tr>
         </table>
         <p>&nbsp;</p>
@@ -112,22 +112,22 @@
             <tr>
                 <td align="left">Discovery</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">2</td>
+                <td align="right">@ViewBag.YTDCriticalAlarmsDiscovery</td>
             </tr>
             <tr>
                 <td align="left">Assessment</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">17</td>
+                <td align="right">@ViewBag.YTDCriticalAlarmsAssessment</td>
             </tr>
             <tr>
                 <td align="left">Installation</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">8</td>
+                <td align="right">@ViewBag.YTDCriticalAlarmsInstallation</td>
             </tr>
             <tr>
                 <td align="left">Mitigation Plans&nbsp;&nbsp;</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">4</td>
+                <td align="right">@ViewBag.YTDCriticalAlarmsMitigationPlans</td>
             </tr>
         </table>
         <p>&nbsp;</p>
@@ -138,22 +138,22 @@
             <tr>
                 <td align="left">Discovery</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">1</td>
+                <td align="right">@ViewBag.YTDViolationsDiscovery</td>
             </tr>
             <tr>
                 <td align="left">Assessment</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">0</td>
+                <td align="right">@ViewBag.YTDViolationsAssessment</td>
             </tr>
             <tr>
                 <td align="left">Installation</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">0</td>
+                <td align="right">@ViewBag.YTDViolationsInstallation</td>
             </tr>
             <tr>
                 <td align="left">Mitigation Plans&nbsp;&nbsp;</td>
                 <td>&nbsp;&nbsp;</td>
-                <td align="right">0</td>
+                <td align="right">@ViewBag.YTDViolationsMitigationPlans</td>
             </tr>
         </table>
         <p>&nbsp;</p>

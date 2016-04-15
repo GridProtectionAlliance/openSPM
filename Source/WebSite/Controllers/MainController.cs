@@ -97,6 +97,45 @@ namespace openSPM.Controllers
 
         public ActionResult Home()
         {
+            m_appModel.ConfigureView(Url.RequestContext, "Home", ViewBag);
+            DateTime today = DateTime.Today.AddDays(1).AddMinutes(-1);
+            DateTime yesterday = DateTime.Today.AddDays(1).AddMinutes(-1).AddDays(-1);
+            DateTime lastWeek = DateTime.Today.AddDays(-7);
+            DateTime lastTwoWeeks = DateTime.Today.AddDays(-14);
+            DateTime begYear = new DateTime(DateTime.Today.Year, 1, 1);
+            Guid userID = new DataHub().GetCurrentUserID();
+
+            ViewBag.todaysTotalPatchCount = m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, {0}, VendorReleaseDate) = 0", today));
+            ViewBag.lastWeeksTotalPatchCount = m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, {0}, VendorReleaseDate) < 7", today));
+            ViewBag.lastTwoWeeksTotalPatchCount = m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, {0}, VendorReleaseDate) < 14", today));
+
+            ViewBag.todaysWaitingAssessmentPatchCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey < 3 AND DATEDIFF(day, {0}, CreatedOn) = 0", today));
+            ViewBag.lastWeeksWaitingAssessmentPatchCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey < 3 AND DATEDIFF(day, {0}, CreatedOn) < 7", today));
+            ViewBag.lastTwoWeeksWaitingAssessmentPatchCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey < 3 AND DATEDIFF(day, {0}, CreatedOn) < 14", today));
+
+            ViewBag.todaysRequiringPatchCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey = 1 AND DATEDIFF(day, {0}, CreatedOn) = 0", today));
+            ViewBag.lastWeeksRequiringPatchCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey = 1 AND DATEDIFF(day, {0}, CreatedOn) < 7", today));
+            ViewBag.lastTwoWeeksRequiringPatchCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey = 1 AND DATEDIFF(day, {0}, CreatedOn) < 14", today));
+
+            ViewBag.todaysRequiringMitigationCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey = 2 AND DATEDIFF(day, {0}, CreatedOn) = 0", today));
+            ViewBag.lastWeeksRequiringMitigationCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey = 2 AND DATEDIFF(day, {0}, CreatedOn) < 7", today));
+            ViewBag.lastTwoWeeksRequiringMitigationCount = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey =2 AND DATEDIFF(day, {0}, CreatedOn) < 14", today));
+
+            ViewBag.YTDPatchesAssesed = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("CreatedOn BETWEEN {0} AND {1} ",begYear, today));
+            ViewBag.YTDPatchesNotApplicaple = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("AssessmentResultKey = 4 AND CreatedOn BETWEEN {0} AND {1} ", begYear, today));
+            ViewBag.YTDPatchesApplied = m_dataContext.Table<Install>().QueryRecordCount(new RecordRestriction("CreatedOn BETWEEN {0} AND {1} ", begYear, today));
+            ViewBag.YTDPatchesMitigationPlans = m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("isDeleted = 0 AND CreatedOn BETWEEN {0} AND {1} ", begYear, today));
+
+            ViewBag.YTDCriticalAlarmsDiscovery = m_dataContext.Table<DiscoveryResult>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, ReviewDate, CreatedOn) >= 21"));
+            ViewBag.YTDCriticalAlarmsAssessment = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, UpdatedOn, CreatedOn) >= 21"));
+            ViewBag.YTDCriticalAlarmsInstallation = m_dataContext.Table<Install>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, CompletedOn, CreatedOn) >= 21"));
+            ViewBag.YTDCriticalAlarmsMitigationPlans = m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND DATEDIFF(day, ApprovedOn, CreatedOn ) >= 21"));
+
+            ViewBag.YTDViolationsDiscovery = m_dataContext.Table<DiscoveryResult>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, ReviewDate, CreatedOn) >= 35"));
+            ViewBag.YTDViolationsAssessment = m_dataContext.Table<Assessment>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, UpdatedOn, CreatedOn) >= 35"));
+            ViewBag.YTDViolationsInstallation = m_dataContext.Table<Install>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, CompletedOn, CreatedOn) >= 35"));
+            ViewBag.YTDViolationsMitigationPlans = m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND DATEDIFF(day, ApprovedOn, CreatedOn) >= 35"));
+
             m_appModel.ConfigureView(Url.RequestContext, "Home", ViewBag);            
             return View();
         }

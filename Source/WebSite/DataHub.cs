@@ -570,6 +570,22 @@ namespace openSPM
             return new DocumentDetail();
         }
 
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.AddNewRecord)]
+        public void AddNewDocument(DocumentDetail record)
+        {
+            // Stub function exists to assign rights to UI operations
+            throw new NotImplementedException();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(DocumentDetail), RecordOperation.UpdateRecord)]
+        public void UpdateDocument(DocumentDetail record)
+        {
+            // Stub function exists to assign rights to UI operations
+            throw new NotImplementedException();
+        }
+
         #endregion
 
         #region [ Page Table Operations ]

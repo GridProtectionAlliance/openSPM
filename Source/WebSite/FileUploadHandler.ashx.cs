@@ -78,12 +78,12 @@ namespace openSPM
                 if (context.Request.Files.Count > 0 && context.User.Identity.IsAuthenticated)
                 {
                     NameValueCollection parameters = context.Request.QueryString;
-                    int sourceID = int.Parse(parameters["SourceID"] ?? "0");
+                    string sourceTable = parameters["SourceTable"];
                     string sourceField = parameters["SourceField"];
-                    string tableName = parameters["TableName"];
+                    int sourceID = int.Parse(parameters["SourceID"] ?? "0");
                     string modelName = parameters["ModelName"]; // If provided, must include namespace
 
-                    if (sourceID > 0 && !string.IsNullOrEmpty(sourceField) && !string.IsNullOrEmpty(tableName))
+                    if (sourceID > 0 && !string.IsNullOrEmpty(sourceField) && !string.IsNullOrEmpty(sourceTable))
                     {
                         // If model name parameter was not provided, assume default pattern of tableName + Document
                         if (string.IsNullOrEmpty(modelName))
@@ -94,7 +94,7 @@ namespace openSPM
                             if (lastPeriodIndex > 0)
                                 currentNamespace = currentNamespace.Substring(0, lastPeriodIndex);
 
-                            modelName = $"{currentNamespace}.Model.{tableName}Document";
+                            modelName = $"{currentNamespace}.Model.{sourceTable}";
                         }
 
                         Type associatedModel = Type.GetType(modelName);
@@ -109,7 +109,7 @@ namespace openSPM
                                 throw new SecurityException($"Access is denied for user '{Thread.CurrentPrincipal.Identity.Name}': minimum required roles = {editRoles.ToDelimitedString(", ")}.");
 
                             IEnumerable<int> documentIDs = dataContext.Connection.
-                                RetrieveData($"SELECT DocumentID FROM {tableName} WHERE {sourceField} = {{0}}", sourceID).AsEnumerable().
+                                RetrieveData($"SELECT DocumentID FROM {sourceTable} WHERE {sourceField} = {{0}}", sourceID).AsEnumerable().
                                 Select(row => row.ConvertField("DocumentID", 0));
 
                             Document[] documents = dataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})")).ToArray();
@@ -140,7 +140,7 @@ namespace openSPM
 
                                 if (!string.IsNullOrWhiteSpace(extension))
                                 {
-                                    // Only worry about first the characters of any extension to determine type
+                                    // Only worry about first three characters of any extension to determine type
                                     if (extension.Length > 4)
                                         extension = extension.Substring(1, 3);
 

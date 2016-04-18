@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using System.Collections.Specialized
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @section StyleSheets {
@@ -31,9 +32,10 @@
     DataContext dataContext = Model.DataContext;
     NameValueCollection parameters = Request.QueryString;
     string sourceTable = parameters["SourceTable"];
+    string sourceField = parameters["SourceField"];
     int sourceID = int.Parse(parameters["SourceID"] ?? "0");
 
-    if (string.IsNullOrEmpty(sourceTable) || sourceID < 1)
+    if (string.IsNullOrEmpty(sourceTable) || string.IsNullOrEmpty(sourceField) || sourceID < 1)
     {
         throw new ArgumentException("Expected source document page parameters are missing or invalid");
     }
@@ -66,6 +68,7 @@
     </div>
 }
 @Html.Partial("PagedViewModel")
+
 @section Scripts {
     @Scripts.Render("~/js.bundle/fileinput")
     <script>
@@ -73,22 +76,24 @@
         @Html.Raw(Model.RenderViewModelConfiguration<DocumentDetail>(ViewBag, "Filename", $"'{sourceTable}'", sourceID))
         @Html.Raw(Model.RenderValueListClientLookupFunction("fileType"))
 
-        $(function() {
-            $("#addNewEditDialog").on("shown.bs.modal", function() {
+        $(function () {
+            $("#addNewEditDialog").on("shown.bs.modal", function () {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#editDocumentsDialog", window.parent.document).find("button[data-dismiss]");
+                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.prop("disabled", true);
                 dismissButtons.invisible();
 
                 $("#uploadFiles").fileinput({
-                    uploadUrl: "@Url.Content("~/FileUploadHandler.ashx")",
-                    uploadAsync: true
+                    uploadUrl: "@Html.Raw(Url.Content($"~/FileUploadHandler.ashx?SourceTable={sourceTable.UrlEncode()}&SourceField={sourceField.UrlEncode()}&SourceID={sourceID.ToString().UrlEncode()}"))",
+                    uploadAsync: true,
+                    showUpload: true,
+                    showRemove: false
                 });
             });
 
-            $("#addNewEditDialog").on("hidden.bs.modal", function() {
+            $("#addNewEditDialog").on("hidden.bs.modal", function () {
                 // On add/edit dialog hidden, re-enable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#editDocumentsDialog", window.parent.document).find("button[data-dismiss]");
+                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.visible();
                 dismissButtons.prop("disabled", false);
             });

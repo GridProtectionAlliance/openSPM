@@ -129,6 +129,16 @@ namespace openSPM.Controllers
             ViewBag.YTDViolationsInstallation = m_dataContext.Table<Install>().QueryRecordCount(new RecordRestriction("DATEDIFF(day, CompletedOn, CreatedOn) >= 35"));
             ViewBag.YTDViolationsMitigationPlans = m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND DATEDIFF(day, ApprovedOn, CreatedOn) >= 35"));
 
+            ViewBag.MyPatchesActive = m_dataContext.Table<PatchStatus>().QueryRecordCount(new RecordRestriction("PatchStatusKey < 4 AND CreatedByID = {0}", userID));
+            ViewBag.MyPendingAssessment = m_dataContext.Table<PatchStatus>().QueryRecordCount(new RecordRestriction("PatchStatusKey < 3 AND CreatedByID = {0}", userID));
+            ViewBag.MyPendingInstall = m_dataContext.Table<PatchStatus>().QueryRecordCount(new RecordRestriction("PatchStatusKey = 3 AND CreatedByID = {0}", userID));
+            ViewBag.MyPendingMitigationPlan = m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("ApprovedOn = NULL AND CreatedByID = {0}", userID));
+            ViewBag.MyCriticalAlarms = m_dataContext.Table<PatchStatus>().QueryRecordCount(new RecordRestriction("PatchStatusKey < 4 AND DATEDIFF(day, CreatedOn, {0}) <= 35 AND CreatedByID = {1}", today, userID));
+
+            ViewBag.PatchesInAlarm = m_dataContext.Table<PatchStatus>().QueryRecords("CreatedOn ASC", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, {0}) >= 14 AND PatchStatusKey < 3", today));
+            ViewBag.PatchesAddedToday = m_dataContext.Table<Patch>().QueryRecords("Title", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, {0}) < 1", today));
+
+
             m_appModel.ConfigureView(Url.RequestContext, "Home", ViewBag);            
             return View();
         }

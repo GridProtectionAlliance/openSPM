@@ -33,12 +33,13 @@ namespace openSPM.Model
     [PrimaryLabel("Filename")]
     public class DocumentDetail
     {
-        [PrimaryKey(true)]
+        [PrimaryKey]
         public string SourceTable { get; set; }
 
-        [PrimaryKey(true)]
+        [PrimaryKey]
         public int SourceID { get; set; }
 
+        [PrimaryKey]
         public int DocumentID { get; set; }
 
         [Required]

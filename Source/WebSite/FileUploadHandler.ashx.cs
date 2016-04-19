@@ -82,6 +82,7 @@ namespace openSPM
                     string sourceField = parameters["SourceField"];
                     int sourceID = int.Parse(parameters["SourceID"] ?? "0");
                     string modelName = parameters["ModelName"]; // If provided, must include namespace
+                    int documentID = 0;
 
                     if (sourceID > 0 && !string.IsNullOrEmpty(sourceField) && !string.IsNullOrEmpty(sourceTable))
                     {
@@ -112,7 +113,12 @@ namespace openSPM
                                 RetrieveData($"SELECT DocumentID FROM {sourceTable} WHERE {sourceField} = {{0}}", sourceID).AsEnumerable().
                                 Select(row => row.ConvertField("DocumentID", 0));
 
-                            Document[] documents = dataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})")).ToArray();
+                            Document[] documents;
+
+                            if (documentIDs.Any())
+                                documents = dataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})")).ToArray();
+                            else
+                                documents = new Document[0];
 
                             HttpFileCollection files = context.Request.Files;
 
@@ -138,11 +144,14 @@ namespace openSPM
                                 // Get default document type key, i.e., "Other"
                                 documentTypeKeys.TryGetValue("*", out defaultDocumentTypeKey);
 
+                                if (extension.StartsWith(".", StringComparison.Ordinal))
+                                    extension = extension.Substring(1);
+
                                 if (!string.IsNullOrWhiteSpace(extension))
                                 {
                                     // Only worry about first three characters of any extension to determine type
-                                    if (extension.Length > 4)
-                                        extension = extension.Substring(1, 3);
+                                    if (extension.Length > 3)
+                                        extension = extension.Substring(0, 3);
 
                                     if (!documentTypeKeys.TryGetValue(extension, out documentTypeKey))
                                         documentTypeKey = defaultDocumentTypeKey;
@@ -154,6 +163,7 @@ namespace openSPM
 
                                 document.DocumentTypeKey = documentTypeKey;
 
+
                                 if (documents.Count(doc => doc.Filename.Equals(filename, StringComparison.OrdinalIgnoreCase)) == 0)
                                 {
                                     // Upload new document
@@ -162,7 +172,7 @@ namespace openSPM
                                 else
                                 {
                                     // Update existing document
-                                    int documentID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID WHERE Filename = {0}", filename) ?? 0;
+                                    documentID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Document WHERE Filename = {0}", filename) ?? 0;
 
                                     if (documentID == 0)
                                     {
@@ -174,6 +184,13 @@ namespace openSPM
                                         dataContext.Table<Document>().UpdateRecord(document);
                                     }
                                 }
+
+                                // Get new document ID
+                                if (documentID == 0)
+                                    documentID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM Document WHERE Filename = {0}", filename) ?? 0;
+
+                                if (documentID > 0)
+                                    dataContext.Connection.ExecuteNonQuery($"INSERT INTO {sourceTable}({sourceField}, DocumentID) VALUES ({{0}}, {{1}})", sourceID, documentID);
                             }
                         }
                     }

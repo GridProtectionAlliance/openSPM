@@ -44,27 +44,28 @@
     ViewBag.PageHasMenu = false;
 
     ViewBag.HeaderColumns = new[]
-    {   //    { "Field", "Label", "Classes" }
+{   //    { "Field", "Label", "Classes" }
         new[] { "Filename", "File Name", "text-left" },
         new[] { null, "Document Type", "text-center" }
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.CanEdit = false;
+    ViewBag.HideUnauthorizedControls = true;
 }
 @helper BodyRows()
 {
-    <td width="80%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: '@(Url.Content("~/FileDownloadHandler.ashx"))?ID=' + ID}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Filename, 2)"></div></a></td>
+    <td width="80%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: '@(Url.Content("~/FileDownloadHandler.ashx"))?ID=' + DocumentID}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Filename, 2)"></div></a></td>
     <td width="15%" class="text-center valign-middle" data-bind="text: lookupFileTypeValue(DocumentTypeKey)"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        <input id="uploadFiles" type="file">
+        <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -74,7 +75,7 @@
     <script>
         "use strict";
         @Html.Raw(Model.RenderViewModelConfiguration<DocumentDetail>(ViewBag, "Filename", $"'{sourceTable}'", sourceID))
-        @Html.Raw(Model.RenderValueListClientLookupFunction("fileType"))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("fileType", lookupFunctionName: "lookupFileTypeValue"))
 
         $(function () {
             $("#addNewEditDialog").on("shown.bs.modal", function () {
@@ -84,11 +85,17 @@
                 dismissButtons.invisible();
 
                 $("#uploadFiles").fileinput({
-                    uploadUrl: "@Html.Raw(Url.Content($"~/FileUploadHandler.ashx?SourceTable={sourceTable.UrlEncode()}&SourceField={sourceField.UrlEncode()}&SourceID={sourceID.ToString().UrlEncode()}"))",
+                    uploadUrl: "@Html.Raw(Url.Content($"~/FileUploadHandler.ashx?SourceTable={sourceTable.UrlEncode()}Document&SourceField={sourceField.UrlEncode()}&SourceID={sourceID.ToString().UrlEncode()}"))",
                     uploadAsync: true,
                     showUpload: true,
-                    showRemove: false
+                    showRemove: false,
+                    minFileCount: 1,
+                    maxFileCount: 10
                 });
+
+                // Update cancel button to say close since work to upload files will already have been handled
+                $("#saveRecordButton").hide();
+                $("#cancelRecordButton").text("Close");
             });
 
             $("#addNewEditDialog").on("hidden.bs.modal", function () {

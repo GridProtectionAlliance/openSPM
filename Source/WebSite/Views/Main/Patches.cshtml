@@ -142,8 +142,14 @@
         });
 
         function openManageDocumentsDialog(record) {
+            const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
+            var initialMode = "";
+
+            if (count < 1)
+                initialMode = "/AddNew";
+
             $("#manageDocumentsFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")?SourceTable=PatchDocument&SourceField=PatchID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
             });

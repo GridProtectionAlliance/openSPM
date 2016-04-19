@@ -572,17 +572,53 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(DocumentDetail), RecordOperation.AddNewRecord)]
-        public void AddNewDocument(DocumentDetail record)
+        public void AddNewDocumentDetail(DocumentDetail record)
         {
-            // Stub function exists to assign rights to UI operations
+            // Stub function exists to assign rights to document related UI operations
             throw new NotImplementedException();
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(DocumentDetail), RecordOperation.UpdateRecord)]
-        public void UpdateDocument(DocumentDetail record)
+        public void UpdateDocumentDetail(DocumentDetail record)
         {
-            // Stub function exists to assign rights to UI operations
+            // Stub function exists to assign rights to document related UI operations
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region [ PatchDocument Table Operations ]
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(PatchDocument), RecordOperation.UpdateRecord)]
+        public void UpdatePatchDocument(PatchDocument record)
+        {
+            // Stub function exists to assign rights to file upload operations
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region [ InstallDocument Table Operations ]
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(InstallDocument), RecordOperation.UpdateRecord)]
+        public void UpdateInstallDocument(InstallDocument record)
+        {
+            // Stub function exists to assign rights to file upload operations
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region [ DiscoveryResultDocument Table Operations ]
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(DiscoveryResultDocument), RecordOperation.UpdateRecord)]
+        public void UpdateDiscoveryResultDocument(DiscoveryResultDocument record)
+        {
+            // Stub function exists to assign rights to file upload operations
             throw new NotImplementedException();
         }
 
@@ -932,52 +968,6 @@ namespace openSPM
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Install>().UpdateRecord(record);
-        }
-
-        #endregion
-
-        #region [InstallDocument Table Operations]
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(InstallDocument), RecordOperation.QueryRecordCount)]
-        public int QueryInstallDocumentCount()
-        {
-            return m_dataContext.Table<InstallDocument>().QueryRecordCount();
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(InstallDocument), RecordOperation.QueryRecords)]
-        public IEnumerable<InstallDocument> QueryInstallDocuments(string sortField, bool ascending, int page, int pageSize)
-        {
-            return m_dataContext.Table<InstallDocument>().QueryRecords(sortField, ascending, page, pageSize);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(InstallDocument), RecordOperation.DeleteRecord)]
-        public void DeleteInstallDocument(int id)
-        {
-            m_dataContext.Table<InstallDocument>().DeleteRecord(id);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(InstallDocument), RecordOperation.CreateNewRecord)]
-        public InstallDocument NewInstallDocument()
-        {
-            return new InstallDocument();
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(InstallDocument), RecordOperation.AddNewRecord)]
-        public void AddNewInstallDocument(InstallDocument record)
-        {
-            m_dataContext.Table<InstallDocument>().AddNewRecord(record);
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        [RecordOperation(typeof(InstallDocument), RecordOperation.UpdateRecord)]
-        public void UpdateInstallDocument(InstallDocument record)
-        {
-            m_dataContext.Table<InstallDocument>().UpdateRecord(record);
         }
 
         #endregion

@@ -299,6 +299,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
+            record.DatePlatformEnrolled = record.CreatedOn;
             m_dataContext.Table<Platform>().AddNewRecord(record);
         }
 

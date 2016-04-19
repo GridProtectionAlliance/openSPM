@@ -29,8 +29,9 @@
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "Abbreviation", "Abbreviation", "text-right" },
+        new[] { "VendorID", "Vendor", "text-left" },
         new[] { "Name", "Name", "text-left" },
+        new[] { "Version", "Version", "text-left"}
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -39,8 +40,11 @@
 }
 @helper BodyRows()
 {
-    <td width="35%" class="text-right valign-middle" data-bind="text: Abbreviation"></td>
-    <td width="60%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="35%" class="text-left valign-middle" data-bind="text: lookupNameValue(VendorID)"></td>
+
+    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="30%" class="text-left valign-middle" data-bind="text: Version"></td>
+
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -51,13 +55,13 @@
     <div class="col-md-12">
         @Html.Raw(dataContext.AddSelectField<Platform, Vendor>("VendorID", "ID", "Name"))
         @Html.Raw(dataContext.AddInputField<Platform>("Name", initialFocus: true))
-        @Html.Raw(dataContext.AddInputField<Platform>("Abbreviation"))
-        @Html.Raw(dataContext.AddTextAreaField<Platform>("Description"))
+        @Html.Raw(dataContext.AddInputField<Platform>("Version"))
     </div>
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Platform>(ViewBag))
+        @Html.Raw(Model.RenderAbstract<Vendor>("Name"))
     </script>
 }

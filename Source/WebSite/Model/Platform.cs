@@ -44,10 +44,7 @@ namespace openSPM.Model
         [Required]
         public string Name { get; set; }
 
-        [Required]
-        public string Abbreviation { get; set; }
-
-        public string Description { get; set; }
+        public string Version { get; set; }
 
         public bool IsDeleted { get; set; }
 
@@ -58,5 +55,8 @@ namespace openSPM.Model
         public DateTime CreatedOn { get; set; }
 
         public Guid CreatedByID { get; set; }
+
+        public DateTime DatePlatformEnrolled { get; set; }
+        public DateTime? DatePlatformRetired { get; set; }
     }
 }

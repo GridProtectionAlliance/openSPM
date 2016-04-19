@@ -41,6 +41,7 @@
     }
 
     ViewBag.CustomTitle = "Manage \"" + parameters["Name"] + "\" " + sourceTable + " Documents";
+    ViewBag.AddNewEditTitle = "Documents for \"" + parameters["Name"] + "\" " + sourceTable;
     ViewBag.PageHasMenu = false;
 
     ViewBag.HeaderColumns = new[]
@@ -103,6 +104,9 @@
                 const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.visible();
                 dismissButtons.prop("disabled", false);
+
+                // Refresh view model after new uploads
+                viewModel.initialize();
             });
         });
     </script>

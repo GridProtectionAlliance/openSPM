@@ -556,11 +556,10 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(DocumentDetail), RecordOperation.DeleteRecord)]
-        public void DeleteDocumentDetail(string sourceTable, int sourceID)
+        public void DeleteDocumentDetail(string sourceTable, int sourceID, int documentID)
         {
-            DocumentDetail record = m_dataContext.Table<DocumentDetail>().LoadRecord(sourceTable, sourceID);
-            m_dataContext.Table<Document>().DeleteRecord(record.DocumentID);
-            m_dataContext.Connection.ExecuteNonQuery($"DELETE FROM {sourceTable}Document WHERE {sourceTable}ID = {{0}} AND DocumentID = {{1}}", sourceID, record.DocumentID);
+            m_dataContext.Connection.ExecuteNonQuery($"DELETE FROM {sourceTable}Document WHERE {sourceTable}ID = {{0}} AND DocumentID = {{1}}", sourceID, documentID);
+            m_dataContext.Table<Document>().DeleteRecord(documentID);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]

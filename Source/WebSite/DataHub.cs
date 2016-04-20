@@ -282,6 +282,7 @@ namespace openSPM
         public void DeletePlatform(int id)
         {
             // For Platforms, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE Platform SET DatePlatformRetired={0} WHERE ID={1}", DateTime.UtcNow, id);
             m_dataContext.Connection.ExecuteNonQuery("UPDATE Platform SET IsDeleted=1 WHERE ID={0}", id);
         }
 

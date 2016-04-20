@@ -39,10 +39,7 @@ namespace openSPM.Model
 
         public string VendorName { get; set; }
 
-        public string VendorAbbreviation { get; set; }
-
         public string PlatformName { get; set; }
 
-        public string PlatformAbbreviation { get; set; }
     }
 }

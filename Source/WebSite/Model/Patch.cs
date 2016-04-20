@@ -61,14 +61,6 @@ namespace openSPM.Model
         }
 
         [Required]
-        [Label("SPM Patch Identifier")]
-        [StringLength(64)]
-        public string PatchMnemonic
-        {
-            get; set;
-        }
-
-        [Required]
         [Label("Vendor Patch Name/Identifier")]
         [StringLength(64)]
         public string VendorPatchName
@@ -90,13 +82,6 @@ namespace openSPM.Model
             get; set;
         }
 
-        [Label("Patch Title")]
-        [StringLength(80)]
-        public string Title
-        {
-            get; set;
-        }
-
         [Label("Patch Summary")]
         public string Summary
         {
@@ -111,12 +96,6 @@ namespace openSPM.Model
 
         [Label("Vendor References")]
         public string Citations
-        {
-            get; set;
-        }
-
-        [Label("Work Arounds")]
-        public string WorkArounds
         {
             get; set;
         }
@@ -142,8 +121,8 @@ namespace openSPM.Model
             get; set;
         }
 
-        [Label("Not For Compliance")]
-        public bool IsNotCompliance
+        [Label("Vulnerability - No Patch Available")]
+        public bool Vulnerability
         {
             get; set;
         }
@@ -152,6 +131,10 @@ namespace openSPM.Model
         {
             get; set;
         }
+
+        [Required]
+        [Label("Evaluation Deadline Date")]
+        public DateTime EvaluationDeadline { get; set; }
 
         public DateTime CreatedOn
         {

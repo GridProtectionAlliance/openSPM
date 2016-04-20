@@ -33,12 +33,14 @@
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "PatchMnemonic", "SPM&nbsp;Reference", "text-center" },
         new[] { "ImpactKey", "Impact", "text-center" },
-        new[] { "Title", "Title", "text-left" },
-        new[] { null, "Patch&nbsp;Status", "text-center valign-middle" },
+        new[] { "VendorPatchName", "Title", "text-left" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
+        new[] { "EvaluationDeadline", "Deadline", "text-center"},
+        new[] { null, "Patch&nbsp;Status", "text-center valign-middle" },
         new[] { null, "Documents", "text-center valign-middle" }
     };
 
+    ViewBag.Platforms = Json.Encode(dataContext.Table<Platform>().QueryRecords().ToArray());
     ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
 
@@ -51,12 +53,13 @@
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
-    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchMnemonic, click: $parent.viewPageRecord"></button></td>
+    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="@*visible: IsNotCompliance*@"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="@*visible: !IsNotCompliance*@"></td>
+    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: ID, click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
-    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Title, 1.5), attr: {title: Title}"></div></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Start...</button></td>
+    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(VendorPatchName, 1.5), attr: {title: VendorPatchName}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Start...</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -81,22 +84,28 @@
     }
 
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Patch>("PatchMnemonic", initialFocus: true))
+        @*@Html.Raw(dataContext.AddInputField<Patch>("PatchMnemonic", initialFocus: true))*@
         @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))*@
         @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
         @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName"))
         @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
+        <div><label for="#evalDate">Evaluation Deadline Date:</label>
+        </div>
+        <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
+        <br/>
         @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
     </div>
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Patch>("Title"))
-        @Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))
+        @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
+        <div>
+            <label for="platformIDSelction">Target Platform/Device:</label>
+            <select class="form-control" id="platfromIDSelection" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
+        </div>
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))
     </div>
     <div class="col-md-4">
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("WorkArounds"))
         @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
         @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
         @{
@@ -105,7 +114,7 @@
                 /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
                 /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
         }
-        @Html.Raw(dataContext.AddCheckBoxField<Patch>("IsNotCompliance"))
+        @Html.Raw(dataContext.AddCheckBoxField<Patch>("Vulnerability"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -124,6 +133,36 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
+        @Html.Raw(Model.RenderAbstract<Platform>("Name"))
+        @Html.Raw(Model.RenderAbstract<Platform>("Version"))
+        $(document).ready(function () {
+           
+
+        });
+        var myPlatforms = @Html.Raw(ViewBag.Platforms);
+        for( var i =0; i< myPlatforms.length; ++i)
+        {
+            myPlatforms[i].nameandversion = myPlatforms[i].Name + '/Version: ' + myPlatforms[i].Version;
+        }
+
+        function getEvalutationDeadlineDate() {
+            var releaseDate = new Date($('#dateVendorReleaseDate').val());
+            var deadlineDate = new Date(releaseDate.addDays(35));
+            
+            //console.log($('#dateVendorReleaseDate'));
+            $('#dateVendorReleaseDate').on('change', function () {
+                
+                var rd = new Date($('#dateVendorReleaseDate').val());
+                var dd = new Date(rd.addDays(35));
+                //console.log(dd.formatDate(DateFormat));
+                $('#evalDate').html(dd.formatDate(DateFormat));
+
+
+            });
+
+            console.log(myPlatforms);
+            $('#evalDate').html(deadlineDate.formatDate(DateFormat));
+        }
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {
@@ -165,7 +204,18 @@
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
 
-        $(function() {
+        $(viewModel).on("beforeSave", function (event, observableRecord) {
+            var rd = new Date($('#dateVendorReleaseDate').val());
+            var dd = new Date(rd.addDays(35));
+            observableRecord.EvaluationDeadline = dd.formatDate(DateFormat);
+            observableRecord.PlatformID = $('#platfromIDSelection').val();
+        });
+
+        $(function () {
+
+            $('label#inputAlarmCriticalDays').hide();
+            $('#inputAlarmCriticalDays').hide();
+
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
         });
     </script>

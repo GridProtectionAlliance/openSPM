@@ -198,6 +198,9 @@
     <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
     <Compile Include="DataHub.cs" />
+    <Compile Include="FileDownloadHandler.ashx.cs">
+      <DependentUpon>FileDownloadHandler.ashx</DependentUpon>
+    </Compile>
     <Compile Include="FileUploadHandler.ashx.cs">
       <DependentUpon>FileUploadHandler.ashx</DependentUpon>
     </Compile>
@@ -389,6 +392,7 @@
     <Content Include="fonts\fontawesome-webfont.woff2" />
     <Content Include="fonts\FontAwesome.otf" />
     <Content Include="FileUploadHandler.ashx" />
+    <Content Include="FileDownloadHandler.ashx" />
     <None Include="Properties\PublishProfiles\Deploy to GPAWeb.pubxml" />
     <None Include="Properties\PublishProfiles\Deploy to Package File.pubxml" />
     <Content Include="Scripts\fileinput.js" />

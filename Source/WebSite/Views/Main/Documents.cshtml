@@ -50,20 +50,20 @@
         new[] { null, "Document Type", "text-center" }
     };
 
-    ViewBag.BodyRows = BodyRows().ToString();
-    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.BodyRows = BodyRows(sourceTable).ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
     ViewBag.CanEdit = false;
     ViewBag.HideUnauthorizedControls = true;
 }
-@helper BodyRows()
+@helper BodyRows(string sourceTable)
 {
-    <td width="80%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: '@(Url.Content("~/FileDownloadHandler.ashx"))?ID=' + DocumentID}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Filename, 2)"></div></a></td>
+    <td width="80%" class="text-left table-cell-hard-wrap"><a data-bind="attr:{href: '@Html.Raw(Url.Content($"~/FileDownloadHandler.ashx?SourceTable={sourceTable.UrlEncode()}Document&DocumentID="))' + DocumentID}" target="_blank"><div data-bind="text: $($element.parentElement.parentElement).truncateToWidth(Filename, 2)"></div></a></td>
     <td width="15%" class="text-center valign-middle" data-bind="text: lookupFileTypeValue(DocumentTypeKey)"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.dataHubIsConnected"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-@helper AddNewEditDialog(DataContext dataContext)
+@helper AddNewEditDialog()
 {
     <div class="col-md-12">
         <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
@@ -86,12 +86,12 @@
                 dismissButtons.invisible();
 
                 $("#uploadFiles").fileinput({
-                    uploadUrl: "@Html.Raw(Url.Content($"~/FileUploadHandler.ashx?SourceTable={sourceTable.UrlEncode()}Document&SourceField={sourceField.UrlEncode()}&SourceID={sourceID.ToString().UrlEncode()}"))",
+                    uploadUrl: "@Html.Raw(Url.Content($"~/FileUploadHandler.ashx?SourceTable={sourceTable.UrlEncode()}Document&SourceField={sourceField.UrlEncode()}&SourceID={sourceID}"))",
                     uploadAsync: true,
                     showUpload: true,
                     showRemove: false,
                     minFileCount: 1,
-                    maxFileCount: 10
+                    maxFileCount: 12
                 });
 
                 // Update cancel button to say close since work to upload files will already have been handled

@@ -136,7 +136,7 @@ namespace openSPM.Controllers
             ViewBag.MyCriticalAlarms = m_dataContext.Table<PatchStatus>().QueryRecordCount(new RecordRestriction("PatchStatusKey < 4 AND DATEDIFF(day, CreatedOn, {0}) <= 35 AND CreatedByID = {1}", today, userID));
 
             ViewBag.PatchesInAlarm = m_dataContext.Table<PatchStatus>().QueryRecords("CreatedOn ASC", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, {0}) >= 14 AND PatchStatusKey < 3", today));
-            ViewBag.PatchesAddedToday = m_dataContext.Table<Patch>().QueryRecords("Title", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, {0}) < 1", today));
+            ViewBag.PatchesAddedToday = m_dataContext.Table<Patch>().QueryRecords("VendorPatchName", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, {0}) < 1", today));
 
 
             m_appModel.ConfigureView(Url.RequestContext, "Home", ViewBag);            
@@ -146,6 +146,12 @@ namespace openSPM.Controllers
         public ActionResult Patches()
         {
             m_appModel.ConfigureView<Patch>(Url.RequestContext, "Patches", ViewBag);
+            return View();
+        }
+
+        public ActionResult ActivePatches()
+        {
+            m_appModel.ConfigureView<PatchPatchStatusDetail>(Url.RequestContext, "ActivePatches", ViewBag);
             return View();
         }
 

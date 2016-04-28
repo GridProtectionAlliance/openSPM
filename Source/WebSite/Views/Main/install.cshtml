@@ -29,7 +29,7 @@
     // TODO: Add examples of how to get to settings
 }
 
-<table class="table">
+@*<table class="table">
     <thead>
         <tr>
             <th>&nbsp;</th>
@@ -71,7 +71,7 @@
     </tr>
 
     </tbody>
-</table>
+</table>*@
 
 
 @{
@@ -88,12 +88,13 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Install";
+    ViewBag.HideAddNewButton = true;
 }
 @helper BodyRows()
 {
 
     
-    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupPatchMnemonicValue(PatchID), click: $parent.viewPageRecord"></button></td>
+    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(PatchID), click: $parent.viewPageRecord"></button></td>
     <td width="30%" class="text-left valign-middle"><div nowrap data-bind="text: Summary"></div></td>
     <td width="30%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedNotes"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedOn.formatDate(DateFormat)"></div></td>
@@ -108,7 +109,8 @@
 {
 
     <div class="col-md-12">
-        @Html.Raw(dataContext.AddSelectField<Install,Patch>("PatchID", "ID", "PatchMnemonic"))
+        <label for="editPatchID">PatchID:</label>
+        <div id="editPatchID" data-bind="text: ID"></div><br/>
         @Html.Raw(dataContext.AddTextAreaField<Install>("Summary"))
         @Html.Raw(dataContext.AddTextAreaField<Install>("CompletedNotes"))
         @Html.Raw(dataContext.AddDateField<Install>("CompletedOn"))
@@ -120,7 +122,7 @@
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Install>(ViewBag))
-        @Html.Raw(Model.RenderAbstract<Patch>("PatchMnemonic"))
+        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
 
        function showWindow() {
            window.open('/Main/InstallDocument', 'PopupWindow', 'width=400px,height=400px,top=150,left=250');

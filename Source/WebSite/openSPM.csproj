@@ -223,6 +223,7 @@
     <Compile Include="Model\NoticeLog.cs" />
     <Compile Include="Model\PatchPatchStatusDetail.cs" />
     <Compile Include="Model\PatchStatusAssessmentDetail.cs" />
+    <Compile Include="Model\PatchUserAccountPlatformBusinessUnitUserAccountView.cs" />
     <Compile Include="Model\UserAccountNoticeLevel.cs" />
     <Compile Include="Model\Page.cs" />
     <Compile Include="Model\Menu.cs" />
@@ -481,6 +482,7 @@
     <Content Include="Views\Main\Assessments.cshtml" />
     <Content Include="Views\Main\MitigationPlan.cshtml" />
     <Content Include="Views\Main\Documents.cshtml" />
+    <Content Include="Views\Main\ActivePatches.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

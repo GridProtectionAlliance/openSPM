@@ -57,7 +57,8 @@
         new[] { "Name", "Company", "text-center" },
         new[] { "Company", "Full Corporate Name", "text-left" },
         new[] { "ReviewDate", "Release&nbsp;Date", "text-center" },
-        new[] { null, "", "" }
+        new[] { null, "", ""},
+        new[] { null, "Documents", "text-center valign-middle" }
     };
 
     ViewBag.HideAddNewButton = true;
@@ -74,6 +75,7 @@
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Company, 1.5), attr: {title: Company}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: addNewDiscoveryResult.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(DiscoveryResultID, $($element)), attr: {id: 'documentCount' + DiscoveryResultID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()" title="Only the latest discovered patch will be deleted..."><span class="glyphicon glyphicon-remove"></span></button>
@@ -88,11 +90,27 @@
     </div>
 }
 @Html.Partial("PagedViewModel")
+
+<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <iframe style="border: none" id="manageDocumentsFrame"></iframe>
+                <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
         var currentVendorID = 0;
 
+        $(function () {
+            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+        });
         function addNewDiscoveryResult(record) {
             currentVendorID = record.VendorID;
             viewModel.addPageRecord();
@@ -136,5 +154,39 @@
 
             return undefined;
         }
+
+        function getDocumentCount(sourceID, element) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryDocumentDetailCount("DiscoveryResult", sourceID).done(function (count) {
+                    $("#documentCount" + sourceID).text(count.toString());
+                });
+            }
+
+            return element.text();
+        }
+
+        function openManageDocumentsDialog(record) {
+            const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
+            var initialMode = "";
+
+            if (count < 1)
+                initialMode = "/AddNew";
+
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=DiscoveryResult&SourceField=DiscoveryResultID&SourceID=" + record.DiscoveryResultID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "height": ($(document).height() - 150) + "px",
+                "width": "100%"
+        });
+
+        $("#manageDocumentsDialog").modal("show");
+        }
+
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+            // Refresh page counts after editing tasks
+            viewModel.queryPageRecords();
+
+            // Clear frame page
+            $("#manageDocumentsFrame").attr("src", "about:blank");
+        });
     </script>
 }

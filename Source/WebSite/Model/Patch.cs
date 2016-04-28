@@ -132,6 +132,12 @@ namespace openSPM.Model
             get; set;
         }
 
+        public bool IsNotCompliance { get; set; }
+
+        [Label("No Security Content")]
+        public bool NoSecurityContent { get; set; }
+
+
         [Required]
         [Label("Evaluation Deadline Date")]
         public DateTime EvaluationDeadline { get; set; }

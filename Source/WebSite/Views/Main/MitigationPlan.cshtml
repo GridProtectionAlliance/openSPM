@@ -106,9 +106,9 @@
 
 @helper BodyRows()
 {
-    <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupPatchMnemonicValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
+    <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchStatusID, click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left valign-middle" data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></td>
-    <td width="45%" class="text-left valign-middle" data-bind="text: lookupTitleValue(lookupPatchIDValue(PatchStatusID))"></td>
+    <td width="45%" class="text-left valign-middle" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID))"></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -138,11 +138,10 @@
         @section Scripts {
             <script>
                 @Html.Raw(Model.RenderViewModelConfiguration<MitigationPlan>(ViewBag))
-                @Html.Raw(Model.RenderAbstract<Patch>("PatchMnemonic"))
+                @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
                 @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
                 @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
                 @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
-                @Html.Raw(Model.RenderAbstract<Patch>("Title"))
 
 
                 $(viewModel).on("beforeEdit", function (event, observableRecord) {

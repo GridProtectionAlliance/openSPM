@@ -256,7 +256,7 @@
             <td align="left" width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
             <td align="right" data-bind="text: dateFixer(CreatedOn)">&nbsp;&nbsp;</td>
             <td align="center" data-bind="text: lookupPatchstatusValue(PatchStatusKey)"></td>
-            <td align="center" data-bind="text: lookupTitleValue(PatchID)"></td>
+            <td align="center" data-bind="text: lookupVendorPatchNameValue(PatchID)"></td>
         </tr>
         </tbody>
 
@@ -272,7 +272,7 @@
     </tr>
     <tbody data-bind="foreach: patches">
     <tr>
-        <td align="center" data-bind="text: PatchMnemonic"></td>
+        <td align="center" data-bind="text: VendorPatchName"></td>
         <td align="center" data-bind="text: lookupNameValue(PlatformID)"></td>
         <td align="center" data-bind="text: lookupAbbreviationValue(VendorID)"></td>
     </tr>
@@ -298,7 +298,7 @@
 </div>
 
 <script>
-    @Html.Raw(Model.RenderAbstract<Patch>("Title"))
+    @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
     @Html.Raw(Model.RenderValueListClientLookupFunction("patchStatus"))
     @Html.Raw(Model.RenderAbstract<Platform>("Name"))
     @Html.Raw(Model.RenderAbstract<Vendor>("Abbreviation"))

@@ -31,17 +31,17 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
-        new[] { "PatchMnemonic", "SPM&nbsp;Reference", "text-center" },
+        new[] { "ID", "SPM&nbsp;Reference", "text-center" },
         new[] { "ImpactKey", "Impact", "text-center" },
         new[] { "VendorPatchName", "Title", "text-left" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
-        new[] { null, "Patch&nbsp;Status", "text-center valign-middle" },
+        new[] { null, "Patch Status", "text-center valign-middle" },
         new[] { null, "Documents", "text-center valign-middle" }
     };
 
     ViewBag.Platforms = Json.Encode(dataContext.Table<Platform>().QueryRecords().ToArray());
-    ViewBag.HideAddNewButton = true;
+    //ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -53,13 +53,13 @@
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="@*visible: IsNotCompliance*@"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="@*visible: !IsNotCompliance*@"></td>
+    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: ID, click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(VendorPatchName, 1.5), attr: {title: VendorPatchName}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Start...</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data)">Start(Or Begin Assessment)...</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -115,6 +115,7 @@
                 /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
         }
         @Html.Raw(dataContext.AddCheckBoxField<Patch>("Vulnerability"))
+        @Html.Raw(dataContext.AddCheckBoxField<Patch>("NoSecurityContent"))
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -139,6 +140,8 @@
            
 
         });
+
+
         var myPlatforms = @Html.Raw(ViewBag.Platforms);
         for( var i =0; i< myPlatforms.length; ++i)
         {
@@ -160,9 +163,22 @@
 
             });
 
-            console.log(myPlatforms);
+            //console.log(myPlatforms);
             $('#evalDate').html(deadlineDate.formatDate(DateFormat));
         }
+
+        function updatePatchStatus(record) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryPatchUserAccountPlatformBusinessUnitUserAccountViews(record.PlatformID).done(function(records) {
+                    for (var i = 0; i < records.length; i++){
+                    
+                        var temp = { 'PatchID': record.ID, 'BusinessUnitID': records[i].BusinessUnitID, 'PatchStatusKey': 2  };
+                        dataHub.addNewPatchStatus(temp);
+                    }
+                });
+            }
+        }
+
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {

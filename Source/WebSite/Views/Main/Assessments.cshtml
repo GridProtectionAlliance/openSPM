@@ -157,9 +157,9 @@
 {
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
-    <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupPatchMnemonicValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
+    <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupTitleValue(lookupPatchIDValue(PatchStatusID))"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID))"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
@@ -188,11 +188,11 @@
         @Html.Raw(Model.RenderViewModelConfiguration<Assessment>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
-        @Html.Raw(Model.RenderAbstract<Patch>("PatchMnemonic"))
+        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
         @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
         @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
-        @Html.Raw(Model.RenderAbstract<Patch>("Title"))
+
 
         function getDueDate(day) {
             var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);

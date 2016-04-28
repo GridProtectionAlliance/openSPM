@@ -201,6 +201,57 @@ namespace openSPM
 
         #endregion
 
+        #region [ PatchStatus Table Operations ]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecordCount)]
+        public int QueryPatchStatusCount()
+        {
+            return m_dataContext.Table<PatchStatus>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecords)]
+        public IEnumerable<PatchStatus> QueryPatchStatuss(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<PatchStatus>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchStatus), RecordOperation.DeleteRecord)]
+        public void DeletePatchStatus(int id)
+        {
+            m_dataContext.Table<PatchStatus>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchStatus), RecordOperation.CreateNewRecord)]
+        public PatchStatus NewPatchStatus()
+        {
+            return new PatchStatus();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchStatus), RecordOperation.AddNewRecord)]
+        public void AddNewPatchStatus(PatchStatus record)
+        {
+            record.CreatedOn = DateTime.UtcNow;
+            record.CreatedByID = GetCurrentUserID();
+            record.StatusChangeOn = record.CreatedOn;
+            m_dataContext.Table<PatchStatus>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchStatus), RecordOperation.UpdateRecord)]
+        public void UpdatePatchStatus(PatchStatus record)
+        {
+            record.StatusChangeOn = DateTime.UtcNow;
+            m_dataContext.Table<PatchStatus>().UpdateRecord(record);
+        }
+
+        #endregion
+
+
         #region [ Vendor Table Operations ]
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecordCount)]
@@ -491,6 +542,22 @@ namespace openSPM
         }
 
         #endregion
+
+        #region [ PatchUserAccountPlatformBusinessUnitUserAccountView Table Operations ]
+
+        public int QueryPatchUserAccountPlatformBusinessUnitUserAccountViewCount(int platformID)
+        {
+            return m_dataContext.Table<PatchUserAccountPlatformBusinessUnitUserAccountView>().QueryRecordCount(new RecordRestriction("PlatformID = {0}", platformID));
+        }
+
+        public IEnumerable<PatchUserAccountPlatformBusinessUnitUserAccountView>
+            QueryPatchUserAccountPlatformBusinessUnitUserAccountViews(int platformID)
+        {
+            return m_dataContext.Table<PatchUserAccountPlatformBusinessUnitUserAccountView>().QueryRecords("PlatformID", new RecordRestriction("PlatformID = {0}", platformID));
+        }
+
+        #endregion
+
 
         #region [ Document Table Operations ]
 
@@ -1029,6 +1096,26 @@ namespace openSPM
 
         #endregion
 
+       
+
+        #region [PatchPatchStatusDetail Table Operations]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecordCount)]
+        public int QueryPatchPatchStatusDetailCount(int parentID)
+        {
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("PatchStatusKey = {0}", parentID));
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecords)]
+        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(int parentID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0}", parentID));
+        }
+
+        #endregion
+
         #region [PatchStatusAssessmentDetail Table Operations]
 
         [AuthorizeHubRole("Administrator")]
@@ -1051,27 +1138,7 @@ namespace openSPM
 
         #endregion
 
-        #region [PatchPatchStatusDetail Table Operations]
-
-        [AuthorizeHubRole("Administrator")]
-        public int QueryPatchPatchStatusDetailCount()
-        {
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount();
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails()
-        {
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords("PatchMnemonic");
-        }
-
-        [AuthorizeHubRole("Administrator")]
-        public PatchPatchStatusDetail NewPatchPatchStatusDetail()
-        {
-            return new PatchPatchStatusDetail();
-        }
-
-        #endregion
+     
 
         #region [ LatestVendorDiscoveryResult View Operations ]
 

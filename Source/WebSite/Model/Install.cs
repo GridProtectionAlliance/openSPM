@@ -69,5 +69,14 @@ namespace openSPM.Model
         [Required]
         [Label("Updated By")]
         public Guid UpdatedByID { get; set; }
+
+        [Label ("Work Management ID")]
+        public string WorkManagementID { get; set; }
+
+        [Label("Installation Due Date")]
+        public DateTime InstallDueDate { get; set; }
+
+        [Label("Business Unit")]
+        public int BusinessUnitID { get; set; }
     }
 }

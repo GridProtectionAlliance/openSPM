@@ -209,8 +209,10 @@
     </Compile>
     <Compile Include="Model\AppModel.cs" />
     <Compile Include="Model\Assessment.cs" />
+    <Compile Include="Model\AssessmentDocument.cs" />
     <Compile Include="Model\BusinessUnit.cs" />
     <Compile Include="Model\BusinessUnitUserAccountDetail.cs" />
+    <Compile Include="Model\ClosedPatch.cs" />
     <Compile Include="Model\DiscoveryResultDocument.cs" />
     <Compile Include="Model\DiscoveryResult.cs" />
     <Compile Include="Model\DocumentDetail.cs" />
@@ -223,6 +225,7 @@
     <Compile Include="Model\NoticeLog.cs" />
     <Compile Include="Model\PatchPatchStatusDetail.cs" />
     <Compile Include="Model\PatchStatusAssessmentDetail.cs" />
+    <Compile Include="Model\PatchStatusAssessmentView.cs" />
     <Compile Include="Model\PatchUserAccountPlatformBusinessUnitUserAccountView.cs" />
     <Compile Include="Model\UserAccountNoticeLevel.cs" />
     <Compile Include="Model\Page.cs" />

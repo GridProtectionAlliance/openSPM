@@ -52,21 +52,20 @@ namespace openSPM.Model
         [Label("Completed Notes")]
         public string CompletedNotes { get; set; }
 
-        [Required]
+ 
         [Label("Created On")]
         [InitialValue("new Date()")]
         public DateTime CreatedOn { get; set; }
 
-        [Required]
+       
         [Label("Created By")]
         public Guid CreatedByID { get; set; }
 
-        [Required]
+        
         [Label("Updated On")]
         [InitialValue("new Date()")]
         public DateTime UpdatedOn { get; set; }
 
-        [Required]
         [Label("Updated By")]
         public Guid UpdatedByID { get; set; }
 
@@ -74,7 +73,7 @@ namespace openSPM.Model
         public string WorkManagementID { get; set; }
 
         [Label("Installation Due Date")]
-        public DateTime InstallDueDate { get; set; }
+        public DateTime? InstallDueDate { get; set; }
 
         [Label("Business Unit")]
         public int BusinessUnitID { get; set; }

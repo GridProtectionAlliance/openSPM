@@ -161,5 +161,7 @@ namespace openSPM.Model
         {
             get; set;
         }
+
+        public bool IsInitiated { get; set; }
     }
 }

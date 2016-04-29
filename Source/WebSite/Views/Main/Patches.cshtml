@@ -36,7 +36,7 @@
         new[] { "VendorPatchName", "Title", "text-left" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
-        new[] { null, "Patch Status", "text-center valign-middle" },
+        new[] { null, "Action", "text-center valign-middle" },
         new[] { null, "Documents", "text-center valign-middle" }
     };
 
@@ -59,7 +59,7 @@
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(VendorPatchName, 1.5), attr: {title: VendorPatchName}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data)">Start(Or Begin Assessment)...</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data), visible: !(IsInitiated)">Initiate</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -137,7 +137,9 @@
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
         $(document).ready(function () {
-           
+            $(window).on("initiatedPatch", function() {
+                viewModel.queryPageRecords();
+            });
 
         });
 
@@ -174,11 +176,20 @@
                     
                         var temp = { 'PatchID': record.ID, 'BusinessUnitID': records[i].BusinessUnitID, 'PatchStatusKey': 2  };
                         dataHub.addNewPatchStatus(temp);
+                        
                     }
+
+                    $(window).trigger("initiatedPatch");
+
+                    record.IsInitiated = true;
+                    dataHub.updatePatch(record);
                 });
+
+               
             }
         }
 
+        
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {

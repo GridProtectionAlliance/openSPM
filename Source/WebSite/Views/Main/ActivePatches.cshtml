@@ -71,7 +71,7 @@ string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImageP
 statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
     <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind=""><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind=""></td>
-    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchID, click: $parent.viewPageRecord"></button></td>
+    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(PatchID), click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupNameValue(BusinessUnitID)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
@@ -100,27 +100,96 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
         </div>
     </div>
 </div>
+
+<div id="assessmentDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
+                <h4 class="modal-title">
+                    <span>Begin Assessment</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchid" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchname">Patch Name</label>
+                    <div class="form-control" id="patchname"></div>
+                    <label for="businessunit">Business Unit</label>
+                    <div class="form-control" id="businessunit"></div>
+                    <label for="assessmentSelect">Assessment Result</label>
+                    <select class="form-control"id="assessmentSelect">
+                        <option value="1" selected="selected">Install/Remediate</option>
+                        <option value="2">Mitigate</option>
+                        <option value="3">Not Applicable - Does not match system config</option>
+                        <option value="4">Not Applicable - Patch has no security related content</option>
+                    </select>
+                    <label for="details">Details/Notes</label>
+                    <textarea id="details" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveAssessmentButton" onclick="addAssessment()">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="cancelRecordButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "PatchID", 2))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
+
+        $(function() {
+
+            $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            $('#assessmentDialog').on("hidden.bs.modal", function () {
+                viewModel.queryPageRecords();
+            });
+        });
 
         function beginAssessment(record) {
-            console.log(record);
+            $('#patchid').html(record.PatchStatusID);
+            $('#patchname').html(record.PatchMnemonic);
+            $('#businessunit').html(lookupNameValue(record.BusinessUnitID).toString());
+            $('#details').val("");
+            $('#assessmentSelect').prop('selectedIndex', 0);
+            $("#assessmentDialog").modal("show").bind(record);
         }
+
+        function addAssessment() {
+            var record = { 'PatchStatusID': $('#patchid').html(), 'AssessmentResultKey': $('#assessmentSelect').val(), 'Details': $('#details').val() };
+            if (viewModel.dataHubIsConnected) {
+                dataHub.addNewAssessment(record);
+                dataHub.queryPatchStatus(record.PatchStatusID).done(function (data) {
+                    var obj = {'ID': data[0].ID, 'PatchID': data[0].PatchID, 'BusinessUnitID': data[0].BusinessUnitID,'PatchStatusKey': (data[0].PatchStatusKey + 1), 'StatusChangeOn': data[0].StatusChangeOn, 'Notes': data[0].Notes, 'CreatedOn': data[0].CreatedOn, 'CreatedByID': data[0].CreatedByID};
+                    dataHub.updatePatchStatus(obj);
+
+                    
+                });
+
+                
+            }
+        }
+
+       
+
         function filterBU() {
-            
+
             //var $rows = $('#recordsTable tbody tr');
             //if ($('#bufilter').val() != "None") {
-                
+
             //    $rows.show().filter(function (i, data) {
             //        console.log($(data).children()[2].innerText == $('#bufilter').val());
             //            //console.log($(data).children()[2].innerHTML);
             //        return $(data).children()[2].innerText !== $('#bufilter').val();
             //    }).hide();
             //}
-           
+
             //viewModel.queryPageRecords();
             //$('#search').keyup(function () {
             //    console.log($rows);
@@ -134,7 +203,7 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             //    }).hide();
             //});
         }
-       
-   
+
+
     </script>
 }

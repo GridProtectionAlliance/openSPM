@@ -71,12 +71,13 @@
 {   //    { "Field", "Label", "Classes" }
         new[] { null, "Alarm", "text-center valign-middle" },
         new[] { "ID", "SPM Reference", "text-left" },
-        new[] { null, "Business Unit", "text-left"},
-        new[] { null, "Title", "text-left"},
+        new[] { null, "Business Unit", "text-left valign-middle"},
+        new[] { null, "Title", "text-left valign-middle"},
         new[] { "AssessmentResultKey", "Result", "text-left" },
         new[] { "Details", "Basis", "text-left"},
-        new[] { null, "Due Date", "text-left"},
-        new[] { null, "Patch&nbsp;Status", "text-center valign-middle" }
+        new[] { "CreatedOn", "Due Date", "text-left"},
+        new[] { null, "Action", "text-center valign-middle" },
+        new[] { null, "Documents", "text-center valign-middle" }
 
     };
 
@@ -85,7 +86,7 @@
     ViewBag.AddNewEditTitle = "Assessment";
 }
 
-<p>&nbsp;</p>
+@*<p>&nbsp;</p>
 
 <p>
     On "Patch Start" a Patch Status record is created for each BUgroup that has the platform selected (the Platform BUG Link Table).  It will be
@@ -151,7 +152,7 @@
     </tr>
 
     </tbody>
-</table>
+</table>*@
 
 @helper BodyRows()
 {
@@ -162,8 +163,12 @@
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID))"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
-    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm">Update...</button></td>
+    <td width="10%" class="text-left valign-middle">
+        <div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" data-bind="visible: (IsAssessed && AssessmentResultKey == 1), click: installPatch.bind($data)"class="btn btn-danger btn-sm">Install</button>
+    <button type="button" data-bind="visible: (IsAssessed && AssessmentResultKey == 2), click: mitigatePatch.bind($data)" class="btn btn-danger btn-sm">Mitigate</button>
+    <button type="button" data-bind="visible: (IsAssessed && AssessmentResultKey > 2), click: closePatch.bind($data)" class="btn btn-danger btn-sm">Close</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -183,6 +188,110 @@
     </div>
 }
 @Html.Partial("PagedViewModel")
+
+<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <iframe style="border: none" id="manageDocumentsFrame"></iframe>
+                <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="installDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
+                <h4 class="modal-title">
+                    <span>Installation Record</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchidinstall" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnameinstall">Patch Name</label>
+                    <div class="form-control" id="patchnameinstall"></div>
+                    <label for="businessunitinstall">Business Unit</label>
+                    <div class="form-control" id="businessunitinstall"></div>
+                    <label for="workmangamentidinstall">WorkManagement ID</label>
+                    <input id="workmangamentidinstall" class="form-control"/>
+                    <label for="completeddateinstall">Completed Date</label>
+                    <input type="text" class="form-control" id="completeddateinstall"/>
+                    <label for="details">Completed Notes</label>
+                    <textarea id="details" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveInstallButton">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="mitigationDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    <span>Mitigation Records</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchstatusidmit" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnamemit">Patch Name</label>
+                    <div class="form-control" id="patchnamemit"></div>
+                    <label for="businessunitmit">Business Unit</label>
+                    <div class="form-control" id="businessunitmit"></div>
+                    <label for="miplanid">MiPlan ID</label>
+                    <input id="miplanid" class="form-control"/>
+                    <label for="summarymit">Details/Notes</label>
+                    <textarea id="summarymit" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveMitigationButton">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="closedDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" >&times;</button>
+                <h4 class="modal-title">
+                    <span>Close&nbsp;Patch</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchidclose" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnameclose">Patch Name</label>
+                    <div class="form-control" id="patchnameclose"></div>
+                    <label for="businessunitclose">Business Unit</label>
+                    <div class="form-control" id="businessunitclose"></div>
+                    <label for="assessmentkeyclose">Assessment Result</label>
+                    <div class="form-control" id="assessmentkeyclose"></div>
+                    <label for="detailsclose">Details/Notes</label>
+                    <textarea id="detailsclose" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveCloseButton">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Assessment>(ViewBag))
@@ -193,6 +302,17 @@
         @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
+        
+        $(function() {
+
+            $("#installDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#mitigationDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            $(window).on("initiatedInstall", function() {
+                viewModel.queryPageRecords();
+            });
+        });
 
         function getDueDate(day) {
             var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);
@@ -202,6 +322,67 @@
             var processeddate = month + '/' + date + '/' + year;
             //console.log(processeddate);
             return processeddate;
+        }
+
+        function installPatch(record) {
+            $('#patchidinstall').html(lookupPatchIDValue(record.PatchStatusID));
+            $('#patchnameinstall').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
+            $('#businessunitinstall').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
+            $('#workmangamentidinstall').val("");
+            $('#completeddateinstall').datepicker({
+                todayBtn: "linked",
+                autoclose: true,
+                todayHighlight: true
+            });
+            $('#details').val("");
+            $("#installDialog").modal("show");
+            $('#saveInstallButton').one("click", function(){addInstall(record)});
+        }
+
+        function addInstall(data) {
+            var record = { 'PatchID': parseInt($('#patchidinstall').html()), 'CompletedOn': (new Date($('#completeddateinstall').val())), 'Summary': ' ', 'BusinessUnitID': (lookupBusinessUnitIDValue(data.PatchStatusID)), 'WorkManagementID': $('#workmangamentidinstall').val(), 'CompletedNotes': $('#details').val() };
+           
+
+            if (viewModel.dataHubIsConnected) {
+                console.log(record);
+                dataHub.addNewInstall(record).done(function() {
+                    data.IsAssessed = false;
+                    dataHub.updateAssessment(data);
+                    $(window).trigger("initiatedInstall");
+                });
+           
+
+            }
+        }
+
+        function mitigatePatch(record) {
+            $('#patchidmit').html(record.PatchStatusID);
+            $('#patchnamemit').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
+            $('#businessunitmit').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
+            $('#miplanid').val("");
+            $('#summarymit').val("");
+            $("#mitigationDialog").modal("show");
+            $('#saveMitigationButton').one("click", function(){addMitigation(record)});
+        }
+
+        function addMitigation(data) {
+            var record = { 'PatchStatusID': data.PatchStatusID, 'MiPlanID': $('#miplanid').val(), 'Summary': $('#summarymit').val()};
+           
+
+            if (viewModel.dataHubIsConnected) {
+                console.log(record);
+                dataHub.addNewMitigationPlan(record).done(function() {
+                    data.IsAssessed = false;
+                    dataHub.updateAssessment(data);
+                    $(window).trigger("initiatedInstall");
+
+                });
+                
+            }
+        }
+
+        function closePatch(record) {
+            console.log(record);
         }
 
         function getDiscoveryStatusImage(element, record) {
@@ -238,6 +419,48 @@
             return undefined;
         }
         
+
+        function getDocumentCount(sourceID, element) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryDocumentDetailCount("Assessment", sourceID).done(function (count) {
+                    $("#documentCount" + sourceID).text(count.toString());
+                });
+            }
+
+            return element.text();
+        }
+
+        $(window).resize(function () {
+            setTimeout(function () {
+                $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
+            }, 500);
+        });
+
+        function openManageDocumentsDialog(record) {
+            const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
+            var initialMode = "";
+
+            if (count < 1)
+                initialMode = "/AddNew";
+
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "height": ($(document).height() - 150) + "px",
+                "width": "100%"
+        });
+
+        $("#manageDocumentsDialog").modal("show");
+        }
+
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+            // Refresh page counts after editing tasks
+            viewModel.queryPageRecords();
+
+            // Clear frame page
+            $("#manageDocumentsFrame").attr("src", "about:blank");
+        });
+
+
         $(viewModel).on("beforeEdit", function(event, observableRecord) {
             observableRecord.patchStatuses = ko.observableArray();
             

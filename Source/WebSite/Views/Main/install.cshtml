@@ -79,6 +79,7 @@
 {
         //    { "Field", "Label", "Classes" }
         new[] { "PatchID", "SPM Reference", "text-left" },
+        new[] { "BusinessUnitID", "Business Unit", "text-left"},
         new[] { "Summary", "Summary", "text-left"},
         new[] { "CompletedNotes", "Installation Notes", "text-left"},
         new[] { "CompletedOn", "Completion Date", "text-left"},
@@ -95,9 +96,10 @@
 
     
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(PatchID), click: $parent.viewPageRecord"></button></td>
-    <td width="30%" class="text-left valign-middle"><div nowrap data-bind="text: Summary"></div></td>
-    <td width="30%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedNotes"></div></td>
-    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedOn.formatDate(DateFormat)"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(BusinessUnitID)"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Summary"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedNotes"></div></td>
+    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedOn.formatDate(DateFormat)"></div></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -136,6 +138,7 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Install>(ViewBag))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
 
         $(function () {

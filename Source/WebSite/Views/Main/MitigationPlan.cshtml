@@ -40,7 +40,7 @@
     ViewBag.AddNewEditTitle = "Midigation Plan";
 
 }
-<p>&nbsp;</p>
+@*<p>&nbsp;</p>
 <ul>
     <li>A list of "open" mitigation plans will be displayed.</li>
     <li>A filter will be available at the top of the screen for "Business Unit" and default to the BUCs or SMEs BU -- or to "all" for everyone else.</li>
@@ -102,11 +102,11 @@
         </tr>
 
     </tbody>
-</table>
+</table>*@
 
 @helper BodyRows()
 {
-    <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchStatusID, click: $parent.viewPageRecord"></button></td>
+    <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupPatchIDValue(PatchStatusID), click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left valign-middle" data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></td>
     <td width="45%" class="text-left valign-middle" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID))"></td>
     <td width="5%" class="text-center valign-middle" nowrap>

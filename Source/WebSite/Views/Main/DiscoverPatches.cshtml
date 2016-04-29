@@ -56,7 +56,7 @@
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "Name", "Company", "text-center" },
         new[] { "Company", "Full Corporate Name", "text-left" },
-        new[] { "ReviewDate", "Release&nbsp;Date", "text-center" },
+        new[] { "ReviewDate", "Last&nbsp;Review&nbsp;Date", "text-center" },
         new[] { null, "", ""},
         new[] { null, "Documents", "text-center valign-middle" }
     };
@@ -107,7 +107,6 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
         var currentVendorID = 0;
-
         $(function () {
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
         });

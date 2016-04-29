@@ -187,6 +187,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
+            record.IsInitiated = false;
             m_dataContext.Table<Patch>().AddNewRecord(record);
         }
 
@@ -212,9 +213,9 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchStatus> QueryPatchStatuss(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<PatchStatus> QueryPatchStatus(int parentID)
         {
-            return m_dataContext.Table<PatchStatus>().QueryRecords(sortField, ascending, page, pageSize);
+            return m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("ID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -558,7 +559,6 @@ namespace openSPM
 
         #endregion
 
-
         #region [ Document Table Operations ]
 
         [RecordOperation(typeof(Document), RecordOperation.QueryRecordCount)]
@@ -658,7 +658,7 @@ namespace openSPM
 
         #region [ PatchDocument Table Operations ]
 
-        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC, Viewer")]
         [RecordOperation(typeof(PatchDocument), RecordOperation.UpdateRecord)]
         public void UpdatePatchDocument(PatchDocument record)
         {
@@ -673,6 +673,18 @@ namespace openSPM
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(InstallDocument), RecordOperation.UpdateRecord)]
         public void UpdateInstallDocument(InstallDocument record)
+        {
+            // Stub function exists to assign rights to file upload operations
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region [ AssessmentDocument Table Operations ]
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(AssessmentDocument), RecordOperation.UpdateRecord)]
+        public void UpdateAssessmentDocument(AssessmentDocument record)
         {
             // Stub function exists to assign rights to file upload operations
             throw new NotImplementedException();
@@ -957,6 +969,7 @@ namespace openSPM
         {
             m_dataContext.Table<Assessment>().DeleteRecord(id);
         }
+        
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Assessment), RecordOperation.CreateNewRecord)]
@@ -974,6 +987,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
+            record.IsAssessed = true;
             m_dataContext.Table<Assessment>().AddNewRecord(record);
         }
 
@@ -1096,18 +1110,16 @@ namespace openSPM
 
         #endregion
 
-       
-
         #region [PatchPatchStatusDetail Table Operations]
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecordCount)]
         public int QueryPatchPatchStatusDetailCount(int parentID)
         {
             return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("PatchStatusKey = {0}", parentID));
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecords)]
         public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(int parentID, string sortField, bool ascending, int page, int pageSize)
         {
@@ -1137,8 +1149,6 @@ namespace openSPM
         }
 
         #endregion
-
-     
 
         #region [ LatestVendorDiscoveryResult View Operations ]
 
@@ -1206,7 +1216,64 @@ namespace openSPM
         }
 
         #endregion
-       
+
+        #region [ PatchStatusAssessmentView View Operations ]
+
+        [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.QueryRecordCount)]
+        public int QueryPatchStatusAssessmentViewCount()
+        {
+                return m_dataContext.Table<PatchStatusAssessmentView>().QueryRecordCount();
+
+        }
+
+        [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.QueryRecords)]
+        public IEnumerable<PatchStatusAssessmentView> QueryPatchStatusAssessmentViews( string sortField, bool ascending, int page, int pageSize)
+        {
+                return m_dataContext.Table<PatchStatusAssessmentView>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+
+        [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.CreateNewRecord)]
+        public PatchStatusAssessmentView NewPatchStatusAssessmentView()
+        {
+            return new PatchStatusAssessmentView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.AddNewRecord)]
+        public void AddNewPatchStatusAssessmentViewInstall(PatchStatusAssessmentView record)
+        {
+            Install result = DeriveInstall(record);
+            result.CreatedByID = GetCurrentUserID();
+            result.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Install>().AddNewRecord(result);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.UpdateRecord)]
+        public void UpdatePatchStatusAssessmentViewInstallTable(PatchStatusAssessmentView record)
+        {
+            m_dataContext.Table<Install>().UpdateRecord(DeriveInstall(record));
+        }
+
+        private Install DeriveInstall(PatchStatusAssessmentView record)
+        {
+            return new Install
+            {
+                PatchID = record.PatchID,
+                Summary = record.Details,
+                CompletedOn = DateTime.UtcNow,
+                CreatedOn = DateTime.UtcNow,
+                CreatedByID = GetCurrentUserID(),
+                UpdatedOn = DateTime.UtcNow,
+                UpdatedByID = GetCurrentUserID(),
+                BusinessUnitID = record.BusinessUnitID,
+            };
+        }
+
+        #endregion
+
+
         #region [ Miscellaneous Hub Operations ]
 
         /// <summary>

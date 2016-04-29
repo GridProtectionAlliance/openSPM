@@ -46,22 +46,22 @@ namespace openSPM.Model
         [Label("Assessment Details")]
         public string Details { get; set; }
 
-        [Required]
         [Label("Updated On")]
         [InitialValue("new Date()")]
         public DateTime UpdatedOn { get; set; }
 
-        [Required]
         [Label("Updated By")]
         public Guid UpdatedByID { get; set; }
 
-        [Required]
+      
         [Label("Created On")]
         [InitialValue("new Date()")]
         public DateTime CreatedOn { get; set; }
 
-        [Required]
+       
         [Label("Created By")]
         public Guid CreatedByID { get; set; }
+
+        public bool IsAssessed { get; set; }
     }
 }

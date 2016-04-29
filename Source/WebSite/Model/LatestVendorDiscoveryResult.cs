@@ -39,7 +39,7 @@ namespace openSPM.Model
             get; set;
         }
 
-        [PrimaryKey(true)]
+        [PrimaryKey]
         public int DiscoveryResultID
         {
             get; set;
@@ -103,6 +103,7 @@ namespace openSPM.Model
             get; set;
         }
 
+        
         public Guid CreatedByID
         {
             get; set;

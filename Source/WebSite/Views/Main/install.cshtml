@@ -220,8 +220,11 @@
            if (viewModel.dataHubIsConnected) {
                dataHub.addNewClosedPatch(record).done(function () {
                    data.IsInstalled = true;
-                   dataHub.updateInstall(data);
-                   $(window).trigger("initiatedInstall");
+                   dataHub.updateInstall(data).done(function() {
+                       dataHub.updatePatchStatusKey(data.PatchStatusID, 4);
+                       $(window).trigger("initiatedInstall");
+                   });
+                   
 
                });
 

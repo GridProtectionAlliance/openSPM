@@ -402,9 +402,10 @@
             if (viewModel.dataHubIsConnected) {
                 dataHub.addNewClosedPatch(record).done(function() {
                     data.IsAssessed = false;
-                    dataHub.updateAssessment(data);
-                    $(window).trigger("initiatedInstall");
-
+                    dataHub.updateAssessment(data).done(function() {
+                        dataHub.updatePatchStatusKey(data.PatchStatusID, 4);
+                        $(window).trigger("initiatedInstall");
+                    });
                 });
                 
             }

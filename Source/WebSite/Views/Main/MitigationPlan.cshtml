@@ -210,8 +210,11 @@
                     if (viewModel.dataHubIsConnected) {
                         dataHub.addNewClosedPatch(record).done(function () {
                             data.IsMitigated = true;
-                            dataHub.updateMitigationPlan(data);
-                            $(window).trigger("initiatedInstall");
+                            dataHub.updateMitigationPlan(data).done(function () {
+                                dataHub.updatePatchStatusKey(data.PatchStatusID, 4);
+                                $(window).trigger("initiatedInstall");
+                            });
+                            
 
                         });
 

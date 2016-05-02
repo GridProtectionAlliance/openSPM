@@ -165,6 +165,15 @@ namespace openSPM
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
+        [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
+        public IEnumerable<Patch> QueryAPatch(int id)
+        {
+           return m_dataContext.Table<Patch>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
+
+        }
+
+        
+
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
         public void DeletePatch(int id)
@@ -248,6 +257,14 @@ namespace openSPM
         {
             record.StatusChangeOn = DateTime.UtcNow;
             m_dataContext.Table<PatchStatus>().UpdateRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Vendor), RecordOperation.DeleteRecord)]
+        public void UpdatePatchStatusKey(int id, int key)
+        {
+            // For Vendors, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE PatchStatus SET PatchStatusKey={0} WHERE ID={1}",key, id);
         }
 
         #endregion
@@ -1321,6 +1338,59 @@ namespace openSPM
 
         #endregion
 
+        #region [HistoryView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecordCount)]
+        public int QueryHistoryViewCount()
+        {
+            return m_dataContext.Table<HistoryView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecords)]
+        public IEnumerable<HistoryView> QueryHistoryViews(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        #endregion
+
+        #region [PatchVendorPlatformView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(PatchVendorPlatformView), RecordOperation.QueryRecordCount)]
+        public int QueryPatchVendorPlatformViewCount()
+        {
+            return m_dataContext.Table<PatchVendorPlatformView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(PatchVendorPlatformView), RecordOperation.QueryRecords)]
+        public IEnumerable<PatchVendorPlatformView> QueryPatchVendorPlatformViews(int id)
+        {
+            return m_dataContext.Table<PatchVendorPlatformView>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
+        }
+
+        #endregion
+
+        #region [AssessmentHistoryView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(AssessmentHistoryView), RecordOperation.QueryRecordCount)]
+        public int QueryAssessmentHistoryViewCount()
+        {
+            return m_dataContext.Table<AssessmentHistoryView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(AssessmentHistoryView), RecordOperation.QueryRecords)]
+        public IEnumerable<AssessmentHistoryView> QueryAssessmentHistoryViews(int id)
+        {
+            return m_dataContext.Table<AssessmentHistoryView>().QueryRecords(restriction: new RecordRestriction("AssessmentID = {0}", id));
+        }
+
+        #endregion
 
         #region [ Miscellaneous Hub Operations ]
 

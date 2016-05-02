@@ -209,7 +209,7 @@ namespace openSPM.Controllers
 
         public ActionResult History()
         {
-            m_appModel.ConfigureView(Url.RequestContext, "History", ViewBag);
+            m_appModel.ConfigureView<HistoryView>(Url.RequestContext, "History", ViewBag);
             return View();
         }
 

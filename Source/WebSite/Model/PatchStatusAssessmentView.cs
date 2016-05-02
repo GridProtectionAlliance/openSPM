@@ -9,6 +9,7 @@ namespace openSPM.Model
     [Table("PatchStatusAssessmentView")]
     public class PatchStatusAssessmentView
     {
+        public int ID { get; set; }
         public int PatchID { get; set; }
         public int PatchStatusKey { get; set; }
         public DateTime StatusChangeOn { get; set; }

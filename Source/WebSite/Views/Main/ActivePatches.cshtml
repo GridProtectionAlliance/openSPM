@@ -27,10 +27,22 @@
 @model openSPM.Model.AppModel
 @{
     DataContext dataContext = Model.DataContext;
+    Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
+    int discoveryWarningDays, discoveryAlarmDays, discoveryCriticalAlarmDays, discoveryViolationDays;
+    string setting;
+
+    const string noneImage = "disabledlight.png";
+    const string warningImage = "yellowlight.png";
+    const string alarmImage = "amberlight.png";
+    const string criticalAlarmImage = "redlight.png";
+    const string violationImage = "blacklight.png";
+
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
-    {   //    { "Field", "Label", "Classes" }
+{   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "PatchID", "SPM&nbsp;Reference", "text-center" },
         new[] { "BusinessUnitID", "Business Unit", "text-center"},
@@ -70,7 +82,7 @@
 string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
 statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind=""><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind=""></td>
+    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(PatchID), click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupNameValue(BusinessUnitID)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
@@ -169,14 +181,49 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
                     var obj = {'ID': data[0].ID, 'PatchID': data[0].PatchID, 'BusinessUnitID': data[0].BusinessUnitID,'PatchStatusKey': (data[0].PatchStatusKey + 1), 'StatusChangeOn': data[0].StatusChangeOn, 'Notes': data[0].Notes, 'CreatedOn': data[0].CreatedOn, 'CreatedByID': data[0].CreatedByID};
                     dataHub.updatePatchStatus(obj);
 
-                    
+
                 });
 
-                
+
             }
         }
 
-       
+        function getStatusImage(element, record) {
+            const daysUntilDeadline = (record.EvaluationDeadline.toDate()).daysBetween(new Date());
+            var image, title;
+            switch (true) {
+                case (daysUntilDeadline > 14 && daysUntilDeadline <= 21):
+                    image = "@warningImage";
+                    title = "Warning";
+                    break;
+                case (daysUntilDeadline > 7 && daysUntilDeadline <= 14):
+                    image = "@alarmImage";
+                    title = "Alarm";
+                    break;
+                case (daysUntilDeadline > 0 && daysUntilDeadline <= 7):
+                    image = "@criticalAlarmImage";
+                    title = "Critical Alarm";
+                    break;
+                case (daysUntilDeadline <= 0):
+                    image = "@violationImage";
+                    title = "Violation";
+                    break;
+
+                default:
+                    image = "@noneImage";
+                    title = "OK";
+                    break;
+            }
+
+            element.attr("src", "@statusLightsImagePath" + image);
+            element.attr("alt", title);
+            element.attr("title", title);
+
+            return undefined;
+        }
+
+
+
 
         function filterBU() {
 

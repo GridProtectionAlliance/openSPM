@@ -80,9 +80,9 @@
         //    { "Field", "Label", "Classes" }
         new[] { "PatchID", "SPM Reference", "text-left" },
         new[] { "BusinessUnitID", "Business Unit", "text-left"},
-        new[] { "Summary", "Summary", "text-left"},
         new[] { "CompletedNotes", "Installation Notes", "text-left"},
         new[] { "CompletedOn", "Completion Date", "text-left"},
+        new[] { null, "Action", "text-center valign-middle"},
         new[] { null, "Documents", "text-center"}
     };
 
@@ -95,11 +95,12 @@
 {
 
     
-    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(PatchID), click: $parent.viewPageRecord"></button></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(BusinessUnitID)"></div></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Summary"></div></td>
+    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedNotes"></div></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedOn.formatDate(DateFormat)"></div></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" data-bind="click: closePatch.bind($data)" class="btn btn-danger btn-sm">Close</button></td>
+
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -134,17 +135,58 @@
     </div>
 </div>
 
+<div id="closedDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    <span>Close&nbsp;Patch</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchidclose" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnameclose">Patch Name</label>
+                    <div class="form-control" id="patchnameclose"></div>
+                    <label for="businessunitclose">Business Unit</label>
+                    <div class="form-control" id="businessunitclose"></div>
+                    <label for="assessmentkeyclose">Assessment Result</label>
+                    <div class="form-control" id="assessmentkeyclose"></div>
+                    <label for="closeddate">Closed Date</label>
+                    <input type="text" class="form-control" id="closeddate" />
+                    <label for="detailsclose">Details/Notes</label>
+                    <textarea id="detailsclose" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveCloseButton">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Install>(ViewBag))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
 
         $(function () {
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            $(window).on("initiatedInstall", function () {
+                viewModel.queryPageRecords();
+            });
+
         });
-        
+
        function getDocumentCount(sourceID, element) {
            if (viewModel.dataHubIsConnected()) {
                dataHub.queryDocumentDetailCount("Install", sourceID).done(function (count) {
@@ -153,6 +195,37 @@
            }
 
            return element.text();
+       }
+
+       function closePatch(record) {
+           $('#patchidclose').html(record.PatchStatusID);
+           $('#patchnameclose').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
+           $('#businessunitclose').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
+           $('#assessmentkeyclose').html(lookupAssessactionValue(1));
+           $('#detailsclose').val("");
+           $('#closeddate').val("");
+           $('#closeddate').datepicker({
+               todayBtn: "linked",
+               autoclose: true,
+               todayHighlight: true
+           });
+           $("#closedDialog").modal("show");
+           $('#saveCloseButton').one("click", function () { addClose(record) });
+       }
+
+       function addClose(data) {
+           var record = { 'PatchStatusID': data.PatchStatusID, 'ClosedDate': (new Date($('#closeddate').val())), 'ActionKey': 1, 'Details': $('#detailsclose').val() };
+
+
+           if (viewModel.dataHubIsConnected) {
+               dataHub.addNewClosedPatch(record).done(function () {
+                   data.IsInstalled = true;
+                   dataHub.updateInstall(data);
+                   $(window).trigger("initiatedInstall");
+
+               });
+
+           }
        }
 
        $(window).resize(function () {
@@ -184,7 +257,7 @@
            // Clear frame page
            $("#manageDocumentsFrame").attr("src", "about:blank");
        });
-        
+
     </script>
 }
 

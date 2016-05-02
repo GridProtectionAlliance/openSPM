@@ -281,6 +281,8 @@
                     <div class="form-control" id="businessunitclose"></div>
                     <label for="assessmentkeyclose">Assessment Result</label>
                     <div class="form-control" id="assessmentkeyclose"></div>
+                    <label for="closeddate">Closed Date</label>
+                    <input type="text" class="form-control" id="closeddate" />
                     <label for="detailsclose">Details/Notes</label>
                     <textarea id="detailsclose" class="form-control"></textarea>
                 </form>
@@ -302,13 +304,14 @@
         @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
+
         
         $(function() {
 
             $("#installDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#mitigationDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
-
+            $("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $(window).on("initiatedInstall", function() {
                 viewModel.queryPageRecords();
             });
@@ -325,7 +328,7 @@
         }
 
         function installPatch(record) {
-            $('#patchidinstall').html(lookupPatchIDValue(record.PatchStatusID));
+            $('#patchidinstall').html(record.PatchStatusID);
             $('#patchnameinstall').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
             $('#businessunitinstall').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
             $('#workmangamentidinstall').val("");
@@ -340,11 +343,9 @@
         }
 
         function addInstall(data) {
-            var record = { 'PatchID': parseInt($('#patchidinstall').html()), 'CompletedOn': (new Date($('#completeddateinstall').val())), 'Summary': ' ', 'BusinessUnitID': (lookupBusinessUnitIDValue(data.PatchStatusID)), 'WorkManagementID': $('#workmangamentidinstall').val(), 'CompletedNotes': $('#details').val() };
-           
+            var record = { 'PatchStatusID': data.PatchStatusID, 'CompletedOn': (new Date($('#completeddateinstall').val())), 'Summary': ' ', 'BusinessUnitID': (lookupBusinessUnitIDValue(data.PatchStatusID)), 'WorkManagementID': $('#workmangamentidinstall').val(), 'CompletedNotes': $('#details').val() };
 
             if (viewModel.dataHubIsConnected) {
-                console.log(record);
                 dataHub.addNewInstall(record).done(function() {
                     data.IsAssessed = false;
                     dataHub.updateAssessment(data);
@@ -367,10 +368,8 @@
 
         function addMitigation(data) {
             var record = { 'PatchStatusID': data.PatchStatusID, 'MiPlanID': $('#miplanid').val(), 'Summary': $('#summarymit').val()};
-           
 
             if (viewModel.dataHubIsConnected) {
-                console.log(record);
                 dataHub.addNewMitigationPlan(record).done(function() {
                     data.IsAssessed = false;
                     dataHub.updateAssessment(data);
@@ -382,7 +381,33 @@
         }
 
         function closePatch(record) {
-            console.log(record);
+            $('#patchidclose').html(record.PatchStatusID);
+            $('#patchnameclose').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
+            $('#businessunitclose').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
+            $('#assessmentkeyclose').html(lookupAssessactionValue(record.AssessmentResultKey));
+            $('#detailsclose').val("");
+            $('#closeddate').val("");
+            $('#closeddate').datepicker({
+                todayBtn: "linked",
+                autoclose: true,
+                todayHighlight: true
+            });
+            $("#closedDialog").modal("show");
+            $('#saveCloseButton').one("click", function(){addClose(record)});
+        }
+
+        function addClose(data) {
+            var record = { 'PatchStatusID': data.PatchStatusID, 'ClosedDate': (new Date($('#closeddate').val())), 'ActionKey': data.AssessmentResultKey, 'Details': $('#detailsclose').val()};
+
+            if (viewModel.dataHubIsConnected) {
+                dataHub.addNewClosedPatch(record).done(function() {
+                    data.IsAssessed = false;
+                    dataHub.updateAssessment(data);
+                    $(window).trigger("initiatedInstall");
+
+                });
+                
+            }
         }
 
         function getDiscoveryStatusImage(element, record) {

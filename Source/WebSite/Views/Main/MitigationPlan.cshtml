@@ -31,8 +31,9 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { "PatchStatusID", "Patch ID", "text-left" },
-        new[] { null, "Business Group", "text-left" },
-        new[] { null, "Title", "text-left"}
+        new[] { null, "Business Group", "text-left valign-middle" },
+        new[] { null, "Title", "text-left valign-middle"},
+        new[] { null, "Action", "text-center valign-middle"}
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -107,8 +108,9 @@
 @helper BodyRows()
 {
     <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupPatchIDValue(PatchStatusID), click: $parent.viewPageRecord"></button></td>
-    <td width="40%" class="text-left valign-middle" data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></td>
-    <td width="45%" class="text-left valign-middle" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID))"></td>
+    <td width="35%" class="text-left valign-middle" data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></td>
+    <td width="40%" class="text-left valign-middle" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID))"></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" data-bind="click: closePatch.bind($data)" class="btn btn-danger btn-sm">Close</button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -135,14 +137,86 @@
 
         }
         @Html.Partial("PagedViewModel")
-        @section Scripts {
+
+<div id="closedDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    <span>Close&nbsp;Patch</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchidclose" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnameclose">Patch Name</label>
+                    <div class="form-control" id="patchnameclose"></div>
+                    <label for="businessunitclose">Business Unit</label>
+                    <div class="form-control" id="businessunitclose"></div>
+                    <label for="assessmentkeyclose">Assessment Result</label>
+                    <div class="form-control" id="assessmentkeyclose"></div>
+                    <label for="closeddate">Closed Date</label>
+                    <input type="text" class="form-control" id="closeddate" />
+                    <label for="detailsclose">Details/Notes</label>
+                    <textarea id="detailsclose" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveCloseButton">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
             <script>
                 @Html.Raw(Model.RenderViewModelConfiguration<MitigationPlan>(ViewBag))
+                @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
                 @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
                 @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
                 @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
                 @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
+                $(function () {
+                    $("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+                    $(window).on("initiatedInstall", function () {
+                        viewModel.queryPageRecords();
+                    });
+
+                });
+
+                function closePatch(record) {
+                    $('#patchidclose').html(record.PatchStatusID);
+                    $('#patchnameclose').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
+                    $('#businessunitclose').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
+                    $('#assessmentkeyclose').html(lookupAssessactionValue(2));
+                    $('#detailsclose').val("");
+                    $('#closeddate').val("");
+                    $('#closeddate').datepicker({
+                        todayBtn: "linked",
+                        autoclose: true,
+                        todayHighlight: true
+                    });
+                    $("#closedDialog").modal("show");
+                    $('#saveCloseButton').one("click", function () { addClose(record) });
+                }
+
+                function addClose(data) {
+                    var record = { 'PatchStatusID': data.PatchStatusID, 'ClosedDate': (new Date($('#closeddate').val())), 'ActionKey': 2, 'Details': $('#detailsclose').val() };
+
+
+                    if (viewModel.dataHubIsConnected) {
+                        dataHub.addNewClosedPatch(record).done(function () {
+                            data.IsMitigated = true;
+                            dataHub.updateMitigationPlan(data);
+                            $(window).trigger("initiatedInstall");
+
+                        });
+
+                    }
+                }
 
                 $(viewModel).on("beforeEdit", function (event, observableRecord) {
                     observableRecord.patches = ko.observableArray();

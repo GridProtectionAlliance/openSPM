@@ -20,11 +20,61 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+
+@using GSF.Web.Model
+@using openSPM.Model
+@using GSF
+
+
 @model openSPM.Model.AppModel
 @{
+    DataContext dataContext = Model.DataContext;
 
+    ViewBag.HeaderColumns = new[]
+{
+        //    { "Field", "Label", "Classes" }
+        new[] { "PatchStatusID", "SPM Reference", "text-left" },
+        new[] { "BusinessUnitID", "Business Unit", "text-left"},
+        new[] { "ActionKey", "Action Taken", "text-left"},
+        new[] { "ClosedDate", "Completion Date", "text-left"},
+        new[] { null, "Details", "text-center valign-middle"},
+        new[] { null, "Documents", "text-center valign-middle"}
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+}
+@helper BodyRows()
+{
+
+
+    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(ActionKey)"></div></td>
+    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: ClosedDate.formatDate(DateFormat)"></div></td>
+    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
+    @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
+    @*<td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+    </td>*@
 }
 
-<p>Will allow active patches to be closed once complaince evenidence is verified.</p>
+@helper AddNewEditDialog(DataContext dataContext)
+{
 
+}
+@Html.Partial("PagedViewModel")
+
+@section Scripts {
+    <script>
+        @Html.Raw(Model.RenderViewModelConfiguration<ClosedPatch>(ViewBag))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
+        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+
+    </script>
+}
 

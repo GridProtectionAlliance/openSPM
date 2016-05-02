@@ -252,6 +252,52 @@ namespace openSPM
 
         #endregion
 
+        #region [ ClosedPatch Table Operations ]
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecordCount)]
+        public int QueryClosedPatchCount()
+        {
+            return m_dataContext.Table<ClosedPatch>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecords)]
+        public IEnumerable<ClosedPatch> QueryClosedPatch(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<ClosedPatch>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ClosedPatch), RecordOperation.DeleteRecord)]
+        public void DeleteClosedPatch(int id)
+        {
+            m_dataContext.Table<ClosedPatch>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ClosedPatch), RecordOperation.CreateNewRecord)]
+        public ClosedPatch NewClosedPatch()
+        {
+            return new ClosedPatch();
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ClosedPatch), RecordOperation.AddNewRecord)]
+        public void AddNewClosedPatch(ClosedPatch record)
+        {
+            m_dataContext.Table<ClosedPatch>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ClosedPatch), RecordOperation.UpdateRecord)]
+        public void UpdateClosedPatch(ClosedPatch record)
+        {
+            m_dataContext.Table<ClosedPatch>().UpdateRecord(record);
+        }
+
+        #endregion
+
 
         #region [ Vendor Table Operations ]
 
@@ -1008,14 +1054,14 @@ namespace openSPM
         [RecordOperation(typeof(Install), RecordOperation.QueryRecordCount)]
         public int QueryInstallCount()
         {
-            return m_dataContext.Table<Install>().QueryRecordCount();
+            return m_dataContext.Table<Install>().QueryRecordCount( new RecordRestriction("IsInstalled = 0"));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Install), RecordOperation.QueryRecords)]
         public IEnumerable<Install> QueryInstalls(string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize);
+            return m_dataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInstalled = 0"));
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1040,6 +1086,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
+            record.IsInstalled = false;
             m_dataContext.Table<Install>().AddNewRecord(record);
         }
 
@@ -1062,7 +1109,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<MitigationPlan>().QueryRecordCount();
 
-            return m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            return m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
         }
 
         [RecordOperation(typeof(MitigationPlan), RecordOperation.QueryRecords)]
@@ -1071,7 +1118,7 @@ namespace openSPM
             if (showDeleted)
                 return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -1096,6 +1143,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
+            record.IsMitigated = false;
             m_dataContext.Table<MitigationPlan>().AddNewRecord(record);
         }
 
@@ -1260,14 +1308,14 @@ namespace openSPM
         {
             return new Install
             {
-                PatchID = record.PatchID,
+                PatchStatusID = record.ID,
                 Summary = record.Details,
                 CompletedOn = DateTime.UtcNow,
                 CreatedOn = DateTime.UtcNow,
                 CreatedByID = GetCurrentUserID(),
                 UpdatedOn = DateTime.UtcNow,
                 UpdatedByID = GetCurrentUserID(),
-                BusinessUnitID = record.BusinessUnitID,
+                
             };
         }
 

@@ -38,7 +38,7 @@ namespace openSPM.Model
 
         [Required]
         [Label("Patch")]
-        public int PatchID { get; set; }
+        public int PatchStatusID { get; set; }
 
         [Label("Summary")]
         public string Summary { get; set; }
@@ -72,10 +72,6 @@ namespace openSPM.Model
         [Label ("Work Management ID")]
         public string WorkManagementID { get; set; }
 
-        [Label("Installation Due Date")]
-        public DateTime? InstallDueDate { get; set; }
-
-        [Label("Business Unit")]
-        public int BusinessUnitID { get; set; }
+        public bool IsInstalled { get; set; }
     }
 }

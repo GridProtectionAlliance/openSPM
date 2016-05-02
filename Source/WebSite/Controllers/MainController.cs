@@ -234,7 +234,7 @@ namespace openSPM.Controllers
 
         public ActionResult Done()
         {
-            m_appModel.ConfigureView(Url.RequestContext, "Done", ViewBag);
+            m_appModel.ConfigureView<ClosedPatch>(Url.RequestContext, "Done", ViewBag);
             return View();
         }
 

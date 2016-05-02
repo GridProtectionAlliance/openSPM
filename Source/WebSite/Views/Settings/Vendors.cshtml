@@ -55,8 +55,9 @@
         @Html.Raw(Model.AddValueListSelectField<Vendor>("VendorTypeKey", "vendorType"))
         @Html.Raw(dataContext.AddInputField<Vendor>("Abbreviation"))
         @Html.Raw(dataContext.AddInputField<Vendor>("Company"))
-        @Html.Raw(dataContext.AddInputField<Vendor>("Link", "url"))
-        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Description", 5))
+
+        @Html.Raw(dataContext.AddInputField<Vendor>("Link", "url", customDataBinding: "visible: $parent.recordMode()!==RecordMode.View"))
+        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Description", 5, customDataBinding: "visible: $parent.recordMode()!==RecordMode.View"))
         @Html.Raw(dataContext.AddCheckBoxField<Vendor>("Enabled"))
     </div>
     <div class="col-md-4">
@@ -82,6 +83,43 @@
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
+        "use strict";
+
         @Html.Raw(Model.RenderViewModelConfiguration<Vendor>(ViewBag))
+
+        // TODO: Move this function into gsf.web.client.js
+
+        function renderHotLinks(sourceText, target) {
+            if (target === undefined)
+                target = "_blank";
+
+            var replacedText;
+
+            // URLs starting with http://, https://, or ftp://
+            const replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@@#\/%?=~_|!:,.;]*[-A-Z0-9+&@@#\/%=~_|])/gim;
+            replacedText = sourceText.replace(replacePattern1, "<a href=\"$1\" target=\"" + target + "\">$1</a>");
+
+            // URLs starting with "www." without // before it
+            const replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+            replacedText = replacedText.replace(replacePattern2,
+                "$1<a href=\"http://$2\" target=\"" + target + "\">$2</a>");
+
+            // Change e-mail addresses to mailto: links
+            const replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+            replacedText = replacedText.replace(replacePattern3, "<a href=\"mailto:$1\">$1</a>");
+
+            return replacedText;
+        }
+
+        // TODO: Add this code into GSF core libraries if useful...
+        $("#addNewEditDialog").on("shown.bs.modal", function () {
+            $("#inputLink").after("<div id=\"viewLink\" style=\"overflow: hidden; background-color: #eee; word-wrap: break-word\" class=\"form-control disabled\" data-bind=\"html: renderHotLinks(notNull(Link())), visible: viewModel.recordMode()===RecordMode.View\"></div>");
+            $("#textDescription").after("<div id=\"viewDescription\" style=\"overflow-x: hidden; background-color: #eee\" class=\"form-control disabled table-cell-wrap\" data-bind=\"html: renderHotLinks(notNull(Description())), visible: viewModel.recordMode()===RecordMode.View\"></div>");
+            $("#viewDescription").height($("#textDescription").height());
+
+            ko.applyBindings(viewModel.currentRecord, $("#viewLink")[0]);
+            ko.applyBindings(viewModel.currentRecord, $("#viewDescription")[0]);
+        });
+
     </script>
-}
+    }

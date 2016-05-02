@@ -23,6 +23,7 @@
 
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Web.Routing;
 using GSF;
 using GSF.Data.Model;
@@ -280,6 +281,18 @@ namespace openSPM.Model
                     value = defaultValue;
 
             return value;
+        }
+
+        /// <summary>
+        /// Renders URLs in source text as HTML anchors creating clickable links.
+        /// </summary>
+        /// <param name="sourceText">Source text to check for URLs.</param>
+        /// <param name="target">Optional anchor target; defaults to "_blank" for new window.</param>
+        /// <returns>Text rendered with clickable HTML links.</returns>
+        public string RenderHotLinks(string sourceText, string target = "_blank")
+        {
+            return new Regex(@"(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?", RegexOptions.IgnoreCase | RegexOptions.Multiline).
+                Replace(sourceText, match => $"<a href=\"{match}\" target=\"{target}\">{match}</a>");
         }
 
         #endregion

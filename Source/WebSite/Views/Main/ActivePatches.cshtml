@@ -149,7 +149,7 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
 @section Scripts {
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "PatchID", 2))
+        @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "VendorReleaseDate", 2))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))

@@ -416,6 +416,7 @@
     <Content Include="Scripts\jquery-2.2.1.min.js" />
     <Content Include="Scripts\jquery-2.2.1.min.map" />
     <None Include="Properties\PublishProfiles\Export Package.pubxml" />
+    <None Include="Properties\PublishProfiles\gpaweb.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to GPAWEB.pubxml" />
     <None Include="Scripts\jquery-2.2.2.intellisense.js" />
     <None Include="Scripts\jquery.validate-vsdoc.js" />

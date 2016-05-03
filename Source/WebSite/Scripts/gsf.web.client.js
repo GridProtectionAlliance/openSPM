@@ -141,10 +141,9 @@ function joinKeyValuePairs (source, parameterDelimiter, keyValueDelimiter, start
     return values.join(parameterDelimiter + " ");
 };
 
-// TODO: This interferes with PrimeUI - need to evaluate why...
-//Array.prototype.joinKeyValuePairs = function (parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter) {
-//    return joinKeyValuePairs(this, parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter);
-//};
+Array.prototype.joinKeyValuePairs = function (parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter) {
+    return joinKeyValuePairs(this, parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter);
+};
 
 // Represents a dictionary style class with case-insensitive keys
 function Dictionary(source) {
@@ -480,6 +479,28 @@ String.prototype.parseKeyValuePairs = function (parameterDelimiter, keyValueDeli
     }
 
     return keyValuePairs;
+}
+
+// Renders URLs and e-mail addresses as clickable links
+function renderHotLinks(sourceText, target) {
+    if (target === undefined)
+        target = "_blank";
+
+    var replacedText;
+
+    // URLs starting with http://, https://, or ftp://
+    const replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
+    replacedText = sourceText.replace(replacePattern1, "<a href=\"$1\" target=\"" + target + "\">$1</a>");
+
+    // URLs starting with "www." without // before it
+    const replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
+    replacedText = replacedText.replace(replacePattern2, "$1<a href=\"http://$2\" target=\"" + target + "\">$2</a>");
+
+    // Change e-mail addresses to mailto: links
+    const replacePattern3 = /(([a-zA-Z0-9\-\_\.])+@[a-zA-Z\_]+?(\.[a-zA-Z]{2,6})+)/gim;
+    replacedText = replacedText.replace(replacePattern3, "<a href=\"mailto:$1\">$1</a>");
+
+    return replacedText;
 }
 
 // Date Functions

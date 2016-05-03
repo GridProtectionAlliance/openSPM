@@ -225,6 +225,7 @@
     <Compile Include="Model\InstallDocument.cs" />
     <Compile Include="Model\InstallHistoryView.cs" />
     <Compile Include="Model\MenuItem.cs" />
+    <Compile Include="Model\MiPlan.cs" />
     <Compile Include="Model\MitigationPlan.cs" />
     <Compile Include="Model\MitigationPlanHistoryView.cs" />
     <Compile Include="Model\NoticeLog.cs" />
@@ -233,6 +234,7 @@
     <Compile Include="Model\PatchStatusAssessmentView.cs" />
     <Compile Include="Model\PatchUserAccountPlatformBusinessUnitUserAccountView.cs" />
     <Compile Include="Model\PatchVendorPlatformView.cs" />
+    <Compile Include="Model\ThemeFields.cs" />
     <Compile Include="Model\UserAccountNoticeLevel.cs" />
     <Compile Include="Model\Page.cs" />
     <Compile Include="Model\Menu.cs" />

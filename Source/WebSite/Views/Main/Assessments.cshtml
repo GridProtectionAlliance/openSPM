@@ -249,9 +249,11 @@
                     <div class="form-control" id="patchnamemit"></div>
                     <label for="businessunitmit">Business Unit</label>
                     <div class="form-control" id="businessunitmit"></div>
-                    <label for="miplanid">MiPlan ID</label>
-                    <input id="miplanid" class="form-control"/>
-                    <label for="summarymit">Details/Notes</label>
+                    <label for="miplanown">Mitigation Plan Owner</label>
+                    <input id="miplanown" class="form-control"/>
+                    <label for="platformmit">Platform</label>
+                    <div id="platformmit" class="form-control"></div>
+                    <label for="summarymit">Summary</label>
                     <textarea id="summarymit" class="form-control"></textarea>
                 </form>
             </div>
@@ -360,20 +362,31 @@
             $('#patchidmit').html(record.PatchStatusID);
             $('#patchnamemit').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
             $('#businessunitmit').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
-            $('#miplanid').val("");
+            $('#miplanown').val("");
             $('#summarymit').val("");
+            $('#platformmit').val("");
             $("#mitigationDialog").modal("show");
             $('#saveMitigationButton').one("click", function(){addMitigation(record)});
         }
 
         function addMitigation(data) {
-            var record = { 'PatchStatusID': data.PatchStatusID, 'MiPlanID': $('#miplanid').val(), 'Summary': $('#summarymit').val()};
+            var mitplan = {'Title': $('#patchnamemit').html(), 'BusinessUnitID': lookupBusinessUnitIDValue(data.PatchStatusID), 'ThemeID': 13, 'Field1': $('#miplanown').val(), 'Field2': $('#platformmit').val(), 'Field3': $('#summarymit').val()};
+           
 
             if (viewModel.dataHubIsConnected) {
-                dataHub.addNewMitigationPlan(record).done(function() {
-                    data.IsAssessed = false;
-                    dataHub.updateAssessment(data);
-                    $(window).trigger("initiatedInstall");
+                dataHub.addNewMiPlan(mitplan).done(function() {
+                    dataHub.getLastMiPlanRecord().done(function(id) {
+                        var record = { 'PatchStatusID': data.PatchStatusID, 'MiPlanID': id, 'Summary': $('#summarymit').val()};
+
+                        dataHub.addNewMitigationPlan(record).done(function() {
+                            data.IsAssessed = false;
+                            dataHub.updateAssessment(data);
+                            $(window).trigger("initiatedInstall");
+                        });
+
+                    });
+
+                    
 
                 });
                 

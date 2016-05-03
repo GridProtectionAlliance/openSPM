@@ -26,7 +26,9 @@ using GSF.Web.Model;
 using GSF.Web.Security;
 using openSPM.Model;
 using System;
+using System.Linq;
 using GSF.Data.Model;
+using openSPM.Models;
 
 namespace openSPM.Controllers
 {
@@ -40,7 +42,9 @@ namespace openSPM.Controllers
 
         // Fields
         private readonly DataContext m_dataContext;
+        private readonly DataContext m_miPlanContext;
         private readonly AppModel m_appModel;
+        private readonly AppModel m_miPlanModel;
         private bool m_disposed;
 
     
@@ -56,10 +60,15 @@ namespace openSPM.Controllers
         {
             // Establish data context for the view
             m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
+            m_miPlanContext = new DataContext("miPlanDB", MvcApplication.LogException );
             ViewData.Add("DataContext", m_dataContext);
+            ViewData.Add("MiPlanContext", m_miPlanContext);
+
 
             // Set default model for pages used by layout
             m_appModel = new AppModel(m_dataContext);
+            m_miPlanModel = new AppModel(m_miPlanContext);
+            ViewData.Add("MiPlanModel", m_miPlanModel);
             ViewData.Model = m_appModel;
         }
 
@@ -242,6 +251,10 @@ namespace openSPM.Controllers
         {
             m_appModel.ConfigureView<Assessment>(Url.RequestContext, "Assessments", ViewBag);
             ViewBag.psag = m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords();
+            int themeID = 13;
+            ThemeFields[] fields = m_miPlanContext.Table<ThemeFields>().QueryRecords("FieldName", new RecordRestriction("ThemeID = {0}", themeID)).ToArray();
+            ViewBag.ThemeFields = fields;
+            ViewBag.ThemeFieldCount = m_miPlanContext.Table<ThemeFields>().QueryRecordCount(new RecordRestriction("ThemeID = {0}", themeID));
             return View();
         }
 

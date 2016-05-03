@@ -33,6 +33,7 @@
         new[] { "PatchStatusID", "Patch ID", "text-left" },
         new[] { null, "Business Group", "text-left valign-middle" },
         new[] { null, "Title", "text-left valign-middle"},
+        new[] { null, "MiPlan ID", "text-center valign-middle" },
         new[] { null, "Action", "text-center valign-middle"}
     };
 
@@ -110,6 +111,7 @@
     <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupPatchIDValue(PatchStatusID), click: $parent.viewPageRecord"></button></td>
     <td width="35%" class="text-left valign-middle" data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></td>
     <td width="40%" class="text-left valign-middle" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID))"></td>
+    <td width="10%" class="text-left valign-middle" nowrap><a href="https://www.gridprotectionalliance.org/MiPlan/Main/MitigationPlan" target="_blank" class="btn btn-link" data-bind="text: MiPlanID"></a></td>
     <td width="10%" class="text-center valign-middle"><button type="button" data-bind="click: closePatch.bind($data)" class="btn btn-danger btn-sm">Close</button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -235,6 +237,7 @@
                 $(viewModel).on("beforeSave", function (event, observableRecord) {
                     delete observableRecord.patches;
                 });
-            </script>
+
+             </script>
         }
 

@@ -34,6 +34,7 @@ using GSF.Web.Model;
 using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
 using openSPM.Model;
+using openSPM.Models;
 
 namespace openSPM
 {
@@ -44,6 +45,7 @@ namespace openSPM
 
         // Fields
         private readonly DataContext m_dataContext;
+        private readonly DataContext m_miPlanContext;
         private bool m_disposed;
 
         #endregion
@@ -53,6 +55,7 @@ namespace openSPM
         public DataHub()
         {
             m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
+            m_miPlanContext = new DataContext("miPlanDB", MvcApplication.LogException);
         }
 
         #endregion
@@ -1430,6 +1433,98 @@ namespace openSPM
         {
             return m_dataContext.Table<MitigationPlanHistoryView>().QueryRecords(restriction: new RecordRestriction("MitigationPlanID = {0}", id));
         }
+
+        #endregion
+
+        #region [ MiPlan Table Operations ]
+
+        [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecordCount)]
+        public int QueryMiPlanCount(bool showDeleted)
+        {
+            if (showDeleted)
+                return m_miPlanContext.Table<MiPlan>().QueryRecordCount(new RecordRestriction());
+
+            return m_miPlanContext.Table<MiPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+        }
+
+        [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecords)]
+        public IEnumerable<MiPlan> QueryMiPlanes(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+                return m_miPlanContext.Table<MiPlan>().QueryRecords(sortField, ascending, page, pageSize);
+
+            return m_miPlanContext.Table<MiPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+        }
+
+        [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecords)]
+        public IEnumerable<MiPlan> GetMiPlanRecord(int id)
+        {
+            return m_miPlanContext.Table<MiPlan>().QueryRecords( restriction: new RecordRestriction("ID = {0}", id));
+        }
+
+        [RecordOperation(typeof(MiPlan), RecordOperation.CreateNewRecord)]
+        public MiPlan NewMiPlan()
+        {
+            return new MiPlan();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(MiPlan), RecordOperation.AddNewRecord)]
+        public void AddNewMiPlan(MiPlan record)
+        {
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            record.IsCompleted = false;
+            record.IsDeleted = false;
+            m_miPlanContext.Table<MiPlan>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(MiPlan), RecordOperation.UpdateRecord)]
+        public void UpdateMiPlan(MiPlan record)
+        {
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_miPlanContext.Table<MiPlan>().UpdateRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(MiPlan), RecordOperation.DeleteRecord)]
+        public int GetLastMiPlanRecord()
+        {
+            // For MitigationPlanes, we only "mark" a record as deleted
+            return m_miPlanContext.Connection.ExecuteScalar<int>("Select MAX(ID) FROM MitigationPlan");
+        }
+
+        #endregion
+
+        #region [ ThemeFields Table Operations ]
+
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ThemeFields), RecordOperation.QueryRecordCount)]
+        public int QueryThemeFieldsCount(int parentID)
+        {
+            return m_miPlanContext.Table<ThemeFields>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ThemeFields), RecordOperation.QueryRecords)]
+        public IEnumerable<ThemeFields> QueryThemeFieldsItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_miPlanContext.Table<ThemeFields>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(ThemeFields), RecordOperation.DeleteRecord)]
+        public void DeleteThemeFields(int id)
+        {
+            m_miPlanContext.Table<ThemeFields>().DeleteRecord(id);
+        }
+
+
 
         #endregion
 

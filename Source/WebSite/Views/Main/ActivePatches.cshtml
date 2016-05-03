@@ -22,6 +22,7 @@
     //*****************************************************************************************************@
 @using System.Security.AccessControl
 @using GSF
+@using GSF.Data.Model
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
@@ -36,6 +37,9 @@
     const string criticalAlarmImage = "redlight.png";
     const string violationImage = "blacklight.png";
 
+    ViewBag.AssessActions = dataContext.Table<ValueList>().QueryRecords("[Key] AsC",restriction: new RecordRestriction("GroupID = 6")).ToArray();
+    ViewBag.AssessActionCount = dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = 6"));
+
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
@@ -45,10 +49,10 @@
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "PatchID", "SPM&nbsp;Reference", "text-center" },
         new[] { "BusinessUnitID", "Business Unit", "text-center"},
-        new[] { "ImpactKey", "Impact", "text-center" },
+        new[] { null, "Vendor", "text-center valign-middle" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
-        new[] { null, "Patch Status", "text-center valign-middle" },
+        new[] { null, "Action", "text-center valign-middle" },
         new[] { null, "Documents", "text-center valign-middle" }
     };
 
@@ -84,10 +88,10 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(PatchID), click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupNameValue(BusinessUnitID)"></td>
-    <td width="10%" class="text-center valign-middle" data-bind="text: lookupImpactValue(ImpactKey)"></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: lookupVendorName(lookupPatchVendorID(PatchID))"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: beginAssessment.bind($data)">Begin Assessment</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: beginAssessment.bind($data)">Assess</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(PatchStatusID, PatchID, $($element)), attr: {id: 'documentCount' + PatchStatusID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -130,10 +134,14 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
                     <div class="form-control" id="businessunit"></div>
                     <label for="assessmentSelect">Assessment Result</label>
                     <select class="form-control"id="assessmentSelect">
-                        <option value="1" selected="selected">Install/Remediate</option>
+                        @for (int i = 0; i < ViewBag.AssessActionCount; ++i)
+                        {
+                            <option value="@Html.Raw(i + 1)">@Html.Raw(ViewBag.AssessActions[i].Text)</option>
+                        }
+                        @*<option value="1" selected="selected">Install/Remediate</option>
                         <option value="2">Mitigate</option>
                         <option value="3">Not Applicable - Does not match system config</option>
-                        <option value="4">Not Applicable - Patch has no security related content</option>
+                        <option value="4">Not Applicable - Patch has no security related content</option>*@
                     </select>
                     <label for="details">Details/Notes</label>
                     <textarea id="details" class="form-control"></textarea>
@@ -153,6 +161,8 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
+        @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
+        @Html.Raw(Model.RenderAbstract<Patch>("VendorID", "ID", "lookupPatchVendorID", "PatchVendorID"))
 
         $(function() {
 

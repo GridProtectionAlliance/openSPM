@@ -1,0 +1,397 @@
+﻿@*******************************************************************************************************
+    //  AssessmentInstallView.cshtml - Gbtc
+    //
+    //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+    //
+    //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+    //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+    //  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+    //  file except in compliance with the License. You may obtain a copy of the License at:
+    //
+    //      http://opensource.org/licenses/MIT
+    //
+    //  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+    //  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+    //  License for the specific language governing permissions and limitations.
+    //
+    //  Code Modification History:
+    //  ----------------------------------------------------------------------------------------------------
+    //  02/29/2016 - Ritchie Carroll
+    //       Generated original version of source code.
+    //
+    //*****************************************************************************************************@
+@using System.Security.AccessControl
+@using GSF.Data.Model
+@using GSF.Security.Model
+@using GSF.Web.Model
+@using openSPM.Model
+@using GSF.Web
+@using GSF
+@using RazorEngine.Templating
+@model openSPM.Model.AppModel
+
+@{
+    DataContext dataContext = Model.DataContext;
+    Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
+    int discoveryWarningDays, discoveryAlarmDays, discoveryCriticalAlarmDays, discoveryViolationDays;
+    string setting;
+
+    const string noneImage = "disabledlight.png";
+    const string warningImage = "yellowlight.png";
+    const string alarmImage = "amberlight.png";
+    const string criticalAlarmImage = "redlight.png";
+    const string violationImage = "blacklight.png";
+
+    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
+
+    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays))
+    {
+        discoveryWarningDays = 7;
+    }
+
+    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays))
+    {
+        discoveryAlarmDays = 14;
+    }
+
+    if (!appSettings.TryGetValue("discoveryCriticalAlarmDays", out setting) || !int.TryParse(setting, out discoveryCriticalAlarmDays))
+    {
+        discoveryCriticalAlarmDays = 21;
+    }
+
+    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays))
+    {
+        discoveryViolationDays = 35;
+    }
+
+
+    // Define column headers, use null for field name to make column non-sortable
+    ViewBag.HeaderColumns = new[]
+{   //    { "Field", "Label", "Classes" }
+        new[] { null, "Alarm", "text-center valign-middle" },
+        new[] { "ID", "SPM Reference", "text-left" },
+        new[] { null, "Business Unit", "text-left valign-middle"},
+        new[] { null, "Title", "text-left valign-middle"},
+        new[] { "AssessmentResultKey", "Result", "text-left" },
+        new[] { "Details", "Basis", "text-left"},
+        new[] { "CreatedOn", "Due Date", "text-left"},
+        new[] { null, "Action", "text-center valign-middle" },
+        new[] { null, "Documents", "text-center valign-middle" }
+
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "Assessment";
+    ViewBag.HideAddNewButton = true;
+}
+
+@*<p>&nbsp;</p>
+
+    <p>
+        On "Patch Start" a Patch Status record is created for each BUgroup that has the platform selected (the Platform BUG Link Table).  It will be
+        typical that more that one BU will be impacted by a security patch -- and all may be.  Therefore, if "all BUs" are selected as the filter
+    </p>
+    <p>&nbsp;</p>
+
+    <ul>
+        <li>A filter will be available at the top of the screen for "Business Unit" and default to the BUCs or SMEs BU -- or to "all" for everyone else.</li>
+        <li>This list will be sorted by assessment due date, patchID (the TVA assigned label), BUGroup, patch Title</li>
+        <li>It will include a status light on the left to indicate the compliance alarm state -- gray, yellow, amber, red or black.</li>
+        <li>A button will allow the BUC for the BUGroup to "update" the status of the security patch by recording the assessment result -- patch, mitigate, patch & mitigate, not applicable.</li>
+        <li>This assessment is a compliance milestone.  Phase 2 -- If a patch must be "reassessed" -- i.e., the assessment result changing but the time of assessment for compliance purposes not changing -- then the Owner must make this change in the assessment result. (This may be a complex collection of SQL)</li>
+        <li>There is no need for a delete button since the BUC (or Owner) can declare the assignment of the patch to the BUG as "not applicable"</li>
+        <li>A button will be available at the bottom for the PIC to "add" a patch status record.  This will be needed if after initial patch entry that an additional BUG should have been linked to the platform.</li>
+    </ul>
+    <p>&nbsp;</p>
+    <p>
+        <b>Computation of Alarm State</b> - The openSPM will "rebuild" the alarm state table on a daily basis -- e.g., at 7:30 AM.  This time of this rebuild is significant in that this will be the time that email notifications will be sent.
+        Alarm State is based on the difference (in days) in two dates -- e.g., today's date and the date of the next compliance item in the status table.  Therefore, status will change as (1) the alarm state table is rebuilt daily or (2)
+        as the status of an individual item changes on an ad-hoc basis -- i.e., if the assessment is shown as being in critical alarm for a particular BU and the BUC completes the assessment, the alarm state must change immediately.  Given the
+        differing domain of discovery (a function of vendor), patch assessment and application (a function of the patch) and mitigation plan (a function of the plan action items) and the differences in a priori knowledge about the keys in each
+        of these cases, 3 separate alarm state tables are used.  The vendor alarm state will have a many rows as there are vendors (alarms based review periodicity as configured in settings.)  The patch alarm state will have as many rows as there are in the patch status table for patches that are not "complete" or
+        "closed" (alarms based on approaching compliance date as configured in settings).  The mitigation status table will have as many rows as there are action items in mitigation plans that have not been marked as complete (alarms have no compliance impact and are based on "not starting on schedule" or "late finish")
+    </p>
+
+    <p>&nbsp;</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>&nbsp;</th>
+                <th>Required Fields</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>Patch Identifier</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Assessment Result</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Basis for Mitigation (if action includes mitigation)</td>
+            </tr>
+
+        </tbody>
+    </table>
+    <p>&nbsp;</p>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>&nbsp;</th>
+            <th>Optional Fields</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>Basis for Patching</td>
+        </tr>
+
+        </tbody>
+    </table>*@
+
+@helper BodyRows()
+{
+
+    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
+    <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: VendorPatchName"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
+    <td width="10%" class="text-left valign-middle">
+        <div nowrap data-bind="text: getDueDate(CreatedOn)"></div>
+    </td>
+        <td width="10%" class="text-center valign-middle">
+            <button type="button" data-bind="click: installPatch.bind($data)" class="btn btn-danger btn-sm">Install</button></td>
+        <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
+        <td width="5%" class="text-center valign-middle" nowrap>
+            <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+            <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+        </td>
+}
+
+@helper AddNewEditDialog(DataContext dataContext)
+{
+
+    <div class="col-md-12">
+        <div class="form-group">
+            <label for="selectPatchStatusID">Patch:</label>
+            <select class="form-control" id="selectPatchStatusID" data-bind="value: PatchStatusID, options: patchStatuses, optionsText: 'PatchMnemonic', optionsValue: 'ID'"></select>
+        </div>
+        @Html.Raw(Model.AddValueListSelectField<Assessment>("AssessmentResultKey", "assessAction"))
+        @Html.Raw(dataContext.AddTextAreaField<Assessment>("Details"))
+    </div>
+}
+@Html.Partial("PagedViewModel")
+
+<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <iframe style="border: none" id="manageDocumentsFrame"></iframe>
+                <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="installDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
+                <h4 class="modal-title">
+                    <span>Installation Record</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchidinstall" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnameinstall">Patch Name</label>
+                    <div class="form-control" id="patchnameinstall"></div>
+                    <label for="businessunitinstall">Business Unit</label>
+                    <div class="form-control" id="businessunitinstall"></div>
+                    <label for="workmangamentidinstall">WorkManagement ID</label>
+                    <input id="workmangamentidinstall" class="form-control" />
+                    <label for="completeddateinstall">Completed Date</label>
+                    <input type="text" class="form-control" id="completeddateinstall" />
+                    <label for="details">Completed Notes</label>
+                    <textarea id="details" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveInstallButton">Save</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        @Html.Raw(Model.RenderViewModelConfiguration<AssessmentInstallView>(ViewBag))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
+        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+
+
+
+        $(function() {
+
+            $("#installDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $(window).on("initiatedInstall", function() {
+                viewModel.queryPageRecords();
+            });
+        });
+
+        function getDueDate(day) {
+            var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);
+            var date = newdate.getDate();
+            var month = newdate.getMonth() + 1;
+            var year = newdate.getFullYear();
+            var processeddate = month + '/' + date + '/' + year;
+            //console.log(processeddate);
+            return processeddate;
+        }
+
+        function installPatch(record) {
+            $('#patchidinstall').html(record.PatchStatusID);
+            $('#patchnameinstall').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
+            $('#businessunitinstall').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
+            $('#workmangamentidinstall').val("");
+            $('#completeddateinstall').datepicker({
+                todayBtn: "linked",
+                autoclose: true,
+                todayHighlight: true
+            });
+            $('#details').val("");
+            $("#installDialog").modal("show");
+            $('#saveInstallButton').one("click", function(){addInstall(record)});
+        }
+
+        function addInstall(data) {
+            var record = { 'PatchStatusID': data.PatchStatusID, 'CompletedOn': (new Date($('#completeddateinstall').val())), 'Summary': ' ', 'BusinessUnitID': data.PatchStatusID, 'WorkManagementID': $('#workmangamentidinstall').val(), 'CompletedNotes': $('#details').val() };
+
+            if (viewModel.dataHubIsConnected) {
+                dataHub.addNewInstall(record).done(function() {
+                    dataHub.updatePatchStatusKey(data.PatchStatusID, data.PatchStatusKey + 1).done(function() {
+                        $(window).trigger("initiatedInstall");
+                    });
+                   
+                });
+
+
+            }
+        }
+
+        function getDiscoveryStatusImage(element, record) {
+            const daysSinceLastReview = (new Date()).daysBetween(record.CreatedOn.toDate());
+            var image, title;
+
+            switch (true) {
+                case (daysSinceLastReview >= @discoveryViolationDays):
+                    image = "@violationImage";
+                    title = "Violation";
+                    break;
+                case (daysSinceLastReview >= @discoveryCriticalAlarmDays):
+                    image = "@criticalAlarmImage";
+                    title = "Critical Alarm";
+                    break;
+                case (daysSinceLastReview >= @discoveryAlarmDays):
+                    image = "@alarmImage";
+                    title = "Alarm";
+                    break;
+                case (daysSinceLastReview >= @discoveryWarningDays):
+                    image = "@warningImage";
+                    title = "Warning";
+                    break;
+                default:
+                    image = "@noneImage";
+                    title = "OK";
+                    break;
+            }
+
+            element.attr("src", "@statusLightsImagePath" + image);
+            element.attr("alt", title);
+            element.attr("title", title);
+
+            return undefined;
+        }
+
+
+        function getDocumentCount(sourceID, element) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryDocumentDetailCount("Assessment", sourceID).done(function (count) {
+                    $("#documentCount" + sourceID).text(count.toString());
+                });
+            }
+
+            return element.text();
+        }
+
+        $(window).resize(function () {
+            setTimeout(function () {
+                $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
+            }, 500);
+        });
+
+        function openManageDocumentsDialog(record) {
+            const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
+            var initialMode = "";
+
+            if (count < 1)
+                initialMode = "/AddNew";
+
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "height": ($(document).height() - 150) + "px",
+                "width": "100%"
+        });
+
+        $("#manageDocumentsDialog").modal("show");
+        }
+
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+            // Refresh page counts after editing tasks
+            viewModel.queryPageRecords();
+
+            // Clear frame page
+            $("#manageDocumentsFrame").attr("src", "about:blank");
+        });
+
+
+        $(viewModel).on("beforeEdit", function(event, observableRecord) {
+            observableRecord.patchStatuses = ko.observableArray();
+
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryPatchStatusAssessmentDetails().done(function(records) {
+                    observableRecord.patchStatuses.removeAll();
+                    observableRecord.patchStatuses(records);
+                });
+            }
+        });
+
+        $(viewModel).on("beforeSave", function(event, observableRecord) {
+            delete observableRecord.patchStatuses;
+        });
+    </script>
+}
+
+
+
+
+
+
+

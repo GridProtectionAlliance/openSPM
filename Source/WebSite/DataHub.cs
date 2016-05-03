@@ -1436,6 +1436,25 @@ namespace openSPM
 
         #endregion
 
+        #region [AssessmentInstallView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(AssessmentInstallView), RecordOperation.QueryRecordCount)]
+        public int QueryAssessmentInstallViewCount()
+        {
+            return m_dataContext.Table<AssessmentInstallView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(AssessmentInstallView), RecordOperation.QueryRecords)]
+        public IEnumerable<AssessmentInstallView> QueryAssessmentInstallViews(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<AssessmentInstallView>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        #endregion
+
+
         #region [ MiPlan Table Operations ]
 
         [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecordCount)]

@@ -21,9 +21,8 @@
 //
 //*****************************************************************************************************@
 @using GSF.Web.Model
-@using GSF
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -39,7 +38,7 @@
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
-    ViewBag.AddNewEditTitle = "Midigation Plan";
+    ViewBag.AddNewEditTitle = "Mitigation Plan";
 
 }
 @*<p>&nbsp;</p>
@@ -136,9 +135,8 @@
         @Html.Raw(dataContext.AddDateField<MitigationPlan>("ApprovedOn"))
         @Html.Raw(dataContext.AddInputField<MitigationPlan>("ApprovedByName"))
     </div>
-
-        }
-        @Html.Partial("PagedViewModel")
+}
+@Html.Partial("PagedViewModel")
 
 <div id="closedDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">

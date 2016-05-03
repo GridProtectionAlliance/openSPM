@@ -262,14 +262,6 @@
 
             $(""#addNewEditDialog"").modal({show: false, backdrop: ""static"", keyboard: false});
 
-            $(""#addNewEditDialog"").on(""shown.bs.modal"", function () {
-                $(""#addNewEditDialog .input-group.date"").datepicker({
-                    todayBtn: ""linked"",
-                    enableOnReadonly: false,
-                    autoclose: true
-                });
-            });
-
             $(window).on(""beforeunload"", function () {
                 if ($(""#addNewEditDialog"").hasClass(""in"") && viewModel.isDirty())
                     return ""There are unsaved changes to this record."";
@@ -343,31 +335,36 @@
         pageControlScripts.Append("\r\n        });");
     }
 
-    if (dataContext.ReadonlyHotLinkFields.Count > 0) {
-        pageControlScripts.Append("\r\n\r\n        $(\"#addNewEditDialog\").on(\"shown.bs.modal\", function () {");
+    pageControlScripts.Append(@"
 
-        foreach (Tuple<string, string, string, bool> readonlyHotLinkField in dataContext.ReadonlyHotLinkFields)
-        {
-            if (readonlyHotLinkField.Item4)
-            {
-                pageControlScripts.AppendFormat("\r\n            $(\"#{0}\").after(\"<div id=\\\"{1}\\\" tabindex=\\\"0\\\" style=\\\"overflow-x: hidden; word-wrap: break-word; resize: both\\\" class=\\\"form-control readonly\\\" data-bind=\\\"html: renderHotLinks(notNull({2}())), visible: viewModel.recordMode()===RecordMode.View\\\"></div>\");",
+        $(""#addNewEditDialog"").on(""shown.bs.modal"", function () {
+            $(""#addNewEditDialog .input-group.date"").datepicker({
+                todayBtn: ""linked"",
+                enableOnReadonly: false,
+                autoclose: true
+            });");
+
+    if (dataContext.ReadonlyHotLinkFields.Count > 0) {
+        foreach (Tuple<string, string, string, bool> readonlyHotLinkField in dataContext.ReadonlyHotLinkFields) {
+            pageControlScripts.AppendLine();
+
+            if (readonlyHotLinkField.Item4) {
+                pageControlScripts.AppendFormat("\r\n            $(\"#{0}\").after(\"<div id=\\\"{1}\\\" tabindex=\\\"0\\\" class=\\\"form-control readonly textarea\\\" data-bind=\\\"html: renderHotLinks(notNull({2}())), visible: viewModel.recordMode()===RecordMode.View\\\"></div>\");",
                     readonlyHotLinkField.Item1, readonlyHotLinkField.Item2, readonlyHotLinkField.Item3);
-                // $("#viewDescription").height($("#textDescription").height());
                 pageControlScripts.AppendFormat("\r\n            $(\"#{0}\").height($(\"#{1}\").height());",
                     readonlyHotLinkField.Item2, readonlyHotLinkField.Item1);
             }
-            else
-            {
-                pageControlScripts.AppendFormat("\r\n            $(\"#{0}\").after(\"<div id=\\\"{1}\\\" tabindex=\\\"0\\\" style=\\\"overflow: hidden; word-wrap: break-word\\\" class=\\\"form-control readonly\\\" data-bind=\\\"html: renderHotLinks(notNull({2}())), visible: viewModel.recordMode()===RecordMode.View\\\"></div>\");",
+            else {
+                pageControlScripts.AppendFormat("\r\n            $(\"#{0}\").after(\"<div id=\\\"{1}\\\" tabindex=\\\"0\\\" class=\\\"form-control readonly inputtext\\\" data-bind=\\\"html: renderHotLinks(notNull({2}())), visible: viewModel.recordMode()===RecordMode.View\\\"></div>\");",
                     readonlyHotLinkField.Item1, readonlyHotLinkField.Item2, readonlyHotLinkField.Item3);
             }
 
             pageControlScripts.AppendFormat("\r\n            ko.applyBindings(viewModel.currentRecord, $(\"#{0}\")[0]);",
                 readonlyHotLinkField.Item2);
         }
-
-        pageControlScripts.Append("\r\n        });");
     }
+
+    pageControlScripts.Append("\r\n        });");
 
     pageControlScripts.Append(@"
     </script>");

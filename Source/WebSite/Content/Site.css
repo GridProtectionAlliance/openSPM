@@ -58,6 +58,16 @@ a.custom-text:active {
 /* Define read-only style for disabled div areas */
 div.readonly {
     background-color: #eee;
+    word-wrap: break-word;
+}
+
+div.readonly.inputtext {
+    overflow: hidden;
+}
+
+div.readonly.textarea {
+    overflow-x: hidden;
+    resize: both;
 }
 
 div.readonly:focus {

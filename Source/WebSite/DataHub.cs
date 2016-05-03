@@ -45,7 +45,7 @@ namespace openSPM
 
         // Fields
         private readonly DataContext m_dataContext;
-        private readonly DataContext m_miPlanContext;
+        private DataContext m_miPlanContext;
         private bool m_disposed;
 
         #endregion
@@ -55,7 +55,6 @@ namespace openSPM
         public DataHub()
         {
             m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
-            m_miPlanContext = new DataContext("miPlanDB", MvcApplication.LogException);
         }
 
         #endregion
@@ -66,6 +65,9 @@ namespace openSPM
         /// Gets <see cref="IRecordOperationsHub.RecordOperationsCache"/> for SignalR hub.
         /// </summary>
         public RecordOperationsCache RecordOperationsCache => s_recordOperationsCache;
+
+        // Gets reference to MiPlan context, creating it if needed
+        private DataContext MiPlanContext => m_miPlanContext ?? (m_miPlanContext = new DataContext("miPlanDB", MvcApplication.LogException));
 
         #endregion
 
@@ -82,7 +84,10 @@ namespace openSPM
                 try
                 {
                     if (disposing)
+                    {
                         m_dataContext?.Dispose();
+                        m_miPlanContext?.Dispose();
+                    }
                 }
                 finally
                 {
@@ -1442,24 +1447,24 @@ namespace openSPM
         public int QueryMiPlanCount(bool showDeleted)
         {
             if (showDeleted)
-                return m_miPlanContext.Table<MiPlan>().QueryRecordCount(new RecordRestriction());
+                return MiPlanContext.Table<MiPlan>().QueryRecordCount(new RecordRestriction());
 
-            return m_miPlanContext.Table<MiPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            return MiPlanContext.Table<MiPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
         }
 
         [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecords)]
         public IEnumerable<MiPlan> QueryMiPlanes(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
         {
             if (showDeleted)
-                return m_miPlanContext.Table<MiPlan>().QueryRecords(sortField, ascending, page, pageSize);
+                return MiPlanContext.Table<MiPlan>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_miPlanContext.Table<MiPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            return MiPlanContext.Table<MiPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
         [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecords)]
         public IEnumerable<MiPlan> GetMiPlanRecord(int id)
         {
-            return m_miPlanContext.Table<MiPlan>().QueryRecords( restriction: new RecordRestriction("ID = {0}", id));
+            return MiPlanContext.Table<MiPlan>().QueryRecords( restriction: new RecordRestriction("ID = {0}", id));
         }
 
         [RecordOperation(typeof(MiPlan), RecordOperation.CreateNewRecord)]
@@ -1478,7 +1483,7 @@ namespace openSPM
             record.UpdatedOn = record.CreatedOn;
             record.IsCompleted = false;
             record.IsDeleted = false;
-            m_miPlanContext.Table<MiPlan>().AddNewRecord(record);
+            MiPlanContext.Table<MiPlan>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
@@ -1487,7 +1492,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_miPlanContext.Table<MiPlan>().UpdateRecord(record);
+            MiPlanContext.Table<MiPlan>().UpdateRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -1495,7 +1500,7 @@ namespace openSPM
         public int GetLastMiPlanRecord()
         {
             // For MitigationPlanes, we only "mark" a record as deleted
-            return m_miPlanContext.Connection.ExecuteScalar<int>("Select MAX(ID) FROM MitigationPlan");
+            return MiPlanContext.Connection.ExecuteScalar<int>("Select MAX(ID) FROM MitigationPlan");
         }
 
         #endregion
@@ -1507,21 +1512,21 @@ namespace openSPM
         [RecordOperation(typeof(ThemeFields), RecordOperation.QueryRecordCount)]
         public int QueryThemeFieldsCount(int parentID)
         {
-            return m_miPlanContext.Table<ThemeFields>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
+            return MiPlanContext.Table<ThemeFields>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ThemeFields), RecordOperation.QueryRecords)]
         public IEnumerable<ThemeFields> QueryThemeFieldsItems(int parentID, string sortField, bool ascending, int page, int pageSize)
         {
-            return m_miPlanContext.Table<ThemeFields>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
+            return MiPlanContext.Table<ThemeFields>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ThemeFields), RecordOperation.DeleteRecord)]
         public void DeleteThemeFields(int id)
         {
-            m_miPlanContext.Table<ThemeFields>().DeleteRecord(id);
+            MiPlanContext.Table<ThemeFields>().DeleteRecord(id);
         }
 
 

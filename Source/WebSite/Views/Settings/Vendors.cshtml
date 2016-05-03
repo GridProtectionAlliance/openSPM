@@ -56,8 +56,8 @@
         @Html.Raw(dataContext.AddInputField<Vendor>("Abbreviation"))
         @Html.Raw(dataContext.AddInputField<Vendor>("Company"))
 
-        @Html.Raw(dataContext.AddInputField<Vendor>("Link", "url", customDataBinding: "visible: $parent.recordMode()!==RecordMode.View"))
-        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Description", 5, customDataBinding: "visible: $parent.recordMode()!==RecordMode.View"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Link", "url"))
+        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Description", 5))
         @Html.Raw(dataContext.AddCheckBoxField<Vendor>("Enabled"))
     </div>
     <div class="col-md-4">

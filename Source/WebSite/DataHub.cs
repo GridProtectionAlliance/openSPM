@@ -165,13 +165,6 @@ namespace openSPM
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
-        [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
-        public IEnumerable<Patch> QueryAPatch(int id)
-        {
-           return m_dataContext.Table<Patch>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
-
-        }
-
         
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -748,6 +741,18 @@ namespace openSPM
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(AssessmentDocument), RecordOperation.UpdateRecord)]
         public void UpdateAssessmentDocument(AssessmentDocument record)
+        {
+            // Stub function exists to assign rights to file upload operations
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
+        #region [ ClosedPatchDocument Table Operations ]
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(ClosedPatchDocument), RecordOperation.UpdateRecord)]
+        public void UpdateClosedPatchDocument(ClosedPatchDocument record)
         {
             // Stub function exists to assign rights to file upload operations
             throw new NotImplementedException();
@@ -1388,6 +1393,42 @@ namespace openSPM
         public IEnumerable<AssessmentHistoryView> QueryAssessmentHistoryViews(int id)
         {
             return m_dataContext.Table<AssessmentHistoryView>().QueryRecords(restriction: new RecordRestriction("AssessmentID = {0}", id));
+        }
+
+        #endregion
+
+        #region [InstallHistoryView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(InstallHistoryView), RecordOperation.QueryRecordCount)]
+        public int QueryInstallHistoryViewCount()
+        {
+            return m_dataContext.Table<InstallHistoryView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(InstallHistoryView), RecordOperation.QueryRecords)]
+        public IEnumerable<InstallHistoryView> QueryInstallHistoryViews(int id)
+        {
+            return m_dataContext.Table<InstallHistoryView>().QueryRecords(restriction: new RecordRestriction("InstallID = {0}", id));
+        }
+
+        #endregion
+
+        #region [MitigationPlanHistoryView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MitigationPlanHistoryView), RecordOperation.QueryRecordCount)]
+        public int QueryMitigationPlanHistoryViewCount()
+        {
+            return m_dataContext.Table<MitigationPlanHistoryView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MitigationPlanHistoryView), RecordOperation.QueryRecords)]
+        public IEnumerable<MitigationPlanHistoryView> QueryMitigationPlanHistoryViews(int id)
+        {
+            return m_dataContext.Table<MitigationPlanHistoryView>().QueryRecords(restriction: new RecordRestriction("MitigationPlanID = {0}", id));
         }
 
         #endregion

@@ -214,6 +214,7 @@
     <Compile Include="Model\BusinessUnit.cs" />
     <Compile Include="Model\BusinessUnitUserAccountDetail.cs" />
     <Compile Include="Model\ClosedPatch.cs" />
+    <Compile Include="Model\ClosedPatchDocument.cs" />
     <Compile Include="Model\DiscoveryResultDocument.cs" />
     <Compile Include="Model\DiscoveryResult.cs" />
     <Compile Include="Model\DocumentDetail.cs" />
@@ -222,8 +223,10 @@
     <Compile Include="Model\HistoryView.cs" />
     <Compile Include="Model\Install.cs" />
     <Compile Include="Model\InstallDocument.cs" />
+    <Compile Include="Model\InstallHistoryView.cs" />
     <Compile Include="Model\MenuItem.cs" />
     <Compile Include="Model\MitigationPlan.cs" />
+    <Compile Include="Model\MitigationPlanHistoryView.cs" />
     <Compile Include="Model\NoticeLog.cs" />
     <Compile Include="Model\PatchPatchStatusDetail.cs" />
     <Compile Include="Model\PatchStatusAssessmentDetail.cs" />

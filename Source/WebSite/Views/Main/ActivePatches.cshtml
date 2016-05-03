@@ -88,7 +88,7 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: beginAssessment.bind($data)">Begin Assessment</button></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="">0</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(PatchStatusID, PatchID, $($element)), attr: {id: 'documentCount' + PatchStatusID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -221,7 +221,45 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
         }
 
 
+        function getDocumentCount(sourceID, patchID, element) {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryDocumentDetailCount("Patch", patchID).done(function (count) {
+                    $("#documentCount" + sourceID).text(count.toString());
+                });
+            }
 
+            return element.text();
+        }
+
+        $(window).resize(function () {
+            setTimeout(function () {
+                $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
+            }, 500);
+        });
+
+        function openManageDocumentsDialog(record) {
+            const count = parseInt(notNull($("#documentCount" + record.PatchID).text(), 0));
+            var initialMode = "";
+
+            if (count < 1)
+                initialMode = "/AddNew";
+
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.VendorPatchName),
+                "height": ($(document).height() - 150) + "px",
+                "width": "100%"
+        });
+
+        $("#manageDocumentsDialog").modal("show");
+        }
+
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+            // Refresh page counts after editing tasks
+            viewModel.queryPageRecords();
+
+            // Clear frame page
+            $("#manageDocumentsFrame").attr("src", "about:blank");
+        });
 
         function filterBU() {
 

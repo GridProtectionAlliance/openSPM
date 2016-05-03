@@ -57,9 +57,9 @@
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: AssessmentID, click: viewAssessment.bind($data)"></button></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: AssessmentDate.formatDate(DateFormat)"></div></td>
-    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: InstallID"></div></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: InstallID, visible: checkNull(InstallID),click: viewInstall.bind($data)"></button></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(InstallDate)"></div></td>
-    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: MitigationPlanID"></div></td>
+    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: MitigationPlanID, visible: checkNull(MitigationPlanID),click: viewMitigation.bind($data)"></button></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(MitigationPlanCreatedDate)"></div></td>
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
@@ -85,6 +85,7 @@
         </div>
     </div>
 </div>
+*@
 
 <div id="installDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -97,26 +98,27 @@
             </div>
             <div class="modal-body auto-height">
                 <form role="form">
-                    <div id="patchidinstall" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchidinstall">Install ID</label>
+                    <div id="patchidinstall" class="form-control"></div>
                     <label for="patchnameinstall">Patch Name</label>
                     <div class="form-control" id="patchnameinstall"></div>
                     <label for="businessunitinstall">Business Unit</label>
                     <div class="form-control" id="businessunitinstall"></div>
                     <label for="workmangamentidinstall">WorkManagement ID</label>
-                    <input id="workmangamentidinstall" class="form-control" />
+                    <div id="workmangamentidinstall" class="form-control"></div>
                     <label for="completeddateinstall">Completed Date</label>
-                    <input type="text" class="form-control" id="completeddateinstall" />
-                    <label for="details">Completed Notes</label>
-                    <textarea id="details" class="form-control"></textarea>
+                    <div class="form-control" id="completeddateinstall"></div>
+                    <label for="completednotesinstall">Completed Notes</label>
+                    <div id="completednotesinstall" class="form-control"></div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveInstallButton">Save</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                 <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
 </div>
+
 
 <div id="mitigationDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -124,29 +126,33 @@
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">
-                    <span>Mitigation Records</span>
+                    <span>Mitigation Plan Record</span>
                 </h4>
             </div>
             <div class="modal-body auto-height">
                 <form role="form">
-                    <div id="patchstatusidmit" class="form-control" style="visibility: hidden"></div>
+                    <label for="mitigationid">Mitigation Plan ID</label>
+                    <div id="mitigationid" class="form-control"></div>
                     <label for="patchnamemit">Patch Name</label>
                     <div class="form-control" id="patchnamemit"></div>
                     <label for="businessunitmit">Business Unit</label>
                     <div class="form-control" id="businessunitmit"></div>
                     <label for="miplanid">MiPlan ID</label>
-                    <input id="miplanid" class="form-control" />
-                    <label for="summarymit">Details/Notes</label>
-                    <textarea id="summarymit" class="form-control"></textarea>
+                    <div id="miplanid" class="form-control"></div>
+                    <label for="approvedonmit">Approved On</label>
+                    <div id="approvedonmit" class="form-control"></div>
+                    <label for="approvedbymit">Approved By</label>
+                    <div id="approvedbymit" class="form-control"></div>
+                    <label for="summarymit">Summary</label>
+                    <div id="summarymit" class="form-control"></div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveMitigationButton">Save</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
-</div>*@
+</div>
 
 <div id="assessmentDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">
@@ -221,11 +227,9 @@
 
             $("#patchDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
-            //$("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
-            //$("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
-            //$(window).on("initiatedInstall", function () {
-            //    viewModel.queryPageRecords();
-            //});
+            $("#installDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#mitigationDialog").modal({ show: false, backdrop: "static", keyboard: false });
+        
         });
 
         function viewPatch(record) {
@@ -259,6 +263,41 @@
 
         }
 
+        function viewInstall(record) {
+            if (viewModel.dataHubIsConnected) {
+                dataHub.queryInstallHistoryViews(record.InstallID).done(function (data) {
+                    $('#patchidinstall').html(data[0].InstallID);
+                    $('#patchnameinstall').html(data[0].VendorPatchName);
+                    $('#businessunitinstall').html(data[0].BusinessUnit);
+                    $('#workmangamentidinstall').html(data[0].WorkManagementID);
+                    $('#completeddateinstall').html((data[0].CompletedOn).formatDate(DateFormat));
+                    $('#completednotesinstall').html(data[0].CompletedNotes);
+                    $("#installDialog").modal("show");
+                });
+            }
+
+        }
+
+        function viewMitigation(record) {
+            if (viewModel.dataHubIsConnected) {
+                dataHub.queryMitigationPlanHistoryViews(record.MitigationPlanID).done(function (data) {
+                    $('#mitigationid').html(data[0].MitigationPlanID);
+                    $('#patchnamemit').html(data[0].VendorPatchName);
+                    $('#businessunitmit').html(data[0].BusinessUnit);
+                    $('#miplanid').html(data[0].MiPlanID);
+                    if(data[0].ApprovedOn !== null)
+                        $('#approvedonmit').html((data[0].ApprovedOn).formatDate(DateFormat));
+                    $('#approvedbymit').html(data[0].ApprovedByName);
+                    $('#summarymit').html(data[0].Summary);
+                    $("#mitigationDialog").modal("show");
+                });
+            }
+
+        }
+        function checkNull(id) {
+            if (id !== null) return true;
+            else return false;
+        }
         function dateFixer(date) {
             if (date !== null) return date.formatDate(DateFormat);
             else return " ";

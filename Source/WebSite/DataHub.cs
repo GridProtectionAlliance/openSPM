@@ -1443,6 +1443,10 @@ namespace openSPM
 
         #region [ MiPlan Table Operations ]
 
+        // NOTE: These hub operations directly operate on MiPlan database and will apply authorization rights in context
+        // of openSPM database security. If MiPlan local security should be taken into account, these database operations
+        // should be dropped in-lieu of iframe and/or service based access to MiPlan...
+
         [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecordCount)]
         public int QueryMiPlanCount(bool showDeleted)
         {

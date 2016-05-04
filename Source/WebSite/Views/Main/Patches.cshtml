@@ -31,9 +31,9 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
-        new[] { "ID", "SPM&nbsp;Reference", "text-center" },
+        new[] { "ID", "Patch ID", "text-center" },
         new[] { "VendorPatchName", "Title", "text-left" },
-        new[] { null , "Vendor", "text-cente valign-middle" },
+        new[] { null , "Vendor", "text-center valign-middle" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
         new[] { null, "Action", "text-center valign-middle" },
@@ -55,9 +55,9 @@
 
     <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: ID, click: $parent.viewPageRecord"></button></td>
-    <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(VendorPatchName, 1.5), attr: {title: VendorPatchName}"></div></td>
-    <td width="10%" class="text-center valign-middle" data-bind="text: lookupVendorName(VendorID)"></td>
-    <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
+    <td width="20%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(VendorPatchName, 1.5), attr: {title: VendorPatchName}"></div></td>
+    <td width="20%" class="text-center valign-middle" data-bind="text: lookupVendorName(VendorID)"></td>
+    <td width="20%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data), visible: !(IsInitiated)">Initiate</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
@@ -132,17 +132,11 @@
 </div>
 @section Scripts {
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag,"ID", 0))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
-        $(document).ready(function () {
-            $(window).on("initiatedPatch", function() {
-                viewModel.queryPageRecords();
-            });
-
-        });
 
 
         var myPlatforms = @Html.Raw(ViewBag.Platforms);
@@ -176,14 +170,18 @@
                     for (var i = 0; i < records.length; i++){
                     
                         var temp = { 'PatchID': record.ID, 'BusinessUnitID': records[i].BusinessUnitID, 'PatchStatusKey': 2  };
-                        dataHub.addNewPatchStatus(temp);
+                        dataHub.addNewPatchStatus(temp).done(function() {
+                            record.IsInitiated = true;
+                            dataHub.updatePatch(record).done(function() {
+                                $(window).trigger("initiatedPatch");
+                            });
+                        });
                         
                     }
 
-                    $(window).trigger("initiatedPatch");
+                    
 
-                    record.IsInitiated = true;
-                    dataHub.updatePatch(record);
+                    
                 });
 
                
@@ -245,6 +243,10 @@
             $('#inputAlarmCriticalDays').hide();
 
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            $(window).on("initiatedPatch", function() {
+                viewModel.queryPageRecords();
+            });
         });
     </script>
 }

@@ -261,7 +261,6 @@ namespace openSPM.Controllers
         public ActionResult AssessmentInstallView()
         {
             m_appModel.ConfigureView<AssessmentInstallView>(Url.RequestContext, "Install", ViewBag);
-            ViewBag.psag = m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords();
             int themeID = 13;
             ThemeFields[] fields = m_miPlanContext.Table<ThemeFields>().QueryRecords("FieldName", new RecordRestriction("ThemeID = {0}", themeID)).ToArray();
             ViewBag.ThemeFields = fields;
@@ -269,6 +268,15 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult AssessmentMitigateView()
+        {
+            m_appModel.ConfigureView<AssessmentMitigateView>(Url.RequestContext, "MitigationPlan", ViewBag);
+            int themeID = 13;
+            ThemeFields[] fields = m_miPlanContext.Table<ThemeFields>().QueryRecords("FieldName", new RecordRestriction("ThemeID = {0}", themeID)).ToArray();
+            ViewBag.ThemeFields = fields;
+            ViewBag.ThemeFieldCount = m_miPlanContext.Table<ThemeFields>().QueryRecordCount(new RecordRestriction("ThemeID = {0}", themeID));
+            return View();
+        }
 
 
         #endregion

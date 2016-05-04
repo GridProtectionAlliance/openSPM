@@ -1,5 +1,5 @@
 ﻿@*******************************************************************************************************
-    //  AssessmentInstallView.cshtml - Gbtc
+    //  AssessmentMitigateView.cshtml - Gbtc
     //
     //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
     //
@@ -167,13 +167,14 @@
     <td width="10%" class="text-left valign-middle">
         <div nowrap data-bind="text: getDueDate(CreatedOn)"></div>
     </td>
-        <td width="10%" class="text-center valign-middle">
-            <button type="button" data-bind="click: installPatch.bind($data)" class="btn btn-danger btn-sm">Install</button></td>
-        <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
-        <td width="5%" class="text-center valign-middle" nowrap>
-            <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
-            <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
-        </td>
+    <td width="10%" class="text-center valign-middle">
+        <button type="button" data-bind="click: mitigatePatch.bind($data)" class="btn btn-danger btn-sm">Create Plan</button>
+    </td>
+            <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
+            <td width="5%" class="text-center valign-middle" nowrap>
+                <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+                <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+            </td>
 }
 
 @helper AddNewEditDialog(DataContext dataContext)
@@ -202,42 +203,41 @@
     </div>
 </div>
 
-<div id="installDialog" class="modal fade" role="dialog">
+<div id="mitigationDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
                 <h4 class="modal-title">
-                    <span>Installation Record</span>
+                    <span>Mitigation Records</span>
                 </h4>
             </div>
             <div class="modal-body auto-height">
                 <form role="form">
-                    <div id="patchidinstall" class="form-control" style="visibility: hidden"></div>
-                    <label for="patchnameinstall">Patch Name</label>
-                    <div class="form-control" id="patchnameinstall"></div>
-                    <label for="businessunitinstall">Business Unit</label>
-                    <div class="form-control" id="businessunitinstall"></div>
-                    <label for="workmangamentidinstall">WorkManagement ID</label>
-                    <input id="workmangamentidinstall" class="form-control" />
-                    <label for="completeddateinstall">Completed Date</label>
-                    <input type="text" class="form-control" id="completeddateinstall" />
-                    <label for="details">Completed Notes</label>
-                    <textarea id="details" class="form-control"></textarea>
+                    <div id="patchstatusidmit" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnamemit">Patch Name</label>
+                    <div class="form-control" id="patchnamemit"></div>
+                    <label for="businessunitmit">Business Unit</label>
+                    <div class="form-control" id="businessunitmit"></div>
+                    <label for="platformmit">Platform</label>
+                    <div id="platformmit" class="form-control"></div>
+                    <label for="miplanown">Mitigation Plan Owner</label>
+                    <input id="miplanown" class="form-control" />                  
+                    <label for="summarymit">Summary</label>
+                    <textarea id="summarymit" class="form-control"></textarea>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveInstallButton">Save</button>
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveMitigationButton">Save</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
 </div>
 
-
 @section Scripts {
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<AssessmentInstallView>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<AssessmentMitigateView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
@@ -249,7 +249,7 @@
 
         $(function() {
 
-            $("#installDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#mitigationDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $(window).on("initiatedInstall", function() {
                 viewModel.queryPageRecords();
@@ -266,33 +266,38 @@
             return processeddate;
         }
 
-        function installPatch(record) {
-            $('#patchidinstall').html(record.PatchStatusID);
-            $('#patchnameinstall').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
-            $('#businessunitinstall').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
-            $('#workmangamentidinstall').val("");
-            $('#completeddateinstall').datepicker({
-                todayBtn: "linked",
-                autoclose: true,
-                todayHighlight: true
-            });
-            $('#details').val("");
-            $("#installDialog").modal("show");
-            $('#saveInstallButton').one("click", function(){addInstall(record)});
+        function mitigatePatch(record) {
+            $('#patchidmit').html(record.PatchStatusID);
+            $('#patchnamemit').html(record.VendorPatchName);
+            $('#businessunitmit').html(record.Name);
+            $('#miplanown').val("");
+            $('#summarymit').val("");
+            $('#platformmit').html(record.PlatformName);
+            $("#mitigationDialog").modal("show");
+            $('#saveMitigationButton').one("click", function(){addMitigation(record)});
         }
 
-        function addInstall(data) {
-            var record = { 'PatchStatusID': data.PatchStatusID, 'CompletedOn': (new Date($('#completeddateinstall').val())), 'Summary': ' ', 'BusinessUnitID': data.PatchStatusID, 'WorkManagementID': $('#workmangamentidinstall').val(), 'CompletedNotes': $('#details').val() };
+        function addMitigation(data) {
+            var mitplan = {'Title': data.VendorPatchName, 'BusinessUnitID': data.BusinessUnitID, 'ThemeID': 13, 'Field1': $('#miplanown').val(), 'Field2': data.PlatformName, 'Field3': $('#summarymit').val()};
+           
 
             if (viewModel.dataHubIsConnected) {
-                dataHub.addNewInstall(record).done(function() {
-                    dataHub.updatePatchStatusKey(data.PatchStatusID, data.PatchStatusKey + 1).done(function() {
-                        $(window).trigger("initiatedInstall");
+                dataHub.addNewMiPlan(mitplan).done(function() {
+                    dataHub.getLastMiPlanRecord().done(function(id) {
+                        var record = { 'PatchStatusID': data.PatchStatusID, 'MiPlanID': id, 'Summary': $('#summarymit').val()};
+
+                        dataHub.addNewMitigationPlan(record).done(function() {
+                            dataHub.updatePatchStatusKey(data.PatchStatusID, data.PatchStatusKey + 1).done(function() {
+                                $(window).trigger("initiatedInstall");
+                            });
+                        });
+
                     });
-                   
+
+                    
+
                 });
-
-
+                
             }
         }
 
@@ -388,10 +393,3 @@
         });
     </script>
 }
-
-
-
-
-
-
-

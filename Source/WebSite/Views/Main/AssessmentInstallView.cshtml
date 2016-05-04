@@ -42,6 +42,10 @@
     const string criticalAlarmImage = "redlight.png";
     const string violationImage = "blacklight.png";
 
+    ViewBag.AssessActions = dataContext.Table<ValueList>().QueryRecords("[Key] AsC", restriction: new RecordRestriction("GroupID = 6")).ToArray();
+    ViewBag.AssessActionCount = dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = 6"));
+
+
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
@@ -161,19 +165,20 @@
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
     <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: VendorPatchName"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: VendorPatchName"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
-    <td width="10%" class="text-left valign-middle">
-        <div nowrap data-bind="text: getDueDate(CreatedOn)"></div>
-    </td>
-        <td width="10%" class="text-center valign-middle">
-            <button type="button" data-bind="click: installPatch.bind($data)" class="btn btn-danger btn-sm">Install</button></td>
-        <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
-        <td width="5%" class="text-center valign-middle" nowrap>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
+        <td width="20%" class="text-center valign-middle">
+            <button type="button" data-bind="click: installPatch.bind($data)" class="btn btn-danger btn-sm">Install</button>
+            <button type="button" data-bind="click: reassessPatch.bind($data)" class="btn btn-danger btn-sm">Reassess</button>
+
+        </td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
+        @*<td width="5%" class="text-center valign-middle" nowrap>
             <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
             <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
-        </td>
+        </td>*@
 }
 
 @helper AddNewEditDialog(DataContext dataContext)
@@ -234,6 +239,40 @@
     </div>
 </div>
 
+<div id="assessmentDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
+                <h4 class="modal-title">
+                    <span>Reassess Patch</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchid" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchname">Patch Name</label>
+                    <div class="form-control" id="patchname"></div>
+                    <label for="businessunit">Business Unit</label>
+                    <div class="form-control" id="businessunit"></div>
+                    <label for="assessmentSelect">Assessment Result</label>
+                    <select class="form-control" id="assessmentSelect">
+                        @for (int i = 0; i < ViewBag.AssessActionCount; ++i)
+                        {
+                            <option value="@Html.Raw(i + 1)">@Html.Raw(ViewBag.AssessActions[i].Text)</option>
+                        }
+                    </select>
+                    <label for="assdetails">Details/Notes</label>
+                    <textarea id="assdetails" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveAssessmentButton">Update</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal" id="cancelRecordButton">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>
@@ -293,6 +332,28 @@
                 });
 
 
+            }
+        }
+
+        function reassessPatch(record) {
+            $('#patchid').html(record.PatchStatusID);
+            $('#patchname').html(record.VendorPatchName);
+            $('#businessunit').html(lookupNameValue(record.BusinessUnitID).toString());
+            $('#assdetails').val("");
+            $('#assessmentSelect').prop('selectedIndex', 0);
+            $("#assessmentDialog").modal("show");
+            $('#saveAssessmentButton').one('click', function() { updateAssessment(record)});
+        }
+
+        
+        function updateAssessment(data) {
+            data.AssessmentResultKey = $('#assessmentSelect').val();
+            data.Details = $('#assdetails').val();
+            
+            if (viewModel.dataHubIsConnected) {
+                dataHub.updateAssessment(data).done(function () {        
+                    $(window).trigger("initiatedInstall");
+                });
             }
         }
 

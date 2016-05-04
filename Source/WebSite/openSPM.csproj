@@ -217,6 +217,7 @@
     <Compile Include="Model\BusinessUnitUserAccountDetail.cs" />
     <Compile Include="Model\ClosedPatch.cs" />
     <Compile Include="Model\ClosedPatchDocument.cs" />
+    <Compile Include="Model\ClosingReviewView.cs" />
     <Compile Include="Model\DiscoveryResultDocument.cs" />
     <Compile Include="Model\DiscoveryResult.cs" />
     <Compile Include="Model\DocumentDetail.cs" />

@@ -35,25 +35,27 @@
         //    { "Field", "Label", "Classes" }
         new[] { "PatchStatusID", "Patch ID", "text-left" },
         new[] { "BusinessUnitID", "Business Unit", "text-left"},
-        new[] { "ActionKey", "Action Taken", "text-left"},
-        new[] { "ClosedDate", "Completion Date", "text-left"},
-        new[] { null, "Details", "text-center valign-middle"},
-        new[] { null, "Documents", "text-center valign-middle"}
+        new[] { null, "Action Taken", "text-left valign-middle"},
+        new[] { "CompletionDate", "Completion Date", "text-center"},
+        new[] { null, "Platform", "text-center valign-middle"},
+        new[] { null, "Action", "text-center valign-middle"}
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.HideAddNewButton = true;
 }
 @helper BodyRows()
 {
 
 
-    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(ActionKey)"></div></td>
-    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: ClosedDate.formatDate(DateFormat)"></div></td>
-    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
+    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: BusinessUnitName"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
+    <td width="15%" class="text-center valign-middle"><div nowrap data-bind="text: CompletionDate.formatDate(DateFormat)"></div></td>
+    <td width="15%" class="text-center valign-middle"><div nowrap data-bind="text: PlatformName"></div></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: closePatch.bind($data)">Close</button></td>
+    @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
@@ -76,9 +78,41 @@
         </div>
     </div>
 </div>
+
+<div id="closedDialog" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">
+                    <span>Close&nbsp;Patch</span>
+                </h4>
+            </div>
+            <div class="modal-body auto-height">
+                <form role="form">
+                    <div id="patchidclose" class="form-control" style="visibility: hidden"></div>
+                    <label for="patchnameclose">Patch Name</label>
+                    <div class="form-control" id="patchnameclose"></div>
+                    <label for="businessunitclose">Business Unit</label>
+                    <div class="form-control" id="businessunitclose"></div>
+                    <label for="assessmentkeyclose">Assessment Result</label>
+                    <div class="form-control" id="assessmentkeyclose"></div>
+                    <label for="closeddate">Closed Date</label>
+                    <input type="text" class="form-control" id="closeddate" />
+                    <label for="detailsclose">Details/Notes</label>
+                    <textarea id="detailsclose" class="form-control"></textarea>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveCloseButton">Close</button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
 @section Scripts {
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<ClosedPatch>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<ClosingReviewView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
         @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
@@ -100,7 +134,7 @@
                 $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
             }, 500);
         });
-
+        
         function openManageDocumentsDialog(record) {
             const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
             var initialMode = "";
@@ -112,12 +146,12 @@
                 "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=ClosedPatch&SourceField=ClosedPatchID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
-        });
+            });
 
-        $("#manageDocumentsDialog").modal("show");
+            $("#manageDocumentsDialog").modal("show");
         }
 
-        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function() {
             // Refresh page counts after editing tasks
             viewModel.queryPageRecords();
 
@@ -125,8 +159,41 @@
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
 
-        $(function () {
+        function closePatch(record) {
+            $('#patchidclose').html(record.ID);
+            $('#patchnameclose').html(record.VendorPatchName);
+            $('#businessunitclose').html(record.BusinessUnitName);
+            $('#assessmentkeyclose').html(lookupAssessactionValue(record.AssessmentResultKey));
+            $('#detailsclose').val("");
+            $('#closeddate').val("");
+            $('#closeddate').datepicker({
+                todayBtn: "linked",
+                autoclose: true,
+                todayHighlight: true
+            });
+            $("#closedDialog").modal("show");
+            $('#saveCloseButton').one("click", function() { addClose(record) });
+        }
+
+        function addClose(data) {
+            var record = { 'PatchStatusID': data.ID, 'ClosedDate': (new Date($('#closeddate').val())), 'ActionKey': data.AssessmentResultKey, 'Details': $('#detailsclose').val() };
+
+            if (viewModel.dataHubIsConnected) {
+                dataHub.addNewClosedPatch(record).done(function() {
+                   dataHub.updatePatchStatusKey(data.ID, 5).done(function() {
+                       $(window).trigger("closePatch");
+                   });  
+                });
+
+            }
+        }
+
+        $(function() {
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $(window).on("closePatch", function() {
+                viewModel.queryPageRecords();
+            });
         });
     </script>
 }

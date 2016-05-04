@@ -76,10 +76,10 @@
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: addNewDiscoveryResult.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(DiscoveryResultID, $($element)), attr: {id: 'documentCount' + DiscoveryResultID}">0</span></button></td>
-    <td width="5%" class="text-center valign-middle" nowrap>
+    @*<td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()" title="Only the latest discovered patch will be deleted..."><span class="glyphicon glyphicon-remove"></span></button>
-    </td>
+    </td>*@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {

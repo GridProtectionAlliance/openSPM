@@ -184,6 +184,8 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             if (viewModel.dataHubIsConnected) {
                 dataHub.addNewAssessment(record).done(function () {
                     ++data.PatchStatusKey;
+                    if ($('#assessmentSelect').val() > 2)
+                        ++data.PatchStatusKey;
                     dataHub.updatePatchStatusKey(data.PatchStatusID, data.PatchStatusKey).done(function() {
                         $(window).trigger("assessmentMade");
                     });

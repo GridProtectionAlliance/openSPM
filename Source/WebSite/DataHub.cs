@@ -1494,6 +1494,24 @@ namespace openSPM
 
         #endregion
 
+        #region [ClosingReviewView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(ClosingReviewView), RecordOperation.QueryRecordCount)]
+        public int QueryClosingReviewViewCount()
+        {
+            return m_dataContext.Table<ClosingReviewView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(ClosingReviewView), RecordOperation.QueryRecords)]
+        public IEnumerable<ClosingReviewView> QueryClosingReviewViews(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        #endregion
+
         #region [ MiPlan Table Operations ]
 
         // NOTE: These hub operations directly operate on MiPlan database and will apply authorization rights in context

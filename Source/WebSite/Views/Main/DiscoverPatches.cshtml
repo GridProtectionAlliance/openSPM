@@ -23,7 +23,10 @@
 @using GSF
 @using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
+@section StyleSheets {
+    @Styles.Render("~/css.bundle/fileinput")
+}
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
@@ -38,15 +41,18 @@
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays)) {
+    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays))
+    {
         discoveryWarningDays = 7;
     }
 
-    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays)) {
+    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays))
+    {
         discoveryAlarmDays = 21;
     }
 
-    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays)) {
+    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays))
+    {
         discoveryViolationDays = 35;
     }
 
@@ -69,24 +75,35 @@
 }
 @helper BodyRows()
 {
-
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
     <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Company, 1.5), attr: {title: Company}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: addNewDiscoveryResult.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(DiscoveryResultID, $($element)), attr: {id: 'documentCount' + DiscoveryResultID}">0</span></button></td>
-    @*<td width="5%" class="text-center valign-middle" nowrap>
+    @*
+    <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()" title="Only the latest discovered patch will be deleted..."><span class="glyphicon glyphicon-remove"></span></button>
-    </td>*@
+    </td>
+    *@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    <div class="col-md-12">
-        @Html.Raw(dataContext.AddDateField<LatestVendorDiscoveryResult>("ReviewDate"))
-        @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
-        @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Notes", 4))
+    <div class="row">
+        <div class="col-md-12">
+            @Html.Raw(dataContext.AddDateField<LatestVendorDiscoveryResult>("ReviewDate"))
+            @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
+            @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Notes", 4))
+        </div>
+    </div>
+    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
+        <div class="col-md-12">
+            <div class="form-group">
+                <label for="uploadFiles">Discovery Result Related Documents:</label>
+                <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+            </div>
+        </div>
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -104,12 +121,12 @@
 </div>
 
 @section Scripts {
+    @Scripts.Render("~/js.bundle/fileinput")
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
+
         var currentVendorID = 0;
-        $(function () {
-            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
-        });
+
         function addNewDiscoveryResult(record) {
             currentVendorID = record.VendorID;
             viewModel.addPageRecord();
@@ -175,9 +192,9 @@
                 "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=DiscoveryResult&SourceField=DiscoveryResultID&SourceID=" + record.DiscoveryResultID + "&Name=" + encodeURIComponent(record.Name),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
-        });
+            });
 
-        $("#manageDocumentsDialog").modal("show");
+            $("#manageDocumentsDialog").modal("show");
         }
 
         $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
@@ -186,6 +203,50 @@
 
             // Clear frame page
             $("#manageDocumentsFrame").attr("src", "about:blank");
+        });
+
+        const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=DiscoveryResultDocument&SourceField=DiscoveryResultID"))";
+        var selectedFiles;
+
+        $(viewModel).on("beforeSave", function(event, observableRecord) {
+            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
+        });
+
+        $(viewModel).on("recordSaved", function(event, record, newRecord) {
+            if (newRecord && selectedFiles.length > 0 && viewModel.dataHubIsConnected()) {
+                dataHub.getLastDiscoveryResultID().done(function(discoveryResultID) {
+                    $("#uploadFiles").fileinput({
+                        uploadUrl: fileUploadUrl + "&SourceID=" + discoveryResultID.toString(),
+                        uploadAsync: true
+                    });
+
+                    for (var i = 0; i < selectedFiles.length; i++) {
+                        $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
+                    }
+
+                    $("#uploadFiles").fileinput("upload");
+                });
+            }
+        });
+        
+        $(function () {
+            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#addNewEditDialog").on("shown.bs.modal", function() {
+                // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
+                dismissButtons.prop("disabled", true);
+                dismissButtons.invisible();
+
+                $("#uploadFiles").fileinput({
+                    uploadUrl: fileUploadUrl,
+                    uploadAsync: true,
+                    showUpload: false,
+                    showRemove: true,
+                    showPreview: false,
+                    minFileCount: 1,
+                    maxFileCount: 12
+                });
+            });
         });
     </script>
 }

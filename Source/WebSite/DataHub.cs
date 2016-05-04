@@ -1300,6 +1300,12 @@ namespace openSPM
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
+        public int GetLastDiscoveryResultID()
+        {
+            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('DiscoveryResult')") ?? 0;
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.UpdateRecord)]
         public void UpdateLatestVendorDiscoveryResult(LatestVendorDiscoveryResult record)
         {

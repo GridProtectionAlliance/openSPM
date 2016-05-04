@@ -67,8 +67,8 @@ namespace openSPM
                 if (context.Request.Files.Count > 0 && context.User.Identity.IsAuthenticated)
                 {
                     NameValueCollection parameters = context.Request.QueryString;
-                    string sourceTable = parameters["SourceTable"];
-                    string sourceField = parameters["SourceField"];
+                    string sourceTable = parameters["SourceTable"] ?? context.Request.Form["SourceTable"];
+                    string sourceField = parameters["SourceField"] ?? context.Request.Form["SourceField"];
                     int sourceID = int.Parse(parameters["SourceID"] ?? context.Request.Form["SourceID"] ?? "0");
                     string modelName = parameters["ModelName"]; // If provided, must include namespace
                     int documentID = 0;

@@ -43,7 +43,6 @@
     };
 
     ViewBag.Platforms = Json.Encode(dataContext.Table<Platform>().QueryRecords().ToArray());
-    //ViewBag.HideAddNewButton = true;
     ViewBag.HideUnauthorizedControls = true;
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -247,11 +246,8 @@
             if (newRecord && selectedFiles.length > 0 && viewModel.dataHubIsConnected()) {
                 dataHub.getLastPatchID().done(function(patchID) {
                     $("#uploadFiles").fileinput({
-                        uploadUrl: fileUploadUrl,
-                        uploadAsync: true,
-                        uploadExtraData: function() {
-                            return { SourceID: patchID };
-                        }
+                        uploadUrl: fileUploadUrl + "&SourceID=" + patchID.toString(),
+                        uploadAsync: true
                     });
 
                     for (var i = 0; i < selectedFiles.length; i++) {

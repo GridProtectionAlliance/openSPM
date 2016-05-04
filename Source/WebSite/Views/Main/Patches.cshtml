@@ -34,9 +34,8 @@
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
-        new[] { "ID", "Patch ID", "text-center" },
-        new[] { "VendorPatchName", "Title", "text-left" },
-        new[] { null , "Vendor", "text-center valign-middle" },
+        new[] { "VendorPatchName", "Patch ID", "text-center" },
+        new[] { null , "Vendor", "text-left valign-middle" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
         new[] { null, "Action", "text-center valign-middle" },
@@ -56,10 +55,9 @@
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: IsNotCompliance"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: !IsNotCompliance"></td>
-    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: ID, click: $parent.viewPageRecord"></button></td>
-    <td width="20%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(VendorPatchName, 1.5), attr: {title: VendorPatchName}"></div></td>
-    <td width="20%" class="text-center valign-middle" data-bind="text: lookupVendorName(VendorID)"></td>
+    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: PatchClassKey !== 2"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: PatchClassKey === 2"></td>
+    <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle" data-bind="text: lookupVendorName(VendorID)"></td>
     <td width="20%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data), visible: !(IsInitiated)">Initiate</button></td>
@@ -87,45 +85,42 @@
     }
 
     <div class="row">
-    <div class="col-md-4">
-        @*@Html.Raw(dataContext.AddInputField<Patch>("PatchMnemonic", initialFocus: true))*@
-        @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))*@
-        @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
-        @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName"))
-        @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
-        <div>
-            <label for="evalDate">Evaluation Deadline Date:</label>
+        <div class="col-md-6">
+            @Html.Raw(Model.AddValueListSelectField<Patch>("PatchClassKey", "patchClass"))
+            @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
+            @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
+            <div class="form-group">
+                <label for="evalDate">Evaluation Deadline Date:</label>
+                <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
+            </div>
+            @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
+            @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
+            <div class="form-group">
+                <label for="platformIDSelction">Target Platform/Device:</label>
+                <select class="form-control" id="platformIDSelction" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
+            </div>
         </div>
-        <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
-        <br />
-        @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
-    </div>
-    <div class="col-md-4">
-        @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
-        <div>
-            <label for="platformIDSelction">Target Platform/Device:</label>
-            <select class="form-control" id="platformIDSelction" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
+        <div class="col-md-6">
+            @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
+            @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
+            @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
+            @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))
+            @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
+            @{
+                dataContext.AddPageDefinedFieldInitialization("AlarmCriticalDays",
+                    /* Initial Value: */ defaultCriticalAlarmDays.ToString(),
+                    /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
+                    /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
+            }
         </div>
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))
-    </div>
-    <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
-        @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
-        @{
-            dataContext.AddPageDefinedFieldInitialization("AlarmCriticalDays",
-                /* Initial Value: */ defaultCriticalAlarmDays.ToString(),
-                /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
-                /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
-        }
-        @Html.Raw(dataContext.AddCheckBoxField<Patch>("Vulnerability"))
-        @Html.Raw(dataContext.AddCheckBoxField<Patch>("NoSecurityContent"))
-    </div>
     </div>
     <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
         <div class="col-md-12">
-            <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+            <div class="form-group">
+                <label for="uploadFiles">Patch Related Documents:</label>
+                <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+            </div>
         </div>
     </div>
 }

@@ -47,7 +47,7 @@
     ViewBag.HeaderColumns = new[]
 {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
-        new[] { "PatchID", "SPM&nbsp;Reference", "text-center" },
+        new[] { "PatchID", "Patch ID", "text-center" },
         new[] { "BusinessUnitID", "Business Unit", "text-center"},
         new[] { null, "Vendor", "text-center valign-middle" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
@@ -138,10 +138,6 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
                         {
                             <option value="@Html.Raw(i + 1)">@Html.Raw(ViewBag.AssessActions[i].Text)</option>
                         }
-                        @*<option value="1" selected="selected">Install/Remediate</option>
-                        <option value="2">Mitigate</option>
-                        <option value="3">Not Applicable - Does not match system config</option>
-                        <option value="4">Not Applicable - Patch has no security related content</option>*@
                     </select>
                     <label for="details">Details/Notes</label>
                     <textarea id="details" class="form-control"></textarea>

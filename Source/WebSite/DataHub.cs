@@ -156,21 +156,38 @@ namespace openSPM
         #region [ Patch Table Operations ]
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
-        public int QueryPatchCount(bool showDeleted)
+        public int QueryPatchCount(bool showDeleted, bool isInitiated)
         {
             if (showDeleted)
-                return m_dataContext.Table<Patch>().QueryRecordCount();
+            {
+                if (isInitiated)
+                    return m_dataContext.Table<Patch>().QueryRecordCount();
+                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsInitiated = 0"));
 
-            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            }
+
+            if (isInitiated)
+                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND IsInitiated = 0"));
         }
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
-        public IEnumerable<Patch> QueryPatches(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Patch> QueryPatches( bool showDeleted, bool isInitiated, string sortField, bool ascending, int page, int pageSize)
         {
             if (showDeleted)
-                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+            {
+                if(isInitiated)
+                    return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInitiated = 0"));
 
-            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            }
+                
+            if(isInitiated)
+                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsInitiated = 0"));
+
+
+
         }
 
         
@@ -1459,6 +1476,23 @@ namespace openSPM
 
         #endregion
 
+        #region [AssessmentMitigateView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecordCount)]
+        public int QueryAssessmentMitigateViewCount()
+        {
+            return m_dataContext.Table<AssessmentMitigateView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecords)]
+        public IEnumerable<AssessmentMitigateView> QueryAssessmentMitigateViews(string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        #endregion
 
         #region [ MiPlan Table Operations ]
 

@@ -212,6 +212,7 @@
     <Compile Include="Model\AssessmentDocument.cs" />
     <Compile Include="Model\AssessmentHistoryView.cs" />
     <Compile Include="Model\AssessmentInstallView.cs" />
+    <Compile Include="Model\AssessmentMitigateView.cs" />
     <Compile Include="Model\BusinessUnit.cs" />
     <Compile Include="Model\BusinessUnitUserAccountDetail.cs" />
     <Compile Include="Model\ClosedPatch.cs" />
@@ -500,6 +501,7 @@
     <Content Include="Views\Main\Documents.cshtml" />
     <Content Include="Views\Main\ActivePatches.cshtml" />
     <Content Include="Views\Main\AssessmentInstallView.cshtml" />
+    <Content Include="Views\Main\AssessmentMitigateView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

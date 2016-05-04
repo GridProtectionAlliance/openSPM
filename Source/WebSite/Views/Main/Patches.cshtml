@@ -23,7 +23,10 @@
 @using GSF
 @using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
+@section StyleSheets {
+    @Styles.Render("~/css.bundle/fileinput")
+}
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -83,16 +86,18 @@
         defaultCriticalAlarmDays = 3;
     }
 
+    <div class="row">
     <div class="col-md-4">
         @*@Html.Raw(dataContext.AddInputField<Patch>("PatchMnemonic", initialFocus: true))*@
         @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))*@
         @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
         @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName"))
         @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
-        <div><label for="#evalDate">Evaluation Deadline Date:</label>
+            <div>
+                <label for="#evalDate">Evaluation Deadline Date:</label>
         </div>
         <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
-        <br/>
+            <br />
         @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
     </div>
     <div class="col-md-4">
@@ -117,6 +122,12 @@
         @Html.Raw(dataContext.AddCheckBoxField<Patch>("Vulnerability"))
         @Html.Raw(dataContext.AddCheckBoxField<Patch>("NoSecurityContent"))
     </div>
+    </div>
+    <div class="row" data-bind="visible: $parent.recordMode()!==RecordMode.View">
+        <div class="col-md-12">
+            <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+        </div>
+    </div>
 }
 @Html.Partial("PagedViewModel")
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
@@ -131,17 +142,23 @@
     </div>
 </div>
 @section Scripts {
+    @Scripts.Render("~/js.bundle/fileinput")
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag,"ID", 0))
+        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
+        $(document).ready(function () {
+            $(window).on("initiatedPatch", function() {
+                viewModel.queryPageRecords();
+            });
 
+        });
 
         var myPlatforms = @Html.Raw(ViewBag.Platforms);
-        for( var i =0; i< myPlatforms.length; ++i)
-        {
+
+        for( var i =0; i< myPlatforms.length; ++i) {
             myPlatforms[i].nameandversion = myPlatforms[i].Name + '/Version: ' + myPlatforms[i].Version;
         }
 
@@ -156,8 +173,6 @@
                 var dd = new Date(rd.addDays(35));
                 //console.log(dd.formatDate(DateFormat));
                 $('#evalDate').html(dd.formatDate(DateFormat));
-
-
             });
 
             //console.log(myPlatforms);
@@ -170,12 +185,7 @@
                     for (var i = 0; i < records.length; i++){
                     
                         var temp = { 'PatchID': record.ID, 'BusinessUnitID': records[i].BusinessUnitID, 'PatchStatusKey': 2  };
-                        dataHub.addNewPatchStatus(temp).done(function() {
-                            record.IsInitiated = true;
-                            dataHub.updatePatch(record).done(function() {
-                                $(window).trigger("initiatedPatch");
-                            });
-                        });
+                        dataHub.addNewPatchStatus(temp);
                         
                     }
 
@@ -183,12 +193,8 @@
 
                     
                 });
-
-               
             }
         }
-
-        
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {
@@ -238,15 +244,10 @@
         });
 
         $(function () {
-
             $('label#inputAlarmCriticalDays').hide();
             $('#inputAlarmCriticalDays').hide();
 
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
-
-            $(window).on("initiatedPatch", function() {
-                viewModel.queryPageRecords();
-            });
         });
     </script>
 }

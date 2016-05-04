@@ -62,18 +62,7 @@ namespace openSPM
         {
             try
             {
-                // Initialize the security principal from caller's windows identity if uninitialized, note that
-                // simply by checking current provider any existing cached security principal will be restored,
-                // if no current provider exists we create a new one
-                if (SecurityProviderCache.CurrentProvider == null)
-                {
-                    lock (typeof(FileUploadHandler))
-                    {
-                        // Let's see if we won the race...
-                        if (SecurityProviderCache.CurrentProvider == null)
-                            SecurityProviderCache.CurrentProvider = SecurityProviderUtility.CreateProvider(string.Empty);
-                    }
-                }
+                SecurityProviderCache.ValidateCurrentProvider();
 
                 if (context.Request.Files.Count > 0 && context.User.Identity.IsAuthenticated)
                 {

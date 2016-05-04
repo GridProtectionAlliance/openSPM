@@ -196,6 +196,14 @@ namespace openSPM
             m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
+        public void UpdatePatchInitatedFlag(int id)
+        {
+            // For Patches, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsInitiated=1 WHERE ID={0}", id);
+        }
+
         [RecordOperation(typeof(Patch), RecordOperation.CreateNewRecord)]
         public Patch NewPatch()
         {

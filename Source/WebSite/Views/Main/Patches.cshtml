@@ -146,9 +146,7 @@
         @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
 
         $(document).ready(function() {
-                $(window).on("initiatedPatch", function() {
-                    viewModel.queryPageRecords();
-                });
+               
         });
 
         var myPlatforms = @Html.Raw(ViewBag.Platforms);
@@ -183,7 +181,12 @@
                             "PatchStatusKey": 2
                         };
                         dataHub.addNewPatchStatus(temp);
+                        
                     }
+
+                    dataHub.updatePatchInitatedFlag(record.ID).done(function() {
+                        $(window).trigger("initiatedPatch"); 
+                    });
                 });
             }
         }
@@ -264,6 +267,11 @@
             $("label#inputAlarmCriticalDays").hide();
             $("#inputAlarmCriticalDays").hide();
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            $(window).on("initiatedPatch", function() {
+                viewModel.queryPageRecords();
+            });
+
             $("#addNewEditDialog").on("shown.bs.modal", function() {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
                 const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");

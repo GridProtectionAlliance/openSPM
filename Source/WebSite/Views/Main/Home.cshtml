@@ -247,16 +247,16 @@
         <tr>
             <td align="left" width="16">&nbsp;</td>
             <td align="center">&nbsp;<u>ToGo Days</u>&nbsp;</td>
-            <td align="center">&nbsp;<u>&nbsp;&nbsp;Type&nbsp;&nbsp;</u>&nbsp;</td>
+            <td align="center">&nbsp;<u>&nbsp;&nbsp;Process Step&nbsp;&nbsp;</u>&nbsp;</td>
             <td align="center"><u>&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;&nbsp;&nbsp;&nbsp;</u></td>
         </tr>
 
         <tbody data-bind="foreach: alarms">
         <tr>
             <td align="left" width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
-            <td align="right" data-bind="text: dateFixer(CreatedOn)">&nbsp;&nbsp;</td>
+            <td align="right" data-bind="text: dateFixer(VendorReleaseDate)">&nbsp;&nbsp;</td>
             <td align="center" data-bind="text: lookupPatchstatusValue(PatchStatusKey)"></td>
-            <td align="center" data-bind="text: lookupVendorPatchNameValue(PatchID)"></td>
+            <td align="center" data-bind="text: PatchMnemonic"></td>
         </tr>
         </tbody>
 
@@ -314,17 +314,19 @@
     ko.applyBindings(new HomePageViewModel());
 
     function dateFixer(date) {
+        if (date === undefined) return '';
         var str = date.slice(6, date.length - 2);
         var newDate = new Date().setTime(str);
         var today = new Date();
-        var ret = 35 - ((today - newDate) / 1000 / 60 / 60 / 24).toFixed(0);
+        var ret = 35- ((today - newDate) / 1000 / 60 / 60 / 24).toFixed(0);
+    
         return ret;
     }
 
     function getDiscoveryStatusImage(element, record) {
         var image, title;
 
-        var daysUntilEnd = (dateFixer(record.CreatedOn));
+        var daysUntilEnd = (dateFixer(record.VendorReleaseDate));
 
         switch (true) {
         case (daysUntilEnd <= 0):

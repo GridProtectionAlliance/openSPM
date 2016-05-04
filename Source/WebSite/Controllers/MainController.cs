@@ -144,8 +144,8 @@ namespace openSPM.Controllers
             ViewBag.MyPendingMitigationPlan = m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("ApprovedOn = NULL AND CreatedByID = {0}", userID));
             ViewBag.MyCriticalAlarms = m_dataContext.Table<PatchStatus>().QueryRecordCount(new RecordRestriction("PatchStatusKey < 4 AND DATEDIFF(day, CreatedOn, {0}) <= 35 AND CreatedByID = {1}", today, userID));
 
-            ViewBag.PatchesInAlarm = m_dataContext.Table<PatchStatus>().QueryRecords("CreatedOn ASC", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, {0}) >= 14 AND PatchStatusKey < 3", today));
-            ViewBag.PatchesAddedToday = m_dataContext.Table<Patch>().QueryRecords("VendorPatchName", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, {0}) < 1", today));
+            ViewBag.PatchesInAlarm = m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords("VendorReleaseDate ASC", restriction: new RecordRestriction("DATEDIFF(day, VendorReleaseDate, GETDATE()) >= 21 AND PatchStatusKey < 4"));
+            ViewBag.PatchesAddedToday = m_dataContext.Table<Patch>().QueryRecords("VendorPatchName", restriction: new RecordRestriction("DATEDIFF(day, CreatedOn, GETDATE()) < 1"));
 
 
             m_appModel.ConfigureView(Url.RequestContext, "Home", ViewBag);            

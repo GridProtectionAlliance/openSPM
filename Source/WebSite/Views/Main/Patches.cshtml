@@ -23,7 +23,10 @@
 @using GSF
 @using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
+@section StyleSheets {
+    @Styles.Render("~/css.bundle/fileinput")
+}
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -83,39 +86,47 @@
         defaultCriticalAlarmDays = 3;
     }
 
-    <div class="col-md-4">
-        @*@Html.Raw(dataContext.AddInputField<Patch>("PatchMnemonic", initialFocus: true))*@
-        @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))*@
-        @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
-        @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName"))
-        @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
-        <div><label for="#evalDate">Evaluation Deadline Date:</label>
+    <div class="row">
+        <div class="col-md-4">
+            @*@Html.Raw(dataContext.AddInputField<Patch>("PatchMnemonic", initialFocus: true))*@
+            @*@Html.Raw(dataContext.AddSelectField<Patch, Patch>("ParentID", "ID", "PatchReference"))*@
+            @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
+            @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName"))
+            @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
+            <div>
+                <label for="#evalDate">Evaluation Deadline Date:</label>
+            </div>
+            <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
+            <br />
+            @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
         </div>
-        <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
-        <br/>
-        @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
-    </div>
-    <div class="col-md-4">
-        @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
-        <div>
-            <label for="platformIDSelction">Target Platform/Device:</label>
-            <select class="form-control" id="platfromIDSelection" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
+        <div class="col-md-4">
+            @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
+            <div>
+                <label for="platformIDSelction">Target Platform/Device:</label>
+                <select class="form-control" id="platfromIDSelection" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
+            </div>
+            @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
+            @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
+            @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))
         </div>
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
-        @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))
+        <div class="col-md-4">
+            @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
+            @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
+            @{
+                dataContext.AddPageDefinedFieldInitialization("AlarmCriticalDays",
+                    /* Initial Value: */ defaultCriticalAlarmDays.ToString(),
+                    /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
+                    /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
+            }
+            @Html.Raw(dataContext.AddCheckBoxField<Patch>("Vulnerability"))
+            @Html.Raw(dataContext.AddCheckBoxField<Patch>("NoSecurityContent"))
+        </div>
     </div>
-    <div class="col-md-4">
-        @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
-        @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
-        @{
-            dataContext.AddPageDefinedFieldInitialization("AlarmCriticalDays",
-                /* Initial Value: */ defaultCriticalAlarmDays.ToString(),
-                /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
-                /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
-        }
-        @Html.Raw(dataContext.AddCheckBoxField<Patch>("Vulnerability"))
-        @Html.Raw(dataContext.AddCheckBoxField<Patch>("NoSecurityContent"))
+    <div class="row" data-bind="visible: $parent.recordMode()!==RecordMode.View">
+        <div class="col-md-12">
+            <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+        </div>
     </div>
 }
 @Html.Partial("PagedViewModel")
@@ -131,12 +142,15 @@
     </div>
 </div>
 @section Scripts {
+    @Scripts.Render("~/js.bundle/fileinput")
     <script>
+        "use strict";
         @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
+
         $(document).ready(function () {
             $(window).on("initiatedPatch", function() {
                 viewModel.queryPageRecords();
@@ -144,26 +158,23 @@
 
         });
 
-
         var myPlatforms = @Html.Raw(ViewBag.Platforms);
-        for( var i =0; i< myPlatforms.length; ++i)
-        {
+
+        for( var i =0; i< myPlatforms.length; ++i) {
             myPlatforms[i].nameandversion = myPlatforms[i].Name + '/Version: ' + myPlatforms[i].Version;
         }
 
         function getEvalutationDeadlineDate() {
             var releaseDate = new Date($('#dateVendorReleaseDate').val());
             var deadlineDate = new Date(releaseDate.addDays(35));
-            
+
             //console.log($('#dateVendorReleaseDate'));
             $('#dateVendorReleaseDate').on('change', function () {
-                
+
                 var rd = new Date($('#dateVendorReleaseDate').val());
                 var dd = new Date(rd.addDays(35));
                 //console.log(dd.formatDate(DateFormat));
                 $('#evalDate').html(dd.formatDate(DateFormat));
-
-
             });
 
             //console.log(myPlatforms);
@@ -174,10 +185,9 @@
             if (viewModel.dataHubIsConnected()) {
                 dataHub.queryPatchUserAccountPlatformBusinessUnitUserAccountViews(record.PlatformID).done(function(records) {
                     for (var i = 0; i < records.length; i++){
-                    
+
                         var temp = { 'PatchID': record.ID, 'BusinessUnitID': records[i].BusinessUnitID, 'PatchStatusKey': 2  };
                         dataHub.addNewPatchStatus(temp);
-                        
                     }
 
                     $(window).trigger("initiatedPatch");
@@ -185,12 +195,8 @@
                     record.IsInitiated = true;
                     dataHub.updatePatch(record);
                 });
-
-               
             }
         }
-
-        
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {
@@ -240,11 +246,21 @@
         });
 
         $(function () {
-
             $('label#inputAlarmCriticalDays').hide();
             $('#inputAlarmCriticalDays').hide();
 
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            $("#addNewEditDialog").on("shown.bs.modal", function () {
+                $("#uploadFiles").fileinput({
+                    uploadUrl: "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=PatchDocument&SourceField=PatchID&SourceID="))",
+                    uploadAsync: true,
+                    showUpload: false,
+                    showRemove: true,
+                    minFileCount: 1,
+                    maxFileCount: 12
+                });
+            });
         });
     </script>
 }

@@ -144,7 +144,7 @@
 @section Scripts {
     @Scripts.Render("~/js.bundle/fileinput")
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag))
+        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag, "ID", 0))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))

@@ -172,25 +172,21 @@ namespace openSPM
         }
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
-        public IEnumerable<Patch> QueryPatches( bool showDeleted, bool isInitiated, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Patch> QueryPatches(bool showDeleted, bool isInitiated, string sortField, bool ascending, int page, int pageSize)
         {
             if (showDeleted)
             {
-                if(isInitiated)
+                if (isInitiated)
                     return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
-                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInitiated = 0"));
 
+                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInitiated = 0"));
             }
                 
-            if(isInitiated)
+            if (isInitiated)
                 return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsInitiated = 0"));
-
-
-
         }
-
-        
 
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
@@ -216,6 +212,12 @@ namespace openSPM
             record.UpdatedOn = record.CreatedOn;
             record.IsInitiated = false;
             m_dataContext.Table<Patch>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        public int GetLastPatchID()
+        {
+            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Patch')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]

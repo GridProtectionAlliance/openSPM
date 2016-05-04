@@ -93,18 +93,18 @@
         @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
         @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName"))
         @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
-            <div>
-                <label for="#evalDate">Evaluation Deadline Date:</label>
+        <div>
+            <label for="evalDate">Evaluation Deadline Date:</label>
         </div>
         <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
-            <br />
+        <br />
         @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
     </div>
     <div class="col-md-4">
         @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
         <div>
             <label for="platformIDSelction">Target Platform/Device:</label>
-            <select class="form-control" id="platfromIDSelection" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
+            <select class="form-control" id="platformIDSelction" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
         </div>
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Summary"))
         @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
@@ -123,7 +123,7 @@
         @Html.Raw(dataContext.AddCheckBoxField<Patch>("NoSecurityContent"))
     </div>
     </div>
-    <div class="row" data-bind="visible: $parent.recordMode()!==RecordMode.View">
+    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
         <div class="col-md-12">
             <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
         </div>
@@ -149,56 +149,53 @@
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
-        $(document).ready(function () {
-            $(window).on("initiatedPatch", function() {
-                viewModel.queryPageRecords();
-            });
 
+        $(document).ready(function() {
+                $(window).on("initiatedPatch", function() {
+                    viewModel.queryPageRecords();
+                });
         });
 
         var myPlatforms = @Html.Raw(ViewBag.Platforms);
 
-        for( var i =0; i< myPlatforms.length; ++i) {
-            myPlatforms[i].nameandversion = myPlatforms[i].Name + '/Version: ' + myPlatforms[i].Version;
+        for (var i = 0; i < myPlatforms.length; ++i) {
+            myPlatforms[i].nameandversion = myPlatforms[i].Name + "/Version: " + myPlatforms[i].Version;
         }
 
         function getEvalutationDeadlineDate() {
-            var releaseDate = new Date($('#dateVendorReleaseDate').val());
+            var releaseDate = new Date($("#dateVendorReleaseDate").val());
             var deadlineDate = new Date(releaseDate.addDays(35));
-            
+
             //console.log($('#dateVendorReleaseDate'));
-            $('#dateVendorReleaseDate').on('change', function () {
-                
-                var rd = new Date($('#dateVendorReleaseDate').val());
+            $("#dateVendorReleaseDate").on("change", function() {
+                var rd = new Date($("#dateVendorReleaseDate").val());
                 var dd = new Date(rd.addDays(35));
                 //console.log(dd.formatDate(DateFormat));
-                $('#evalDate').html(dd.formatDate(DateFormat));
+                $("#evalDate").html(dd.formatDate(DateFormat));
             });
 
             //console.log(myPlatforms);
-            $('#evalDate').html(deadlineDate.formatDate(DateFormat));
+            $("#evalDate").html(deadlineDate.formatDate(DateFormat));
         }
 
         function updatePatchStatus(record) {
             if (viewModel.dataHubIsConnected()) {
                 dataHub.queryPatchUserAccountPlatformBusinessUnitUserAccountViews(record.PlatformID).done(function(records) {
-                    for (var i = 0; i < records.length; i++){
-                    
-                        var temp = { 'PatchID': record.ID, 'BusinessUnitID': records[i].BusinessUnitID, 'PatchStatusKey': 2  };
+                    for (var i = 0; i < records.length; i++) {
+                        var temp = {
+                            "PatchID": record.ID,
+                            "BusinessUnitID": records[i].BusinessUnitID,
+                            "PatchStatusKey": 2
+                        };
                         dataHub.addNewPatchStatus(temp);
-                        
                     }
-
-                    
-
-                    
                 });
             }
         }
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryDocumentDetailCount("Patch", sourceID).done(function (count) {
+                dataHub.queryDocumentDetailCount("Patch", sourceID).done(function(count) {
                     $("#documentCount" + sourceID).text(count.toString());
                 });
             }
@@ -206,8 +203,8 @@
             return element.text();
         }
 
-        $(window).resize(function () {
-            setTimeout(function () {
+        $(window).resize(function() {
+            setTimeout(function() {
                 $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
             }, 500);
         });
@@ -219,16 +216,17 @@
             if (count < 1)
                 initialMode = "/AddNew";
 
-            $("#manageDocumentsFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
-                "height": ($(document).height() - 150) + "px",
-                "width": "100%"
-            });
+            $("#manageDocumentsFrame")
+                .attr({
+                    "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                    "height": ($(document).height() - 150) + "px",
+                    "width": "100%"
+                });
 
             $("#manageDocumentsDialog").modal("show");
         }
 
-        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function() {
             // Refresh page counts after editing tasks
             viewModel.queryPageRecords();
 
@@ -236,18 +234,54 @@
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
 
-        $(viewModel).on("beforeSave", function (event, observableRecord) {
-            var rd = new Date($('#dateVendorReleaseDate').val());
+        var lastPatchID = 0;
+        var selectedFiles;
+
+        $(viewModel).on("beforeSave", function(event, observableRecord) {
+            var rd = new Date($("#dateVendorReleaseDate").val());
             var dd = new Date(rd.addDays(35));
             observableRecord.EvaluationDeadline = dd.formatDate(DateFormat);
-            observableRecord.PlatformID = $('#platfromIDSelection').val();
+            observableRecord.PlatformID = $("#platformIDSelction").val();
+            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
         });
 
-        $(function () {
-            $('label#inputAlarmCriticalDays').hide();
-            $('#inputAlarmCriticalDays').hide();
+        $(viewModel).on("recordSaved", function(event, record, newRecord) {
+            if (newRecord && selectedFiles.length > 0 && viewModel.dataHubIsConnected()) {
+                dataHub.getLastPatchID().done(function(patchID) {
+                    lastPatchID = patchID;
 
+                    for (var i = 0; i < selectedFiles.length; i++) {
+                        $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
+                    }
+
+                    $("#uploadFiles").fileinput("upload");
+                });
+            }
+        });
+
+        $(function() {
+            $("label#inputAlarmCriticalDays").hide();
+            $("#inputAlarmCriticalDays").hide();
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+            $("#addNewEditDialog").on("shown.bs.modal", function() {
+                // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
+                dismissButtons.prop("disabled", true);
+                dismissButtons.invisible();
+
+                $("#uploadFiles").fileinput({
+                    uploadUrl: "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=PatchDocument&SourceField=PatchID"))",
+                    uploadAsync: true,
+                    showUpload: false,
+                    showRemove: true,
+                    showPreview: false,
+                    minFileCount: 1,
+                    maxFileCount: 12,
+                    uploadExtraData: function() {
+                        return { SourceID: lastPatchID };
+                    }
+                });
+            });
         });
     </script>
 }

@@ -486,7 +486,9 @@ function renderHotLinks(sourceText, target) {
     if (target === undefined)
         target = "_blank";
 
-    var replacedText;
+    sourceText = sourceText.toString();
+
+    var replacedText;    
 
     // URLs starting with http://, https://, or ftp://
     const replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;

@@ -229,21 +229,27 @@
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
 
-        var lastPatchID = 0;
+        const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=PatchDocument&SourceField=PatchID"))";
         var selectedFiles;
 
         $(viewModel).on("beforeSave", function(event, observableRecord) {
+            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
             var rd = new Date($("#dateVendorReleaseDate").val());
             var dd = new Date(rd.addDays(35));
             observableRecord.EvaluationDeadline = dd.formatDate(DateFormat);
             observableRecord.PlatformID = $("#platformIDSelction").val();
-            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
         });
 
         $(viewModel).on("recordSaved", function(event, record, newRecord) {
             if (newRecord && selectedFiles.length > 0 && viewModel.dataHubIsConnected()) {
                 dataHub.getLastPatchID().done(function(patchID) {
-                    lastPatchID = patchID;
+                    $("#uploadFiles").fileinput({
+                        uploadUrl: fileUploadUrl,
+                        uploadAsync: true,
+                        uploadExtraData: function() {
+                            return { SourceID: patchID };
+                        }
+                    });
 
                     for (var i = 0; i < selectedFiles.length; i++) {
                         $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
@@ -265,16 +271,13 @@
                 dismissButtons.invisible();
 
                 $("#uploadFiles").fileinput({
-                    uploadUrl: "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=PatchDocument&SourceField=PatchID"))",
+                    uploadUrl: fileUploadUrl,
                     uploadAsync: true,
                     showUpload: false,
                     showRemove: true,
                     showPreview: false,
                     minFileCount: 1,
-                    maxFileCount: 12,
-                    uploadExtraData: function() {
-                        return { SourceID: lastPatchID };
-                    }
+                    maxFileCount: 12
                 });
             });
         });

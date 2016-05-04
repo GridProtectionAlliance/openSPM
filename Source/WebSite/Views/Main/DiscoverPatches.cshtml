@@ -172,7 +172,7 @@
                 initialMode = "/AddNew";
 
             $("#manageDocumentsFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=DiscoveryResult&SourceField=DiscoveryResultID&SourceID=" + record.DiscoveryResultID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=DiscoveryResult&SourceField=DiscoveryResultID&SourceID=" + record.DiscoveryResultID + "&Name=" + encodeURIComponent(record.Name),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
         });

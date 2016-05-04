@@ -217,6 +217,7 @@
     <Compile Include="Model\BusinessUnitUserAccountDetail.cs" />
     <Compile Include="Model\ClosedPatch.cs" />
     <Compile Include="Model\ClosedPatchDocument.cs" />
+    <Compile Include="Model\ClosingReviewView.cs" />
     <Compile Include="Model\DiscoveryResultDocument.cs" />
     <Compile Include="Model\DiscoveryResult.cs" />
     <Compile Include="Model\DocumentDetail.cs" />
@@ -350,6 +351,7 @@
     <Content Include="Images\Menu\userGroup.png" />
     <Content Include="Images\openSPM.png" />
     <Content Include="Images\openSPM2.png" />
+    <Content Include="Images\patchexplosion2.PNG" />
     <Content Include="Images\ProcessSteps\Large\1settings.png" />
     <Content Include="Images\ProcessSteps\Large\2check.png" />
     <Content Include="Images\ProcessSteps\Large\3new.png" />

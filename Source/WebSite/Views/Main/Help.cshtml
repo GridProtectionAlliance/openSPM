@@ -90,7 +90,9 @@
                 <p class="image-wrap">
                     <div>
                         From time-to-time, typically weekly, the PIC will review each patch source in openSPM and document that these sources have been
-                        checked for new patch availability.   OpenSPM will log the time that this source/vendor was checked.
+                        checked for new patch availability. OpenSPM will log the time that this source/vendor was checked and the outcome of this discovery
+                        by clicking on the "Record" button. Following "Record" the PIC can optionally attach documents that might be useful to either:
+                        (1) assist in the documentation of compliance or (2) be of value in the creation of "candidate security patches".
                     </div>
             </p></td>
         </tr>
@@ -99,17 +101,26 @@
             <td ><img src="~/Images/ProcessSteps/Small/3new.png" class="image-wrap"/>
                 <p class="image-wrap">
                     <div>
-                        As new candidate security patches are discovered in Step 2, the PIC assigns the patch a corporate ID number and adds (copy and pastes)
-                        the patch information from the vendor web site into openSPM.  The minimum required information for entry of a new patch is:
+                        After new candidate security patches are discovered in Step 2, the PIC assigns the patch a corporate ID number and adds (copy and pastes)
+                        the patch information from the vendor web site into openSPM by clicking on the "Record" button.  The minimum required information for entry of a new patch is:
                     </div>
                     <ul class="image-wrap small">
                         <li>Corporate patch tracking number of the form "TVA-yymm-nnn"</li>
-                        <li>Vendor / Source (from drop-down menu)</li>
+                        <li>Vendor / Source (from a drop-down list)</li>
                         <li>Vendor patch tracking ID</li>
                         <li>Patch title (80 characters max)</li>
                         <li>Vendor patch release date (this is used as the default start date for the 35-day period allowed for assessment)</li>
-                        <li>Platform (one or more are selected) that directs the patch to one or more SMEs for assessment for their BU.</li>
+                        <li>A Platform (from a drop-down list) that directs the patch to one or more SMEs for assessment on behalf of their BU. Note: Since the
+                            tracking number is specific
+                            to the SME-BU-Platform association, in the cases where a patch applies to multiple platforms then a new "candidate security patch"
+                            must be created for each applicable platform.
+                        </li>
                     </ul>
+                    <div>
+                        Once the candidate security patch is entered it can be edited and refined by .... When ready, it the PIC notifies SME's in one or more
+                        BU's that they have a patch available for assessment by clicking on the blue "submit" button. Documents can be attached to the patch
+                        after clicking on "Record" and prior to submission.  
+                    </div>
                     <div>
                         As much information as is available from the vendor should be added to define the patch.  Fields are provided in the openSPM patch
                         entry from for this additional information.  Documents, such as PDFs, can be attached if they available from the vendor.
@@ -148,7 +159,7 @@
                     <div> The minimum required information that must be entered as part of the assessment is one of three “Assessment Results”:</div>
                     <ul class="image-wrap small">
                         <li>Install the patch</li>
-                        <li>Develop a mitigation plan (which includes patching some, but not all, devices)</li>
+                        <li>Develop a mitigation plan (which can include patching some, but not all, devices)</li>
                         <li>Declaring that patch is NOT an applicable security patch for this BU</li>
                     </ul>
                     <div>

@@ -21,28 +21,29 @@
 //
 //*****************************************************************************************************@
 @model openSPM.Model.AppModel
-<div class="alert alert-danger" role="alert">These system settings control application appearance and behavior - edit with care.</div>
+<div class="alert alert-danger" role="alert">These system settings control application appearance and behavior</div>
 <p>
     By clicking on the menu items to the left, the following system elements can be configured:
 </p>
-<ol>
+<ul>
     <li>
-        The <b>System Pages</b>. This is the list of pages that are configured in the system. You can edit pages to control it's title, page location,
+        <b>Settings</b> - Click here to go back to the main settings page.<br /><br />
+    </li>
+    
+    <li>
+        <b>System Pages</b> - This is the list of pages that are configured in the system. You can edit pages to control it's title, page location,
         server and client key/value pair configuration, as well as included and excluded roles that will control if a page is allowed to show up in a
-        menu based on a user's defined roles.
-        <em>Note that adding a new MVC based page will require a route be placed into the corresponding view controller.</em>
+        menu based on a user's defined roles. <em>Note that adding a new MVC based page will require a route be placed into the corresponding view controller.</em><br /><br />
     </li>
     <li>
-        The <b>System Menus</b>. This is the list of menus that are defined in the system. You can edit the menu details as well as control the
+        <b>System Menus</b> - This is the list of menus that are defined in the system. You can edit the menu details as well as control the
         menu items (i.e., the <em>system pages</em> or external links) that will appear in the menu. For each menu item you can edit the image,
-        menu item text and the order of items for the menu.
+        menu item text and the order of items for the menu.<br /><br />
     </li>
     <li>
-        The <b>System Value Lists</b>. This is the list of enumerations and values defined for the system that most often appear in drop-downs through-out
+        <b>System Value Lists</b> - This is the list of enumerations and values defined for the system that most often appear in drop-downs through-out
         the system. You can edit the value list group details as well as control the list items that will appear in the group. For each value item you can
-        edit the primary key value and various enumeration options for the list item as well as its sort order.
+        edit the primary key value and various enumeration options for the list item as well as its sort order.<br /><br />
     </li>
-</ol>
-<p>
-    Click on "Settings" to go back to the primary <i>open</i>SPM settings.
-</p>
+</ul>
+

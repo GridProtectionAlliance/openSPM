@@ -38,6 +38,8 @@ using GSF.Security;
 using GSF.Web.Model;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.AspNet.SignalR.Json;
+using Newtonsoft.Json;
 using openSPM.Model;
 
 namespace openSPM
@@ -118,6 +120,14 @@ namespace openSPM
                 foreach (KeyValuePair<string, string> item in dataContext.LoadDatabaseSettings("layout.setting"))
                     global.LayoutSettings.Add(item.Key, item.Value);
             }
+
+            // Modify the JSON serializer to serialize dates as UTC -
+            // otherwise, timezone will not be appended to date strings
+            // and browsers will select whatever timezone suits them
+            JsonSerializerSettings settings = JsonUtility.CreateDefaultSerializerSettings();
+            settings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+            JsonSerializer serializer = JsonSerializer.Create(settings);
+            GlobalHost.DependencyResolver.Register(typeof(JsonSerializer), () => serializer);
         }
 
         /// <summary>

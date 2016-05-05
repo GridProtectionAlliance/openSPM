@@ -62,6 +62,7 @@
         new[] { null, "Vendor", "text-center valign-middle" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
+        new[] { "IsExpedited", "Expedite", "text-center"},
         new[] { null, "Action", "text-center valign-middle" },
         new[] { null, "Documents", "text-center valign-middle" }
     };
@@ -101,6 +102,7 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupVendorName(lookupPatchVendorID(PatchID))"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
+    <td width="5%" class="text-center valign-middle"><span data-bind="visible: IsExpedited" class="glyphicon glyphicon-check"></span></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: beginAssessment.bind($data)">Assess</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(PatchStatusID, PatchID, $($element)), attr: {id: 'documentCount' + PatchStatusID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
@@ -163,7 +165,7 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
 @section Scripts {
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "VendorReleaseDate", 2))
+        @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "-IsExpedited", 2))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))

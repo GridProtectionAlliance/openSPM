@@ -278,6 +278,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult VendorView()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "VendorView", ViewBag);
+            return View();
+        }
+
 
         #endregion
     }

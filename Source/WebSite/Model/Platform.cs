@@ -58,5 +58,10 @@ namespace openSPM.Model
 
         public DateTime DatePlatformEnrolled { get; set; }
         public DateTime? DatePlatformRetired { get; set; }
+
+        public string Notes { get; set; }
+
+        public DateTime? DeletedON { get; set; }
+        public Guid? DeletedByID { get; set; }
     }
 }

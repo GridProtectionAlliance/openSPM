@@ -22,6 +22,7 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -364,12 +365,25 @@ namespace openSPM
             return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
+      
+        public IEnumerable<Vendor> QueryOneVendor(int id)
+        {
+           return m_dataContext.Table<Vendor>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
+        }
+
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Vendor), RecordOperation.DeleteRecord)]
         public void DeleteVendor(int id)
         {
             // For Vendors, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE Vendor SET IsDeleted=1 WHERE ID={0}", id);
+            Vendor v = m_dataContext.Table<Vendor>().LoadRecord(id);
+            if (v.IsDeleted == false)
+            {
+                v.DeletedByID = GetCurrentUserID();
+                v.DeletedON = DateTime.UtcNow;
+                v.IsDeleted = true;
+                m_dataContext.Table<Vendor>().UpdateRecord(v);
+            }
         }
 
         [RecordOperation(typeof(Vendor), RecordOperation.CreateNewRecord)]
@@ -425,8 +439,14 @@ namespace openSPM
         public void DeletePlatform(int id)
         {
             // For Platforms, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE Platform SET DatePlatformRetired={0} WHERE ID={1}", DateTime.UtcNow, id);
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE Platform SET IsDeleted=1 WHERE ID={0}", id);
+            Platform platform = m_dataContext.Table<Platform>().LoadRecord(id);
+            if (platform.IsDeleted == false)
+            {
+                platform.DeletedByID = GetCurrentUserID();
+                platform.DeletedON = DateTime.UtcNow;
+                platform.IsDeleted = true;
+                m_dataContext.Table<Platform>().UpdateRecord(platform);
+            }
         }
 
         [RecordOperation(typeof(Platform), RecordOperation.CreateNewRecord)]
@@ -548,8 +568,16 @@ namespace openSPM
         public void DeleteBusinessUnit(int id)
         {
             // For BusinessUnits, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE BusinessUnit SET IsDeleted=1 WHERE ID={0}", id);
+            BusinessUnit bu = m_dataContext.Table<BusinessUnit>().LoadRecord(id);
+            if (bu.IsDeleted == false)
+            {
+                bu.DeletedByID = GetCurrentUserID();
+                bu.DeletedON = DateTime.UtcNow;
+                bu.IsDeleted = true;
+                m_dataContext.Table<BusinessUnit>().UpdateRecord(bu);
+            }
         }
+
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.CreateNewRecord)]
         public BusinessUnit NewBusinessUnit()
@@ -1183,7 +1211,15 @@ namespace openSPM
         public void DeleteMitigationPlan(int id)
         {
             // For MitigationPlanes, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE MitigationPlan SET IsDeleted=1 WHERE ID={0}", id);
+            MitigationPlan mp = m_dataContext.Table<MitigationPlan>().LoadRecord(id);
+            if(mp.IsDeleted == false)
+            {
+                mp.DeletedByID = GetCurrentUserID();
+                mp.DeletedON = DateTime.UtcNow;
+                mp.IsDeleted = true;
+                m_dataContext.Table<MitigationPlan>().UpdateRecord(mp);
+            }
+            
         }
 
         [RecordOperation(typeof(MitigationPlan), RecordOperation.CreateNewRecord)]

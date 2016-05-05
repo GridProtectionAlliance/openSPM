@@ -33,8 +33,7 @@
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
-    int discoveryWarningDays, discoveryAlarmDays, discoveryCriticalAlarmDays, discoveryViolationDays;
-    string setting;
+    string value, statusLightsImagePath;
 
     const string noneImage = "greenlight.png";
     const string warningImage = "yellowlight.png";
@@ -42,34 +41,23 @@
     const string criticalAlarmImage = "redlight.png";
     const string violationImage = "blacklight.png";
 
+    ViewBag.alarmDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = 16")).ToArray());
+
+    if (!appSettings.TryGetValue("statusLightsImagePath", out value))
+    {
+        statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+        statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
+    }
+    else
+    {
+        statusLightsImagePath = value;
+    }
+
     ViewBag.AssessActions = dataContext.Table<ValueList>().QueryRecords("[Key] AsC", restriction: new RecordRestriction("GroupID = 6")).ToArray();
     ViewBag.AssessActionCount = dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = 6"));
 
 
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
-    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
-
-    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays))
-    {
-        discoveryWarningDays = 7;
-    }
-
-    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays))
-    {
-        discoveryAlarmDays = 14;
-    }
-
-    if (!appSettings.TryGetValue("discoveryCriticalAlarmDays", out setting) || !int.TryParse(setting, out discoveryCriticalAlarmDays))
-    {
-        discoveryCriticalAlarmDays = 21;
-    }
-
-    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays))
-    {
-        discoveryViolationDays = 35;
-    }
-
-
+   
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
 {   //    { "Field", "Label", "Classes" }
@@ -162,7 +150,7 @@
 @helper BodyRows()
 {
 
-    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
+    <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: VendorPatchName"></div></td>
@@ -224,7 +212,7 @@
                     <div class="form-control" id="patchnamemit"></div>
                     <label for="businessunitmit">Business Unit</label>
                     <div class="form-control" id="businessunitmit"></div>
-                    <label for="platformmit">Platform</label>
+                    <label for="platformmit">Product</label>
                     <div id="platformmit" class="form-control"></div>
                     <label for="miplanown">Mitigation Plan Owner</label>
                     <input id="miplanown" class="form-control" />                  
@@ -319,7 +307,7 @@
 
         function addMitigation(data) {
             var mitplan = {'Title': data.VendorPatchName, 'BusinessUnitID': data.BusinessUnitID, 'ThemeID': 13, 'Field1': $('#miplanown').val(), 'Field2': data.PlatformName, 'Field3': $('#summarymit').val()};
-           
+
 
             if (viewModel.dataHubIsConnected) {
                 dataHub.addNewMiPlan(mitplan).done(function() {
@@ -334,10 +322,10 @@
 
                     });
 
-                    
+
 
                 });
-                
+
             }
         }
 
@@ -351,36 +339,42 @@
             $('#saveAssessmentButton').one('click', function() { updateAssessment(record)});
         }
 
-        
+
         function updateAssessment(data) {
             data.AssessmentResultKey = $('#assessmentSelect').val();
             data.Details = $('#assdetails').val();
-            
+
             if (viewModel.dataHubIsConnected) {
-                dataHub.updateAssessment(data).done(function () {        
+                dataHub.updateAssessment(data).done(function () {
                     $(window).trigger("initiatedInstall");
                 });
             }
         }
 
-        function getDiscoveryStatusImage(element, record) {
-            const daysSinceLastReview = (new Date()).daysBetween(record.CreatedOn.toDate());
-            var image, title;
+        function getStatusImage(element, record) {
 
+            var alarmDayLimits = @Html.Raw(ViewBag.alarmDayLimits);
+            const critcalAlarmDays = alarmDayLimits[0].Value;
+            const warningDays = alarmDayLimits[1].Value;
+            const alarmDays = alarmDayLimits[2].Value;
+            const violationDays = alarmDayLimits[3].Value;
+            const daysUntilDeadline =  violationDays + (record.CreatedOn.toDate()).daysBetween(new Date());
+
+            var image, title;
             switch (true) {
-                case (daysSinceLastReview >= @discoveryViolationDays):
+                case (daysUntilDeadline <= violationDays - violationDays):
                     image = "@violationImage";
                     title = "Violation";
                     break;
-                case (daysSinceLastReview >= @discoveryCriticalAlarmDays):
+                case (daysUntilDeadline <= violationDays - critcalAlarmDays):
                     image = "@criticalAlarmImage";
                     title = "Critical Alarm";
                     break;
-                case (daysSinceLastReview >= @discoveryAlarmDays):
+                case (daysUntilDeadline <= violationDays - alarmDays):
                     image = "@alarmImage";
                     title = "Alarm";
                     break;
-                case (daysSinceLastReview >= @discoveryWarningDays):
+                case (daysUntilDeadline <= violationDays - warningDays):
                     image = "@warningImage";
                     title = "Warning";
                     break;

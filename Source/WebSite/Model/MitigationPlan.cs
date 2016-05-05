@@ -75,5 +75,8 @@ namespace openSPM.Model
         public Guid UpdatedByID { get; set; }
 
         public bool IsMitigated { get; set; }
+
+        public DateTime? DeletedON { get; set; }
+        public Guid? DeletedByID { get; set; }
     }
 }

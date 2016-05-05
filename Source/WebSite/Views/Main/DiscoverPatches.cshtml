@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using GSF
+@using GSF.Data.Model
 @using GSF.Web.Model
 @using openSPM.Model
 @model AppModel
@@ -30,35 +31,31 @@
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
-    int discoveryWarningDays, discoveryAlarmDays, discoveryViolationDays;
-    string setting;
+    string statusLightsImagePath;
+    string value;
 
     const string okImage = "greenlight.png";
     const string warningImage = "yellowlight.png";
     const string alarmImage = "redlight.png";
     const string violationImage = "blacklight.png";
 
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
-    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays))
+    ViewBag.discoveryDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = 15")).ToArray());
+
+    if (!appSettings.TryGetValue("statusLightsImagePath", out value))
     {
-        discoveryWarningDays = 7;
+        statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+        statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
+    }
+    else
+    {
+        statusLightsImagePath = value;
     }
 
-    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays))
-    {
-        discoveryAlarmDays = 21;
-    }
-
-    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays))
-    {
-        discoveryViolationDays = 35;
-    }
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
-    {   //    { "Field", "Label", "Classes" }
+{   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "Name", "Vendor", "text-center" },
         new[] { "Company", "Full Corporate Name", "text-left" },
@@ -72,6 +69,8 @@
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.AddNewEditTitle = "Vendor Details";
+    ViewBag.CanEdit = false;
 }
 @helper BodyRows()
 {
@@ -81,21 +80,50 @@
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: addNewDiscoveryResult.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(DiscoveryResultID, $($element)), attr: {id: 'documentCount' + DiscoveryResultID}">0</span></button></td>
-    @*
-    <td width="5%" class="text-center valign-middle" nowrap>
+    
+    @*<td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()" title="Only the latest discovered patch will be deleted..."><span class="glyphicon glyphicon-remove"></span></button>
-    </td>
-    *@
+    </td>*@
+    
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-4">
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Name", initialFocus: true))
+            @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("VendorTypeKey", "vendorType"))
+            @Html.Raw(dataContext.AddInputField<Vendor>("PatchCadence"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Abbreviation"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Company"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Link", "url"))
+            @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Description", 5))
+            @Html.Raw(dataContext.AddCheckBoxField<LatestVendorDiscoveryResult>("Enabled"))
+        </div>
+        <div class="col-md-4">
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Address1"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Address2"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("City"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("State"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ZIP"))
+            @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("NoticeMethodKey", "noticeMethod"))
+            @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("VendorNotes", 4))
+        </div>
+        <div class="col-md-4">
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactName1"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactEmail1"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneOfc1"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneCell1"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactName2"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactEmail2"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneOfc2"))
+            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneCell2"))
+        </div>
+        @*<div class="col-md-12">
             @Html.Raw(dataContext.AddDateField<LatestVendorDiscoveryResult>("ReviewDate"))
             @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
             @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Notes", 4))
-        </div>
+        </div>*@
     </div>
     <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
         <div class="col-md-12">
@@ -105,6 +133,8 @@
             </div>
         </div>
     </div>
+
+
 }
 @Html.Partial("PagedViewModel")
 
@@ -126,6 +156,7 @@
         @Html.Raw(Model.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
 
         var currentVendorID = 0;
+      
 
         function addNewDiscoveryResult(record) {
             currentVendorID = record.VendorID;
@@ -136,10 +167,11 @@
             // Make sure new records get assigned current vendor ID
             newRecord.VendorID = currentVendorID;
         });
+        var discoveryDays = @Html.Raw(ViewBag.discoveryDayLimits);
 
-        const discoveryWarningDays = @discoveryWarningDays;
-        const discoveryAlarmDays = @discoveryAlarmDays;
-        const discoveryViolationDays = @discoveryViolationDays;
+        const discoveryWarningDays = discoveryDays[0].Value;
+        const discoveryAlarmDays = discoveryDays[1].Value;
+        const discoveryViolationDays = discoveryDays[2].Value;
 
         function getDiscoveryStatusImage(element, record) {
             const daysSinceLastReview = (new Date()).daysBetween(record.ReviewDate.toDate());
@@ -228,7 +260,7 @@
                 });
             }
         });
-        
+
         $(function () {
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#addNewEditDialog").on("shown.bs.modal", function() {

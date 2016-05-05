@@ -503,6 +503,8 @@
     <Content Include="Views\Main\ActivePatches.cshtml" />
     <Content Include="Views\Main\AssessmentInstallView.cshtml" />
     <Content Include="Views\Main\AssessmentMitigateView.cshtml" />
+    <Content Include="Views\Settings\Product.cshtml" />
+    <Content Include="Views\Main\VendorView.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

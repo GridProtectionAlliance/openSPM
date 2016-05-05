@@ -36,7 +36,7 @@
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
-    ViewBag.AddNewEditTitle = "Platform";
+    ViewBag.AddNewEditTitle = "Product";
 }
 @helper BodyRows()
 {
@@ -47,7 +47,7 @@
 
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && !IsDeleted && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
 @helper AddNewEditDialog(DataContext dataContext)
@@ -63,5 +63,6 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Platform>(ViewBag))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name"))
+
     </script>
 }

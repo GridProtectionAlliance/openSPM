@@ -120,6 +120,10 @@ namespace openSPM.Model
 
         public string Notes { get; set; }
 
+        [Label("Patch Cadence")]
+        [StringLength(20)]
+        public string PatchCadence { get; set; }
+
         [InitialValue("true")]
         public bool Enabled { get; set; }
 
@@ -132,5 +136,8 @@ namespace openSPM.Model
         public DateTime CreatedOn { get; set; }
 
         public Guid CreatedByID { get; set; }
+
+        public DateTime? DeletedON { get; set; }
+        public Guid? DeletedByID { get; set; }
     }
 }

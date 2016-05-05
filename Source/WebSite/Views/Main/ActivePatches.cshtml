@@ -29,7 +29,7 @@
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
-    string setting;
+    string value, statusLightsImagePath;
 
     const string noneImage = "greenlight.png";
     const string warningImage = "yellowlight.png";
@@ -37,11 +37,21 @@
     const string criticalAlarmImage = "redlight.png";
     const string violationImage = "blacklight.png";
 
+    ViewBag.alarmDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = 16")).ToArray());
+
+    if (!appSettings.TryGetValue("statusLightsImagePath", out value))
+    {
+        statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+        statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
+    }
+    else
+    {
+        statusLightsImagePath = value;
+    }
+
+
     ViewBag.AssessActions = dataContext.Table<ValueList>().QueryRecords("[Key] AsC",restriction: new RecordRestriction("GroupID = 6")).ToArray();
     ViewBag.AssessActionCount = dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = 6"));
-
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
-    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -189,32 +199,38 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
                     dataHub.updatePatchStatusKey(data.PatchStatusID, data.PatchStatusKey).done(function() {
                         $(window).trigger("assessmentMade");
                     });
-                    
+
                 });
             }
         }
 
         function getStatusImage(element, record) {
+
+            var alarmDayLimits = @Html.Raw(ViewBag.alarmDayLimits);
+            const critcalAlarmDays = alarmDayLimits[0].Value;
+            const warningDays = alarmDayLimits[1].Value;
+            const alarmDays = alarmDayLimits[2].Value;
+            const violationDays = alarmDayLimits[3].Value;
             const daysUntilDeadline = (record.EvaluationDeadline.toDate()).daysBetween(new Date());
+
             var image, title;
             switch (true) {
-                case (daysUntilDeadline > 14 && daysUntilDeadline <= 21):
-                    image = "@warningImage";
-                    title = "Warning";
-                    break;
-                case (daysUntilDeadline > 7 && daysUntilDeadline <= 14):
-                    image = "@alarmImage";
-                    title = "Alarm";
-                    break;
-                case (daysUntilDeadline > 0 && daysUntilDeadline <= 7):
-                    image = "@criticalAlarmImage";
-                    title = "Critical Alarm";
-                    break;
-                case (daysUntilDeadline <= 0):
+                case (daysUntilDeadline <= violationDays - violationDays):
                     image = "@violationImage";
                     title = "Violation";
                     break;
-
+                case (daysUntilDeadline <= violationDays - critcalAlarmDays):
+                    image = "@criticalAlarmImage";
+                    title = "Critical Alarm";
+                    break;
+                case (daysUntilDeadline <= violationDays - alarmDays):
+                    image = "@alarmImage";
+                    title = "Alarm";
+                    break;
+                case (daysUntilDeadline <= violationDays - warningDays):
+                    image = "@warningImage";
+                    title = "Warning";
+                    break;
                 default:
                     image = "@noneImage";
                     title = "OK";

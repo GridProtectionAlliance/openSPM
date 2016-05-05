@@ -98,7 +98,14 @@ namespace openSPM.Controllers
 
         public ActionResult Platforms()
         {
-            m_appModel.ConfigureView<Platform>(Url.RequestContext, "Settings.Platforms", ViewBag);
+            m_appModel.ConfigureView<Platform>(Url.RequestContext, "Settings.Products", ViewBag);
+            return View();
+
+        }
+
+        public ActionResult Product()
+        {
+            m_appModel.ConfigureView<Platform>(Url.RequestContext, "Settings.Products", ViewBag);
             return View();
         }
 

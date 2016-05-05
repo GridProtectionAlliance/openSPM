@@ -1,0 +1,101 @@
+﻿@*******************************************************************************************************
+    //  VendorView.cshtml - Gbtc
+    //
+    //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+    //
+    //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+    //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+    //  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+    //  file except in compliance with the License. You may obtain a copy of the License at:
+    //
+    //      http://opensource.org/licenses/MIT
+    //
+    //  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+    //  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+    //  License for the specific language governing permissions and limitations.
+    //
+    //  Code Modification History:
+    //  ----------------------------------------------------------------------------------------------------
+    //  02/27/2016 - Ritchie Carroll
+    //       Generated original version of source code.
+    //
+    //*****************************************************************************************************@
+@using GSF.Data.Model
+@using GSF.Web.Model
+@using openSPM.Model
+@model openSPM.Model.AppModel
+@{
+    DataContext dataContext = Model.DataContext;
+    ViewBag.VendorRecord = Json.Encode(dataContext.Table<Vendor>().QueryRecords(restriction: new RecordRestriction("ID = {0}", 1)));
+
+
+}
+<script src="~/Scripts/jquery-2.2.1.js"></script>
+
+<script src="~/Scripts/bootstrap.min.js"></script>
+<script src="~/Scripts/ie10-viewport-bug-workaround.js"></script>
+<script src="~/Scripts/respond.js"></script>
+<script src="~/Scripts/bootstrap-datepicker.min.js"></script>
+<script src="~/Scripts/bootstrap-toolkit.min.js"></script>
+
+<script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+
+<script src="~/Scripts/gsf.web.client.js"></script>
+
+
+<script src="~/signalr/hubs"></script>
+<script src="~/Scripts/Site.js"></script>
+
+<script src="~/Scripts/knockout-3.4.0.debug.js"></script>
+<script src="~/Scripts/knockout.mapping-latest.debug.js"></script>
+<script src="~/Scripts/knockout.validation.min.js"></script>
+<script src="~/Scripts/ko-reactor.min.js"></script>
+<script src="~/Scripts/ko.observableDictionary.js"></script>
+<script src="~/Scripts/js.cookie.js"></script>
+<div  data-bind="with: vendorRecord">
+   
+    <div class="col-md-4">
+        @Html.Raw(dataContext.AddInputField<Vendor>("Name", initialFocus: true))
+        @Html.Raw(Model.AddValueListSelectField<Vendor>("VendorTypeKey", "vendorType"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Abbreviation"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Company"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Link", "url"))
+        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Description", 5))
+        @Html.Raw(dataContext.AddCheckBoxField<Vendor>("Enabled"))
+    </div>
+    <div class="col-md-4">
+        @Html.Raw(dataContext.AddInputField<Vendor>("Address1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("Address2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("City"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("State"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ZIP"))
+        @Html.Raw(Model.AddValueListSelectField<Vendor>("NoticeMethodKey", "noticeMethod"))
+        @Html.Raw(dataContext.AddTextAreaField<Vendor>("Notes", 4))
+    </div>
+    <div class="col-md-4">
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactName1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactEmail1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneOfc1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneCell1"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactName2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactEmail2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneOfc2"))
+        @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneCell2"))
+    </div>
+</div>
+    
+
+
+<script>
+    
+    var array = (@Html.Raw(ViewBag.VendorRecord) );
+    console.log(array[0]);
+    @*function VendorViewModel() {
+        var self = this;
+        self.currentRecord = ko.observableArray(@Html.Raw(Json.Encode(ViewBag.VendorRecord)));
+    }*@
+
+    ko.applyBindings( vendorRecord = array[0]);
+
+</script>
+

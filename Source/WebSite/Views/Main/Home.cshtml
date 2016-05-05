@@ -21,6 +21,7 @@
     //
     //*****************************************************************************************************@
 @using GSF
+@using GSF.Data.Model
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
@@ -29,21 +30,27 @@
     // use direct database calls, e.g., dataContect.Connection.RetrieveData(...) or you
     // can use model based table operations, e.g., dataContext.Table<Page>().LoadRecord(id)
     DataContext dataContext = Model.DataContext;
-
-
-    string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
-    statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
-
-
+    Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
+    string value, statusLightsImagePath;
 
     const string noneImage = "greenlight.png";
-    const string dueImage = "yellowlight.png";
-    const string pastDueImage = "redlight.png";
-    const string amberImage = "amberlight.png";
-    const string completedImage = "blacklight.png";
-    const string pendingImage = "magentalight.png";
-    const string deferredImage = "bluelight.png";
-    const string waitingImage = "greylight.png";
+    const string warningImage = "yellowlight.png";
+    const string alarmImage = "amberlight.png";
+    const string criticalAlarmImage = "redlight.png";
+    const string violationImage = "blacklight.png";
+
+    ViewBag.alarmDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = 16")).ToArray());
+
+    if (!appSettings.TryGetValue("statusLightsImagePath", out value))
+    {
+        statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
+        statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
+    }
+    else
+    {
+        statusLightsImagePath = value;
+    }
+
 }
 <script src="~/Scripts/jquery-2.2.1.js"></script>
 
@@ -253,7 +260,7 @@
 
         <tbody data-bind="foreach: alarms">
         <tr>
-            <td align="left" width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
+            <td align="left" width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
             <td align="right" data-bind="text: dateFixer(VendorReleaseDate)">&nbsp;&nbsp;</td>
             <td align="center" data-bind="text: lookupPatchstatusValue(PatchStatusKey)"></td>
             <td align="center" data-bind="text: PatchMnemonic"></td>
@@ -267,7 +274,7 @@
     <tr><td colspan="3" align="left"><b>Patches Added Today</b></td></tr>
     <tr>
         <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
-        <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;Platform&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+        <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;Product&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
         <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;Vendor&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
     </tr>
     <tbody data-bind="foreach: patches">
@@ -319,37 +326,49 @@
         var newDate = new Date().setTime(str);
         var today = new Date();
         var ret = 35- ((today - newDate) / 1000 / 60 / 60 / 24).toFixed(0);
-    
+
         return ret;
     }
 
-    function getDiscoveryStatusImage(element, record) {
-        var image, title;
+    function getStatusImage(element, record) {
 
-        var daysUntilEnd = (dateFixer(record.VendorReleaseDate));
+            var alarmDayLimits = @Html.Raw(ViewBag.alarmDayLimits);
+            const critcalAlarmDays = alarmDayLimits[0].Value;
+            const warningDays = alarmDayLimits[1].Value;
+            const alarmDays = alarmDayLimits[2].Value;
+            const violationDays = alarmDayLimits[3].Value;
+            const daysUntilDeadline = (dateFixer(record.VendorReleaseDate));
 
-        switch (true) {
-        case (daysUntilEnd <= 0):
-            image = "@pastDueImage";
-            title = "Past Due";
-            break;
-        case (daysUntilEnd < 7):
-            image = "@dueImage";
-            title = "Due";
-            break;
-        default:
-            image = "@noneImage";
-            title = "Coming Due";
-            break;
+            var image, title;
+            switch (true) {
+                case (daysUntilDeadline <= violationDays - violationDays):
+                    image = "@violationImage";
+                    title = "Violation";
+                    break;
+                case (daysUntilDeadline <= violationDays - critcalAlarmDays):
+                    image = "@criticalAlarmImage";
+                    title = "Critical Alarm";
+                    break;
+                case (daysUntilDeadline <= violationDays - alarmDays):
+                    image = "@alarmImage";
+                    title = "Alarm";
+                    break;
+                case (daysUntilDeadline <= violationDays - warningDays):
+                    image = "@warningImage";
+                    title = "Warning";
+                    break;
+                default:
+                    image = "@noneImage";
+                    title = "OK";
+                    break;
+            }
 
+            element.attr("src", "@statusLightsImagePath" + image);
+            element.attr("alt", title);
+            element.attr("title", title);
+
+            return undefined;
         }
-
-        element.attr("src", "@statusLightsImagePath" + image);
-        element.attr("alt", title);
-        element.attr("title", title);
-
-        return undefined;
-    }
 
     function openModal(record) {
         //console.log(record);

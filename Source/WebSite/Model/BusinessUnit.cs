@@ -61,5 +61,8 @@ namespace openSPM.Model
         public DateTime CreatedOn { get; set; }
 
         public Guid CreatedByID { get; set; }
+
+        public DateTime? DeletedON { get; set; }
+        public Guid? DeletedByID { get; set; }
     }
 }

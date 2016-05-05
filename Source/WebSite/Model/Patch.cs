@@ -165,5 +165,8 @@ namespace openSPM.Model
         }
 
         public bool IsInitiated { get; set; }
+
+        [Label("Requires Expedited Attention")]
+        public bool IsExpedited { get; set; }
     }
 }

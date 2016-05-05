@@ -38,7 +38,7 @@
         new[] { null , "Vendor", "text-left valign-middle" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
-        new[] { null, "Action", "text-center valign-middle" },
+        //new[] { "IsExpedited", "Action", "text-center" },
         new[] { null, "Documents", "text-center valign-middle" }
     };
 
@@ -59,11 +59,11 @@
     <td width="20%" class="text-left valign-middle" data-bind="text: lookupVendorName(VendorID)"></td>
     <td width="20%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data), visible: !(IsInitiated)">Initiate</button></td>
+    @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data), visible: !(IsInitiated)">Initiate</button></td>*@
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && !IsDeleted && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
 @helper AddNewEditDialog(DataContext dataContext)
@@ -112,6 +112,7 @@
                     /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
                     /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
             }
+            @Html.Raw(dataContext.AddCheckBoxField<Patch>("IsExpedited"))
         </div>
     </div>
     <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
@@ -138,7 +139,7 @@
 @section Scripts {
     @Scripts.Render("~/js.bundle/fileinput")
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag, "ID", 0))
+        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag, "-IsExpedited"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
@@ -284,7 +285,31 @@
                     maxFileCount: 12
                 });
             });
-            console.log(new Date(new Date().setDate(new Date().getDate() + 35)));
+
+            $(viewModel).on("recordSaved", function(event, record) {
+                // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+                if (viewModel.dataHubIsConnected()) {
+                    dataHub.getLastPatchID().done(function(lastPatchID) {
+                        dataHub.queryPatchUserAccountPlatformBusinessUnitUserAccountViews(record.PlatformID).done(function(records) {
+                            for (var i = 0; i < records.length; i++) {
+                                var temp = {
+                                    "PatchID": lastPatchID,
+                                    "BusinessUnitID": records[i].BusinessUnitID,
+                                    "PatchStatusKey": 2
+                                };
+                                dataHub.addNewPatchStatus(temp);
+                        
+                            }
+
+                            dataHub.updatePatchInitatedFlag(record.ID).done(function() {
+                                $(window).trigger("initiatedPatch"); 
+                            });
+                        });
+                    });
+
+                    
+                }
+            });
         });
     </script>
 }

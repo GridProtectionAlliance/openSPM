@@ -157,36 +157,26 @@ namespace openSPM
         #region [ Patch Table Operations ]
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
-        public int QueryPatchCount(bool showDeleted, bool isInitiated)
+        public int QueryPatchCount(bool showDeleted)
         {
             if (showDeleted)
-            {
-                if (isInitiated)
-                    return m_dataContext.Table<Patch>().QueryRecordCount();
-                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsInitiated = 0"));
-
-            }
-
-            if (isInitiated)
-                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
-            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND IsInitiated = 0"));
+                return m_dataContext.Table<Patch>().QueryRecordCount();
+            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            
         }
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
-        public IEnumerable<Patch> QueryPatches(bool showDeleted, bool isInitiated, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Patch> QueryPatches(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
         {
             if (showDeleted)
-            {
-                if (isInitiated)
-                    return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
+            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+        }
 
-                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInitiated = 0"));
-            }
-                
-            if (isInitiated)
-                return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
-
-            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsInitiated = 0"));
+        public Patch QueryAPatch(int id)
+        {
+           
+            return m_dataContext.Table<Patch>().LoadRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]

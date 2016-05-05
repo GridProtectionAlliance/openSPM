@@ -89,10 +89,10 @@
             @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
             @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
             @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
-            <div class="form-group">
-                <label for="evalDate">Evaluation Deadline Date:</label>
-                <div id="evalDate" style="text-align: center; width: 40%; border-style: solid; border-color: red" data-bind="value: getEvalutationDeadlineDate()"></div>
-            </div>
+            @*<div style="border-style: solid; border-color: red">*@
+                @Html.Raw(dataContext.AddDateField<Patch>("EvaluationDeadline"))
+            @*</div>*@
+          
             @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
             @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
             <div class="form-group">
@@ -284,6 +284,7 @@
                     maxFileCount: 12
                 });
             });
+            console.log(new Date(new Date().setDate(new Date().getDate() + 35)));
         });
     </script>
 }

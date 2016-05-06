@@ -1554,6 +1554,25 @@ namespace openSPM
 
         #endregion
 
+        #region [VendorPlatformView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(VendorPlatformView), RecordOperation.QueryRecordCount)]
+        public int QueryVendorPlatformViewCount()
+        {
+            return m_dataContext.Table<VendorPlatformView>().QueryRecordCount();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(VendorPlatformView), RecordOperation.QueryRecords)]
+        public IEnumerable<VendorPlatformView> QueryVendorPlatformViews(int id)
+        {
+            return m_dataContext.Table<VendorPlatformView>().QueryRecords(restriction: new RecordRestriction("VendorID = {0}", id));
+        }
+
+        #endregion
+
+
         #region [ MiPlan Table Operations ]
 
         // NOTE: These hub operations directly operate on MiPlan database and will apply authorization rights in context

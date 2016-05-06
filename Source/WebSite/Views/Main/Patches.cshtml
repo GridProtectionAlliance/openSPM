@@ -42,7 +42,7 @@
         new[] { null, "Documents", "text-center valign-middle" }
     };
 
-    ViewBag.Platforms = Json.Encode(dataContext.Table<Platform>().QueryRecords().ToArray());
+    
     ViewBag.HideUnauthorizedControls = true;
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -97,7 +97,7 @@
             @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
             <div class="form-group">
                 <label for="platformIDSelction">Target Platform/Device:</label>
-                <select class="form-control" id="platformIDSelction" data-bind="options: myPlatforms, optionsText: 'nameandversion', optionsValue: 'ID' "></select>
+                <select class="form-control" id="platformIDSelction"></select>
             </div>
         </div>
         <div class="col-md-6">
@@ -144,17 +144,9 @@
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
+       
 
-        $(document).ready(function() {
-               
-        });
-
-        var myPlatforms = @Html.Raw(ViewBag.Platforms);
-
-        for (var i = 0; i < myPlatforms.length; ++i) {
-            myPlatforms[i].nameandversion = myPlatforms[i].Name + "/Version: " + myPlatforms[i].Version;
-        }
-
+        
         function getEvalutationDeadlineDate() {
             var releaseDate = new Date($("#dateVendorReleaseDate").val());
             var deadlineDate = new Date(releaseDate.addDays(35));
@@ -283,6 +275,23 @@
                     showPreview: false,
                     minFileCount: 1,
                     maxFileCount: 12
+                });
+
+                dataHub.queryVendorPlatformViews($('select#selectVendorID').val()).done(function(data) {
+                    $('#platformIDSelction').children().remove();
+                    $.each(data, function (key, val) {
+                        $('#platformIDSelction').append(new Option(val.NameVersion, val.ID));
+                    });
+                }); 
+
+                $('select#selectVendorID').on("change",function(event, handler) {
+                    dataHub.queryVendorPlatformViews($('select#selectVendorID').val()).done(function(data) {
+                        $('#platformIDSelction').children().remove();
+                        $.each(data, function (key, val) {
+                            $('#platformIDSelction').append(new Option(val.NameVersion, val.ID));
+                        });
+                    }); 
+                    
                 });
             });
 

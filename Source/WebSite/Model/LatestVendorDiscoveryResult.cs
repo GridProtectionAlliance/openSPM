@@ -128,7 +128,7 @@ namespace openSPM.Model
 
         [Label("Patch Cadence")]
         [StringLength(20)]
-        public int PatchCadence { get; set; }
+        public string PatchCadence { get; set; }
 
         public bool Enabled { get; set; }
 

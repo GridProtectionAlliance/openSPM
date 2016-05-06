@@ -1084,6 +1084,11 @@ namespace openSPM
             return m_dataContext.Table<Assessment>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        public int GetLastAssessmentID()
+        {
+            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Assessment')") ?? 0;
+        }
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Assessment), RecordOperation.DeleteRecord)]
         public void DeleteAssessment(int id)

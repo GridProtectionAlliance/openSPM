@@ -26,6 +26,11 @@
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
+@section StyleSheets {
+    @Styles.Render("~/css.bundle/fileinput")
+}
+
+
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
@@ -97,9 +102,9 @@ string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImageP
 statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
-    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(PatchID), click: $parent.viewPageRecord"></button></td>
+    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchMnemonic, click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupNameValue(BusinessUnitID)"></td>
-    <td width="10%" class="text-center valign-middle" data-bind="text: lookupVendorName(lookupPatchVendorID(PatchID))"></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: VendorName"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
     <td width="5%" class="text-center valign-middle"><span data-bind="visible: IsExpedited" class="glyphicon glyphicon-check"></span></td>
@@ -129,7 +134,7 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 </div>
 
 <div id="assessmentDialog" class="modal fade" role="dialog">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg" style="width: 90%">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
@@ -140,10 +145,39 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             <div class="modal-body auto-height">
                 <form role="form">
                     <div id="patchid" class="form-control" style="visibility: hidden"></div>
-                    <label for="patchname">Patch Name</label>
-                    <div class="form-control" id="patchname"></div>
-                    <label for="businessunit">Business Unit</label>
-                    <div class="form-control" id="businessunit"></div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="patchname">Patch Name</label>
+                            <div class="form-control" id="patchname"></div>
+                            <label for="businessunit">Business Unit</label>
+                            <div class="form-control" id="businessunit"></div>
+                            <label for="productname">Product</label>
+                            <div class="form-control" id="productname"></div>
+                            <label for="patchclass">Patch Class</label>
+                            <div class="form-control" id="patchclass"></div>
+                            <label for="releasedate">Release Date</label>
+                            <div class="form-control" id="releasedate"></div>
+                            <label for="deadline">Evaluation Deadline</label>
+                            <div class="form-control" id="deadline"></div>
+                            <label for="impactkey">Impact Status</label>
+                            <div class="form-control" id="impactkey"></div>
+                            <label for="patchdetail">Patch Details</label>
+                            <div class="form-control" id="patchdetail"></div>
+                            <label for="patchsummary">Patch Summary</label>
+                            <div class="form-control" id="patchsummary"></div>
+                            <label for="patchcitation">Patch Citations</label>
+                            <div class="form-control" id="patchcitation"></div>
+                            <label for="patchlink">Link</label>
+                            <div class="form-control" id="patchlink"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <iframe style="border: none" id="manageDocumentsWindowFrame" marginwidth="0" marginheight="0"></iframe>
+                        </div>
+                    </div>
+                   
+                    
+                    <hr/>
+                   
                     <label for="assessmentSelect">Assessment Result</label>
                     <select class="form-control"id="assessmentSelect">
                         @for (int i = 0; i < ViewBag.AssessActionCount; ++i)
@@ -153,10 +187,18 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
                     </select>
                     <label for="details">Details/Notes</label>
                     <textarea id="details" class="form-control"></textarea>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="uploadFiles">Assessment Related Documents:</label>
+                                <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveAssessmentButton">Save</button>
+                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveAssessmentButton">Save Assessment</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal" id="cancelRecordButton">Cancel</button>
             </div>
         </div>
@@ -164,20 +206,44 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 </div>
 
 @section Scripts {
+@Scripts.Render("~/js.bundle/fileinput")
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "-IsExpedited", 2))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("patchClass"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
-        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
-        @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
-        @Html.Raw(Model.RenderAbstract<Patch>("VendorID", "ID", "lookupPatchVendorID", "PatchVendorID"))
+
 
         $(function() {
 
             $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
 
+
             $(window).on("assessmentMade", function () {
                 viewModel.queryPageRecords();
+            });
+
+            $("#assessmentDialog").on("shown.bs.modal", function() {
+                // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
+                dismissButtons.prop("disabled", true);
+                dismissButtons.invisible();
+
+                $("#uploadFiles").fileinput({
+                    uploadUrl: fileUploadUrl,
+                    uploadAsync: true,
+                    showUpload: false,
+                    showRemove: true,
+                    showPreview: false,
+                    minFileCount: 1,
+                    maxFileCount: 12
+                });
+
+                
+            });
+
+            $('#saveAssessmentButton').on("click", function() {
+                selectedFiles = $("#uploadFiles").fileinput("getFileStack");
             });
         });
 
@@ -185,8 +251,20 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             $('#patchid').html(record.PatchStatusID);
             $('#patchname').html(record.PatchMnemonic);
             $('#businessunit').html(lookupNameValue(record.BusinessUnitID).toString());
+            $('#productname').html(record.PlatformName + " / Version: " + record.PlatformVersion);
+            $('#patchclass').html(lookupPatchclassValue(record.PatchClassKey));
+            $('#releasedate').html(record.VendorReleaseDate.formatDate(DateFormat));
+            $('#deadline').html(record.EvaluationDeadline.formatDate(DateFormat));
+            $('#impactkey').html(lookupImpactValue(record.ImpactKey));
+            $('#patchdetail').html(record.Detail);
+            $('#patchsummary').html(record.Summary);
+            $('#patchcitation').html(record.Citations);
+            $('#patchlink').html(record.Link);
+
             $('#details').val("");
             $('#assessmentSelect').prop('selectedIndex', 0);
+            $('#uploadFiles').val("");
+            openManageDocumentsWindow(record);
             $("#assessmentDialog").modal("show");
             $('#saveAssessmentButton').one('click', function() { addAssessment(record)});
         }
@@ -263,6 +341,14 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             }, 500);
         });
 
+        function openManageDocumentsWindow(record) {
+            $("#manageDocumentsWindowFrame").attr({
+                "src": "@Url.Content("~/Main/Documents")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true",
+               "height":  "500px",
+               "width": "100%"
+        });
+        }
+
         function openManageDocumentsDialog(record) {
             const count = parseInt(notNull($("#documentCount" + record.PatchID).text(), 0));
             var initialMode = "";
@@ -271,7 +357,7 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
                 initialMode = "/AddNew";
 
             $("#manageDocumentsFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.VendorPatchName),
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
         });
@@ -286,6 +372,34 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             // Clear frame page
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
+
+        const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=AssessmentDocument&SourceField=AssessmentID"))";
+        var selectedFiles;
+
+        $(viewModel).on("beforeSave", function(event, observableRecord) {
+            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
+        });
+
+        $(window).on("assessmentMade", function(event, record) {
+            if (selectedFiles.length > 0 && viewModel.dataHubIsConnected()) {
+                dataHub.getLastAssessmentID().done(function(assessmentID) {
+                    $("#uploadFiles").fileinput({
+                        uploadUrl: fileUploadUrl + "&SourceID=" + assessmentID.toString(),
+                        uploadAsync: true
+                    });
+
+                    for (var i = 0; i < selectedFiles.length; i++) {
+                        $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
+                    }
+
+                    $("#uploadFiles").fileinput("upload");
+                    selectedFiles = [];
+                });
+            }
+        });
+
+        
+
 
         function filterBU() {
 

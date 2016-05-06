@@ -33,6 +33,7 @@
     NameValueCollection parameters = Request.QueryString;
     string sourceTable = parameters["SourceTable"];
     string sourceField = parameters["SourceField"];
+    bool hideButton = bool.Parse(parameters["HideButton"] ?? "false");
     int sourceID = int.Parse(parameters["SourceID"] ?? "0");
 
     if (string.IsNullOrEmpty(sourceTable) || string.IsNullOrEmpty(sourceField) || sourceID < 1)
@@ -52,6 +53,7 @@
 
     ViewBag.BodyRows = BodyRows(sourceTable).ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog().ToString();
+    ViewBag.HideAddNewButton = hideButton;
     ViewBag.CanEdit = false;
     ViewBag.HideUnauthorizedControls = true;
 }

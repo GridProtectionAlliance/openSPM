@@ -21,5 +21,15 @@ namespace openSPM.Model
         public DateTime EvaluationDeadline { get; set; }
         public int PatchStatusKey { get; set; } 
         public bool IsExpedited { get; set; }
+        public int VendorID { get; set; }
+        public string VendorName { get; set; }
+        public int PlatformID { get; set; }
+        public string PlatformName { get; set; }
+        public string PlatformVersion { get; set; }
+        public int PatchClassKey { get; set; }
+        public string Summary { get; set; }
+        public string Detail { get; set; }
+        public string Link { get; set; }
+
     }
 }

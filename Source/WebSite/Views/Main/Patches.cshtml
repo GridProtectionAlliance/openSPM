@@ -144,44 +144,7 @@
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
-       
-
-        
-        function getEvalutationDeadlineDate() {
-            var releaseDate = new Date($("#dateVendorReleaseDate").val());
-            var deadlineDate = new Date(releaseDate.addDays(35));
-
-            //console.log($('#dateVendorReleaseDate'));
-            $("#dateVendorReleaseDate").on("change", function() {
-                var rd = new Date($("#dateVendorReleaseDate").val());
-                var dd = new Date(rd.addDays(35));
-                //console.log(dd.formatDate(DateFormat));
-                $("#evalDate").html(dd.formatDate(DateFormat));
-            });
-
-            //console.log(myPlatforms);
-            $("#evalDate").html(deadlineDate.formatDate(DateFormat));
-        }
-
-        function updatePatchStatus(record) {
-            if (viewModel.dataHubIsConnected()) {
-                dataHub.queryPatchUserAccountPlatformBusinessUnitUserAccountViews(record.PlatformID).done(function(records) {
-                    for (var i = 0; i < records.length; i++) {
-                        var temp = {
-                            "PatchID": record.ID,
-                            "BusinessUnitID": records[i].BusinessUnitID,
-                            "PatchStatusKey": 2
-                        };
-                        dataHub.addNewPatchStatus(temp);
-                        
-                    }
-
-                    dataHub.updatePatchInitatedFlag(record.ID).done(function() {
-                        $(window).trigger("initiatedPatch"); 
-                    });
-                });
-            }
-        }
+      
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {
@@ -229,10 +192,6 @@
 
         $(viewModel).on("beforeSave", function(event, observableRecord) {
             selectedFiles = $("#uploadFiles").fileinput("getFileStack");
-            var rd = new Date($("#dateVendorReleaseDate").val());
-            var dd = new Date(rd.addDays(35));
-            observableRecord.EvaluationDeadline = dd.formatDate(DateFormat);
-            observableRecord.PlatformID = $("#platformIDSelction").val();
         });
 
         $(viewModel).on("recordSaved", function(event, record, newRecord) {

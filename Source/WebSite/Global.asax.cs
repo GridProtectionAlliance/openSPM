@@ -33,6 +33,7 @@ using System.Web.Routing;
 using GSF;
 using GSF.Configuration;
 using GSF.Data;
+using GSF.Data.Model;
 using GSF.Identity;
 using GSF.Security;
 using GSF.Web.Model;
@@ -100,6 +101,9 @@ namespace openSPM
 
                 // Validate users and groups exist in the database as SIDs
                 ValidateAccountsAndGroups(dataContext.Connection);
+
+                // Validate several time interval counters exist
+                ValidateTimeIntervalCounters(dataContext.Connection);
 
                 // Load global web settings
                 Dictionary<string, string> appSetting = dataContext.LoadDatabaseSettings("app.setting");
@@ -184,6 +188,22 @@ namespace openSPM
 #endif
             }, DataHub.CurrentConnectionID);
         }
+
+        private static void ValidateTimeIntervalCounters(AdoDataConnection database)
+        {
+            DateTime today = DateTime.UtcNow.BaselinedTimestamp(BaselineTimeInterval.Month);
+            TableOperations<TimeIntervalCounters> operations = new TableOperations<TimeIntervalCounters>(database);
+            TimeIntervalCounters timeIntervalCounters = new TimeIntervalCounters();
+
+            for (int i = 0; i < 12; i++)
+            {
+                DateTime testTime = today.AddMonths(i);
+                timeIntervalCounters.TimeInterval = $"{testTime.Year}{testTime.Month.ToString().PadLeft(2, '0')}";
+                if (operations.QueryRecordCount(new RecordRestriction("TimeInterval = {0}", timeIntervalCounters.TimeInterval)) == 0)
+                    operations.AddNewRecord(timeIntervalCounters);
+            }
+        }
+
 
         /// <summary>
         /// Validates security roles for all defined nodes.

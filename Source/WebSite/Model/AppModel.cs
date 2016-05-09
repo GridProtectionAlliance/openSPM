@@ -21,7 +21,9 @@
 //
 //******************************************************************************************************
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Routing;
@@ -299,6 +301,34 @@ namespace openSPM.Model
         {
             return new Regex(@"(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?", RegexOptions.IgnoreCase | RegexOptions.Multiline).
                 Replace(sourceText, match => $"<a href=\"{match}\" target=\"{target}\">{match}</a>");
+        }
+
+        /// <summary>
+        /// Safely increments counter value record and returns updated value.
+        /// </summary>
+        /// <returns>Incremented counter value.</returns>
+        public int GetNextCounterValue()
+        {
+            lock (typeof(AppModel))
+            {
+                DateTime today = DateTime.UtcNow.BaselinedTimestamp(BaselineTimeInterval.Month);
+                TableOperations<TimeIntervalCounters> operations = DataContext.Table<TimeIntervalCounters>();
+                string timeInterval = $"{today.Year}{today.Month.ToString().PadLeft(2, '0')}";
+
+                // Query latest counter value
+                TimeIntervalCounters timeIntervalCounters = operations.QueryRecords(restriction: new RecordRestriction("TimeInterval = {0}", timeInterval)).FirstOrDefault();
+
+                if (timeIntervalCounters == null)
+                    throw new InvalidOperationException($"No counter record exists for '{timeInterval}' - cannot get a new counter value. Try restarting web site.");
+
+                // Increment counter
+                timeIntervalCounters.Counter++;
+
+                // Update record with new counter value
+                operations.UpdateRecord(timeIntervalCounters);
+
+                return timeIntervalCounters.Counter;
+            }
         }
 
         #endregion

@@ -215,7 +215,6 @@
     <Compile Include="Model\AssessmentMitigateView.cs" />
     <Compile Include="Model\BusinessUnit.cs" />
     <Compile Include="Model\BusinessUnitUserAccountDetail.cs" />
-    <Compile Include="Model\Class1.cs" />
     <Compile Include="Model\ClosedPatch.cs" />
     <Compile Include="Model\ClosedPatchDocument.cs" />
     <Compile Include="Model\ClosingReviewView.cs" />
@@ -239,6 +238,7 @@
     <Compile Include="Model\PatchUserAccountPlatformBusinessUnitUserAccountView.cs" />
     <Compile Include="Model\PatchVendorPlatformView.cs" />
     <Compile Include="Model\ThemeFields.cs" />
+    <Compile Include="Model\TimeIntervalCounters.cs" />
     <Compile Include="Model\UserAccountNoticeLevel.cs" />
     <Compile Include="Model\Page.cs" />
     <Compile Include="Model\Menu.cs" />

@@ -54,7 +54,7 @@ namespace openSPM.Model
         }
 
         [Required]
-        [Label("Target Platform / Device")]
+        [Label("Target Product")]
         public int PlatformID
         {
             get; set;

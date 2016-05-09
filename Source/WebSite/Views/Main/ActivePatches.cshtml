@@ -98,8 +98,6 @@
 <br/>*@
 @helper BodyRows()
 {
-string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
-statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchMnemonic, click: $parent.viewPageRecord"></button></td>
@@ -213,39 +211,9 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
         @Html.Raw(Model.RenderValueListClientLookupFunction("patchClass"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
+        
 
-        $(function() {
-
-            $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
-
-
-            $(window).on("assessmentMade", function () {
-                viewModel.queryPageRecords();
-            });
-
-            $("#assessmentDialog").on("shown.bs.modal", function() {
-                // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
-                dismissButtons.prop("disabled", true);
-                dismissButtons.invisible();
-
-                $("#uploadFiles").fileinput({
-                    uploadUrl: fileUploadUrl,
-                    uploadAsync: true,
-                    showUpload: false,
-                    showRemove: true,
-                    showPreview: false,
-                    minFileCount: 1,
-                    maxFileCount: 12
-                });
-
-                
-            });
-
-            $('#saveAssessmentButton').on("click", function() {
-                selectedFiles = $("#uploadFiles").fileinput("getFileStack");
-            });
-        });
+      
 
         function beginAssessment(record) {
             $('#patchid').html(record.PatchStatusID);
@@ -260,54 +228,43 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             $('#patchsummary').html(record.Summary);
             $('#patchcitation').html(record.Citations);
             $('#patchlink').html(record.Link);
-
             $('#details').val("");
             $('#assessmentSelect').prop('selectedIndex', 0);
-            $('#uploadFiles').val("");
             openManageDocumentsWindow(record);
             $("#assessmentDialog").modal("show");
-            $('#saveAssessmentButton').one('click', function() { addAssessment(record)});
-        }
+            $('#saveAssessmentButton').one('click', function() { if (viewModel.dataHubIsConnected) {
+                                                                    viewModel.currentRecord(record);
+                                                                    viewModel.saveNewRecord();
+                                                                  }
+            });
 
-        function addAssessment(data) {
-            var record = { 'PatchStatusID': data.PatchStatusID, 'AssessmentResultKey': $('#assessmentSelect').val(), 'Details': $('#details').val() };
-            if (viewModel.dataHubIsConnected) {
-                dataHub.addNewAssessment(record).done(function () {
-                    ++data.PatchStatusKey;
-                    if ($('#assessmentSelect').val() > 2)
-                        ++data.PatchStatusKey;
-                    dataHub.updatePatchStatusKey(data.PatchStatusID, data.PatchStatusKey).done(function() {
-                        $(window).trigger("assessmentMade");
-                    });
-
-                });
-            }
+          
         }
 
         function getStatusImage(element, record) {
 
             var alarmDayLimits = @Html.Raw(ViewBag.alarmDayLimits);
             const critcalAlarmDays = alarmDayLimits[0].Value;
-            const warningDays = alarmDayLimits[1].Value;
-            const alarmDays = alarmDayLimits[2].Value;
-            const violationDays = alarmDayLimits[3].Value;
+            const warningDays = alarmDayLimits[3].Value -alarmDayLimits[1].Value;
+            const alarmDays = alarmDayLimits[3].Value - alarmDayLimits[2].Value;
+            const violationDays = alarmDayLimits[3].Value - alarmDayLimits[3].Value;
             const daysUntilDeadline = (record.EvaluationDeadline.toDate()).daysBetween(new Date());
 
             var image, title;
             switch (true) {
-                case (daysUntilDeadline <= violationDays - violationDays):
+                case (daysUntilDeadline <= violationDays):
                     image = "@violationImage";
                     title = "Violation";
                     break;
-                case (daysUntilDeadline <= violationDays - critcalAlarmDays):
+                case (daysUntilDeadline <= critcalAlarmDays):
                     image = "@criticalAlarmImage";
                     title = "Critical Alarm";
                     break;
-                case (daysUntilDeadline <= violationDays - alarmDays):
+                case (daysUntilDeadline <= alarmDays):
                     image = "@alarmImage";
                     title = "Alarm";
                     break;
-                case (daysUntilDeadline <= violationDays - warningDays):
+                case (daysUntilDeadline <=  warningDays):
                     image = "@warningImage";
                     title = "Warning";
                     break;
@@ -372,59 +329,74 @@ statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
             // Clear frame page
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
-
+        
         const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=AssessmentDocument&SourceField=AssessmentID"))";
-        var selectedFiles;
+        var assessmentID;
 
-        $(viewModel).on("beforeSave", function(event, observableRecord) {
-            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
+
+        $(viewModel).on("beforeSave", function(event, observableRecord){
+            observableRecord.ImpactKey = $('#assessmentSelect').val(); //high jack ImpactKey to save assessment key
+            observableRecord.Detail = $('#details').val();
         });
+       
 
-        $(window).on("assessmentMade", function(event, record) {
-            if (selectedFiles.length > 0 && viewModel.dataHubIsConnected()) {
-                dataHub.getLastAssessmentID().done(function(assessmentID) {
-                    $("#uploadFiles").fileinput({
-                        uploadUrl: fileUploadUrl + "&SourceID=" + assessmentID.toString(),
-                        uploadAsync: true
+        $(viewModel).on("recordSaved", function(event, record, newRecord){
+            
+           
+            // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+            if (viewModel.dataHubIsConnected()) {
+                if (newRecord) {
+                    dataHub.getLastAssessmentID().done(function(id) {
+                        assessmentID = id.toString();
+                        $("#uploadFiles").fileinput("upload");
+                        
                     });
+                }
 
-                    for (var i = 0; i < selectedFiles.length; i++) {
-                        $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
-                    }
-
-                    $("#uploadFiles").fileinput("upload");
-                    selectedFiles = [];
+                ++record.PatchStatusKey;
+                if ($('#assessmentSelect').val() > 2)
+                    ++record.PatchStatusKey;
+                dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
+                    viewModel.queryPageRecords();
                 });
+
+                
+
+                    
             }
         });
 
         
+        $(function() {
 
+            $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
+            $("#assessmentDialog").on("shown.bs.modal", function() {
+                // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
+                dismissButtons.prop("disabled", true);
+                dismissButtons.invisible();
+
+                $('#uploadFiles').fileinput('reset');
+
+                $("#uploadFiles").fileinput({
+                    uploadUrl: fileUploadUrl,
+                    uploadAsync: true,
+                    showUpload: false,
+                    showRemove: true,
+                    showPreview: false,
+                    minFileCount: 1,
+                    maxFileCount: 12, uploadExtraData: function(){
+                        return {SourceID: assessmentID};
+                    }
+                });
+
+                
+            });
+
+        });
 
         function filterBU() {
-
-            //var $rows = $('#recordsTable tbody tr');
-            //if ($('#bufilter').val() != "None") {
-
-            //    $rows.show().filter(function (i, data) {
-            //        console.log($(data).children()[2].innerText == $('#bufilter').val());
-            //            //console.log($(data).children()[2].innerHTML);
-            //        return $(data).children()[2].innerText !== $('#bufilter').val();
-            //    }).hide();
-            //}
-
-            //viewModel.queryPageRecords();
-            //$('#search').keyup(function () {
-            //    console.log($rows);
-            //    var val = '^(?=.*\\b' + $.trim($(this).val()).split(/\s+/).join('\\b)(?=.*\\b') + ').*$',
-            //        reg = RegExp(val, 'i'),
-            //        text;
-
-            //    $rows.show().filter(function () {
-            //        text = $(this).text().replace(/\s+/g, ' ');
-            //        return !reg.test(text);
-            //    }).hide();
-            //});
         }
 
 

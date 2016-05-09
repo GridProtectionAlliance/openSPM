@@ -1262,6 +1262,45 @@ namespace openSPM
             return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0}", parentID));
         }
 
+        [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.CreateNewRecord)]
+        public PatchPatchStatusDetail NewPatchPatchStatusDetail()
+        {
+            return new PatchPatchStatusDetail();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.AddNewRecord)]
+        public void AddNewPatchPatchStatusDetailInstall(PatchPatchStatusDetail record)
+        {
+            Assessment result = DeriveAssessment(record);
+            result.CreatedByID = GetCurrentUserID();
+            result.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Assessment>().AddNewRecord(result);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.UpdateRecord)]
+        public void UpdatePatchPatchStatusDetailInstallTable(PatchPatchStatusDetail record)
+        {
+            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+        }
+
+        private Assessment DeriveAssessment(PatchPatchStatusDetail record)
+        {
+            return new Assessment()
+            {
+                PatchStatusID = record.PatchStatusID,
+                AssessmentResultKey = record.ImpactKey,
+                Details = record.Detail,
+                CreatedOn = DateTime.UtcNow,
+                CreatedByID = GetCurrentUserID(),
+                UpdatedOn = DateTime.UtcNow,
+                UpdatedByID = GetCurrentUserID(),
+                IsAssessed = false
+
+            };
+        }
+
         #endregion
 
         #region [PatchStatusAssessmentDetail Table Operations]

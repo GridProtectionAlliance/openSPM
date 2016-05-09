@@ -86,7 +86,8 @@
     <div class="row">
         <div class="col-md-6">
             @Html.Raw(Model.AddValueListSelectField<Patch>("PatchClassKey", "patchClass"))
-            @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            @*@Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))*@
+            <div class="form-control" id="vendorName" style="display: none"></div>
             @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
             @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
             @*<div style="border-style: solid; border-color: red">*@
@@ -192,6 +193,7 @@
 
         $(viewModel).on("beforeSave", function (event, observableRecord) {
             observableRecord.PlatformID = $('#platformIDSelction').val();
+            observableRecord.VendorPatchName = $('#vendorName').val();
             selectedFiles = $("#uploadFiles").fileinput("getFileStack");
         });
 
@@ -226,7 +228,9 @@
                 const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.prop("disabled", true);
                 dismissButtons.invisible();
-
+                
+                var count = @Model.GetNextCounterValue();
+                $('#vendorName').val("TVA-" + (new Date().getFullYear()).toString() + '-' + (new Date().getMonth()).toString().padLeft(2,'0') + "-" + count.toString().padLeft(4, '0'));
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,
                     uploadAsync: true,

@@ -141,9 +141,9 @@ function joinKeyValuePairs (source, parameterDelimiter, keyValueDelimiter, start
     return values.join(parameterDelimiter + " ");
 };
 
-Array.prototype.joinKeyValuePairs = function (parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter) {
-    return joinKeyValuePairs(this, parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter);
-};
+//Array.prototype.joinKeyValuePairs = function (parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter) {
+//    return joinKeyValuePairs(this, parameterDelimiter, keyValueDelimiter, startValueDelimiter, endValueDelimiter);
+//};
 
 // Represents a dictionary style class with case-insensitive keys
 function Dictionary(source) {

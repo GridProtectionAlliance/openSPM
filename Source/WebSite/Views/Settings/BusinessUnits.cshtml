@@ -85,13 +85,13 @@
                     <h4 class="modal-title">
                         <span data-bind="visible: recordMode()===RecordMode.View">View</span>
                         <span data-bind="visible: recordMode()!==RecordMode.View">Edit</span>
-                        <span id="editSMEPlatformsUserTitle"></span> Assigned Platforms
+                        <span id="editSMEPlatformsUserTitle"></span> Assigned Products
                     </h4>
                 </div>
                 <div class="modal-body auto-height" data-bind="css: {'modal-readonly': recordMode()===RecordMode.View}">
                     <form role="form">
                         <div class="col-md-12">
-                            <label for="inputNewPlatform">Assign Platform to SME:</label>
+                            <label for="inputNewPlatform">Assign Product to SME:</label>
                             <div class="input-group">
                                 <input type="text" class="form-control" id="inputNewPlatform" required>
                                 <span id="inputNewPlatformAdd" class="input-group-addon" data-bind="style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}"><i class="glyphicon glyphicon-plus"></i></span>
@@ -289,6 +289,8 @@
                 $("#editSMEPlatformsUserTitle").text(selectedBusinessUnitUserAccount.UserAccountName);
                 $("#editSMEPlatformsDialog").modal("show");
             }
+            
+            refreshBusinessUnitSMETable();
         }
 
         function initializeBusinessUnitSMETable() {
@@ -313,7 +315,7 @@
                             },
                             {
                                 content: function(record) {
-                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"editBusinessUnitSMEPlatforms('" + record.UserAccountID + "')\" title=\"Edit '" + record.UserAccountName + "' platforms...\">Platforms</button>";
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"editBusinessUnitSMEPlatforms('" + record.UserAccountID + "')\" title=\"Edit '" + record.UserAccountName + "' products...\">Products</button>";
                                 },
                                 headerText: "",
                                 bodyClass: "text-center",
@@ -363,7 +365,7 @@
             if (!viewModel.canEdit() || viewModel.recordMode() === RecordMode.View)
                 return;
 
-            if (viewModel.dataHubIsConnected() && confirm("Are you sure you want to remove platform '" + platformName + "' from '" + selectedBusinessUnitUserAccount.UserAccountName + "'?")) {
+            if (viewModel.dataHubIsConnected() && confirm("Are you sure you want to remove product '" + platformName + "' from '" + selectedBusinessUnitUserAccount.UserAccountName + "'?")) {
                 dataHub.deleteUserAccountPlatform(userAccountID, platformID).done(function () {
                     refreshSMEPlatformsTable();
                 });
@@ -379,7 +381,7 @@
 
                     smePlatforms.puidatatable({
                         lazy: true,
-                        caption: "Platforms Assigned to SME",
+                        caption: "Products Assigned to SME",
                         paginator: {
                             rows: rowsPerPage,
                             totalRecords: count
@@ -392,7 +394,7 @@
                             },
                             {
                                 field: "PlatformName",
-                                headerText: "Platform Name",
+                                headerText: "Product Name",
                                 bodyStyle: "width: 50%"
                             },
                             {

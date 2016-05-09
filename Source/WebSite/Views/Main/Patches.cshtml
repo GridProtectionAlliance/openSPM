@@ -230,7 +230,8 @@
                 dismissButtons.invisible();
                 
                 var count = @Model.GetNextCounterValue();
-                $('#vendorName').val("TVA-" + (new Date().getFullYear()).toString() + '-' + (new Date().getMonth()).toString().padLeft(2,'0') + "-" + count.toString().padLeft(4, '0'));
+                var company = "@Model.Global.CompanyAcronym";
+                $('#vendorName').val(company + "-" + (new Date().getFullYear()).toString() + '-' + (new Date().getMonth()).toString().padLeft(2,'0') + "-" + count.toString().padLeft(4, '0'));
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,
                     uploadAsync: true,

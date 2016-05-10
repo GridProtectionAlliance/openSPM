@@ -47,6 +47,7 @@ namespace openSPM
         // Fields
         private readonly DataContext m_dataContext;
         private DataContext m_miPlanContext;
+        private AppModel m_appmodel;
         private bool m_disposed;
 
         #endregion
@@ -56,6 +57,7 @@ namespace openSPM
         public DataHub()
         {
             m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
+            m_appmodel = new AppModel(m_dataContext);
         }
 
         #endregion
@@ -205,6 +207,11 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.AddNewRecord)]
         public void AddNewPatch(Patch record)
         {
+            string companyname = m_appmodel.Global.CompanyAcronym.ToString();
+            string year = DateTime.UtcNow.Year.ToString();
+            string month = DateTime.UtcNow.Month.ToString().PadLeft(2,'0');
+            string count = m_appmodel.GetNextCounterValue().ToString().PadLeft(4,'0');
+            record.VendorPatchName = companyname + '-' + year + '-' + month + '-' + count;  
             record.CreatedByID = GetCurrentUserID();
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = record.CreatedByID;
@@ -355,7 +362,11 @@ namespace openSPM
             return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
         }
 
-      
+        public IEnumerable<Vendor> QueryVendorsNonPaged()
+        {
+           return m_dataContext.Table<Vendor>().QueryRecords("Name", new RecordRestriction("IsDeleted = 0"));
+        }
+
         public IEnumerable<Vendor> QueryOneVendor(int id)
         {
            return m_dataContext.Table<Vendor>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
@@ -401,7 +412,38 @@ namespace openSPM
             record.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Vendor>().UpdateRecord(record);
         }
+        /// <summary>
+        /// Searches Vendors by name with no limit on total returned records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <returns>Search results as "IDLabel" values - serialized as JSON [{ id: "value", label : "name" }, ...]; useful for dynamic lookup lists.</returns>
+        public IEnumerable<IDLabel> SearchVendors(string searchText)
+        {
+            return SearchVendors(searchText, -1);
+        }
 
+        /// <summary>
+        /// Searches Vendors by name limited to the specified number of records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <param name="limit">Limit of number of record to return.</param>
+        /// <returns>Search results as "IDLabel" values - serialized as JSON [{ id: "value", label : "name" }, ...]; useful for dynamic lookup lists.</returns>
+        public IEnumerable<IDLabel> SearchVendors(string searchText, int limit)
+        {
+            if (limit < 1)
+                return m_dataContext
+                    .Table<Vendor>()
+                    .QueryRecords()
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
+                    .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+
+            return m_dataContext
+                .Table<Vendor>()
+                .QueryRecords()
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
+                .Take(limit)
+                .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+        }
         #endregion
 
         #region [ Platform Table Operations ]

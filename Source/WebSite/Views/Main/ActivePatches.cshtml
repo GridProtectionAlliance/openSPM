@@ -23,6 +23,7 @@
 @using System.Security.AccessControl
 @using GSF
 @using GSF.Data.Model
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
@@ -82,20 +83,22 @@
     ViewBag.BUNames = dataContext.Table<BusinessUnit>().QueryRecords("Name").ToArray();
     ViewBag.BUCounts = dataContext.Table<BusinessUnit>().QueryRecordCount();
 }
-<div class="row">
-    <div class="col-md-6">
-        <label for="bufilter">Business Unit Filter:</label>
-        <select class="form-control" id="bufilter" onchange="filterBU()">
-            <option value="0">None</option>
-            @for (int i = 0; i < ViewBag.BUCounts; ++i)
-            {
-                var str = "<option value='" + ViewBag.BUNames[i].ID + "'>" + ViewBag.BUNames[i].Name + "</option>";
-                @Html.Raw(str)
-            }
-        </select>
+@helper BUFilter()
+{
+    <div class='row'>
+        <div class='col-md-6'>
+            <label for='bufilter'>Business Unit Filter:</label>
+            <select class='form-control' id='bufilter' onchange='filterBU()'>
+                <option value='0'>None</option>
+                @for (int i = 0; i < ViewBag.BUCounts; ++i)
+                {
+                    var str = "<option value='" + ViewBag.BUNames[i].ID + "'>" + ViewBag.BUNames[i].Name + "</option>";
+                    @Html.Raw(str)
+                }
+            </select>
+        </div>
     </div>
-</div>
-<br/>
+}
 @helper BodyRows()
 {
 
@@ -210,11 +213,7 @@
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("patchClass"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
-
-        
-
-      
-
+       
         function beginAssessment(record) {
             $('#patchid').html(record.PatchStatusID);
             $('#patchname').html(record.PatchMnemonic);
@@ -389,17 +388,22 @@
                     maxFileCount: 12, uploadExtraData: function(){
                         return {SourceID: assessmentID};
                     }
-                });
-
-                
-            });
-
+                });                
+            });            
+            
+            $("#pageHeader").append("@Html.Raw(BUFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");     
+            setTimeout(function() {viewModel.calculatePageSize(true);}, 100);
         });
 
         function filterBU() {
             if(viewModel.dataHubIsConnected()){
                 if($('#bufilter').val() == 0)
+                {
                     viewModel.queryPageRecords();
+                    viewModel.queryRecordCount().done(function(count){
+                        viewModel.recordCount(count);
+                    });
+                }
                 else{
                     dataHub.queryPatchPatchStatusDetailsByBU(2,$('#bufilter').val(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function(data){
                         $(viewModel).trigger("pageRecordsQueried", [data]);

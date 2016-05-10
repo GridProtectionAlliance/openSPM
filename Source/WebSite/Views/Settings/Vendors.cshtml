@@ -38,6 +38,17 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Patch Source";
 }
+<div class="row">
+    <div class="col-md-6">
+        <label for="vendorfilter">Vendor Name Filter:</label>
+        <div class="input-group">
+            <input type="text" class="form-control" id="vendorfilter">
+            <span id="vendorfilteradd" class="input-group-addon"></span>
+        </div>
+    </div>
+</div>
+<br/>
+
 @helper BodyRows()
 {
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
@@ -85,5 +96,20 @@
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Vendor>(ViewBag))
+        
+        $(function () {
+            var filterdata;
+
+            initializeAutoCompleteLookupField("vendorfilter", dataHub.searchVendors, false, true, 10);
+            
+            $("#vendorfilter").puiautocomplete({
+                select: function (event, item) {
+                    console.log(item);
+                    filterdata = item.data("id");
+                }
+            });
+
+           
+        });
     </script>
 }

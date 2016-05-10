@@ -1262,6 +1262,11 @@ namespace openSPM
             return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0}", parentID));
         }
 
+        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetailsByBU(int parentID, int buID, string sortField, bool ascending, int page, int pageSize)
+        {
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0} AND BusinessUnitID = {1}", parentID, buID));
+        }
+
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.CreateNewRecord)]
         public PatchPatchStatusDetail NewPatchPatchStatusDetail()
         {

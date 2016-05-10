@@ -82,20 +82,20 @@
     ViewBag.BUNames = dataContext.Table<BusinessUnit>().QueryRecords("Name").ToArray();
     ViewBag.BUCounts = dataContext.Table<BusinessUnit>().QueryRecordCount();
 }
-@*<div class="row">
+<div class="row">
     <div class="col-md-6">
         <label for="bufilter">Business Unit Filter:</label>
         <select class="form-control" id="bufilter" onchange="filterBU()">
-            <option value="None">None</option>
+            <option value="0">None</option>
             @for (int i = 0; i < ViewBag.BUCounts; ++i)
             {
-                var str = "<option value='" + ViewBag.BUNames[i].Name + "'>" + ViewBag.BUNames[i].Name + "</option>";
+                var str = "<option value='" + ViewBag.BUNames[i].ID + "'>" + ViewBag.BUNames[i].Name + "</option>";
                 @Html.Raw(str)
             }
         </select>
     </div>
 </div>
-<br/>*@
+<br/>
 @helper BodyRows()
 {
 
@@ -397,6 +397,26 @@
         });
 
         function filterBU() {
+            if(viewModel.dataHubIsConnected()){
+                if($('#bufilter').val() == 0)
+                    viewModel.queryPageRecords();
+                else{
+                    dataHub.queryPatchPatchStatusDetailsByBU(2,$('#bufilter').val(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function(data){
+                        $(viewModel).trigger("pageRecordsQueried", [data]);
+                        viewModel.pageRecords.removeAll();
+                        //console.log(data);
+                        viewModel.recordCount(data.length);
+                        viewModel.pageRecords(data);
+
+                        refreshHubDependentControlState();
+                        $("[id='recordRow']").css("visibility", "visible");
+                        $("#loadingDataLabel").hide();
+                        
+                    }).fail(function (error) {
+                        showErrorMessage(error);
+                    });
+                }
+            }
         }
 
 

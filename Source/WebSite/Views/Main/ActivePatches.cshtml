@@ -137,16 +137,17 @@
 <div id="assessmentDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg" style="width: 90%">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header auto-height" >
                 <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
                 <h4 class="modal-title">
-                    <span>Begin Assessment</span>
+                    <span>Conduct Assessment</span>
                 </h4>
             </div>
             <div class="modal-body auto-height">
                 <form role="form">
                     <div id="patchid" class="form-control" style="visibility: hidden"></div>
-                    <div class="row">
+                    <label for="patchdetails"><h3><u>Patch Details</u></h3></label>
+                    <div id="patchdetails"class="row">
                         <div class="col-md-6">
                             <label for="patchname">Patch Name</label>
                             <div class="form-control" id="patchname"></div>
@@ -160,6 +161,8 @@
                             <div class="form-control" id="releasedate"></div>
                             <label for="deadline">Evaluation Deadline</label>
                             <div class="form-control" id="deadline"></div>
+                        </div>
+                        <div class="col-md-6">
                             <label for="impactkey">Impact Status</label>
                             <div class="form-control" id="impactkey"></div>
                             <label for="patchdetail">Patch Details</label>
@@ -171,32 +174,32 @@
                             <label for="patchlink">Link</label>
                             <div class="form-control" id="patchlink"></div>
                         </div>
-                        <div class="col-md-6">
-                            <iframe style="border: none" id="manageDocumentsWindowFrame" marginwidth="0" marginheight="0"></iframe>
+                        <div class="row" style="padding-left: 13px">
+                            <iframe style="border: none" id="manageDocumentsWindowFrame" marginwidth="10" marginheight="0"></iframe>
                         </div>
                     </div>
-                   
-                    
                     <hr/>
-                   
-                    <label for="assessmentSelect">Assessment Result</label>
-                    <select class="form-control"id="assessmentSelect">
-                        @for (int i = 0; i < ViewBag.AssessActionCount; ++i)
-                        {
-                            <option value="@Html.Raw(i + 1)">@Html.Raw(ViewBag.AssessActions[i].Text)</option>
-                        }
-                    </select>
-                    <label for="details">Details/Notes</label>
-                    <textarea id="details" class="form-control"></textarea>
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="form-group">
-                                <label for="uploadFiles">Assessment Related Documents:</label>
-                                <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+                    <label for="assessment"><h3><u>Assessment</u></h3></label>
+                        <div id="assessment">
+                            <label for="assessmentSelect">Assessment Result:</label>
+                            <select class="form-control"id="assessmentSelect">
+                                @for (int i = 0; i < ViewBag.AssessActionCount; ++i)
+                                {
+                                    <option value="@Html.Raw(i + 1)">@Html.Raw(ViewBag.AssessActions[i].Text)</option>
+                                }
+                            </select>
+                            <label for="details">Details/Notes:</label>
+                            <textarea id="details" class="form-control"></textarea>
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="form-group">
+                                        <label for="uploadFiles">Add Assessment Related Documents:</label>
+                                        <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </form>
+                  </form>
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveAssessmentButton">Save Assessment</button>
@@ -213,7 +216,7 @@
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("patchClass"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
-       
+
         function beginAssessment(record) {
             $('#patchid').html(record.PatchStatusID);
             $('#patchname').html(record.PatchMnemonic);
@@ -231,13 +234,15 @@
             $('#assessmentSelect').prop('selectedIndex', 0);
             openManageDocumentsWindow(record);
             $("#assessmentDialog").modal("show");
+            $('#manageDocuments').one('click', function(){ openManageDocumentsWindow(record); })
             $('#saveAssessmentButton').one('click', function() { if (viewModel.dataHubIsConnected) {
                                                                     viewModel.currentRecord(record);
                                                                     viewModel.saveNewRecord();
                                                                   }
             });
 
-          
+
+
         }
 
         function getStatusImage(element, record) {
@@ -300,7 +305,7 @@
         function openManageDocumentsWindow(record) {
             $("#manageDocumentsWindowFrame").attr({
                 "src": "@Url.Content("~/Main/Documents")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true" + "&HideHeader=1",
-               "height":  "500px",
+               "height": "100%",
                "width": "100%"
         });
         }
@@ -328,7 +333,7 @@
             // Clear frame page
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
-        
+
         const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=AssessmentDocument&SourceField=AssessmentID"))";
         var assessmentID;
 
@@ -337,18 +342,18 @@
             observableRecord.ImpactKey = $('#assessmentSelect').val(); //high jack ImpactKey to save assessment key
             observableRecord.Detail = $('#details').val();
         });
-       
+
 
         $(viewModel).on("recordSaved", function(event, record, newRecord){
-            
-           
+
+
             // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
             if (viewModel.dataHubIsConnected()) {
                 if (newRecord) {
                     dataHub.getLastAssessmentID().done(function(id) {
                         assessmentID = id.toString();
                         $("#uploadFiles").fileinput("upload");
-                        
+
                     });
                 }
 
@@ -359,13 +364,13 @@
                     viewModel.queryPageRecords();
                 });
 
-                
 
-                    
+
+
             }
         });
 
-        
+
         $(function() {
 
             $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
@@ -388,10 +393,10 @@
                     maxFileCount: 12, uploadExtraData: function(){
                         return {SourceID: assessmentID};
                     }
-                });                
-            });            
-            
-            $("#pageHeader").append("@Html.Raw(BUFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");     
+                });
+            });
+
+            $("#pageHeader").append("@Html.Raw(BUFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
             setTimeout(function() {viewModel.calculatePageSize(true);}, 100);
         });
 
@@ -415,7 +420,7 @@
                         refreshHubDependentControlState();
                         $("[id='recordRow']").css("visibility", "visible");
                         $("#loadingDataLabel").hide();
-                        
+
                     }).fail(function (error) {
                         showErrorMessage(error);
                     });

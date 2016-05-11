@@ -41,6 +41,7 @@ namespace openSPM.Model
         public string Name { get; set; }
 
         [Required]
+        [StringLength(12)]
         public string Abbreviation { get; set; }
 
         [Required]

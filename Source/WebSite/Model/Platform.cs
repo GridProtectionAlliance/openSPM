@@ -44,6 +44,11 @@ namespace openSPM.Model
         [Required]
         public string Name { get; set; }
 
+        [Required]
+        [StringLength(12)]
+        [Label("Product Abbreviation")]
+        public string Abbreviation { get; set; }
+
         public string Version { get; set; }
 
         public bool IsDeleted { get; set; }

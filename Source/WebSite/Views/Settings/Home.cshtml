@@ -30,16 +30,16 @@
         if candidate security patches are available.<br/><br/>
     </li>
     <li>
-        <b>Platform List</b> (or Target Platform). Development of this list provides a convenient way for the Patch Input Coordinator (PIC) to assign a Business Unit (BU) a candidate security
-        patch for assessment. As new patches are added to the system, they must be assigned to a Target Platform. Multiple platforms may exist for each vendor.
-        <b>Requirement</b>: As platforms are added they must be associated with a single "vendor".<br/><br/>
+        <b>Product List</b> (or Target Product). Development of this list provides a convenient way for the Patch Input Coordinator (PIC) to assign a Business Unit (BU) a candidate security
+        patch for assessment. As new patches are added to the system, they must be assigned to a Target Product. Multiple Products may exist for each vendor.
+        <b>Requirement</b>: As Products are added they must be associated with a single "vendor".<br/><br/>
     </li>
     <li>
         <b>Business Unit</b> A Business Unit is an arbitrary organization unit that contains Subject Matter Experts (SMEs) who are accountable for conducting assessments
-        on specific Target Platforms. Each BU has a designated BU Coordinator (BUC) who is accountable for one or more Platforms within his/her BU.
+        on specific Target Products. Each BU has a designated BU Coordinator (BUC) who is accountable for one or more Products within his/her BU.
         While BUs generally align with the physical organization structure, many virtual BUs can be created to correctly represent technical approval authority of the BUC to the SME.
         <b>Requirement</b>: The BUC must be added to the system as a user prior to creation of a new BU.<br/><br/>
-        <b>Importantly</b>: After the Business Unit is created, it is EDITED to associate one or more existing users to the BU as an SME and to associate SMEs with one or more platforms. See the diagram below.<br/><br/>
+        <b>Importantly</b>: After the Business Unit is created, it is EDITED to associate one or more existing users to the BU as an SME and to associate SMEs with one or more Products. See the diagram below.<br/><br/>
     </li>
     <li>
         <b>Security Users</b> (or Users) This page is used to add new users and to assign them one or more openSPM roles. Users can either be added via Active Directory or managed

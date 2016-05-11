@@ -299,7 +299,7 @@
 
         function openManageDocumentsWindow(record) {
             $("#manageDocumentsWindowFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true",
+                "src": "@Url.Content("~/Main/Documents")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true" + "&HideHeader=1",
                "height":  "500px",
                "width": "100%"
         });

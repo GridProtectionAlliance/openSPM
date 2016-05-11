@@ -34,6 +34,8 @@
     string sourceTable = parameters["SourceTable"];
     string sourceField = parameters["SourceField"];
     bool hideButton = bool.Parse(parameters["HideButton"] ?? "false");
+    int hideHeader = int.Parse(parameters["HideHeader"] ?? "0");
+
     int sourceID = int.Parse(parameters["SourceID"] ?? "0");
 
     if (string.IsNullOrEmpty(sourceTable) || string.IsNullOrEmpty(sourceField) || sourceID < 1)
@@ -44,7 +46,6 @@
     ViewBag.CustomTitle = "Manage \"" + parameters["Name"] + "\" " + sourceTable + " Documents";
     ViewBag.AddNewEditTitle = "Documents for \"" + parameters["Name"] + "\" " + sourceTable;
     ViewBag.PageHasMenu = false;
-
     ViewBag.HeaderColumns = new[]
 {   //    { "Field", "Label", "Classes" }
         new[] { "Filename", "File Name", "text-left" },
@@ -81,6 +82,11 @@
         @Html.Raw(Model.RenderValueListClientLookupFunction("fileType", lookupFunctionName: "lookupFileTypeValue"))
 
         $(function () {
+
+            if(@hideHeader)
+                $('#pageHeader').hide();
+            
+
             $("#addNewEditDialog").on("shown.bs.modal", function () {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
                 const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");

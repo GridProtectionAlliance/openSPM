@@ -96,7 +96,7 @@
 
     
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: lookupVendorPatchNameValue(lookupPatchIDValue(PatchStatusID)), click: $parent.viewPageRecord"></button></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(lookupBusinessUnitIDValue(PatchStatusID))"></div></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedNotes"></div></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: CompletedOn.formatDate(DateFormat)"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" data-bind="click: closePatch.bind($data)" class="btn btn-danger btn-sm">Close</button></td>
@@ -174,7 +174,7 @@
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
         @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
         @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
-        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
 
 
         $(function () {

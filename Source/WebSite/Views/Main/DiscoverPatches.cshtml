@@ -75,7 +75,7 @@
 @helper BodyRows()
 {
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
-    <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
+    <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Abbreviation, click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Company, 1.5), attr: {title: Company}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: addNewDiscoveryResult.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>

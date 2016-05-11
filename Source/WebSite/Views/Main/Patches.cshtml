@@ -144,7 +144,7 @@
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
-        @Html.Raw(Model.RenderAbstract<Vendor>("Name", "ID", "lookupVendorName", "VendorName"))
+        @Html.Raw(Model.RenderAbstract<Vendor>("Abbreviation", "ID", "lookupVendorName", "VendorName"))
       
 
         function getDocumentCount(sourceID, element) {
@@ -237,8 +237,7 @@
             $("label#inputAlarmCriticalDays").hide();
             $("#inputAlarmCriticalDays").hide();
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
-
-       
+           
 
             $("#addNewEditDialog").on("shown.bs.modal", function() {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
@@ -246,6 +245,11 @@
                 dismissButtons.prop("disabled", true);
                 dismissButtons.invisible();
                 
+                $('#dateVendorReleaseDate').datepicker().on("changeDate", function (e) {
+                    $('#dateEvaluationDeadline').datepicker('update', (new Date(new Date().setDate(e.date.getDate() + 35))));
+                });
+
+
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,
                     uploadAsync: true,

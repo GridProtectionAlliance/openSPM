@@ -104,7 +104,7 @@
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchMnemonic, click: $parent.viewPageRecord"></button></td>
-    <td width="10%" class="text-center valign-middle" data-bind="text: lookupNameValue(BusinessUnitID)"></td>
+    <td width="10%" class="text-center valign-middle" data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorName"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
@@ -215,7 +215,7 @@
         @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "-IsExpedited", 2))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("patchClass"))
-        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
 
         function beginAssessment(record) {
             $('#patchid').html(record.PatchStatusID);

@@ -53,7 +53,7 @@
 
 
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: viewPatch.bind($data)"></button></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupNameValue(BusinessUnitID)"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: AssessmentID, click: viewAssessment.bind($data)"></button></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: AssessmentDate.formatDate(DateFormat)"></div></td>
@@ -221,7 +221,7 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<HistoryView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
-        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
 
         $(function () {
 

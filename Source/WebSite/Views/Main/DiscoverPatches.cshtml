@@ -89,7 +89,7 @@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    <div class="row">
+    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.View">
         <div class="col-md-4">
             @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Name", initialFocus: true))
             @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("VendorTypeKey", "vendorType"))
@@ -119,13 +119,15 @@
             @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneOfc2"))
             @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneCell2"))
         </div>
-        @*<div class="col-md-12">
+
+       
+    </div>
+    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
+        <div class="col-md-12">
             @Html.Raw(dataContext.AddDateField<LatestVendorDiscoveryResult>("ReviewDate"))
             @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
             @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Notes", 4))
-        </div>*@
-    </div>
-    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
+        </div>
         <div class="col-md-12">
             <div class="form-group">
                 <label for="uploadFiles">Discovery Result Related Documents:</label>

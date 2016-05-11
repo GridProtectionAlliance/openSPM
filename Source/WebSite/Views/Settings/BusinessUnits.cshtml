@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF
 @using GSF.Web.Model
 @using openSPM.Model
 @model AppModel
@@ -38,6 +39,41 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Business Unit";
 }
+@section StyleSheets{
+    <style>
+        .right-inner-addon {
+            position: relative;
+        }
+
+            .right-inner-addon input {
+                padding-right: 30px;
+            }
+
+            .right-inner-addon i {
+                position: absolute;
+                right: 0px;
+                padding: 10px 12px;
+                pointer-events: none;
+            }
+    </style>
+}
+@helper BUFilter()
+{
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='form-group'>
+                <label for='bufilter'>Platform Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='bufilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
 @helper BodyRows()
 {
     <td width="25%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
@@ -429,6 +465,25 @@
             var selectedPlatformID;
             var selectedUserAccountID;
             var smePlatformsTableInitialized = false;
+        
+            $("#pageHeader").append("@Html.Raw(BUFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+            $('#bufilter').on('keyup', function (e) {
+                if (viewModel.dataHubIsConnected()) {
+                    dataHub.filterBusinessUnits($('#bufilter').val(), @ViewBag.ShowDeleted.ToString().ToLower(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function (data) {
+                        $(viewModel).trigger("pageRecordsQueried", [data]);
+                        viewModel.pageRecords.removeAll();
+                        viewModel.recordCount(data.length);
+                        viewModel.pageRecords(data);
+
+                        refreshHubDependentControlState();
+                        $("[id='recordRow']").css("visibility", "visible");
+                        $("#loadingDataLabel").hide();
+
+                    }).fail(function (error) {
+                        showErrorMessage(error);
+                    });
+                }
+            });
 
             $("#addNewEditDialog").on("shown.bs.modal", function () {
                 // Since knockout binding will re-establish state of all bound items when add new/edit dialog is shown,

@@ -20,6 +20,7 @@
     //       Generated original version of source code.
     //
     //*****************************************************************************************************@
+@using GSF
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
@@ -37,6 +38,39 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Product";
+}
+@section StyleSheets{
+    <style>
+        .right-inner-addon {
+            position: relative;
+        }
+
+            .right-inner-addon input {
+                padding-right: 30px;
+            }
+
+            .right-inner-addon i {
+                position: absolute;
+                right: 0px;
+                padding: 10px 12px;
+                pointer-events: none;
+            }
+    </style>
+}
+@helper PlatformFilter()
+{
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='form-group'>
+                <label for='platformfilter'>Platform Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='platformfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+    </div>
+
 }
 @helper BodyRows()
 {
@@ -65,5 +99,27 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Platform>(ViewBag))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name"))
+        
+        $(function () {
+
+            $("#pageHeader").append("@Html.Raw(PlatformFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+            $('#platformfilter').on('keyup', function (e) {
+                if (viewModel.dataHubIsConnected()) {
+                    dataHub.filterPlatforms($('#platformfilter').val(), @ViewBag.ShowDeleted.ToString().ToLower(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function (data) {
+                        $(viewModel).trigger("pageRecordsQueried", [data]);
+                        viewModel.pageRecords.removeAll();
+                        viewModel.recordCount(data.length);
+                        viewModel.pageRecords(data);
+
+                        refreshHubDependentControlState();
+                        $("[id='recordRow']").css("visibility", "visible");
+                        $("#loadingDataLabel").hide();
+
+                    }).fail(function (error) {
+                        showErrorMessage(error);
+                    });
+                }
+            });
+        });
     </script>
 }

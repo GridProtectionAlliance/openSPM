@@ -536,6 +536,33 @@ namespace openSPM
             m_dataContext.Table<Platform>().UpdateRecord(record);
         }
 
+
+        /// <summary>
+        /// Filters Platforms by name with no limit on total returned records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <param name="showDeleted">Show deleted or not</param>
+        /// <param name="sortField">Field to sort query</param>
+        /// <param name="ascending">Bool for ascending sort</param>
+        /// <param name="page">Page to return</param>
+        /// <param name="pageSize">Size of pages to return</param>
+        /// <returns>Filtered results as Vendor Table records.</returns>
+        public IEnumerable<Platform> FilterPlatforms(string searchText, bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+            {
+                return m_dataContext
+                    .Table<Platform>()
+                    .QueryRecords(sortField, ascending, page, pageSize)
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
+
+            }
+            return m_dataContext
+                .Table<Platform>()
+                .QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"))
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
+        }
+
         /// <summary>
         /// Searches platforms by name with no limit on total returned records.
         /// </summary>
@@ -665,6 +692,31 @@ namespace openSPM
             m_dataContext.Table<BusinessUnit>().UpdateRecord(record);
         }
 
+        /// <summary>
+        /// Filters BUs by name with no limit on total returned records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <param name="showDeleted">Show deleted or not</param>
+        /// <param name="sortField">Field to sort query</param>
+        /// <param name="ascending">Bool for ascending sort</param>
+        /// <param name="page">Page to return</param>
+        /// <param name="pageSize">Size of pages to return</param>
+        /// <returns>Filtered results as Vendor Table records.</returns>
+        public IEnumerable<BusinessUnit> FilterBusinessUnits(string searchText, bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+            {
+                return m_dataContext
+                    .Table<BusinessUnit>()
+                    .QueryRecords(sortField, ascending, page, pageSize)
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
+
+            }
+            return m_dataContext
+                .Table<BusinessUnit>()
+                .QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"))
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
+        }
         #endregion
 
         #region [ BusinessUnitUserAccount Table Operations ]

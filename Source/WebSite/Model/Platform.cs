@@ -61,7 +61,7 @@ namespace openSPM.Model
 
         public Guid CreatedByID { get; set; }
 
-        public DateTime DatePlatformEnrolled { get; set; }
+        public DateTime? DatePlatformEnrolled { get; set; }
         public DateTime? DatePlatformRetired { get; set; }
 
         public string Notes { get; set; }

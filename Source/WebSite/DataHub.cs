@@ -65,12 +65,12 @@ namespace openSPM
         #region [ Properties ]
 
         /// <summary>
-        /// Gets <see cref="IRecordOperationsHub.RecordOperationsCache"/> for SignalR hub.
+        /// Gets <see cref="GSF.Web.Model.RecordOperationsCache"/> for SignalR hub.
         /// </summary>
         public RecordOperationsCache RecordOperationsCache => s_recordOperationsCache;
 
         // Gets reference to MiPlan context, creating it if needed
-        private DataContext MiPlanContext => m_miPlanContext ?? (m_miPlanContext = new DataContext("miPlanDB", MvcApplication.LogException));
+        private DataContext MiPlanContext => m_miPlanContext ?? (m_miPlanContext = new DataContext("miPlanDB", exceptionHandler: MvcApplication.LogException));
 
         #endregion
 
@@ -159,20 +159,24 @@ namespace openSPM
         #region [ Patch Table Operations ]
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
-        public int QueryPatchCount(bool showDeleted)
+        public int QueryPatchCount(bool showDeleted, string filterText = "%")
         {
+            if (filterText != "%") filterText += '%';
+
             if (showDeleted)
-                return m_dataContext.Table<Patch>().QueryRecordCount();
-            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("Name LIKE { 0 }", filterText));
+            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
             
         }
 
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
-        public IEnumerable<Patch> QueryPatches(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Patch> QueryPatches(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
+            if (filterText != "%") filterText += '%';
+
             if (showDeleted)
-               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize);
-            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE { 0 }", filterText));
+            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
         }
 
         public Patch QueryAPatch(int id)
@@ -241,14 +245,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecordCount)]
-        public int QueryPatchStatusCount()
+        public int QueryPatchStatusCount(string filterText = "%")
         {
             return m_dataContext.Table<PatchStatus>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchStatus> QueryPatchStatus(int parentID)
+        public IEnumerable<PatchStatus> QueryPatchStatus(int parentID, string filterText = "%")
         {
             return m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("ID = {0}", parentID));
         }
@@ -299,14 +303,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecordCount)]
-        public int QueryClosedPatchCount()
+        public int QueryClosedPatchCount(string filterText = "%")
         {
             return m_dataContext.Table<ClosedPatch>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecords)]
-        public IEnumerable<ClosedPatch> QueryClosedPatch(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<ClosedPatch> QueryClosedPatch(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<ClosedPatch>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -345,7 +349,7 @@ namespace openSPM
         #region [ Vendor Table Operations ]
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecordCount)]
-        public int QueryVendorCount(bool showDeleted)
+        public int QueryVendorCount(bool showDeleted, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<Vendor>().QueryRecordCount();
@@ -354,7 +358,7 @@ namespace openSPM
         }
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecords)]
-        public IEnumerable<Vendor> QueryVendors(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Vendor> QueryVendors(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize);
@@ -477,21 +481,36 @@ namespace openSPM
         #region [ Platform Table Operations ]
 
         [RecordOperation(typeof(Platform), RecordOperation.QueryRecordCount)]
-        public int QueryPlatformCount(bool showDeleted)
+        public int QueryPlatformCount(bool showDeleted, string filterText)
         {
-            if (showDeleted)
-                return m_dataContext.Table<Platform>().QueryRecordCount();
+            
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            if (showDeleted)
+                return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
+
+            return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(Platform), RecordOperation.QueryRecords)]
-        public IEnumerable<Platform> QueryPlatforms(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Platform> QueryPlatforms(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            if (showDeleted)
-                return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            if (showDeleted)
+                return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
+
+            return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -633,7 +652,7 @@ namespace openSPM
         #region [ BusinessUnit Table Operations ]
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecordCount)]
-        public int QueryBusinessUnitCount(bool showDeleted)
+        public int QueryBusinessUnitCount(bool showDeleted, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<BusinessUnit>().QueryRecordCount();
@@ -642,7 +661,7 @@ namespace openSPM
         }
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecords)]
-        public IEnumerable<BusinessUnit> QueryBusinessUnits(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<BusinessUnit> QueryBusinessUnits(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize);
@@ -793,7 +812,7 @@ namespace openSPM
         #region [ Document Table Operations ]
 
         [RecordOperation(typeof(Document), RecordOperation.QueryRecordCount)]
-        public int QueryDocumentCount()
+        public int QueryDocumentCount(string filterText = "%")
         {
             return m_dataContext.Table<Document>().QueryRecordCount();
         }
@@ -811,7 +830,7 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(Document), RecordOperation.DeleteRecord)]
-        public void DeleteDocument(int id)
+        public void DeleteDocument(int id, string filterText = "%")
         {
             m_dataContext.Table<Document>().DeleteRecord(id);
         }
@@ -843,13 +862,13 @@ namespace openSPM
         #region [ DocumentDetail View Operations ]
 
         [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecordCount)]
-        public int QueryDocumentDetailCount(string sourceTable, int sourceID)
+        public int QueryDocumentDetailCount(string sourceTable, int sourceID, string filterText = "%")
         {
             return m_dataContext.Table<DocumentDetail>().QueryRecordCount(new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
         }
 
         [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecords)]
-        public IEnumerable<DocumentDetail> QueryDocumentDetailResults(string sourceTable, int sourceID, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<DocumentDetail> QueryDocumentDetailResults(string sourceTable, int sourceID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<DocumentDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
         }
@@ -951,14 +970,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Page), RecordOperation.QueryRecordCount)]
-        public int QueryPageCount()
+        public int QueryPageCount(string filterText = "%")
         {
             return m_dataContext.Table<Page>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Page), RecordOperation.QueryRecords)]
-        public IEnumerable<Page> QueryPages(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Page> QueryPages(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<Page>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -998,14 +1017,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Menu), RecordOperation.QueryRecordCount)]
-        public int QueryMenuCount()
+        public int QueryMenuCount(string filterText = "%")
         {
             return m_dataContext.Table<Menu>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Menu), RecordOperation.QueryRecords)]
-        public IEnumerable<Menu> QueryMenus(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Menu> QueryMenus(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<Menu>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1045,14 +1064,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecordCount)]
-        public int QueryMenuItemCount(int parentID)
+        public int QueryMenuItemCount(int parentID, string filterText = "%")
         {
             return m_dataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction("MenuID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecords)]
-        public IEnumerable<MenuItem> QueryMenuItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<MenuItem> QueryMenuItems(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("MenuID = {0}", parentID));
         }
@@ -1099,14 +1118,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueListGroup), RecordOperation.QueryRecordCount)]
-        public int QueryValueListGroupCount()
+        public int QueryValueListGroupCount(string filterText = "%")
         {
             return m_dataContext.Table<ValueListGroup>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueListGroup), RecordOperation.QueryRecords)]
-        public IEnumerable<ValueListGroup> QueryValueListGroups(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<ValueListGroup> QueryValueListGroups(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<ValueListGroup>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1147,14 +1166,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.QueryRecordCount)]
-        public int QueryValueListCount(int parentID)
+        public int QueryValueListCount(int parentID, string filterText = "%")
         {
             return m_dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.QueryRecords)]
-        public IEnumerable<ValueList> QueryValueListItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<ValueList> QueryValueListItems(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
         }
@@ -1194,14 +1213,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Assessment), RecordOperation.QueryRecordCount)]
-        public int QueryAssessmentCount()
+        public int QueryAssessmentCount(string filterText = "%")
         {
             return m_dataContext.Table<Assessment>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Assessment), RecordOperation.QueryRecords)]
-        public IEnumerable<Assessment> QueryAssessments(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Assessment> QueryAssessments(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<Assessment>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1254,14 +1273,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Install), RecordOperation.QueryRecordCount)]
-        public int QueryInstallCount()
+        public int QueryInstallCount(string filterText = "%")
         {
             return m_dataContext.Table<Install>().QueryRecordCount( new RecordRestriction("IsInstalled = 0"));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Install), RecordOperation.QueryRecords)]
-        public IEnumerable<Install> QueryInstalls(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<Install> QueryInstalls(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInstalled = 0"));
         }
@@ -1306,7 +1325,7 @@ namespace openSPM
         #region [MitigationPlan Table Operations]
 
         [RecordOperation(typeof(MitigationPlan), RecordOperation.QueryRecordCount)]
-        public int QueryMitigationPlanCount(bool showDeleted)
+        public int QueryMitigationPlanCount(bool showDeleted, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<MitigationPlan>().QueryRecordCount();
@@ -1315,7 +1334,7 @@ namespace openSPM
         }
 
         [RecordOperation(typeof(MitigationPlan), RecordOperation.QueryRecords)]
-        public IEnumerable<MitigationPlan> QueryMitigationPlans(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<MitigationPlan> QueryMitigationPlans(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize);
@@ -1372,14 +1391,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecordCount)]
-        public int QueryPatchPatchStatusDetailCount(int parentID)
+        public int QueryPatchPatchStatusDetailCount(int parentID, string filterText = "%")
         {
             return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("PatchStatusKey = {0}", parentID));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(int parentID, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0}", parentID));
         }
@@ -1455,7 +1474,7 @@ namespace openSPM
         #region [ LatestVendorDiscoveryResult View Operations ]
 
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecordCount)]
-        public int QueryLatestVendorDiscoveryResultCount(bool showDeleted)
+        public int QueryLatestVendorDiscoveryResultCount(bool showDeleted, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount();
@@ -1464,7 +1483,7 @@ namespace openSPM
         }
 
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecords)]
-        public IEnumerable<LatestVendorDiscoveryResult> QueryLatestVendorDiscoveryResults(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<LatestVendorDiscoveryResult> QueryLatestVendorDiscoveryResults(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             if (showDeleted)
                 return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize);
@@ -1528,14 +1547,14 @@ namespace openSPM
         #region [ PatchStatusAssessmentView View Operations ]
 
         [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.QueryRecordCount)]
-        public int QueryPatchStatusAssessmentViewCount()
+        public int QueryPatchStatusAssessmentViewCount(string filterText = "%")
         {
                 return m_dataContext.Table<PatchStatusAssessmentView>().QueryRecordCount();
 
         }
 
         [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchStatusAssessmentView> QueryPatchStatusAssessmentViews( string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<PatchStatusAssessmentView> QueryPatchStatusAssessmentViews( string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
                 return m_dataContext.Table<PatchStatusAssessmentView>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1585,14 +1604,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecordCount)]
-        public int QueryHistoryViewCount()
+        public int QueryHistoryViewCount(string filterText = "%")
         {
             return m_dataContext.Table<HistoryView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecords)]
-        public IEnumerable<HistoryView> QueryHistoryViews(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<HistoryView> QueryHistoryViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1603,14 +1622,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchVendorPlatformView), RecordOperation.QueryRecordCount)]
-        public int QueryPatchVendorPlatformViewCount()
+        public int QueryPatchVendorPlatformViewCount(string filterText = "%")
         {
             return m_dataContext.Table<PatchVendorPlatformView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchVendorPlatformView), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchVendorPlatformView> QueryPatchVendorPlatformViews(int id)
+        public IEnumerable<PatchVendorPlatformView> QueryPatchVendorPlatformViews(int id, string filterText = "%")
         {
             return m_dataContext.Table<PatchVendorPlatformView>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
         }
@@ -1621,14 +1640,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentHistoryView), RecordOperation.QueryRecordCount)]
-        public int QueryAssessmentHistoryViewCount()
+        public int QueryAssessmentHistoryViewCount(string filterText = "%")
         {
             return m_dataContext.Table<AssessmentHistoryView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentHistoryView), RecordOperation.QueryRecords)]
-        public IEnumerable<AssessmentHistoryView> QueryAssessmentHistoryViews(int id)
+        public IEnumerable<AssessmentHistoryView> QueryAssessmentHistoryViews(int id, string filterText = "%")
         {
             return m_dataContext.Table<AssessmentHistoryView>().QueryRecords(restriction: new RecordRestriction("AssessmentID = {0}", id));
         }
@@ -1639,14 +1658,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(InstallHistoryView), RecordOperation.QueryRecordCount)]
-        public int QueryInstallHistoryViewCount()
+        public int QueryInstallHistoryViewCount(string filterText = "%")
         {
             return m_dataContext.Table<InstallHistoryView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(InstallHistoryView), RecordOperation.QueryRecords)]
-        public IEnumerable<InstallHistoryView> QueryInstallHistoryViews(int id)
+        public IEnumerable<InstallHistoryView> QueryInstallHistoryViews(int id, string filterText = "%")
         {
             return m_dataContext.Table<InstallHistoryView>().QueryRecords(restriction: new RecordRestriction("InstallID = {0}", id));
         }
@@ -1657,14 +1676,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(MitigationPlanHistoryView), RecordOperation.QueryRecordCount)]
-        public int QueryMitigationPlanHistoryViewCount()
+        public int QueryMitigationPlanHistoryViewCount(string filterText = "%")
         {
             return m_dataContext.Table<MitigationPlanHistoryView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(MitigationPlanHistoryView), RecordOperation.QueryRecords)]
-        public IEnumerable<MitigationPlanHistoryView> QueryMitigationPlanHistoryViews(int id)
+        public IEnumerable<MitigationPlanHistoryView> QueryMitigationPlanHistoryViews(int id, string filterText = "%")
         {
             return m_dataContext.Table<MitigationPlanHistoryView>().QueryRecords(restriction: new RecordRestriction("MitigationPlanID = {0}", id));
         }
@@ -1675,14 +1694,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.QueryRecordCount)]
-        public int QueryAssessmentInstallViewCount()
+        public int QueryAssessmentInstallViewCount(string filterText = "%")
         {
             return m_dataContext.Table<AssessmentInstallView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.QueryRecords)]
-        public IEnumerable<AssessmentInstallView> QueryAssessmentInstallViews(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<AssessmentInstallView> QueryAssessmentInstallViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<AssessmentInstallView>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1693,14 +1712,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecordCount)]
-        public int QueryAssessmentMitigateViewCount()
+        public int QueryAssessmentMitigateViewCount(string filterText = "%")
         {
             return m_dataContext.Table<AssessmentMitigateView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecords)]
-        public IEnumerable<AssessmentMitigateView> QueryAssessmentMitigateViews(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<AssessmentMitigateView> QueryAssessmentMitigateViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1711,14 +1730,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(ClosingReviewView), RecordOperation.QueryRecordCount)]
-        public int QueryClosingReviewViewCount()
+        public int QueryClosingReviewViewCount(string filterText = "%")
         {
             return m_dataContext.Table<ClosingReviewView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(ClosingReviewView), RecordOperation.QueryRecords)]
-        public IEnumerable<ClosingReviewView> QueryClosingReviewViews(string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<ClosingReviewView> QueryClosingReviewViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize);
         }
@@ -1729,14 +1748,14 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(VendorPlatformView), RecordOperation.QueryRecordCount)]
-        public int QueryVendorPlatformViewCount()
+        public int QueryVendorPlatformViewCount(string filterText = "%")
         {
             return m_dataContext.Table<VendorPlatformView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(VendorPlatformView), RecordOperation.QueryRecords)]
-        public IEnumerable<VendorPlatformView> QueryVendorPlatformViews(int id)
+        public IEnumerable<VendorPlatformView> QueryVendorPlatformViews(int id, string filterText = "%")
         {
             return m_dataContext.Table<VendorPlatformView>().QueryRecords(restriction: new RecordRestriction("VendorID = {0}", id));
         }
@@ -1751,7 +1770,7 @@ namespace openSPM
         // should be dropped in-lieu of iframe and/or service based access to MiPlan...
 
         [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecordCount)]
-        public int QueryMiPlanCount(bool showDeleted)
+        public int QueryMiPlanCount(bool showDeleted, string filterText = "%")
         {
             if (showDeleted)
                 return MiPlanContext.Table<MiPlan>().QueryRecordCount(new RecordRestriction());
@@ -1760,7 +1779,7 @@ namespace openSPM
         }
 
         [RecordOperation(typeof(MiPlan), RecordOperation.QueryRecords)]
-        public IEnumerable<MiPlan> QueryMiPlanes(bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<MiPlan> QueryMiPlanes(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             if (showDeleted)
                 return MiPlanContext.Table<MiPlan>().QueryRecords(sortField, ascending, page, pageSize);
@@ -1817,14 +1836,14 @@ namespace openSPM
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ThemeFields), RecordOperation.QueryRecordCount)]
-        public int QueryThemeFieldsCount(int parentID)
+        public int QueryThemeFieldsCount(int parentID, string filterText = "%")
         {
             return MiPlanContext.Table<ThemeFields>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ThemeFields), RecordOperation.QueryRecords)]
-        public IEnumerable<ThemeFields> QueryThemeFieldsItems(int parentID, string sortField, bool ascending, int page, int pageSize)
+        public IEnumerable<ThemeFields> QueryThemeFieldsItems(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return MiPlanContext.Table<ThemeFields>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
         }

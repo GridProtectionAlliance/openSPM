@@ -60,7 +60,7 @@ namespace openSPM.Controllers
         {
             // Establish data context for the view
             m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
-            m_miPlanContext = new DataContext("miPlanDB", MvcApplication.LogException );
+            m_miPlanContext = new DataContext("miPlanDB", exceptionHandler: MvcApplication.LogException );
             ViewData.Add("DataContext", m_dataContext);
             ViewData.Add("MiPlanContext", m_miPlanContext);
 

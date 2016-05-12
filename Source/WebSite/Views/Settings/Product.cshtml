@@ -74,9 +74,9 @@
 }
 @helper BodyRows()
 {
-    <td width="35%" class="text-left valign-middle" data-bind="text: lookupNameValue(VendorID)"></td>
+    <td width="10%" class="text-left valign-middle" data-bind="text: lookupAbbreviationValue(VendorID)"></td>
 
-    <td width="30%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Abbreviation, click: $parent.viewPageRecord"></button></td>
+    <td width="55%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
     <td width="30%" class="text-left valign-middle" data-bind="text: Version"></td>
 
     <td width="5%" class="text-center valign-middle" nowrap>
@@ -98,27 +98,23 @@
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Platform>(ViewBag))
-        @Html.Raw(Model.RenderAbstract<Vendor>("Name"))
+        @Html.Raw(Model.RenderAbstract<Vendor>("Abbreviation"))
         
         $(function () {
 
             $("#pageHeader").append("@Html.Raw(PlatformFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+            
+
             $('#platformfilter').on('keyup', function (e) {
-                if (viewModel.dataHubIsConnected()) {
-                    dataHub.filterPlatforms($('#platformfilter').val(), @ViewBag.ShowDeleted.ToString().ToLower(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function (data) {
-                        $(viewModel).trigger("pageRecordsQueried", [data]);
-                        viewModel.pageRecords.removeAll();
-                        viewModel.recordCount(data.length);
-                        viewModel.pageRecords(data);
+                if ($('#platformfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#platformfilter').val();
+                    viewModel.filterPageRecords();
 
-                        refreshHubDependentControlState();
-                        $("[id='recordRow']").css("visibility", "visible");
-                        $("#loadingDataLabel").hide();
-
-                    }).fail(function (error) {
-                        showErrorMessage(error);
-                    });
                 }
+    
             });
         });
     </script>

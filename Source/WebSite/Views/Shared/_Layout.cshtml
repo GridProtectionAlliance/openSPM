@@ -28,6 +28,11 @@
 @using Page = openSPM.Model.Page
 @model AppModel
 @{
+#if DEBUG
+    const string min = "";
+#else
+    const string min = ".min";
+#endif
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> layoutSettings = Model.Global.LayoutSettings;
     string copyrightText, copyrightUrl, setting;
@@ -111,11 +116,9 @@
     <meta name="application-name" content="@Model.Global.ApplicationName" />
     <meta name="description" content="@Model.Global.ApplicationDescription" />
     <meta name="keywords" content="@Model.Global.ApplicationKeywords" />
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <link href="@Url.Content($"~/Content/bootstrap{min}.css")" rel="stylesheet">
     <link href="@Url.Content(Model.Global.BootstrapTheme)" rel="stylesheet">
-    @if (Model.Global.BootstrapTheme.EndsWith("bootstrap.min.css")) {
-    <link href="~/Content/bootstrap-theme.min.css" rel="stylesheet">
-    }
     @Styles.Render("~/css.bundle/bootstrap")
     @Styles.Render("~/css.bundle/jqueryui")
     @Styles.Render("~/css.bundle/primeui")

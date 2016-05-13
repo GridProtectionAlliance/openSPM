@@ -119,8 +119,17 @@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    <div class="col-md-12">
+    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.View">
+        <div class="col-md-12">
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PatchMnemonic"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("VendorName"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PlatformName"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("VendorReleaseDate"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("EvaluationDeadline"))
+            @Html.Raw(dataContext.AddTextAreaField<PatchPatchStatusDetail>("Summary"))
+        </div>
     </div>
+    
 }
 @Html.Partial("PagedViewModel")
 <div id="manageDocumentsDialog" class="modal fade modal-wide" style="z-index: 2000">

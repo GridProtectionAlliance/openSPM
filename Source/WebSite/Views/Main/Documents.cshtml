@@ -34,7 +34,7 @@
     string sourceTable = parameters["SourceTable"];
     string sourceField = parameters["SourceField"];
     bool hideButton = bool.Parse(parameters["HideButton"] ?? "false");
-    int hideHeader = int.Parse(parameters["HideHeader"] ?? "0");
+    string titleStart = parameters["titleStart"] ?? "Manage";
 
     int sourceID = int.Parse(parameters["SourceID"] ?? "0");
 
@@ -43,7 +43,7 @@
         throw new ArgumentException("Expected source document page parameters are missing or invalid");
     }
 
-    ViewBag.CustomTitle = "Manage \"" + parameters["Name"] + "\" " + sourceTable + " Documents";
+    ViewBag.CustomTitle = titleStart + " \"" + parameters["Name"] + "\" " + sourceTable + " Documents";
     ViewBag.AddNewEditTitle = "Documents for \"" + parameters["Name"] + "\" " + sourceTable;
     ViewBag.PageHasMenu = false;
     ViewBag.HeaderColumns = new[]
@@ -82,10 +82,6 @@
         @Html.Raw(Model.RenderValueListClientLookupFunction("fileType", lookupFunctionName: "lookupFileTypeValue"))
 
         $(function () {
-
-            if(@hideHeader)
-                $('#pageHeader').hide();
-            
 
             $("#addNewEditDialog").on("shown.bs.modal", function () {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up

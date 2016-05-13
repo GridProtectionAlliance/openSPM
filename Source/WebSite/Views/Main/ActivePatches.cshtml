@@ -122,15 +122,19 @@
     </div>
 }
 @Html.Partial("PagedViewModel")
-<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
+<div id="manageDocumentsDialog" class="modal fade modal-wide" style="z-index: 2000">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-body">
+            <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
                 <iframe style="border: none" id="manageDocumentsFrame"></iframe>
+            </div>
+            <div class="modal-footer">
                 <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
             </div>
-        </div>
+         </div>
     </div>
 </div>
 
@@ -174,10 +178,16 @@
                             <label for="patchlink">Link</label>
                             <div class="form-control" id="patchlink"></div>
                         </div>
-                        <div class="row" style="padding-left: 13px">
-                            <iframe style="border: none" id="manageDocumentsWindowFrame" marginwidth="10" marginheight="0"></iframe>
-                        </div>
+                        @*<div class="row" style="padding-left: 13px">
+                            <iframe style="border: none" id="manageDocumentsWindowFrame" marginwidth="0" marginheight="0"></iframe>
+                        </div>*@
+
                     </div>
+                    <br/>
+                    <div class="row" style="padding-left: 13px">
+                        <button type="button" class="btn btn-primary" id="patchDocuments">Get Patch Documents</button>
+                    </div>
+
                     <hr/>
                     <label for="assessment"><h3><u>Assessment</u></h3></label>
                         <div id="assessment">
@@ -216,6 +226,7 @@
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("patchClass"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
         function beginAssessment(record) {
             $('#patchid').html(record.PatchStatusID);
@@ -232,9 +243,9 @@
             $('#patchlink').html(record.Link);
             $('#details').val("");
             $('#assessmentSelect').prop('selectedIndex', 0);
-            openManageDocumentsWindow(record);
+            //openManageDocumentsWindow(record);
             $("#assessmentDialog").modal("show");
-            $('#manageDocuments').one('click', function(){ openManageDocumentsWindow(record); })
+            $('#patchDocuments').on('click', function(){ openManageDocumentsModal(record); })
             $('#saveAssessmentButton').one('click', function() { if (viewModel.dataHubIsConnected) {
                                                                     viewModel.currentRecord(record);
                                                                     viewModel.saveNewRecord();
@@ -304,14 +315,23 @@
 
         function openManageDocumentsWindow(record) {
             $("#manageDocumentsWindowFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true" + "&HideHeader=1",
-               "height": "100%",
-               "width": "100%"
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true" + "&HideHeader=1",
+               "height": "200px",
+               "width": "97%"
         });
+        }
+        
+        function openManageDocumentsModal(record) {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true" + "&titleStart=View",
+                "height": ($(document).height() - 150) + "px",
+               "width": "100%"
+            });
+            $("#manageDocumentsDialog").modal("show");
         }
 
         function openManageDocumentsDialog(record) {
-            const count = parseInt(notNull($("#documentCount" + record.PatchID).text(), 0));
+            const count = parseInt(notNull($("#documentCount" + record.PatchStatusID).text(), 0));
             var initialMode = "";
 
             if (count < 1)

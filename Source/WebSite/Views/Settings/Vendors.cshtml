@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
@@ -38,16 +39,42 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Patch Source";
 }
-<div class="row">
-    <div class="col-md-6">
-        <label for="vendorfilter">Vendor Name Filter:</label>
-        <div class="input-group">
-            <input type="text" class="form-control" id="vendorfilter">
-            <span id="vendorfilteradd" class="input-group-addon"></span>
+@section StyleSheets{
+    <style>
+        .right-inner-addon {
+            position: relative;
+        }
+
+            .right-inner-addon input {
+                padding-right: 30px;
+            }
+
+            .right-inner-addon i {
+                position: absolute;
+                right: 0px;
+                padding: 10px 12px;
+                pointer-events: none;
+            }
+    </style>
+}
+@helper VendorFilter()
+{
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='form-group'>
+                <label for='vendorfilter'>Vendor Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search' />
+                </div>
+            </div>
         </div>
     </div>
-</div>
-<br/>
+
+}
+
+
+
 
 @helper BodyRows()
 {
@@ -96,20 +123,24 @@
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Vendor>(ViewBag))
-        
-        $(function () {
-            var filterdata;
 
-            initializeAutoCompleteLookupField("vendorfilter", dataHub.searchVendors, false, true, 10);
-            
-            $("#vendorfilter").puiautocomplete({
-                select: function (event, item) {
-                    console.log(item);
-                    filterdata = item.data("id");
+        $(function () {
+            $("#pageHeader").append("@Html.Raw(VendorFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+
+
+            $('#vendorfilter').on('keyup', function (e) {
+                if ($('#vendorfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#vendorfilter').val();
+                    viewModel.filterPageRecords();
+
                 }
+
             });
 
-           
+
         });
     </script>
 }

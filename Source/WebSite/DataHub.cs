@@ -349,21 +349,36 @@ namespace openSPM
         #region [ Vendor Table Operations ]
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecordCount)]
-        public int QueryVendorCount(bool showDeleted, string filterText = "%")
+        public int QueryVendorCount(bool showDeleted, string filterText)
         {
-            if (showDeleted)
-                return m_dataContext.Table<Vendor>().QueryRecordCount();
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+
+            if (showDeleted)
+                return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
+
+            return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecords)]
-        public IEnumerable<Vendor> QueryVendors(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<Vendor> QueryVendors(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            if (showDeleted)
-                return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            if (showDeleted)
+                return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
+
+            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         public IEnumerable<Vendor> QueryVendorsNonPaged()
@@ -654,19 +669,33 @@ namespace openSPM
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecordCount)]
         public int QueryBusinessUnitCount(bool showDeleted, string filterText = "%")
         {
-            if (showDeleted)
-                return m_dataContext.Table<BusinessUnit>().QueryRecordCount();
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            if (showDeleted)
+                return m_dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
+
+            return m_dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecords)]
         public IEnumerable<BusinessUnit> QueryBusinessUnits(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            if (showDeleted)
-                return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            if (showDeleted)
+                return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
+
+            return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]

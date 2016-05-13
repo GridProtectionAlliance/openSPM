@@ -325,7 +325,7 @@
                 $("#editSMEPlatformsUserTitle").text(selectedBusinessUnitUserAccount.UserAccountName);
                 $("#editSMEPlatformsDialog").modal("show");
             }
-            
+
             refreshBusinessUnitSMETable();
         }
 
@@ -465,24 +465,18 @@
             var selectedPlatformID;
             var selectedUserAccountID;
             var smePlatformsTableInitialized = false;
-        
+
             $("#pageHeader").append("@Html.Raw(BUFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
             $('#bufilter').on('keyup', function (e) {
-                if (viewModel.dataHubIsConnected()) {
-                    dataHub.filterBusinessUnits($('#bufilter').val(), @ViewBag.ShowDeleted.ToString().ToLower(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function (data) {
-                        $(viewModel).trigger("pageRecordsQueried", [data]);
-                        viewModel.pageRecords.removeAll();
-                        viewModel.recordCount(data.length);
-                        viewModel.pageRecords(data);
+                if ($('#bufilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#bufilter').val();
+                    viewModel.filterPageRecords();
 
-                        refreshHubDependentControlState();
-                        $("[id='recordRow']").css("visibility", "visible");
-                        $("#loadingDataLabel").hide();
-
-                    }).fail(function (error) {
-                        showErrorMessage(error);
-                    });
                 }
+
             });
 
             $("#addNewEditDialog").on("shown.bs.modal", function () {

@@ -509,6 +509,7 @@
     <Content Include="Views\Main\AssessmentMitigateView.cshtml" />
     <Content Include="Views\Settings\Product.cshtml" />
     <Content Include="Views\Main\VendorView.cshtml" />
+    <Content Include="Views\System\SelectTheme.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

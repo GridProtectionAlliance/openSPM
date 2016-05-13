@@ -207,7 +207,9 @@
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryDocumentDetailCount("DiscoveryResult", sourceID).done(function (count) {
+                console.log(sourceID);
+                dataHub.queryDocumentDetailCount('DiscoveryResult', sourceID, null).done(function (count) {
+                    console.log("doing");
                     $("#documentCount" + sourceID).text(count.toString());
                 });
             }
@@ -216,7 +218,7 @@
         }
 
         function openManageDocumentsDialog(record) {
-            const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
+            const count = parseInt(notNull($("#documentCount" + record.DiscoveryResultID).text(), 0));
             var initialMode = "";
 
             if (count < 1)

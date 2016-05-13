@@ -894,13 +894,13 @@ namespace openSPM
         #region [ DocumentDetail View Operations ]
 
         [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecordCount)]
-        public int QueryDocumentDetailCount(string sourceTable, int sourceID, string filterText = "%")
+        public int QueryDocumentDetailCount(string sourceTable, int sourceID, string filterText)
         {
             return m_dataContext.Table<DocumentDetail>().QueryRecordCount(new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
         }
 
         [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecords)]
-        public IEnumerable<DocumentDetail> QueryDocumentDetailResults(string sourceTable, int sourceID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<DocumentDetail> QueryDocumentDetailResults(string sourceTable, int sourceID, string sortField, bool ascending, int page, int pageSize, string filterText)
         {
             return m_dataContext.Table<DocumentDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
         }

@@ -1420,16 +1420,30 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecordCount)]
-        public int QueryPatchPatchStatusDetailCount(int parentID, string filterText = "%")
+        public int QueryPatchPatchStatusDetailCount(int parentID, string filterText)
         {
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("PatchStatusKey = {0}", parentID));
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("PatchStatusKey = {0} AND BusinessUnitID LIKE {1}", parentID, filterText));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0}", parentID));
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0} AND BusinessUnitID LIKE {1}", parentID, filterText));
         }
 
         public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetailsByBU(int parentID, int buID, string sortField, bool ascending, int page, int pageSize)
@@ -1477,6 +1491,78 @@ namespace openSPM
         }
 
         #endregion
+
+        #region [MyAssessmentsView Table Operations]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MyAssessmentsView), RecordOperation.QueryRecordCount)]
+        public int QueryMyAssessmentsViewCount(string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+            return m_dataContext.Table<MyAssessmentsView>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MyAssessmentsView), RecordOperation.QueryRecords)]
+        public IEnumerable<MyAssessmentsView> QueryMyAssessmentsViews(string sortField, bool ascending, int page, int pageSize, string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+            return m_dataContext.Table<MyAssessmentsView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+        }
+
+        [RecordOperation(typeof(MyAssessmentsView), RecordOperation.CreateNewRecord)]
+        public MyAssessmentsView NewMyAssessmentsView()
+        {
+            return new MyAssessmentsView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(MyAssessmentsView), RecordOperation.AddNewRecord)]
+        public void AddNewMyAssessmentsViewInstall(MyAssessmentsView record)
+        {
+            Assessment result = DeriveAssessment(record);
+            result.CreatedByID = GetCurrentUserID();
+            result.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Assessment>().AddNewRecord(result);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(MyAssessmentsView), RecordOperation.UpdateRecord)]
+        public void UpdateMyAssessmentsViewInstallTable(MyAssessmentsView record)
+        {
+            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+        }
+
+        private Assessment DeriveAssessment(MyAssessmentsView record)
+        {
+            return new Assessment()
+            {
+                PatchStatusID = record.PatchStatusID,
+                AssessmentResultKey = record.ImpactKey,
+                Details = record.Detail,
+                CreatedOn = DateTime.UtcNow,
+                CreatedByID = GetCurrentUserID(),
+                UpdatedOn = DateTime.UtcNow,
+                UpdatedByID = GetCurrentUserID(),
+                IsAssessed = false
+
+            };
+        }
+
+        #endregion
+
 
         #region [PatchStatusAssessmentDetail Table Operations]
 

@@ -231,6 +231,7 @@
     <Compile Include="Model\MiPlan.cs" />
     <Compile Include="Model\MitigationPlan.cs" />
     <Compile Include="Model\MitigationPlanHistoryView.cs" />
+    <Compile Include="Model\MyAssessmentsView.cs" />
     <Compile Include="Model\NoticeLog.cs" />
     <Compile Include="Model\PatchPatchStatusDetail.cs" />
     <Compile Include="Model\PatchStatusAssessmentDetail.cs" />

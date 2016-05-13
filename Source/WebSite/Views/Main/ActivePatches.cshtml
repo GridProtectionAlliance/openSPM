@@ -89,7 +89,8 @@
         <div class='col-md-6'>
             <label for='bufilter'>Business Unit Filter:</label>
             <select class='form-control' id='bufilter' onchange='filterBU()'>
-                <option value='0'>None</option>
+                <option value='none'>None</option>
+                <option value='mine'>My Assessments</option>
                 @for (int i = 0; i < ViewBag.BUCounts; ++i)
                 {
                     var str = "<option value='" + ViewBag.BUNames[i].ID + "'>" + ViewBag.BUNames[i].Name + "</option>";
@@ -223,6 +224,7 @@
 @Scripts.Render("~/js.bundle/fileinput")
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<PatchPatchStatusDetail>(ViewBag, "-IsExpedited", 2))
+
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("patchClass"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
@@ -417,35 +419,24 @@
             });
 
             $("#pageHeader").append("@Html.Raw(BUFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+        
+
             setTimeout(function() {viewModel.calculatePageSize(true);}, 100);
         });
 
         function filterBU() {
-            if(viewModel.dataHubIsConnected()){
-                if($('#bufilter').val() == 0)
-                {
-                    viewModel.queryPageRecords();
-                    viewModel.queryRecordCount().done(function(count){
-                        viewModel.recordCount(count);
-                    });
-                }
-                else{
-                    dataHub.queryPatchPatchStatusDetailsByBU(2,$('#bufilter').val(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function(data){
-                        $(viewModel).trigger("pageRecordsQueried", [data]);
-                        viewModel.pageRecords.removeAll();
-                        //console.log(data);
-                        viewModel.recordCount(data.length);
-                        viewModel.pageRecords(data);
+        
+            if ($('#bufilter').val() == 'none') {
+                viewModel.filterText = '%';
+                viewModel.filterPageRecords();
+            }else if($('#bufilter').val() == 'mine'){
+                
+            } else {
+                viewModel.filterText = $('#bufilter').val();
+                viewModel.filterPageRecords();
 
-                        refreshHubDependentControlState();
-                        $("[id='recordRow']").css("visibility", "visible");
-                        $("#loadingDataLabel").hide();
-
-                    }).fail(function (error) {
-                        showErrorMessage(error);
-                    });
-                }
             }
+            
         }
 
 

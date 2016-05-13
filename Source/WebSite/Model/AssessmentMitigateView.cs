@@ -10,6 +10,7 @@ namespace openSPM.Model
     {
         [PrimaryKey(true)]
         public int ID { get; set; }
+        public string Title { get; set; }
         public int PatchStatusID { get; set; }
         public int PatchStatusKey { get; set; }
         public string Name { get; set; }

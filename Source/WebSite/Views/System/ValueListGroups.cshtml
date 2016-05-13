@@ -75,7 +75,7 @@
 
         function getValueListItemCount(groupID, element) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryValueListCount(groupID).done(function (count) {
+                dataHub.queryValueListCount(groupID, null).done(function (count) {
                     const valueListMode = $("#valueListMode" + groupID);
                     const valueListCount = $("#valueListCount" + groupID);
                     const modeText = count > 0 ? "Edit" : "Add";

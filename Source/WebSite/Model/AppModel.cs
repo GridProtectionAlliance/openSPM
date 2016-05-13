@@ -90,10 +90,11 @@ namespace openSPM.Model
         /// Renders client-side Javascript function for looking up value list values based on key.
         /// </summary>
         /// <param name="groupName">Value list group name as defined in ValueListGroup table.</param>
+        /// <param name="fieldName">Use field from Value list table, defaults to Name.</param>
         /// <param name="valueListName">Name of associative array, defaults to <paramref name="groupName"/> + Values.</param>
         /// <param name="lookupFunctionName">Name of lookup function, defaults to lookup + <paramref name="groupName"/>.ToTitleCase() + Value.</param>
         /// <returns>Client-side Javascript lookup function.</returns>
-        public string RenderValueListClientLookupFunction(string groupName, string valueListName = null, string lookupFunctionName = null)
+        public string RenderValueListClientLookupFunction(string groupName, string fieldName = "Name", string valueListName = null, string lookupFunctionName = null)
         {
             StringBuilder javascript = new StringBuilder();
 
@@ -113,7 +114,9 @@ namespace openSPM.Model
 
             foreach (ValueList valueList in DataContext.Table<ValueList>().QueryRecords("SortOrder", new RecordRestriction("GroupID = {0} AND Enabled <> 0 AND Hidden = 0", key)))
             {
-                javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
+                if(fieldName == "Abbreviation")
+                    javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Abbreviation.JavaScriptEncode()}\";");
+                else javascript.AppendLine($"        {valueListName}[{valueList.Key}] = \"{valueList.Text.JavaScriptEncode()}\";");
             }
 
             javascript.AppendLine($"\r\n        function {lookupFunctionName}(value) {{");

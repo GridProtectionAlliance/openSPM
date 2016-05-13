@@ -76,7 +76,7 @@
 
         function getMenuItemCount(pageID, element) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryMenuItemCount(pageID).done(function (count) {
+                dataHub.queryMenuItemCount(pageID, null).done(function (count) {
                     const menuItemMode = $("#menuItemMode" + pageID);
                     const menuItemCount = $("#menuItemCount" + pageID);
                     const modeText = count > 0 ? "Edit" : "Add";

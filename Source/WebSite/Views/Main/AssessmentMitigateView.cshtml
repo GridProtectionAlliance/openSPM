@@ -262,7 +262,7 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<AssessmentMitigateView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
-        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
         @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
         @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
         @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))

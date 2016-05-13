@@ -28,12 +28,15 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
+using System.Web.Mvc;
 using GSF;
 using GSF.Data.Model;
 using GSF.Identity;
 using GSF.Web.Model;
 using GSF.Web.Security;
 using Microsoft.AspNet.SignalR;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using openSPM.Model;
 using openSPM.Models;
 
@@ -1420,35 +1423,68 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecordCount)]
-        public int QueryPatchPatchStatusDetailCount(int parentID, string filterText)
+        public int QueryPatchPatchStatusDetailCount(string filterText)
         {
-            if (filterText == null) filterText = "%";
+
+            Dictionary<string, string> parameters = filterText.ParseKeyValuePairs();
+
+            string setting;
+            int action;
+            string filter;
+
+            if (!parameters.TryGetValue("Action", out setting) || !int.TryParse(setting, out action))
+                action = 0;
+
+            parameters.TryGetValue("Filter", out filter);
+
+            if (filter == null) filter = "%";
+
+            else if(action == 1)
+            {
+                // Do this (action 1)
+                return m_dataContext.Table<MyAssessmentsView>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+            }
             else
             {
+                // Do that (action 0)
                 // Build your filter string here!
-                filterText += "%";
+                filter += "%";
             }
 
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("PatchStatusKey = {0} AND BusinessUnitID LIKE {1}", parentID, filterText));
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("BusinessUnitID LIKE {0}", filter));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText)
+        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetails(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            if (filterText == null) filterText = "%";
+            Dictionary<string, string> parameters = filterText.ParseKeyValuePairs();
+
+            string setting;
+            int action;
+            string filter;
+
+            if (!parameters.TryGetValue("Action", out setting) || !int.TryParse(setting, out action))
+                action = 0;
+
+            parameters.TryGetValue("Filter", out filter);
+
+            if (filter == null) filter = "%";
+
+            else if (action == 1)
+            {
+                // Do this (action 1)
+                return m_dataContext.Table<MyAssessmentsView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+
+            }
             else
             {
+                // Do that (action 0)
                 // Build your filter string here!
-                filterText += "%";
+                filter += "%";
             }
 
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0} AND BusinessUnitID LIKE {1}", parentID, filterText));
-        }
-
-        public IEnumerable<PatchPatchStatusDetail> QueryPatchPatchStatusDetailsByBU(int parentID, int buID, string sortField, bool ascending, int page, int pageSize)
-        {
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("PatchStatusKey = {0} AND BusinessUnitID = {1}", parentID, buID));
+            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID LIKE {0}", filter));
         }
 
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.CreateNewRecord)]

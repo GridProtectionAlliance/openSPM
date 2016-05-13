@@ -66,8 +66,7 @@
         new[] { "ID", "Patch ID", "text-left" },
         new[] { null, "Business Unit", "text-left valign-middle"},
         new[] { null, "Title", "text-left valign-middle"},
-        new[] { "AssessmentResultKey", "Result", "text-left" },
-        new[] { "Details", "Basis", "text-left"},
+        new[] { "AssessmentResultKey", "As'mt Result", "text-left" },
         new[] { "CreatedOn", "Due Date", "text-left"},
         new[] { null, "Action", "text-center valign-middle" },
         new[] { null, "Documents", "text-center valign-middle" }
@@ -153,12 +152,11 @@
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
-    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: VendorPatchName"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
+    <td width="25%" class="text-left valign-middle"><div nowrap data-bind="text: VendorPatchName"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
-    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
-        <td width="20%" class="text-center valign-middle">
+        <td width="30%" class="text-center valign-middle">
             <button type="button" data-bind="click: installPatch.bind($data)" class="btn btn-danger btn-sm">Install</button>
             <button type="button" data-bind="click: reassessPatch.bind($data)" class="btn btn-danger btn-sm">Reassess</button>
 
@@ -208,15 +206,15 @@
             <div class="modal-body auto-height">
                 <form role="form">
                     <div id="patchidinstall" class="form-control" style="visibility: hidden"></div>
-                    <label for="patchnameinstall">Patch Name</label>
+                    <label for="patchnameinstall">Patch ID:</label>
                     <div class="form-control" id="patchnameinstall"></div>
-                    <label for="businessunitinstall">Business Unit</label>
+                    <label for="businessunitinstall">Business Unit:</label>
                     <div class="form-control" id="businessunitinstall"></div>
-                    <label for="workmangamentidinstall">WorkManagement ID</label>
+                    <label for="workmangamentidinstall">WorkManagement ID:</label>
                     <input id="workmangamentidinstall" class="form-control" />
-                    <label for="completeddateinstall">Completed Date</label>
+                    <label for="completeddateinstall">Completed Date:</label>
                     <input type="text" class="form-control" id="completeddateinstall" />
-                    <label for="details">Completed Notes</label>
+                    <label for="details">Completed Notes:</label>
                     <textarea id="details" class="form-control"></textarea>
                 </form>
             </div>

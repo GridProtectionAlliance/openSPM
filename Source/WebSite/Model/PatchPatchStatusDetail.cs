@@ -10,6 +10,8 @@ namespace openSPM.Model
     [Table("PatchPatchStatusDetail")]
     public class PatchPatchStatusDetail
     {
+        public Guid? UserAccountID { get; set; }
+
         public int PatchID { get; set; }
         public int BusinessUnitID { get; set; }
 
@@ -19,7 +21,7 @@ namespace openSPM.Model
         public int ImpactKey { get; set; }
         public DateTime VendorReleaseDate { get; set; }
         public DateTime EvaluationDeadline { get; set; }
-        public int PatchStatusKey { get; set; } 
+        public int PatchStatusKey { get; set; }
         public bool IsExpedited { get; set; }
         public int VendorID { get; set; }
         public string VendorName { get; set; }
@@ -30,6 +32,5 @@ namespace openSPM.Model
         public string Summary { get; set; }
         public string Detail { get; set; }
         public string Link { get; set; }
-
     }
 }

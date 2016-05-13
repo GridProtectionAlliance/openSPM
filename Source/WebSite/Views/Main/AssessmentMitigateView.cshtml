@@ -66,7 +66,6 @@
         new[] { null, "Business Unit", "text-left valign-middle"},
         new[] { null, "Title", "text-left valign-middle"},
         new[] { "AssessmentResultKey", "Result", "text-left" },
-        new[] { "Details", "Basis", "text-left"},
         new[] { "CreatedOn", "Due Date", "text-left"},
         new[] { null, "Action", "text-center valign-middle" },
         new[] { null, "Documents", "text-center valign-middle" }
@@ -152,8 +151,8 @@
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
-    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: VendorPatchName"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Title"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
     <td width="10%" class="text-left valign-middle">
@@ -163,11 +162,7 @@
         <button type="button" data-bind="click: mitigatePatch.bind($data)" class="btn btn-danger btn-sm">Create Plan</button>
         <button type="button" data-bind="click: reassessPatch.bind($data)" class="btn btn-danger btn-sm">Reassess</button>
     </td>
-            <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
-            <td width="5%" class="text-center valign-middle" nowrap>
-                <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
-                <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
-            </td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
 }
 
 @helper AddNewEditDialog(DataContext dataContext)

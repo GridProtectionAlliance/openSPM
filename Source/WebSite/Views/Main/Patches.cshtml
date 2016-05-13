@@ -149,7 +149,7 @@
 
         function getDocumentCount(sourceID, element) {
             if (viewModel.dataHubIsConnected()) {
-                dataHub.queryDocumentDetailCount("Patch", sourceID).done(function(count) {
+                dataHub.queryDocumentDetailCount("Patch", sourceID, null).done(function(count) {
                     $("#documentCount" + sourceID).text(count.toString());
                 });
             }

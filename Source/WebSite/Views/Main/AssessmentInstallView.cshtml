@@ -148,14 +148,14 @@
         @Html.Raw(Model.RenderViewModelConfiguration<AssessmentInstallView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
+        
+        const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=InstallDocument&SourceField=InstallID"))";
 
         $(function() {
-            const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=InstallDocument&SourceField=InstallID"))";
 
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
             
             $('#addNewEditDialog').on("shown.bs.modal",function(){
-                $('#uploadFiles').fileinput('reset');
 
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,
@@ -258,7 +258,7 @@
                 initialMode = "/AddNew";
 
             $("#manageDocumentsFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.VendorPatchName),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
              });
@@ -276,6 +276,11 @@
 
 
         var InstallID;
+        var selectedFiles;
+        
+        $(viewModel).on("beforeSave", function (event, observableRecord) {
+            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
+        });
 
         $(viewModel).on("recordSaved", function(event, record, newRecord){
             // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
@@ -283,6 +288,15 @@
                 if (newRecord) {
                     dataHub.getLastInstallID().done(function(id) {
                         InstallID = id.toString();
+                        $("#uploadFiles").fileinput({
+                            uploadUrl: fileUploadUrl + "&SourceID=" + id.toString(),
+                            uploadAsync: true
+                        });
+
+                        for (var i = 0; i < selectedFiles.length; i++) {
+                            $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
+                        }
+
                         $("#uploadFiles").fileinput("upload");
 
                     });
@@ -299,10 +313,3 @@
        
     </script>
 }
-
-
-
-
-
-
-

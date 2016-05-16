@@ -77,105 +77,43 @@
     ViewBag.AddNewEditTitle = "Assessment";
     ViewBag.HideAddNewButton = true;
 }
-
-@*<p>&nbsp;</p>
-
-    <p>
-        On "Patch Start" a Patch Status record is created for each BUgroup that has the platform selected (the Platform BUG Link Table).  It will be
-        typical that more that one BU will be impacted by a security patch -- and all may be.  Therefore, if "all BUs" are selected as the filter
-    </p>
-    <p>&nbsp;</p>
-
-    <ul>
-        <li>A filter will be available at the top of the screen for "Business Unit" and default to the BUCs or SMEs BU -- or to "all" for everyone else.</li>
-        <li>This list will be sorted by assessment due date, patchID (the TVA assigned label), BUGroup, patch Title</li>
-        <li>It will include a status light on the left to indicate the compliance alarm state -- gray, yellow, amber, red or black.</li>
-        <li>A button will allow the BUC for the BUGroup to "update" the status of the security patch by recording the assessment result -- patch, mitigate, patch & mitigate, not applicable.</li>
-        <li>This assessment is a compliance milestone.  Phase 2 -- If a patch must be "reassessed" -- i.e., the assessment result changing but the time of assessment for compliance purposes not changing -- then the Owner must make this change in the assessment result. (This may be a complex collection of SQL)</li>
-        <li>There is no need for a delete button since the BUC (or Owner) can declare the assignment of the patch to the BUG as "not applicable"</li>
-        <li>A button will be available at the bottom for the PIC to "add" a patch status record.  This will be needed if after initial patch entry that an additional BUG should have been linked to the platform.</li>
-    </ul>
-    <p>&nbsp;</p>
-    <p>
-        <b>Computation of Alarm State</b> - The openSPM will "rebuild" the alarm state table on a daily basis -- e.g., at 7:30 AM.  This time of this rebuild is significant in that this will be the time that email notifications will be sent.
-        Alarm State is based on the difference (in days) in two dates -- e.g., today's date and the date of the next compliance item in the status table.  Therefore, status will change as (1) the alarm state table is rebuilt daily or (2)
-        as the status of an individual item changes on an ad-hoc basis -- i.e., if the assessment is shown as being in critical alarm for a particular BU and the BUC completes the assessment, the alarm state must change immediately.  Given the
-        differing domain of discovery (a function of vendor), patch assessment and application (a function of the patch) and mitigation plan (a function of the plan action items) and the differences in a priori knowledge about the keys in each
-        of these cases, 3 separate alarm state tables are used.  The vendor alarm state will have a many rows as there are vendors (alarms based review periodicity as configured in settings.)  The patch alarm state will have as many rows as there are in the patch status table for patches that are not "complete" or
-        "closed" (alarms based on approaching compliance date as configured in settings).  The mitigation status table will have as many rows as there are action items in mitigation plans that have not been marked as complete (alarms have no compliance impact and are based on "not starting on schedule" or "late finish")
-    </p>
-
-    <p>&nbsp;</p>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>&nbsp;</th>
-                <th>Required Fields</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>Patch Identifier</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Assessment Result</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>Basis for Mitigation (if action includes mitigation)</td>
-            </tr>
-
-        </tbody>
-    </table>
-    <p>&nbsp;</p>
-    <table class="table">
-        <thead>
-        <tr>
-            <th>&nbsp;</th>
-            <th>Optional Fields</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>1</td>
-            <td>Basis for Patching</td>
-        </tr>
-
-        </tbody>
-    </table>*@
-
 @helper BodyRows()
 {
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
     <td width="10%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Name"></div></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: Title"></div></td>
+    <td width="25%" class="text-left valign-middle"><div nowrap data-bind="text: Title"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
-    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: Details"></div></td>
-    <td width="10%" class="text-left valign-middle">
-        <div nowrap data-bind="text: getDueDate(CreatedOn)"></div>
-    </td>
-    <td width="20%" class="text-center valign-middle">
-        <button type="button" data-bind="click: mitigatePatch.bind($data)" class="btn btn-danger btn-sm">Create Plan</button>
-        <button type="button" data-bind="click: reassessPatch.bind($data)" class="btn btn-danger btn-sm">Reassess</button>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
+    <td width="30%" class="text-center valign-middle">
+        <button type="button" data-bind="click: $parent.addPageRecord.bind($data)" class="btn btn-danger btn-sm">Create Plan</button>
+        <button type="button" data-bind="click: $parent.editPageRecord.bind($data)" class="btn btn-danger btn-sm">Reassess</button>
     </td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
 }
 
 @helper AddNewEditDialog(DataContext dataContext)
 {
-
-    <div class="col-md-12">
-        <div class="form-group">
-            <label for="selectPatchStatusID">Patch:</label>
-            <select class="form-control" id="selectPatchStatusID" data-bind="value: PatchStatusID, options: patchStatuses, optionsText: 'PatchMnemonic', optionsValue: 'ID'"></select>
+    <div class="row">
+        <div class="col-md-12">
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("Name", fieldLabel: "Business Unit"))
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("PlatformName"))
+            <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
+                @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("Summary"))
+            </div>
         </div>
-        @Html.Raw(Model.AddValueListSelectField<Assessment>("AssessmentResultKey", "assessAction"))
-        @Html.Raw(dataContext.AddTextAreaField<Assessment>("Details"))
+
     </div>
+
+    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.Edit">
+        <div class="col-md-12">
+            @Html.Raw(Model.AddValueListSelectField<AssessmentMitigateView>("AssessmentResultKey", "assessAction", fieldLabel: "Assessment Result"))
+            @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("Details"))
+        </div>
+    </div>
+
 }
 @Html.Partial("PagedViewModel")
 
@@ -191,91 +129,19 @@
     </div>
 </div>
 
-<div id="mitigationDialog" class="modal fade" role="dialog">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">
-                    <span>Mitigation Records</span>
-                </h4>
-            </div>
-            <div class="modal-body auto-height">
-                <form role="form">
-                    <div id="patchstatusidmit" class="form-control" style="visibility: hidden"></div>
-                    <label for="patchnamemit">Patch Name</label>
-                    <div class="form-control" id="patchnamemit"></div>
-                    <label for="businessunitmit">Business Unit</label>
-                    <div class="form-control" id="businessunitmit"></div>
-                    <label for="platformmit">Product</label>
-                    <div id="platformmit" class="form-control"></div>
-                    <label for="miplanown">Mitigation Plan Owner</label>
-                    <input id="miplanown" class="form-control" />                  
-                    <label for="summarymit">Summary</label>
-                    <textarea id="summarymit" class="form-control"></textarea>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveMitigationButton">Save</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="assessmentDialog" class="modal fade" role="dialog">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" id="dismissDialogButton">&times;</button>
-                <h4 class="modal-title">
-                    <span>Reassess Patch</span>
-                </h4>
-            </div>
-            <div class="modal-body auto-height">
-                <form role="form">
-                    <div id="patchid" class="form-control" style="visibility: hidden"></div>
-                    <label for="patchname">Patch Name</label>
-                    <div class="form-control" id="patchname"></div>
-                    <label for="businessunit">Business Unit</label>
-                    <div class="form-control" id="businessunit"></div>
-                    <label for="assessmentSelect">Assessment Result</label>
-                    <select class="form-control" id="assessmentSelect">
-                        @for (int i = 0; i < ViewBag.AssessActionCount; ++i)
-                        {
-                            <option value="@Html.Raw(i + 1)">@Html.Raw(ViewBag.AssessActions[i].Text)</option>
-                        }
-                    </select>
-                    <label for="assdetails">Details/Notes</label>
-                    <textarea id="assdetails" class="form-control"></textarea>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveAssessmentButton">Update</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal" id="cancelRecordButton">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<AssessmentMitigateView>(ViewBag))
-        @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
-        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
-        @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
-        @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
-        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
-
-
 
         $(function() {
-
-            $("#mitigationDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
-            $(window).on("initiatedInstall", function() {
-                viewModel.queryPageRecords();
+
+            
+            $('#addNewEditDialog').on("shown.bs.modal",function(){
+                $('#inputVendorPatchName').prop('disabled', true);
+                $('#inputName').prop('disabled', true);
+                $('#inputPlatformName').prop('disabled', true);
             });
         });
 
@@ -287,63 +153,6 @@
             var processeddate = month + '/' + date + '/' + year;
             //console.log(processeddate);
             return processeddate;
-        }
-
-        function mitigatePatch(record) {
-            $('#patchidmit').html(record.PatchStatusID);
-            $('#patchnamemit').html(record.VendorPatchName);
-            $('#businessunitmit').html(record.Name);
-            $('#miplanown').val("");
-            $('#summarymit').val("");
-            $('#platformmit').html(record.PlatformName);
-            $("#mitigationDialog").modal("show");
-            $('#saveMitigationButton').one("click", function(){addMitigation(record)});
-        }
-
-        function addMitigation(data) {
-            var mitplan = {'Title': data.VendorPatchName, 'BusinessUnitID': data.BusinessUnitID, 'ThemeID': 13, 'Field1': $('#miplanown').val(), 'Field2': data.PlatformName, 'Field3': $('#summarymit').val()};
-
-
-            if (viewModel.dataHubIsConnected) {
-                dataHub.addNewMiPlan(mitplan).done(function() {
-                    dataHub.getLastMiPlanRecord().done(function(id) {
-                        var record = { 'PatchStatusID': data.PatchStatusID, 'MiPlanID': id, 'Summary': $('#summarymit').val()};
-
-                        dataHub.addNewMitigationPlan(record).done(function() {
-                            dataHub.updatePatchStatusKey(data.PatchStatusID, data.PatchStatusKey + 1).done(function() {
-                                $(window).trigger("initiatedInstall");
-                            });
-                        });
-
-                    });
-
-
-
-                });
-
-            }
-        }
-
-        function reassessPatch(record) {
-            $('#patchid').html(record.PatchStatusID);
-            $('#patchname').html(record.VendorPatchName);
-            $('#businessunit').html(lookupNameValue(record.BusinessUnitID).toString());
-            $('#assdetails').val("");
-            $('#assessmentSelect').prop('selectedIndex', 0);
-            $("#assessmentDialog").modal("show");
-            $('#saveAssessmentButton').one('click', function() { updateAssessment(record)});
-        }
-
-
-        function updateAssessment(data) {
-            data.AssessmentResultKey = $('#assessmentSelect').val();
-            data.Details = $('#assdetails').val();
-
-            if (viewModel.dataHubIsConnected) {
-                dataHub.updateAssessment(data).done(function () {
-                    $(window).trigger("initiatedInstall");
-                });
-            }
         }
 
         function getStatusImage(element, record) {
@@ -411,7 +220,7 @@
                 initialMode = "/AddNew";
 
             $("#manageDocumentsFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.VendorPatchName),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
         });
@@ -426,21 +235,41 @@
             // Clear frame page
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
-
-
-        $(viewModel).on("beforeEdit", function(event, observableRecord) {
-            observableRecord.patchStatuses = ko.observableArray();
-
-            if (viewModel.dataHubIsConnected()) {
-                dataHub.queryPatchStatusAssessmentDetails().done(function(records) {
-                    observableRecord.patchStatuses.removeAll();
-                    observableRecord.patchStatuses(records);
-                });
-            }
+        
+        $(viewModel).on("newRecord", function(event, newRecord, oldRecord){
+            newRecord.PatchStatusID = oldRecord.PatchStatusID;
+            newRecord.VendorPatchName = oldRecord.VendorPatchName;
+            newRecord.Name = oldRecord.Name;
+            newRecord.PlatformName = oldRecord.PlatformName;
         });
+        
+        $(viewModel).on("recordSaved", function(event, record, newRecord){
+            // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+            if (viewModel.dataHubIsConnected()) {
+                if (newRecord) {
+                    ++record.PatchStatusKey;
+                    dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
+                        viewModel.queryPageRecords();
+                    });
+                    
+                    dataHub.getLastMiPlanRecord().done(function(miPlanID) {
+                        dataHub.getLastMitigationPlanID().done(function(planID) {
+                            dataHub.getMitigationPlan(planID).done(function(data){
+                                data.MiPlanID = miPlanID;
+                                dataHub.updateMitigationPlan(data);
+                            });
+                            
+                        });
 
-        $(viewModel).on("beforeSave", function(event, observableRecord) {
-            delete observableRecord.patchStatuses;
+                    });
+                }
+                else{
+                    if(record.AssessmentResultKey >2 ) ++record.PatchStatusKey;
+                    dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
+                        viewModel.queryPageRecords();
+                    });
+                }
+            }
         });
     </script>
 }

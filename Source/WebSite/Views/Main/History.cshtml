@@ -220,7 +220,7 @@
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<HistoryView>(ViewBag))
-        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
 
         $(function () {

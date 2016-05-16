@@ -21,5 +21,14 @@ namespace openSPM.Model
         public DateTime CreatedOn { get; set; }
         public int PlatformID { get; set; }
         public string PlatformName { get; set; }
+
+        public int MiPlanID { get; set; }
+        public string PlanURL { get; set; }
+        public string Justification { get; set; }
+        public string Summary { get; set; }
+        public string Risk { get; set; }
+        public string Detail { get; set; }
+        public Guid CreatedByID { get; set; }
+
     }
 }

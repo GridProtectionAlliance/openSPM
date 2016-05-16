@@ -17,5 +17,7 @@ namespace openSPM.Model
         public string VendorPatchName { get; set; }
         public int AssessmentResultKey { get; set; }
         public DateTime CompletionDate { get; set; }
+        public string Details { get; set; }
+        public int PatchStatusKey { get; set; }
     }
 }

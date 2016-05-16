@@ -24,9 +24,12 @@
 @using GSF.Web.Model
 @using openSPM.Model
 @using GSF
-
-
 @model openSPM.Model.AppModel
+@section StyleSheets {
+    @Styles.Render("~/css.bundle/fileinput")
+}
+
+
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -54,7 +57,7 @@
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="15%" class="text-center valign-middle"><div nowrap data-bind="text: CompletionDate.formatDate(DateFormat)"></div></td>
     <td width="15%" class="text-center valign-middle"><div nowrap data-bind="text: PlatformName"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: closePatch.bind($data)">Close</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click:  $parent.addPageRecord.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Close</button></td>
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -64,135 +67,100 @@
 
 @helper AddNewEditDialog(DataContext dataContext)
 {
-
+    <div class="row">
+        <div class="col-md-12">
+        
+            @Html.Raw(dataContext.AddInputField<ClosingReviewView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            @Html.Raw(dataContext.AddInputField<ClosingReviewView>("BusinessUnitName", fieldLabel: "Business Unit"))
+            @Html.Raw(Model.AddValueListSelectField<ClosingReviewView>("AssessmentResultKey", "assessAction", fieldLabel: "Assessment Result"))
+            @Html.Raw(dataContext.AddDateField<ClosingReviewView>("CompletionDate", fieldLabel: "Completion Date"))
+            <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
+                @Html.Raw(dataContext.AddTextAreaField<ClosingReviewView>("Details"))
+            </div>
+            <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="uploadFiles">Add Installation Related Documents:</label>
+                        <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 }
-@Html.Partial("PagedViewModel")
-<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <iframe style="border: none" id="manageDocumentsFrame"></iframe>
-                <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div id="closedDialog" class="modal fade" role="dialog">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">
-                    <span>Close&nbsp;Patch</span>
-                </h4>
-            </div>
-            <div class="modal-body auto-height">
-                <form role="form">
-                    <div id="patchidclose" class="form-control" style="visibility: hidden"></div>
-                    <label for="patchnameclose">Patch Name</label>
-                    <div class="form-control" id="patchnameclose"></div>
-                    <label for="businessunitclose">Business Unit</label>
-                    <div class="form-control" id="businessunitclose"></div>
-                    <label for="assessmentkeyclose">Assessment Result</label>
-                    <div class="form-control" id="assessmentkeyclose"></div>
-                    <label for="closeddate">Closed Date</label>
-                    <input type="text" class="form-control" id="closeddate" />
-                    <label for="detailsclose">Details/Notes</label>
-                    <textarea id="detailsclose" class="form-control"></textarea>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary" data-dismiss="modal" id="saveCloseButton">Close</button>
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
+@Html.Partial("PagedViewModel")
 @section Scripts {
+@Scripts.Render("~/js.bundle/fileinput")
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<ClosingReviewView>(ViewBag))
-        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
-        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
-        @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
-        @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
-        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
-
-        function getDocumentCount(sourceID, element) {
-            if (viewModel.dataHubIsConnected()) {
-                dataHub.queryDocumentDetailCount("ClosedPatch", sourceID).done(function (count) {
-                    $("#documentCount" + sourceID).text(count.toString());
-                });
-            }
-
-            return element.text();
-        }
-
-        $(window).resize(function () {
-            setTimeout(function () {
-                $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
-            }, 500);
-        });
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
         
-        function openManageDocumentsDialog(record) {
-            const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
-            var initialMode = "";
+        const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=ClosedPatchDocument&SourceField=ClosedPatchID"))";
+        var ClosedPatchID;
+        var selectedFiles;
 
-            if (count < 1)
-                initialMode = "/AddNew";
-
-            $("#manageDocumentsFrame").attr({
-                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=ClosedPatch&SourceField=ClosedPatchID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.PatchMnemonic),
-                "height": ($(document).height() - 150) + "px",
-                "width": "100%"
-            });
-
-            $("#manageDocumentsDialog").modal("show");
-        }
-
-        $("#manageDocumentsDialog").on("hidden.bs.modal", function() {
-            // Refresh page counts after editing tasks
-            viewModel.queryPageRecords();
-
-            // Clear frame page
-            $("#manageDocumentsFrame").attr("src", "about:blank");
+        $(viewModel).on("newRecord", function (event, newRecord, oldRecord) {
+            newRecord.ID = oldRecord.ID;
+            newRecord.VendorPatchName = oldRecord.VendorPatchName;
+            newRecord.BusinessUnitName = oldRecord.BusinessUnitName;
+            newRecord.BusinessUnitID = oldRecord.BusinessUnitID;
+            newRecord.AssessmentResultKey = oldRecord.AssessmentResultKey;
         });
 
-        function closePatch(record) {
-            $('#patchidclose').html(record.ID);
-            $('#patchnameclose').html(record.VendorPatchName);
-            $('#businessunitclose').html(record.BusinessUnitName);
-            $('#assessmentkeyclose').html(lookupAssessactionValue(record.AssessmentResultKey));
-            $('#detailsclose').val("");
-            $('#closeddate').val("");
-            $('#closeddate').datepicker({
-                todayBtn: "linked",
-                autoclose: true,
-                todayHighlight: true
-            });
-            $("#closedDialog").modal("show");
-            $('#saveCloseButton').one("click", function() { addClose(record) });
-        }
+        $(viewModel).on("beforeSave", function (event, observableRecord) {
+            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
+        });
 
-        function addClose(data) {
-            var record = { 'PatchStatusID': data.ID, 'ClosedDate': (new Date($('#closeddate').val())), 'ActionKey': data.AssessmentResultKey, 'Details': $('#detailsclose').val() };
+        $(viewModel).on("recordSaved", function (event, record, newRecord) {
+            // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+            if (viewModel.dataHubIsConnected()) {
+                if (newRecord) {
+                    dataHub.getLastClosedPatchID().done(function (id) {
+                        ClosedPatchID = id.toString();
+                        $("#uploadFiles").fileinput({
+                            uploadUrl: fileUploadUrl + "&SourceID=" + id.toString(),
+                            uploadAsync: true
+                        });
 
-            if (viewModel.dataHubIsConnected) {
-                dataHub.addNewClosedPatch(record).done(function() {
-                   dataHub.updatePatchStatusKey(data.ID, 5).done(function() {
-                       $(window).trigger("closePatch");
-                   });  
-                });
+                        for (var i = 0; i < selectedFiles.length; i++) {
+                            $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
+                        }
 
+                        $("#uploadFiles").fileinput("upload");
+
+                    });
+
+                    ++record.PatchStatusKey;
+                    dataHub.updatePatchStatusKey(record.ID, record.PatchStatusKey).done(function () {
+                        viewModel.queryPageRecords();
+                    });
+                }
             }
-        }
-
+        });
+     
         $(function() {
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
-            $("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
-            $(window).on("closePatch", function() {
-                viewModel.queryPageRecords();
+ 
+            $('#addNewEditDialog').on("shown.bs.modal", function () {
+
+                $("#uploadFiles").fileinput({
+                    uploadUrl: fileUploadUrl,
+                    uploadAsync: true,
+                    showUpload: false,
+                    showRemove: true,
+                    showPreview: false,
+                    minFileCount: 1,
+                    maxFileCount: 12,
+                    uploadExtraData: function () {
+                        return { SourceID: ClosedPatchID };
+                    }
+                });
+
+                $('#inputVendorPatchName').prop('disabled', true);
+                $('#inputBusinessUnitName').prop('disabled', true);
+                $('#selectAssessmentResultKey').prop('disabled', true);
+                $('#dateCompletionDate').prop('disabled', true);
             });
         });
     </script>

@@ -72,7 +72,6 @@ namespace openSPM.Model
             get; set;
         }
 
-        [Required]
         [Label("Vendor Patch Name/Identifier")]
         [StringLength(64)]
         public string VendorPatchName
@@ -139,7 +138,7 @@ namespace openSPM.Model
             get; set;
         }
 
-        [Required]
+  
         [Label("Evaluation Deadline Date")]
         [InitialValue("new Date(new Date().setDate(new Date().getDate() + 35))")]
         public DateTime EvaluationDeadline { get; set; }

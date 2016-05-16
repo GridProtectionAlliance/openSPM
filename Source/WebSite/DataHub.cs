@@ -318,6 +318,12 @@ namespace openSPM
             return m_dataContext.Table<ClosedPatch>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        public int GetLastClosedPatchID()
+        {
+            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('ClosedPatch')") ?? 0;
+        }
+
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.DeleteRecord)]
         public void DeleteClosedPatch(int id)
@@ -1381,6 +1387,18 @@ namespace openSPM
             return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
         }
 
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        public int GetLastMitigationPlanID()
+        {
+            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('MitigationPlan')") ?? 0;
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        public MitigationPlan GetMitigationPlan(int id)
+        {
+            return m_dataContext.Table<MitigationPlan>().LoadRecord(id);
+        }
+
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(MitigationPlan), RecordOperation.DeleteRecord)]
         public void DeleteMitigationPlan(int id)
@@ -1940,6 +1958,63 @@ namespace openSPM
             return m_dataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.CreateNewRecord)]
+        public AssessmentMitigateView NewAssessmentMitigateView()
+        {
+            return new AssessmentMitigateView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.AddNewRecord)]
+        public void AddNewAssessmentMitigateViewMitigate(AssessmentMitigateView record)
+        {
+            MitigationPlan result = DeriveMitigate(record);
+            result.CreatedByID = GetCurrentUserID();
+            result.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<MitigationPlan>().AddNewRecord(result);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.UpdateRecord)]
+        public void UpdateAssessmentMitigateView(AssessmentMitigateView record)
+        {
+            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+        }
+
+        private MitigationPlan DeriveMitigate(AssessmentMitigateView record)
+        {
+            return new MitigationPlan()
+            {
+                PatchStatusID = record.PatchStatusID,
+                Summary = record.Summary,
+                MiPlanID = record.MiPlanID,
+                CreatedOn = DateTime.UtcNow,
+                CreatedByID = GetCurrentUserID(),
+                UpdatedOn = DateTime.UtcNow,
+                UpdatedByID = GetCurrentUserID(),
+                IsMitigated = false
+
+            };
+        }
+
+        private Assessment DeriveAssessment(AssessmentMitigateView record)
+        {
+            return new Assessment()
+            {
+                ID = record.ID,
+                PatchStatusID = record.PatchStatusID,
+                AssessmentResultKey = record.AssessmentResultKey,
+                Details = record.Details,
+                CreatedOn = record.CreatedOn,
+                CreatedByID = record.CreatedByID,
+                UpdatedOn = DateTime.UtcNow,
+                UpdatedByID = GetCurrentUserID(),
+                IsAssessed = true
+
+            };
+        }
+
+
         #endregion
 
         #region [ClosingReviewView Table Operations]
@@ -1957,6 +2032,40 @@ namespace openSPM
         {
             return m_dataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize);
         }
+
+        [RecordOperation(typeof(ClosingReviewView), RecordOperation.CreateNewRecord)]
+        public ClosingReviewView NewClosingReviewView()
+        {
+            return new ClosingReviewView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(ClosingReviewView), RecordOperation.AddNewRecord)]
+        public void AddNewClosingReviewViewMitigate(ClosingReviewView record)
+        {
+            ClosedPatch result = DeriveClosedPatch(record);
+            m_dataContext.Table<ClosedPatch>().AddNewRecord(result);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(ClosingReviewView), RecordOperation.UpdateRecord)]
+        public void UpdateClosingReviewView(ClosingReviewView record)
+        {
+            m_dataContext.Table<ClosedPatch>().UpdateRecord(DeriveClosedPatch(record));
+        }
+
+        private ClosedPatch DeriveClosedPatch(ClosingReviewView record)
+        {
+            return new ClosedPatch()
+            {
+                PatchStatusID = record.ID,
+                ClosedDate = DateTime.UtcNow,
+                Details = record.Details,
+                ActionKey = record.AssessmentResultKey
+
+            };
+        }
+
 
         #endregion
 
@@ -2042,12 +2151,12 @@ namespace openSPM
         public int GetLastMiPlanRecord()
         {
             // For MitigationPlanes, we only "mark" a record as deleted
-            return MiPlanContext.Connection.ExecuteScalar<int>("Select MAX(ID) FROM MitigationPlan");
+            return MiPlanContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('MitigationPlan')") ?? 0;
         }
 
         #endregion
 
-        #region [ ThemeFields Table Operations ]
+            #region [ ThemeFields Table Operations ]
 
 
         [AuthorizeHubRole("Administrator")]

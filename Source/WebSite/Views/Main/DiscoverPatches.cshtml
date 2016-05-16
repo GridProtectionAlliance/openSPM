@@ -267,9 +267,7 @@
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#addNewEditDialog").on("shown.bs.modal", function() {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
-                dismissButtons.prop("disabled", true);
-                dismissButtons.invisible();
+               
 
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,

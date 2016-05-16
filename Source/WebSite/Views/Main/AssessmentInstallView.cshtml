@@ -142,11 +142,8 @@
 
 @section Scripts {
 @Scripts.Render("~/js.bundle/fileinput")
-
-
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<AssessmentInstallView>(ViewBag))
-        @Html.Raw(Model.RenderValueListClientLookupFunction("alarmState"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
         
         const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=InstallDocument&SourceField=InstallID"))";
@@ -306,6 +303,13 @@
                         viewModel.queryPageRecords();
                     });
                 }
+                else{
+                    if(record.AssessmentResultKey >2 ) ++record.PatchStatusKey;
+                    dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
+                        viewModel.queryPageRecords();
+                    });
+                }
+             
             }
         });
 

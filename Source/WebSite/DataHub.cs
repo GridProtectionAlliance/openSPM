@@ -1262,6 +1262,7 @@ namespace openSPM
         {
             return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Assessment')") ?? 0;
         }
+
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Assessment), RecordOperation.DeleteRecord)]
         public void DeleteAssessment(int id)
@@ -1315,6 +1316,12 @@ namespace openSPM
         public IEnumerable<Install> QueryInstalls(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInstalled = 0"));
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        public int GetLastInstallID()
+        {
+            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Install')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1855,6 +1862,64 @@ namespace openSPM
         public IEnumerable<AssessmentInstallView> QueryAssessmentInstallViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<AssessmentInstallView>().QueryRecords(sortField, ascending, page, pageSize);
+        }
+
+        [RecordOperation(typeof(AssessmentInstallView), RecordOperation.CreateNewRecord)]
+        public AssessmentInstallView NewAssessmentInstallView()
+        {
+            return new AssessmentInstallView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(AssessmentInstallView), RecordOperation.AddNewRecord)]
+        public void AddNewAssessmentInstallViewInstall(AssessmentInstallView record)
+        {
+            Install result = DeriveInstall(record);
+            result.CreatedByID = GetCurrentUserID();
+            result.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Install>().AddNewRecord(result);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(AssessmentInstallView), RecordOperation.UpdateRecord)]
+        public void UpdateAssessmentInstallViewInstallTable(AssessmentInstallView record)
+        {
+            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+        }
+
+        private Install DeriveInstall(AssessmentInstallView record)
+        {
+            return new Install()
+            {
+                PatchStatusID = record.PatchStatusID,
+                Summary = record.Summary,
+                CompletedOn = record.CompletedOn,
+                CreatedOn = DateTime.UtcNow,
+                CreatedByID = GetCurrentUserID(),
+                UpdatedOn = DateTime.UtcNow,
+                UpdatedByID = GetCurrentUserID(),
+                IsInstalled = true,
+                WorkManagementID =  record.WorkManagementID,
+                CompletedNotes = record.CompletedNotes
+
+            };
+        }
+
+        private Assessment DeriveAssessment(AssessmentInstallView record)
+        {
+            return new Assessment()
+            {
+                ID = record.ID,
+                PatchStatusID = record.PatchStatusID,
+                AssessmentResultKey = record.AssessmentResultKey,
+                Details = record.Details,
+                CreatedOn = record.CreatedOn,
+                CreatedByID = record.CreatedByID,
+                UpdatedOn = DateTime.UtcNow,
+                UpdatedByID = GetCurrentUserID(),
+                IsAssessed = true
+
+            };
         }
 
         #endregion

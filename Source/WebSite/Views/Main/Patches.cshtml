@@ -86,7 +86,9 @@
     <div class="row">
         <div class="col-md-6">
             @Html.Raw(Model.AddValueListSelectField<Patch>("PatchClassKey", "patchClass"))
-            @*@Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))*@
+            <div data-bind="visible: $parent.recordMode()==RecordMode.Edit || $parent.recordMode()==RecordMode.View ">
+                @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            </div>
             <div class="form-control" id="vendorName" style="display: none"></div>
             @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
             @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
@@ -193,7 +195,6 @@
 
         $(viewModel).on("beforeSave", function (event, observableRecord) {
             observableRecord.PlatformID = $('#platformIDSelction').val();
-            observableRecord.VendorPatchName = $('#vendorName').val();
             selectedFiles = $("#uploadFiles").fileinput("getFileStack");
         });
 
@@ -244,7 +245,7 @@
                 const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
                 dismissButtons.prop("disabled", true);
                 dismissButtons.invisible();
-                
+
                 $('#dateVendorReleaseDate').datepicker().on("changeDate", function (e) {
                     $('#dateEvaluationDeadline').datepicker('update', (new Date(new Date().setDate(e.date.getDate() + 35))));
                 });

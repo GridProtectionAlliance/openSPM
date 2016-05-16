@@ -407,10 +407,6 @@
             $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
 
             $("#assessmentDialog").on("shown.bs.modal", function() {
-                // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
-                const dismissButtons = $("#manageDocumentsDialog", window.parent.document).find("button[data-dismiss]");
-                dismissButtons.prop("disabled", true);
-                dismissButtons.invisible();
 
                 $('#uploadFiles').fileinput('reset');
 
@@ -421,7 +417,8 @@
                     showRemove: true,
                     showPreview: false,
                     minFileCount: 1,
-                    maxFileCount: 12, uploadExtraData: function(){
+                    maxFileCount: 12, 
+                    uploadExtraData: function(){
                         return {SourceID: assessmentID};
                     }
                 });

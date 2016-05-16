@@ -497,14 +497,14 @@ function PagedViewModel() {
         });
     }
 
-    self.addPageRecord = function () {
+    self.addPageRecord = function (oldRecord) {
         if (!self.canAddNew())
             return;
 
         if (self.dataHubIsConnected()) {
             self.newRecord().done(function (emptyRecord) {
                 // Raise event to allow any new record initialization
-                $(self).trigger("newRecord", [emptyRecord]);
+                $(self).trigger("newRecord", [emptyRecord, oldRecord]);
 
                 self.deriveObservableRecord(emptyRecord).done(function (observableRecord) {
                     self.recordMode(RecordMode.AddNew);

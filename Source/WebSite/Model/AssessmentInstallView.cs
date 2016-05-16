@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using GSF.Data.Model;
@@ -18,6 +19,21 @@ namespace openSPM.Model
         public int AssessmentResultKey { get; set; }
         public string Details { get; set; }
         public DateTime CreatedOn { get; set; }
+        public Guid CreatedByID { get; set; }
+        public string Summary { get; set; }
+        [Required]
+        [Label("Completed Date")]
+        [InitialValue("new Date()")]
+        public DateTime? CompletedOn { get; set; }
+
+        [Label("Completed Notes")]
+        public string CompletedNotes { get; set; }
+
+        [Label("Work Management ID")]
+        public string WorkManagementID { get; set; }
+
+        public bool IsInstalled { get; set; }
+        public string Title { get; set; }
 
     }
 }

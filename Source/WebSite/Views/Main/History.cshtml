@@ -41,7 +41,8 @@
         new[] { null, "InstallID", "text-center valign-middle" },
         new[] { null, "Install Date", "text-center valign-middle" },
         new[] { null, "Mitigation Plan ID", "text-center valign-middle" },
-        new[] { null, "Mitigation Plan Date", "text-center valign-middle" }
+        new[] { null, "Mitigation Plan Date", "text-center valign-middle" },
+        new[] { null, "Closed Date", "text-center valign-middle" },
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -61,6 +62,8 @@
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(InstallDate)"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: MitigationPlanID, visible: checkNull(MitigationPlanID),click: viewMitigation.bind($data)"></button></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(MitigationPlanCreatedDate)"></div></td>
+        <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(ClosedDate)"></div></td>
+
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
             <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>

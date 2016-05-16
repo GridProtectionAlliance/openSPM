@@ -106,6 +106,7 @@
             newRecord.BusinessUnitName = oldRecord.BusinessUnitName;
             newRecord.BusinessUnitID = oldRecord.BusinessUnitID;
             newRecord.AssessmentResultKey = oldRecord.AssessmentResultKey;
+            newRecord.PatchStatusKey = oldRecord.PatchStatusKey;
         });
 
         $(viewModel).on("beforeSave", function (event, observableRecord) {

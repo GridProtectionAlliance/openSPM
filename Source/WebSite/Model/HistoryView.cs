@@ -22,6 +22,7 @@ namespace openSPM.Model
         public DateTime? InstallDate { get; set; }
         public int? MitigationPlanID { get; set; }
         public DateTime? MitigationPlanCreatedDate { get; set; }
+        public DateTime ClosedDate { get; set; }
 
     }
 }

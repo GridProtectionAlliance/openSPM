@@ -1518,7 +1518,7 @@ namespace openSPM
             return new PatchPatchStatusDetail();
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.AddNewRecord)]
         public void AddNewPatchPatchStatusDetailInstall(PatchPatchStatusDetail record)
         {
@@ -1528,7 +1528,7 @@ namespace openSPM
             m_dataContext.Table<Assessment>().AddNewRecord(result);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.UpdateRecord)]
         public void UpdatePatchPatchStatusDetailInstallTable(PatchPatchStatusDetail record)
         {
@@ -1888,7 +1888,7 @@ namespace openSPM
             return new AssessmentInstallView();
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.AddNewRecord)]
         public void AddNewAssessmentInstallViewInstall(AssessmentInstallView record)
         {
@@ -1898,7 +1898,7 @@ namespace openSPM
             m_dataContext.Table<Install>().AddNewRecord(result);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.UpdateRecord)]
         public void UpdateAssessmentInstallViewInstallTable(AssessmentInstallView record)
         {
@@ -1964,7 +1964,7 @@ namespace openSPM
             return new AssessmentMitigateView();
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.AddNewRecord)]
         public void AddNewAssessmentMitigateViewMitigate(AssessmentMitigateView record)
         {
@@ -1974,7 +1974,7 @@ namespace openSPM
             m_dataContext.Table<MitigationPlan>().AddNewRecord(result);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.UpdateRecord)]
         public void UpdateAssessmentMitigateView(AssessmentMitigateView record)
         {
@@ -2124,7 +2124,7 @@ namespace openSPM
             return new MiPlan();
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(MiPlan), RecordOperation.AddNewRecord)]
         public void AddNewMiPlan(MiPlan record)
         {
@@ -2137,7 +2137,7 @@ namespace openSPM
             MiPlanContext.Table<MiPlan>().AddNewRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(MiPlan), RecordOperation.UpdateRecord)]
         public void UpdateMiPlan(MiPlan record)
         {

@@ -2033,6 +2033,7 @@ namespace openSPM
             return m_dataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(ClosingReviewView), RecordOperation.CreateNewRecord)]
         public ClosingReviewView NewClosingReviewView()
         {

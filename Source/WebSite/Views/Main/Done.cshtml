@@ -57,7 +57,7 @@
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="15%" class="text-center valign-middle"><div nowrap data-bind="text: CompletionDate.formatDate(DateFormat)"></div></td>
     <td width="15%" class="text-center valign-middle"><div nowrap data-bind="text: PlatformName"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click:  $parent.addPageRecord.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Close</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click:  $parent.addPageRecord.bind($data), visible: $parent.canAddNew() && $parent.dataHubIsConnected()">Close</button></td>
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>

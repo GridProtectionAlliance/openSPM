@@ -237,7 +237,7 @@
 
         function viewPatch(record) {
             if (viewModel.dataHubIsConnected) {
-                dataHub.queryPatchVendorPlatformViews(record.PatchID).done(function (data) {
+                dataHub.queryPatchVendorPlatformViews(record.PatchID, null).done(function (data) {
                     $('#patchidpatch').html(data[0].ID);
                     $('#patchnamepatch').html(data[0].VendorPatchName);
                     $('#vendoridpatch').html(data[0].VendorName);
@@ -253,7 +253,7 @@
         function viewAssessment(record) {
             if (viewModel.dataHubIsConnected) {
                 console.log(record);
-                dataHub.queryAssessmentHistoryViews(record.AssessmentID).done(function (data) {
+                dataHub.queryAssessmentHistoryViews(record.AssessmentID, null).done(function (data) {
                     $('#assidass').html(data[0].AssessmentID);
                     $('#patchnameass').html(data[0].VendorPatchName);
                     $('#businessunitass').html(data[0].BusinessUnit);
@@ -268,7 +268,7 @@
 
         function viewInstall(record) {
             if (viewModel.dataHubIsConnected) {
-                dataHub.queryInstallHistoryViews(record.InstallID).done(function (data) {
+                dataHub.queryInstallHistoryViews(record.InstallID, null).done(function (data) {
                     $('#patchidinstall').html(data[0].InstallID);
                     $('#patchnameinstall').html(data[0].VendorPatchName);
                     $('#businessunitinstall').html(data[0].BusinessUnit);
@@ -283,7 +283,7 @@
 
         function viewMitigation(record) {
             if (viewModel.dataHubIsConnected) {
-                dataHub.queryMitigationPlanHistoryViews(record.MitigationPlanID).done(function (data) {
+                dataHub.queryMitigationPlanHistoryViews(record.MitigationPlanID, null).done(function (data) {
                     $('#mitigationid').html(data[0].MitigationPlanID);
                     $('#patchnamemit').html(data[0].VendorPatchName);
                     $('#businessunitmit').html(data[0].BusinessUnit);

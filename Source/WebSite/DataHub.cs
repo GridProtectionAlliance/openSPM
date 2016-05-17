@@ -2221,7 +2221,7 @@ namespace openSPM
         public Guid GetCurrentUserID()
         {
             Guid userID;
-            AuthorizationCache.UserIDs.TryGetValue(UserInfo.CurrentUserID, out userID);
+            AuthorizationCache.UserIDs.TryGetValue(Thread.CurrentPrincipal.Identity.Name, out userID);
             return userID;
         }
 

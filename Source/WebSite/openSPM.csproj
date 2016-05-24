@@ -422,6 +422,7 @@
     <Content Include="Scripts\jquery-2.2.1.js" />
     <Content Include="Scripts\jquery-2.2.1.min.js" />
     <Content Include="Scripts\jquery-2.2.1.min.map" />
+    <None Include="Properties\PublishProfiles\deployment.pubxml" />
     <None Include="Properties\PublishProfiles\Export Package.pubxml" />
     <None Include="Properties\PublishProfiles\gpaweb.pubxml" />
     <None Include="Properties\PublishProfiles\Publish to GPAWEB.pubxml" />

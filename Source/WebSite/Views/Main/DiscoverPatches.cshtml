@@ -57,7 +57,7 @@
     ViewBag.HeaderColumns = new[]
 {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
-        new[] { "Name", "Vendor", "text-center" },
+        new[] { "Abbreviation", "Vendor", "text-center" },
         new[] { "Company", "Full Corporate Name", "text-left" },
         new[] { "ReviewDate", "Last&nbsp;Review&nbsp;Date", "text-center" },
         new[] { null, "", ""},
@@ -72,6 +72,23 @@
     ViewBag.AddNewEditTitle = "Vendor Details";
     ViewBag.CanEdit = false;
 }
+@helper VendorFilter()
+{
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='form-group'>
+                <label for='vendorfilter'>Vendor Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
 @helper BodyRows()
 {
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
@@ -264,6 +281,21 @@
         });
 
         $(function () {
+            $("#pageHeader").append("@Html.Raw(VendorFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+
+
+            $('#vendorfilter').on('keyup', function (e) {
+                if ($('#vendorfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#vendorfilter').val();
+                    viewModel.filterPageRecords();
+
+                }
+
+            });
+
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#addNewEditDialog").on("shown.bs.modal", function() {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up

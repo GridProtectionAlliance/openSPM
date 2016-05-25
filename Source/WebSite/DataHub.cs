@@ -164,10 +164,17 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
         public int QueryPatchCount(bool showDeleted, string filterText = "%")
         {
-            if (filterText != "%") filterText += '%';
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+
 
             if (showDeleted)
-                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("Name LIKE { 0 }", filterText));
+                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
             return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
             
         }
@@ -175,10 +182,17 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
         public IEnumerable<Patch> QueryPatches(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            if (filterText != "%") filterText += '%';
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+
 
             if (showDeleted)
-               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE { 0 }", filterText));
+               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
         }
 
@@ -1650,21 +1664,35 @@ namespace openSPM
         #region [ LatestVendorDiscoveryResult View Operations ]
 
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecordCount)]
-        public int QueryLatestVendorDiscoveryResultCount(bool showDeleted, string filterText = "%")
+        public int QueryLatestVendorDiscoveryResultCount(bool showDeleted, string filterText)
         {
-            if (showDeleted)
-                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount();
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+            if (showDeleted)
+                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("Abbreviation LIKE {0}", filterText));
+
+            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Abbreviation LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecords)]
-        public IEnumerable<LatestVendorDiscoveryResult> QueryLatestVendorDiscoveryResults(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<LatestVendorDiscoveryResult> QueryLatestVendorDiscoveryResults(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            if (showDeleted)
-                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
 
-            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"));
+            if (showDeleted)
+                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+
+            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Abbreviation LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -1780,16 +1808,28 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecordCount)]
-        public int QueryHistoryViewCount(string filterText = "%")
+        public int QueryHistoryViewCount(string filterText)
         {
-            return m_dataContext.Table<HistoryView>().QueryRecordCount();
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecords)]
-        public IEnumerable<HistoryView> QueryHistoryViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<HistoryView> QueryHistoryViews(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         #endregion
@@ -1870,16 +1910,28 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.QueryRecordCount)]
-        public int QueryAssessmentInstallViewCount(string filterText = "%")
+        public int QueryAssessmentInstallViewCount(string filterText)
         {
-            return m_dataContext.Table<AssessmentInstallView>().QueryRecordCount();
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<AssessmentInstallView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.QueryRecords)]
-        public IEnumerable<AssessmentInstallView> QueryAssessmentInstallViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<AssessmentInstallView> QueryAssessmentInstallViews(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            return m_dataContext.Table<AssessmentInstallView>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<AssessmentInstallView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.CreateNewRecord)]
@@ -1946,16 +1998,30 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecordCount)]
-        public int QueryAssessmentMitigateViewCount(string filterText = "%")
+        public int QueryAssessmentMitigateViewCount(string filterText)
         {
-            return m_dataContext.Table<AssessmentMitigateView>().QueryRecordCount();
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+            return m_dataContext.Table<AssessmentMitigateView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecords)]
-        public IEnumerable<AssessmentMitigateView> QueryAssessmentMitigateViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<AssessmentMitigateView> QueryAssessmentMitigateViews(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            return m_dataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+            return m_dataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.CreateNewRecord)]
@@ -2021,16 +2087,29 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(ClosingReviewView), RecordOperation.QueryRecordCount)]
-        public int QueryClosingReviewViewCount(string filterText = "%")
+        public int QueryClosingReviewViewCount(string filterText)
         {
-            return m_dataContext.Table<ClosingReviewView>().QueryRecordCount();
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+
+            return m_dataContext.Table<ClosingReviewView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(ClosingReviewView), RecordOperation.QueryRecords)]
-        public IEnumerable<ClosingReviewView> QueryClosingReviewViews(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<ClosingReviewView> QueryClosingReviewViews(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            return m_dataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize);
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]

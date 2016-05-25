@@ -35,6 +35,7 @@
     {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "VendorPatchName", "Patch ID", "text-center" },
+        new[] { "Title", "Patch Title", "text-left"},
         new[] { null , "Vendor", "text-left valign-middle" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
@@ -47,15 +48,31 @@
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
-    ViewBag.AddNewEditTitle = "Patch for Assesment";
+    ViewBag.AddNewEditTitle = "Patch for Assessment";
 }
+@helper PatchFilter()
+{
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='form-group'>
+                <label for='patchfilter'>Patch ID Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='patchfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @helper BodyRows()
 {
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
     <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: PatchClassKey !== 2"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: PatchClassKey === 2"></td>
-    <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
+    <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle" data-bind="text: Title"></td>
     <td width="20%" class="text-left valign-middle" data-bind="text: lookupVendorName(VendorID)"></td>
     <td width="20%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
@@ -234,7 +251,21 @@
             }
         });
 
-        $(function() {
+        $(function () {
+            $("#pageHeader").append("@Html.Raw(PatchFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+            
+            $('#patchfilter').on('keyup', function (e) {
+                if ($('#patchfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#patchfilter').val();
+                    viewModel.filterPageRecords();
+
+                }
+
+            });
+
             $("label#inputAlarmCriticalDays").hide();
             $("#inputAlarmCriticalDays").hide();
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });

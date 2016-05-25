@@ -33,7 +33,7 @@
     ViewBag.HeaderColumns = new[]
 {
         //    { "Field", "Label", "Classes" }
-        new[] { "VendorPatchName", "SPM Reference", "text-left" },
+        new[] { "VendorPatchName", "Patch ID", "text-center" },
         new[] { "BusinessUnitID", "Business Unit", "text-left"},
         new[] { null, "AssessmentID", "text-left valign-middle"},
         new[] { null, "Action Taken", "text-left valign-middle"},
@@ -49,6 +49,22 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.HideAddNewButton = true;
 }
+@helper PatchFilter()
+{
+    <div class='row'>
+        <div class='col-md-12'>
+            <div class='form-group'>
+                <label for='patchfilter'>Patch ID Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='patchfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
 @helper BodyRows()
 {
 
@@ -227,7 +243,19 @@
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
 
         $(function () {
+            $("#pageHeader").append("@Html.Raw(PatchFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+            
+            $('#patchfilter').on('keyup', function (e) {
+                if ($('#patchfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#patchfilter').val();
+                    viewModel.filterPageRecords();
 
+                }
+
+            });
             $("#patchDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#installDialog").modal({ show: false, backdrop: "static", keyboard: false });

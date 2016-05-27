@@ -40,8 +40,8 @@
     const string alarmImage = "amberlight.png";
     const string criticalAlarmImage = "redlight.png";
     const string violationImage = "blacklight.png";
-
-    ViewBag.alarmDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = 16")).ToArray());
+    int groupID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name = 'dayLimits'") ?? 0;
+    ViewBag.alarmDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = {0}", groupID)).ToArray());
 
     if (!appSettings.TryGetValue("statusLightsImagePath", out value))
     {
@@ -57,7 +57,7 @@
     ViewBag.AssessActionCount = dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = 6"));
 
 
-   
+
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
 {   //    { "Field", "Label", "Classes" }

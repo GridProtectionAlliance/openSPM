@@ -39,8 +39,8 @@
     const string alarmImage = "redlight.png";
     const string violationImage = "blacklight.png";
 
-
-    ViewBag.discoveryDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = 15")).ToArray());
+    int groupID = dataContext.Connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name = 'discoveryDayLimits'") ?? 0;
+    ViewBag.discoveryDayLimits = Json.Encode(dataContext.Table<ValueList>().QueryRecords(restriction: new RecordRestriction("GroupID = {0}", groupID)).ToArray());
 
     if (!appSettings.TryGetValue("statusLightsImagePath", out value))
     {

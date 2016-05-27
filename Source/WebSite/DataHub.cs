@@ -2214,6 +2214,7 @@ namespace openSPM
             record.UpdatedOn = record.CreatedOn;
             record.IsCompleted = false;
             record.IsDeleted = false;
+            record.IsApproved = false;
             MiPlanContext.Table<MiPlan>().AddNewRecord(record);
         }
 

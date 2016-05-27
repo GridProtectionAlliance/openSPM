@@ -78,5 +78,6 @@ namespace openSPM.Model
 
         public DateTime? DeletedON { get; set; }
         public Guid? DeletedByID { get; set; }
+        public bool IsApproved { get; set; }
     }
 }

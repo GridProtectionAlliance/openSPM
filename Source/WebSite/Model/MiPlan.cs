@@ -59,5 +59,6 @@ namespace openSPM.Model
 
         public bool IsCompleted { get; set; }
 
+        public bool IsApproved { get; set; }
     }
 }

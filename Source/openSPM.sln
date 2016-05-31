@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
-VisualStudioVersion = 14.0.24720.0
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "openSPM", "WebSite\openSPM.csproj", "{993DF351-4E0A-4C6D-AA31-B0B85C3B7D8D}"
 EndProject
@@ -31,6 +31,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQLServer", "SQLServer", "{
 		Data\SQLServer\openSPM.sql = Data\SQLServer\openSPM.sql
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailService", "Service\EmailService\EmailService.csproj", "{BF47F95F-B749-42F1-BF1C-07D9972C2AA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmailServiceConsole", "Service\EmailServiceConsole\EmailServiceConsole.csproj", "{E3F2AF43-7051-4EDD-8D35-FFB4D1DED6EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,14 @@ Global
 		{993DF351-4E0A-4C6D-AA31-B0B85C3B7D8D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{993DF351-4E0A-4C6D-AA31-B0B85C3B7D8D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{993DF351-4E0A-4C6D-AA31-B0B85C3B7D8D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF47F95F-B749-42F1-BF1C-07D9972C2AA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF47F95F-B749-42F1-BF1C-07D9972C2AA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF47F95F-B749-42F1-BF1C-07D9972C2AA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF47F95F-B749-42F1-BF1C-07D9972C2AA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3F2AF43-7051-4EDD-8D35-FFB4D1DED6EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3F2AF43-7051-4EDD-8D35-FFB4D1DED6EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3F2AF43-7051-4EDD-8D35-FFB4D1DED6EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3F2AF43-7051-4EDD-8D35-FFB4D1DED6EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,5 +62,7 @@ Global
 		{4EBC5F00-10B3-418E-99C3-A3528466E6AF} = {59D4E4B1-9611-4CCE-9FEC-B94798BEB01E}
 		{3A659691-D895-42D3-97CA-FACDB22EFAE1} = {59D4E4B1-9611-4CCE-9FEC-B94798BEB01E}
 		{B01021AB-2987-4AA6-A624-892E6C30F33E} = {7ECF335A-D14D-4DA6-8D0A-6E0D80533745}
+		{BF47F95F-B749-42F1-BF1C-07D9972C2AA2} = {3A659691-D895-42D3-97CA-FACDB22EFAE1}
+		{E3F2AF43-7051-4EDD-8D35-FFB4D1DED6EB} = {3A659691-D895-42D3-97CA-FACDB22EFAE1}
 	EndGlobalSection
 EndGlobal

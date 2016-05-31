@@ -22,9 +22,12 @@
 //******************************************************************************************************
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime;
 using System.ServiceProcess;
@@ -39,7 +42,9 @@ using GSF.IO;
 using GSF.Net.Smtp;
 using GSF.Security.Model;
 using GSF.ServiceProcess;
+using GSF.Threading;
 using GSF.Units;
+using openSPM.Model;
 
 namespace EmailService
 {
@@ -54,6 +59,7 @@ namespace EmailService
         private string m_smtpUserName;
         private string m_smtpPassword;
         private readonly ConcurrentDictionary<Guid, string> m_emailAddressCache;
+        private readonly LongSynchronizedOperation m_emailOperation;
 
         #endregion
 
@@ -77,6 +83,7 @@ namespace EmailService
                 m_serviceHelper.ErrorLogger.ErrorLog.LogException += LogExceptionHandler;
 
             m_emailAddressCache = new ConcurrentDictionary<Guid, string>();
+            m_emailOperation = new LongSynchronizedOperation(ProcessEmails, LogException);
         }
 
         public ServiceHost(IContainer container) : this()
@@ -92,20 +99,267 @@ namespace EmailService
         {
             // The primary process runs once per minute
 
-        //    if (DateTime.UtcNow.Minute % 5 == 0)
-        //    {
-        //        // This task will run every five minutes
-        //    }
 
-        //    if (DateTime.UtcNow.Minute == 0)
-        //    {
-        //        // This task will run every hour
-        //    }
+            //    if (DateTime.UtcNow.Minute % 5 == 0)
+            //    {
+            //        // This task will run every five minutes
+            //    }
 
-        //    if (DateTime.UtcNow.Hour == 0 && DateTime.UtcNow.Minute == 0)
-        //    {
-        //        // This task will run once per day
-        //    }
+            //    if (DateTime.UtcNow.Minute == 0)
+            //    {
+            //        // This task will run every hour
+            //    }
+
+            if (DateTime.UtcNow.Hour == 12 && DateTime.UtcNow.Minute == 0)
+                {
+                // This task will run once per day
+                m_emailOperation.TryRunOnce();
+
+            }
+        }
+
+        private void ProcessEmails()
+        {
+            ProcessOpenSPMEmails();
+            ProcessMiPlanEmails();
+        }
+
+        private void ProcessOpenSPMEmails()
+        {
+            using (AdoDataConnection connection = new AdoDataConnection("openSPM"))
+            {
+                TableOperations<PendingAssessmentViolations> pavs = new TableOperations<PendingAssessmentViolations>(connection);
+                TableOperations<PendingInstallationViolations> pivs = new TableOperations<PendingInstallationViolations>(connection);
+                int groupID = connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name = 'dayLimits'") ?? 0;
+                TableOperations<ValueList> valueList = new TableOperations<ValueList>(connection);
+                int criticalAlarm, warning, alarm, violation;
+                ValueList[] alarms = valueList.QueryRecords("[Key]", restriction: new RecordRestriction("GroupID = {0}", groupID)).ToArray();
+                if(groupID == 0)
+                {
+                    violation = 0;
+                    alarm = 14;
+                    warning = 21;
+                    criticalAlarm = 3;   
+                }
+                else
+                {
+                    criticalAlarm = alarms[0].Value;
+                    warning = alarms[3].Value - alarms[1].Value;
+                    alarm = alarms[3].Value - alarms[2].Value;
+                    violation = alarms[3].Value - alarms[3].Value;
+                }
+
+                IEnumerable<PendingAssessmentViolations> tr = pavs.QueryRecords();
+          
+                string emailSubject = "";
+
+                foreach (PendingAssessmentViolations pav in tr)
+                {
+                    Debug.WriteLine(pav.VendorPatchName + " SME:" + pav.SME + " days left:" + pav.DaysTilViolation);
+
+                    string emailBody = "NOTIFICATION: %0A%0A" +
+                                        "The following patch is nearing the evalutation deadline...%0A%0A" +
+                                         "Patch: " + pav.VendorPatchName + "%0A" +
+                                        "Business Unit: " + pav.BUName + "%0A" +
+                                        "Platform: " + pav.PlatformName + "%0A%0A" +
+                                        "Deadline: " + pav.EvaluationDeadline + "%0A%0A";
+
+                    if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
+                    {
+                        emailSubject = "Warning: " + pav.VendorPatchName + " approaching Evaluation Deadline";
+                        try
+                        {
+                            SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+                    else if (pav.DaysTilViolation <= alarm && pav.DaysTilViolation > criticalAlarm)
+                    {
+                        emailSubject = "Alarm: " + pav.VendorPatchName + " approaching Evaluation Deadline";
+                        try
+                        {
+                            SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+                    else if (pav.DaysTilViolation <= criticalAlarm && pav.DaysTilViolation > violation)
+                    {
+                        emailSubject = "Critical Alarm: " + pav.VendorPatchName + " approaching Evaluation Deadline";
+                        try
+                        {
+                            SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+                    else if (pav.DaysTilViolation <= violation)
+                    {
+                        emailSubject = "Violation: " + pav.VendorPatchName + " passed Evaluation Deadline";
+                        try
+                        {
+                            SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+
+
+
+                }
+
+                IEnumerable<PendingInstallationViolations> installTable = pivs.QueryRecords();
+
+                foreach (PendingInstallationViolations rows in installTable)
+                {
+                    Debug.WriteLine(rows.VendorPatchName + " SME:" + rows.SME + " days left:" + rows.DaysTilViolation);
+
+                    string emailBody = "NOTIFICATION: \n\n" +
+                                        "The following patch is nearing the deadline...\n\n" +
+                                         "Patch: " + rows.VendorPatchName + "\n" +
+                                        "Business Unit: " + rows.BUName + "\n" +
+                                        "Platform: " + rows.PlatformName + "\n\n" +
+                                        "Deadline: " + rows.DueDate + "\n\n";
+
+                    if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
+                    {
+                        emailSubject = "Warning: " + rows.VendorPatchName + " approaching Deadline";
+                        try
+                        {
+                            SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+                    else if (rows.DaysTilViolation <= alarm && rows.DaysTilViolation > criticalAlarm)
+                    {
+                        emailSubject = "Alarm: " + rows.VendorPatchName + " approaching Deadline";
+                        try
+                        {
+                            SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+                    else if (rows.DaysTilViolation <= criticalAlarm && rows.DaysTilViolation > violation)
+                    {
+                        emailSubject = "Critical Alarm: " + rows.VendorPatchName + " approaching Deadline";
+                        try
+                        {
+                            SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+                    else if (rows.DaysTilViolation <= violation)
+                    {
+                        emailSubject = "Violation: " + rows.VendorPatchName + " passed Deadline";
+                        try
+                        {
+                            SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+
+                }
+
+                // Handle daily e-mails
+                if (DateTime.UtcNow.Hour == 0 && DateTime.UtcNow.Minute == 0)
+                {
+                    // ...     Guid
+
+                    try
+                    {
+                        SendEmail("userID", "MySubject", "<hr><b>My E-Mail</b>", "openSPM@tva.gov", "openSPM");
+                    }
+                    catch (Exception ex)
+                    {
+                        LogException(ex);
+                    }
+                }
+            }
+        }
+
+        private void ProcessMiPlanEmails()
+        {
+            using (AdoDataConnection connection = new AdoDataConnection("miPlan"))
+            {
+                TableOperations<MitigationPlanActionsDue> mpad = new TableOperations<MitigationPlanActionsDue>(connection);
+                int groupID = connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name = 'alarmLimits'") ?? 0;
+                TableOperations<ValueList> valueList = new TableOperations<ValueList>(connection);
+                int due, pastDue;
+                ValueList[] alarms = valueList.QueryRecords("[Key]", restriction: new RecordRestriction("GroupID = {0}", groupID)).ToArray();
+                if (groupID == 0)
+                {
+                    pastDue = 0;
+                    due = 7;
+
+                }
+                else
+                {
+                    pastDue = alarms[0].Value;
+                    due = alarms[1].Value;
+                }
+
+                IEnumerable<MitigationPlanActionsDue> table = mpad.QueryRecords();
+                string emailSubject = "";
+
+                foreach (MitigationPlanActionsDue row in table)
+                {
+                    Debug.WriteLine(row.Title + " SME:" + row.UserAccountID + " days left:" + row.DaysLeft);
+
+                    string emailBody = "NOTIFICATION: \n\n" +
+                                        "The following plan has actions nearing the deadline...\n\n" +
+                                         "Plan: " + row.Title + "\n" +
+                                         "Business Unit: " + row.Name + "\n" +
+                                         "Deadline: " + row.ScheduledEndDate + "\n\n";
+
+                    if (row.DaysLeft <= due && row.DaysLeft >= pastDue)
+                    {
+                        emailSubject = "Due: " + row.Title + " approaching Deadline";
+                        try
+                        {
+                            SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+                    else if (row.DaysLeft <= pastDue)
+                    {
+                        emailSubject = "Past Due: " + row.Title + " approaching Deadline";
+                        try
+                        {
+                            SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+
+                }
+
+            }
         }
 
         private void HeartbeatProcess(string processName, object[] processArguments)
@@ -438,7 +692,10 @@ namespace EmailService
 
         private void SendEmail(IEnumerable<Guid> userIDs, string subject, string body, string fromEmail = null, string settingsCategory = "systemSettings")
         {
-            Mail.Send(fromEmail ?? m_defaultFromEmailAddress, string.Join(", ", userIDs.Select(id => LookupActiveDirectoryEmail(id, settingsCategory))), subject, body, true, m_smtpServer, m_smtpUserName, m_smtpPassword);
+            if (!string.IsNullOrWhiteSpace(m_smtpUserName) && !string.IsNullOrWhiteSpace(m_smtpPassword))
+                Mail.Send(fromEmail ?? m_defaultFromEmailAddress, string.Join(", ", userIDs.Select(id => LookupActiveDirectoryEmail(id, settingsCategory))), subject, body, true, m_smtpServer, m_smtpUserName, m_smtpPassword);
+            else
+                Mail.Send(fromEmail ?? m_defaultFromEmailAddress, string.Join(", ", userIDs.Select(id => LookupActiveDirectoryEmail(id, settingsCategory))), subject, body, true, m_smtpServer);
         }
 
         private string LookupActiveDirectoryEmail(Guid userID, string settingsCategory = "systemSettings")
@@ -449,9 +706,13 @@ namespace EmailService
                 {
                     TableOperations<UserAccount> userAccountOperations = new TableOperations<UserAccount>(connection, LogException);
                     UserAccount userAccount = userAccountOperations.LoadRecord(id);
+                    string userAccountName = UserInfo.SIDToAccountName(userAccount.Name);
 
-                    using (UserInfo userInfo = new UserInfo(UserInfo.SIDToAccountName(userAccount.Name)))
+                    using (UserInfo userInfo = new UserInfo(userAccountName))
+                    {
+                        Debug.WriteLine($"User = {userAccountName} - e-mail = {userInfo.Email}");
                         return userInfo.Email;
+                    }
                 }
             });
         }

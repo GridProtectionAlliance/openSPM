@@ -35,27 +35,27 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Antlr3.Runtime, Version=3.5.0.2, Culture=neutral, PublicKeyToken=eb42632606e9261f, processorArchitecture=MSIL">
-      <HintPath>..\EmailService\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
+      <HintPath>..\..\packages\Antlr.3.5.0.2\lib\Antlr3.Runtime.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ExpressionEvaluator, Version=2.0.3.0, Culture=neutral, PublicKeyToken=90d9f15d622e2348, processorArchitecture=MSIL">
-      <HintPath>..\EmailService\packages\ExpressionEvaluator.2.0.3.0\lib\net40\ExpressionEvaluator.dll</HintPath>
+      <HintPath>..\..\packages\ExpressionEvaluator.2.0.3.0\lib\net40\ExpressionEvaluator.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="GSF.Communication, Version=2.1.258.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\EmailService\packages\GSF.Communication.2.1.258-beta\lib\net46\GSF.Communication.dll</HintPath>
+      <HintPath>..\..\packages\GSF.Communication.2.1.258-beta\lib\net46\GSF.Communication.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="GSF.Core, Version=2.1.258.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\EmailService\packages\GSF.Core.2.1.258-beta\lib\net46\GSF.Core.dll</HintPath>
+      <HintPath>..\..\packages\GSF.Core.2.1.258-beta\lib\net46\GSF.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="GSF.Security, Version=2.1.258.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\EmailService\packages\GSF.Security.2.1.258-beta\lib\net46\GSF.Security.dll</HintPath>
+      <HintPath>..\..\packages\GSF.Security.2.1.258-beta\lib\net46\GSF.Security.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="GSF.ServiceProcess, Version=2.1.258.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\EmailService\packages\GSF.ServiceProcess.2.1.258-beta\lib\net46\GSF.ServiceProcess.dll</HintPath>
+      <HintPath>..\..\packages\GSF.ServiceProcess.2.1.258-beta\lib\net46\GSF.ServiceProcess.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />

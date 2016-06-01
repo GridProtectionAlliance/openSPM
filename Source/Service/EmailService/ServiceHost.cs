@@ -111,7 +111,7 @@ namespace EmailService
             //        // This task will run every hour
             //    }
 
-            if (DateTime.Now.Hour == dailyEmailTime && DateTime.Now.Minute == 56)
+            if (DateTime.Now.Hour == dailyEmailTime && DateTime.Now.Minute == 0)
                 {
                 // This task will run once per day
                 m_emailOperation.TryRunOnce();

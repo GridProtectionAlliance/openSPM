@@ -2167,6 +2167,125 @@ namespace openSPM
 
         #endregion
 
+        #region [ NoticeLog Table Operations ]
+
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLog), RecordOperation.QueryRecordCount)]
+        public int QueryNoticeLogCount(string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<NoticeLog>().QueryRecordCount(new RecordRestriction("Title LIKE {0}", filterText));
+        }
+
+        [AuthorizeHubRole("*")]
+        public IEnumerable<NoticeLog> QueryNoticeLogs()
+        {
+
+            return m_dataContext.Table<NoticeLog>().QueryRecords();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLog), RecordOperation.QueryRecords)]
+        public IEnumerable<NoticeLog> QueryNoticeLogs(string sortField, bool ascending, int page, int pageSize, string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<NoticeLog>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Title LIKE {0}", filterText));
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(NoticeLog), RecordOperation.DeleteRecord)]
+        public void DeleteNoticeLog(int id)
+        {
+            m_dataContext.Table<NoticeLog>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLog), RecordOperation.CreateNewRecord)]
+        public NoticeLog NewNoticeLog()
+        {
+            return new NoticeLog();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLog), RecordOperation.AddNewRecord)]
+        public void AddNewNoticeLog(NoticeLog record)
+        {
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<NoticeLog>().AddNewRecord(record);
+        }
+
+        #endregion
+
+        #region [ NoticeLogView Table Operations ]
+
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLogView), RecordOperation.QueryRecordCount)]
+        public int QueryNoticeLogViewCount(string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<NoticeLogView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+        }
+
+        [AuthorizeHubRole("*")]
+        public IEnumerable<NoticeLogView> QueryNoticeLogViews()
+        {
+            return m_dataContext.Table<NoticeLogView>().QueryRecords();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLogView), RecordOperation.QueryRecords)]
+        public IEnumerable<NoticeLogView> QueryNoticeLogViews(string sortField, bool ascending, int page, int pageSize, string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return m_dataContext.Table<NoticeLogView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(NoticeLogView), RecordOperation.DeleteRecord)]
+        public void DeleteNoticeLogView(int id)
+        {
+            m_dataContext.Table<NoticeLogView>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLogView), RecordOperation.CreateNewRecord)]
+        public NoticeLogView NewNoticeLogView()
+        {
+            return new NoticeLogView();
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(NoticeLogView), RecordOperation.AddNewRecord)]
+        public void AddNewNoticeLogView(NoticeLogView record)
+        {
+            record.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<NoticeLogView>().AddNewRecord(record);
+        }
+
+        #endregion
+
 
         #region [ MiPlan Table Operations ]
 

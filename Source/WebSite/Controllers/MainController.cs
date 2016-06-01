@@ -236,7 +236,7 @@ namespace openSPM.Controllers
 
         public ActionResult Notification()
         {
-            m_appModel.ConfigureView(Url.RequestContext, "Notification", ViewBag);
+            m_appModel.ConfigureView<NoticeLog>(Url.RequestContext, "Notification", ViewBag);
             return View();
         }
 

@@ -15,6 +15,8 @@ namespace EmailService
         [PrimaryKey]
         public Guid SME { get; set; }
 
+        public int ID { get; set; }
+
         public string VendorPatchName { get; set; }
         public string Title { get; set; }
         public DateTime EvaluationDeadline { get; set; }

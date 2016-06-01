@@ -60,6 +60,7 @@ namespace EmailService
         private string m_smtpPassword;
         private readonly ConcurrentDictionary<Guid, string> m_emailAddressCache;
         private readonly LongSynchronizedOperation m_emailOperation;
+        private string userEmail;
 
         #endregion
 
@@ -110,7 +111,7 @@ namespace EmailService
             //        // This task will run every hour
             //    }
 
-            if (DateTime.Now.Hour == dailyEmailTime && DateTime.Now.Minute == 0)
+            if (DateTime.Now.Hour == dailyEmailTime && DateTime.Now.Minute == 56)
                 {
                 // This task will run once per day
                 m_emailOperation.TryRunOnce();
@@ -130,6 +131,7 @@ namespace EmailService
             {
                 TableOperations<PendingAssessmentViolations> pavs = new TableOperations<PendingAssessmentViolations>(connection);
                 TableOperations<PendingInstallationViolations> pivs = new TableOperations<PendingInstallationViolations>(connection);
+                TableOperations<NoticeLog> logs = new TableOperations<NoticeLog>(connection);
                 int groupID = connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name = 'dayLimits'") ?? 0;
                 TableOperations<ValueList> valueList = new TableOperations<ValueList>(connection);
                 int criticalAlarm, warning, alarm, violation;
@@ -169,6 +171,15 @@ namespace EmailService
                         try
                         {
                             SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = pav.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 1;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
                         }
                         catch (Exception ex)
                         {
@@ -182,6 +193,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = pav.PatchStatusID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 2;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -194,6 +215,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = pav.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 3;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -206,6 +237,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = pav.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 4;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -218,6 +259,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = pav.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 5;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -247,6 +298,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = rows.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 1;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -261,6 +322,17 @@ namespace EmailService
                         try
                         {
                             SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = rows.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 2;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
+
                         }
                         catch (Exception ex)
                         {
@@ -273,6 +345,17 @@ namespace EmailService
                         try
                         {
                             SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = rows.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 3;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
+
                         }
                         catch (Exception ex)
                         {
@@ -285,6 +368,17 @@ namespace EmailService
                         try
                         {
                             SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = rows.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 4;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
+
                         }
                         catch (Exception ex)
                         {
@@ -297,6 +391,17 @@ namespace EmailService
                         try
                         {
                             SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = rows.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 5;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
+
                         }
                         catch (Exception ex)
                         {
@@ -330,6 +435,7 @@ namespace EmailService
                 TableOperations<MitigationPlanActionsDue> mpad = new TableOperations<MitigationPlanActionsDue>(connection);
                 int groupID = connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name = 'alarmLimits'") ?? 0;
                 TableOperations<ValueList> valueList = new TableOperations<ValueList>(connection);
+                TableOperations<NoticeLog> logs = new TableOperations<NoticeLog>(connection);
                 int due, pastDue;
                 ValueList[] alarms = valueList.QueryRecords("[Key]", restriction: new RecordRestriction("GroupID = {0}", groupID)).ToArray();
                 if (groupID == 0)
@@ -363,6 +469,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = row.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 1;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -377,6 +493,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = row.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 2;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -389,6 +515,16 @@ namespace EmailService
                         try
                         {
                             SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = row.ID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 3;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
                         }
                         catch (Exception ex)
                         {
@@ -750,6 +886,7 @@ namespace EmailService
                     using (UserInfo userInfo = new UserInfo(userAccountName))
                     {
                         Debug.WriteLine($"User = {userAccountName} - e-mail = {userInfo.Email}");
+                        userEmail = userInfo.Email;
                         return userInfo.Email;
                     }
                 }

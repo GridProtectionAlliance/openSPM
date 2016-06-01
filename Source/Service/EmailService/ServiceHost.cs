@@ -156,7 +156,7 @@ namespace EmailService
                 foreach (PendingAssessmentViolations pav in tr)
                 {
                     Debug.WriteLine(pav.VendorPatchName + " SME:" + pav.SME + " days left:" + pav.DaysTilViolation);
-
+               
                     string emailBody = "NOTIFICATION:" + "<br/>" + 
                                         "The following patch is nearing the evalutation deadline..." + "<br/>" +
                                          "Patch: " + pav.VendorPatchName + "<br/>" +

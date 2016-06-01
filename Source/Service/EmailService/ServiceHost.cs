@@ -99,7 +99,7 @@ namespace EmailService
         {
             // The primary process runs once per minute
 
-
+            int dailyEmailTime = int.Parse(ConfigurationFile.Current.Settings["systemSettings"]["DailyEmailTime"].Value);
             //    if (DateTime.UtcNow.Minute % 5 == 0)
             //    {
             //        // This task will run every five minutes
@@ -110,7 +110,7 @@ namespace EmailService
             //        // This task will run every hour
             //    }
 
-            if (DateTime.UtcNow.Hour == 12 && DateTime.UtcNow.Minute == 0)
+            if (DateTime.Now.Hour == dailyEmailTime && DateTime.Now.Minute == 0)
                 {
                 // This task will run once per day
                 m_emailOperation.TryRunOnce();
@@ -157,14 +157,26 @@ namespace EmailService
                 {
                     Debug.WriteLine(pav.VendorPatchName + " SME:" + pav.SME + " days left:" + pav.DaysTilViolation);
 
-                    string emailBody = "NOTIFICATION: %0A%0A" +
-                                        "The following patch is nearing the evalutation deadline...%0A%0A" +
-                                         "Patch: " + pav.VendorPatchName + "%0A" +
-                                        "Business Unit: " + pav.BUName + "%0A" +
-                                        "Platform: " + pav.PlatformName + "%0A%0A" +
-                                        "Deadline: " + pav.EvaluationDeadline + "%0A%0A";
+                    string emailBody = "NOTIFICATION:" + "<br/>" + 
+                                        "The following patch is nearing the evalutation deadline..." + "<br/>" +
+                                         "Patch: " + pav.VendorPatchName + "<br/>" +
+                                        "Business Unit: " + pav.BUName + "<br/>" +
+                                        "Platform: " + pav.PlatformName + "<br/>" +
+                                        "Deadline: " + pav.EvaluationDeadline;
+                    if ((DateTime.Now - pav.CreatedOn).Days < 1)
+                    {
+                        emailSubject = "New Patch: " + pav.VendorPatchName;
+                        try
+                        {
+                            SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
 
-                    if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
+                    }
+                    else if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
                     {
                         emailSubject = "Warning: " + pav.VendorPatchName + " approaching Evaluation Deadline";
                         try
@@ -223,14 +235,27 @@ namespace EmailService
                 {
                     Debug.WriteLine(rows.VendorPatchName + " SME:" + rows.SME + " days left:" + rows.DaysTilViolation);
 
-                    string emailBody = "NOTIFICATION: \n\n" +
-                                        "The following patch is nearing the deadline...\n\n" +
-                                         "Patch: " + rows.VendorPatchName + "\n" +
-                                        "Business Unit: " + rows.BUName + "\n" +
-                                        "Platform: " + rows.PlatformName + "\n\n" +
-                                        "Deadline: " + rows.DueDate + "\n\n";
+                    string emailBody = "NOTIFICATION:" + "<br/>" + "<br/>" +
+                                        "The following patch is nearing the deadline..." + "<br/>" +
+                                         "Patch: " + rows.VendorPatchName + "<br/>" +
+                                        "Business Unit: " + rows.BUName + "<br/>" +
+                                        "Platform: " + rows.PlatformName + "<br/>" +
+                                        "Deadline: " + rows.DueDate;
+                    if ((DateTime.Now - rows.CreatedOn).Days < 1)
+                    {
+                        emailSubject = "Assessment Complete: " + rows.VendorPatchName;
+                        try
+                        {
+                            SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
 
-                    if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
+                    }
+
+                    else if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
                     {
                         emailSubject = "Warning: " + rows.VendorPatchName + " approaching Deadline";
                         try
@@ -326,13 +351,27 @@ namespace EmailService
                 {
                     Debug.WriteLine(row.Title + " SME:" + row.UserAccountID + " days left:" + row.DaysLeft);
 
-                    string emailBody = "NOTIFICATION: \n\n" +
-                                        "The following plan has actions nearing the deadline...\n\n" +
-                                         "Plan: " + row.Title + "\n" +
-                                         "Business Unit: " + row.Name + "\n" +
-                                         "Deadline: " + row.ScheduledEndDate + "\n\n";
+                    string emailBody = "NOTIFICATION: <br/>" +
+                                        "The following plan has actions nearing the deadline...<br/>" +
+                                         "Plan: " + row.Title + "<br/>" +
+                                         "Business Unit: " + row.Name + "<br/>" +
+                                         "Deadline: " + row.ScheduledEndDate;
 
-                    if (row.DaysLeft <= due && row.DaysLeft >= pastDue)
+                    if ((DateTime.Now - row.CreatedOn).Days < 1)
+                    {
+                        emailSubject = "New plan submitted: " + row.Title;
+                        try
+                        {
+                            SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+
+                    }
+
+                    else if (row.DaysLeft <= due && row.DaysLeft >= pastDue)
                     {
                         emailSubject = "Due: " + row.Title + " approaching Deadline";
                         try

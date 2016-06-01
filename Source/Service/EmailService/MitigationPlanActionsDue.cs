@@ -21,6 +21,7 @@ namespace EmailService
         public string Name { get; set; }
         public DateTime ScheduledEndDate{ get; set;}
         public  int DaysLeft { get; set; }
+        public DateTime CreatedOn { get; set; }
 
     }
 }

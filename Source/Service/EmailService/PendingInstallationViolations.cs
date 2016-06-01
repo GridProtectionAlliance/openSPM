@@ -20,5 +20,6 @@ namespace EmailService
         public string PlatformName { get; set; }
         public string BUName { get; set; }
         public int DaysTilViolation { get; set; }
+        public DateTime CreatedOn { get; set; }
     }
 }

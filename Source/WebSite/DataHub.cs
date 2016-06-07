@@ -174,7 +174,7 @@ namespace openSPM
 
 
             if (showDeleted)
-                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
+                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
             return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
             
         }
@@ -192,7 +192,7 @@ namespace openSPM
 
 
             if (showDeleted)
-               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
+               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
             return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
         }
 
@@ -206,12 +206,17 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
         public void DeletePatch(int id)
         {
+            IEnumerable<PatchStatus> records = m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("PatchID = {0}", id));
+            foreach (PatchStatus ps in records)
+            {
+                m_dataContext.Table<PatchStatus>().DeleteRecord(ps.ID);
+            }
+
             // For Patches, we only "mark" a record as deleted
             m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
-        [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
         public void UpdatePatchInitatedFlag(int id)
         {
             // For Patches, we only "mark" a record as deleted
@@ -1526,6 +1531,12 @@ namespace openSPM
             return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID LIKE {0}", filter));
         }
 
+        [AuthorizeHubRole("Administrator, BUC, PIC")]
+        [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.DeleteRecord)]
+        public void DeletePatchPatchStatus(int id)
+        {
+            m_dataContext.Table<PatchStatus>().DeleteRecord(id);
+        }
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.CreateNewRecord)]
         public PatchPatchStatusDetail NewPatchPatchStatusDetail()
         {

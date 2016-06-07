@@ -30,7 +30,7 @@ namespace openSPM.Model
     /// <summary>
     /// Model for openSPM.Patch table.
     /// </summary>
-    [PrimaryLabel("PatchReference")]
+    [PrimaryLabel("VendorPatchName")]
     [IsDeletedFlag("IsDeleted")]
     public class Patch
     {

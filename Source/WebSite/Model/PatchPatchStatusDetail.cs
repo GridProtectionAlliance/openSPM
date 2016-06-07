@@ -7,6 +7,7 @@ using GSF.Data.Model;
 
 namespace openSPM.Model
 {
+    [PrimaryLabel("PatchMnemonic")]
     [Table("PatchPatchStatusDetail")]
     public class PatchPatchStatusDetail
     {

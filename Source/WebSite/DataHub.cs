@@ -556,6 +556,12 @@ namespace openSPM
             return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
+        public IEnumerable<Platform> QueryPlatformsByVendor(int parentID)
+        {
+            return m_dataContext.Table<Platform>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", parentID));
+        }
+
+    
         [AuthorizeHubRole("Administrator, Owner")]
         [RecordOperation(typeof(Platform), RecordOperation.DeleteRecord)]
         public void DeletePlatform(int id)
@@ -2173,7 +2179,7 @@ namespace openSPM
         [RecordOperation(typeof(VendorPlatformView), RecordOperation.QueryRecords)]
         public IEnumerable<VendorPlatformView> QueryVendorPlatformViews(int id, string filterText = "%")
         {
-            return m_dataContext.Table<VendorPlatformView>().QueryRecords(restriction: new RecordRestriction("VendorID = {0}", id));
+            return m_dataContext.Table<VendorPlatformView>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", id));
         }
 
         #endregion

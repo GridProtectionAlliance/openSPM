@@ -292,18 +292,18 @@
                     maxFileCount: 12
                 });
 
-                dataHub.queryVendorPlatformViews($('select#selectVendorID').val(), null).done(function(data) {
+                dataHub.queryPlatformsByVendor($('select#selectVendorID').val()).done(function (data) {
                     $('#platformIDSelction').children().remove();
                     $.each(data, function (key, val) {
-                        $('#platformIDSelction').append(new Option(val.NameVersion, val.ID));
+                        $('#platformIDSelction').append(new Option(val.Name, val.ID));
                     });
                 }); 
 
-                $('select#selectVendorID').on("change",function(event, handler) {
-                    dataHub.queryVendorPlatformViews($('select#selectVendorID').val(), null).done(function(data) {
+                $('select#selectVendorID').on("change", function(event, handler) {
+                    dataHub.queryPlatformsByVendor($('select#selectVendorID').val()).done(function(data) {
                         $('#platformIDSelction').children().remove();
                         $.each(data, function (key, val) {
-                            $('#platformIDSelction').append(new Option(val.NameVersion, val.ID));
+                            $('#platformIDSelction').append(new Option(val.Name, val.ID));
                         });
                     }); 
                     

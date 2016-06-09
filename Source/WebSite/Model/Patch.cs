@@ -113,7 +113,7 @@ namespace openSPM.Model
 
         [Label("Patch Source Link")]
         [StringLength(512)]
-        [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
+        //[RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
         public string Link
         {
             get; set;

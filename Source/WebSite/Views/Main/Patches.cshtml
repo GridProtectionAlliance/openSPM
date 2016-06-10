@@ -110,16 +110,22 @@
             @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
             @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
             @*<div style="border-style: solid; border-color: red">*@
-                @Html.Raw(dataContext.AddDateField<Patch>("EvaluationDeadline"))
+            @Html.Raw(dataContext.AddDateField<Patch>("EvaluationDeadline"))
             @*</div>*@
-          
+
             @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
-            @*@Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))*@
-            <div class="form-group">
-                <label for="platformIDSelction">Target Product:</label>
-                <select class="form-control" id="platformIDSelction"></select>
-            </div>
+            @*<div data-bind="visible: $parent.recordMode()==RecordMode.View ">*@
+                @Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))
+            @*</div>
+            <div data-bind="visible: $parent.recordMode()==RecordMode.Edit || $parent.recordMode()==RecordMode.AddNew ">
+
+                <div class="form-group">
+                    <label for="platformIDSelction">Target Product:</label>
+                    <select class="form-control" id="platformIDSelction"></select>
+                </div>
+            </div>*@
         </div>
+
         <div class="col-md-6">
             @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
             @Html.Raw(dataContext.AddTextAreaField<Patch>("Title"))
@@ -211,7 +217,7 @@
         var selectedFiles;
 
         $(viewModel).on("beforeSave", function (event, observableRecord) {
-            observableRecord.PlatformID = $('#platformIDSelction').val();
+            //observableRecord.PlatformID = $('#platformIDSelction').val();
             selectedFiles = $("#uploadFiles").fileinput("getFileStack");
         });
 
@@ -292,18 +298,18 @@
                     maxFileCount: 12
                 });
 
-                dataHub.queryPlatformsByVendor($('select#selectVendorID').val()).done(function (data) {
-                    $('#platformIDSelction').children().remove();
-                    $.each(data, function (key, val) {
-                        $('#platformIDSelction').append(new Option(val.Name, val.ID));
-                    });
-                }); 
+                //dataHub.queryPlatformsByVendor($('select#selectVendorID').val()).done(function (data) {
+                //    $('#selectPlatformID').children().remove();
+                //    $.each(data, function (key, val) {
+                //        $('#selectPlatformID').append(new Option(val.Name, val.ID));
+                //    });
+                //}); 
 
                 $('select#selectVendorID').on("change", function(event, handler) {
                     dataHub.queryPlatformsByVendor($('select#selectVendorID').val()).done(function(data) {
-                        $('#platformIDSelction').children().remove();
+                        $('#selectPlatformID').children().remove();
                         $.each(data, function (key, val) {
-                            $('#platformIDSelction').append(new Option(val.Name, val.ID));
+                            $('#selectPlatformID').append(new Option(val.Name, val.ID));
                         });
                     }); 
                     

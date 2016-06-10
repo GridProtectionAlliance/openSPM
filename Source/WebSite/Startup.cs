@@ -35,10 +35,10 @@ namespace openSPM
             using (new SecurityHub()) {}
 
             HubConfiguration hubConfig = new HubConfiguration();
-#if DEBUG
+
             // Enabled detailed client errors
             hubConfig.EnableDetailedErrors = true;
-#endif
+
             // Load ServiceHub SignalR class
             app.MapSignalR(hubConfig);
         }

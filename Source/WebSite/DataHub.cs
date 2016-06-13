@@ -202,7 +202,7 @@ namespace openSPM
             return m_dataContext.Table<Patch>().LoadRecord(id);
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
         public void DeletePatch(int id)
         {
@@ -216,7 +216,7 @@ namespace openSPM
             m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, SME")]
         public void UpdatePatchInitatedFlag(int id)
         {
             // For Patches, we only "mark" a record as deleted
@@ -229,7 +229,7 @@ namespace openSPM
             return new Patch();
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Patch), RecordOperation.AddNewRecord)]
         public void AddNewPatch(Patch record)
         {
@@ -246,54 +246,54 @@ namespace openSPM
             m_dataContext.Table<Patch>().AddNewRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastPatchID()
         {
             return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Patch')") ?? 0;
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Patch), RecordOperation.UpdateRecord)]
         public void UpdatePatch(Patch record)
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
             m_dataContext.Table<Patch>().UpdateRecord(record);
+
+
         }
 
         #endregion
 
         #region [ PatchStatus Table Operations ]
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecordCount)]
         public int QueryPatchStatusCount(string filterText = "%")
         {
             return m_dataContext.Table<PatchStatus>().QueryRecordCount();
         }
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecords)]
         public IEnumerable<PatchStatus> QueryPatchStatus(int parentID, string filterText = "%")
         {
             return m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("ID = {0}", parentID));
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.DeleteRecord)]
         public void DeletePatchStatus(int id)
         {
             m_dataContext.Table<PatchStatus>().DeleteRecord(id);
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.CreateNewRecord)]
         public PatchStatus NewPatchStatus()
         {
             return new PatchStatus();
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.AddNewRecord)]
         public void AddNewPatchStatus(PatchStatus record)
         {
@@ -303,7 +303,7 @@ namespace openSPM
             m_dataContext.Table<PatchStatus>().AddNewRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.UpdateRecord)]
         public void UpdatePatchStatus(PatchStatus record)
         {
@@ -311,7 +311,7 @@ namespace openSPM
             m_dataContext.Table<PatchStatus>().UpdateRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Vendor), RecordOperation.DeleteRecord)]
         public void UpdatePatchStatusKey(int id, int key)
         {
@@ -323,48 +323,46 @@ namespace openSPM
 
         #region [ ClosedPatch Table Operations ]
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecordCount)]
         public int QueryClosedPatchCount(string filterText = "%")
         {
             return m_dataContext.Table<ClosedPatch>().QueryRecordCount();
         }
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecords)]
         public IEnumerable<ClosedPatch> QueryClosedPatch(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<ClosedPatch>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastClosedPatchID()
         {
             return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('ClosedPatch')") ?? 0;
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.DeleteRecord)]
         public void DeleteClosedPatch(int id)
         {
             m_dataContext.Table<ClosedPatch>().DeleteRecord(id);
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.CreateNewRecord)]
         public ClosedPatch NewClosedPatch()
         {
             return new ClosedPatch();
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.AddNewRecord)]
         public void AddNewClosedPatch(ClosedPatch record)
         {
             m_dataContext.Table<ClosedPatch>().AddNewRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.UpdateRecord)]
         public void UpdateClosedPatch(ClosedPatch record)
         {
@@ -440,7 +438,7 @@ namespace openSPM
             return new Vendor();
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Vendor), RecordOperation.AddNewRecord)]
         public void AddNewVendor(Vendor record)
         {
@@ -583,7 +581,7 @@ namespace openSPM
             return new Platform();
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Platform), RecordOperation.AddNewRecord)]
         public void AddNewPlatform(Platform record)
         {
@@ -754,7 +752,7 @@ namespace openSPM
             return new BusinessUnit();
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(BusinessUnit), RecordOperation.AddNewRecord)]
         public void AddNewBusinessUnit(BusinessUnit record)
         {
@@ -1274,27 +1272,25 @@ namespace openSPM
 
         #region [Assessment Table Operations]
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Assessment), RecordOperation.QueryRecordCount)]
         public int QueryAssessmentCount(string filterText = "%")
         {
             return m_dataContext.Table<Assessment>().QueryRecordCount();
         }
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Assessment), RecordOperation.QueryRecords)]
         public IEnumerable<Assessment> QueryAssessments(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<Assessment>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastAssessmentID()
         {
             return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Assessment')") ?? 0;
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Assessment), RecordOperation.DeleteRecord)]
         public void DeleteAssessment(int id)
         {
@@ -1302,14 +1298,14 @@ namespace openSPM
         }
         
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Assessment), RecordOperation.CreateNewRecord)]
         public Assessment NewAssessment()
         {
             return new Assessment();
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Assessment), RecordOperation.AddNewRecord)]
         public void AddNewAssessment(Assessment record)
         {
@@ -1322,7 +1318,7 @@ namespace openSPM
             m_dataContext.Table<Assessment>().AddNewRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Assessment), RecordOperation.UpdateRecord)]
         public void UpdateAssessment(Assessment record)
         {
@@ -1335,21 +1331,19 @@ namespace openSPM
 
         #region [Install Table Operations]
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Install), RecordOperation.QueryRecordCount)]
         public int QueryInstallCount(string filterText = "%")
         {
             return m_dataContext.Table<Install>().QueryRecordCount( new RecordRestriction("IsInstalled = 0"));
         }
 
-        [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Install), RecordOperation.QueryRecords)]
         public IEnumerable<Install> QueryInstalls(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             return m_dataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInstalled = 0"));
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastInstallID()
         {
             return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Install')") ?? 0;
@@ -1362,14 +1356,14 @@ namespace openSPM
             m_dataContext.Table<Install>().DeleteRecord(id);
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Install), RecordOperation.CreateNewRecord)]
         public Install NewInstall()
         {
             return new Install();
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Install), RecordOperation.AddNewRecord)]
         public void AddNewInstall(Install record)
         {
@@ -1381,7 +1375,7 @@ namespace openSPM
             m_dataContext.Table<Install>().AddNewRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Install), RecordOperation.UpdateRecord)]
         public void UpdateInstall(Install record)
         {
@@ -1412,19 +1406,19 @@ namespace openSPM
             return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastMitigationPlanID()
         {
             return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('MitigationPlan')") ?? 0;
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public MitigationPlan GetMitigationPlan(int id)
         {
             return m_dataContext.Table<MitigationPlan>().LoadRecord(id);
         }
 
-        [AuthorizeHubRole("Administrator, Owner")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(MitigationPlan), RecordOperation.DeleteRecord)]
         public void DeleteMitigationPlan(int id)
         {
@@ -1446,7 +1440,7 @@ namespace openSPM
             return new MitigationPlan();
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(MitigationPlan), RecordOperation.AddNewRecord)]
         public void AddNewMitigationPlan(MitigationPlan record)
         {
@@ -1458,7 +1452,7 @@ namespace openSPM
             m_dataContext.Table<MitigationPlan>().AddNewRecord(record);
         }
 
-        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(MitigationPlan), RecordOperation.UpdateRecord)]
         public void UpdateMitigationPlan(MitigationPlan record)
         {
@@ -1658,19 +1652,16 @@ namespace openSPM
 
         #region [PatchStatusAssessmentDetail Table Operations]
 
-        [AuthorizeHubRole("Administrator")]
         public int QueryPatchStatusAssessmentDetailCount()
         {
             return m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecordCount();
         }
 
-        [AuthorizeHubRole("Administrator")]
         public IEnumerable<PatchStatusAssessmentDetail> QueryPatchStatusAssessmentDetails()
         {
             return m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords("PatchMnemonic");
         }
 
-        [AuthorizeHubRole("Administrator")]
         public PatchStatusAssessmentDetail NewPatchStatusAssessmentDetail()
         {
             return new PatchStatusAssessmentDetail();

@@ -217,7 +217,8 @@
         var selectedFiles;
 
         $(viewModel).on("beforeSave", function (event, observableRecord) {
-            //observableRecord.PlatformID = $('#platformIDSelction').val();
+            observableRecord.PlatformID = $('#selectPlatformID').val();
+            //console.log($('#selectPlatformID').val());
             selectedFiles = $("#uploadFiles").fileinput("getFileStack");
         });
 
@@ -310,6 +311,7 @@
                         $('#selectPlatformID').children().remove();
                         $.each(data, function (key, val) {
                             $('#selectPlatformID').append(new Option(val.Name, val.ID));
+                            //console.log(val.ID);
                         });
                     }); 
                     

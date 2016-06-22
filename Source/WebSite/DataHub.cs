@@ -29,6 +29,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Web.Mvc;
+using System.Web.Security;
 using GSF;
 using GSF.Data.Model;
 using GSF.Identity;
@@ -160,7 +161,8 @@ namespace openSPM
         // Client-side script functionality
 
         #region [ Patch Table Operations ]
-
+        
+        [AuthorizeHubRole("*")]
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
         public int QueryPatchCount(bool showDeleted, string filterText = "%")
         {
@@ -179,6 +181,7 @@ namespace openSPM
             
         }
 
+        [AuthorizeHubRole("*")]
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecords)]
         public IEnumerable<Patch> QueryPatches(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {

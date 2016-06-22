@@ -654,13 +654,13 @@ namespace openSPM
                 return m_dataContext
                     .Table<Platform>()
                     .QueryRecords()
-                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
                     .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
 
             return m_dataContext
                 .Table<Platform>()
                 .QueryRecords()
-                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
                 .Take(limit)
                 .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
         }

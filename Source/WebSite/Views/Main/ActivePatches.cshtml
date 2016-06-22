@@ -81,8 +81,8 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Patches for Assesment";
-    ViewBag.BUNames = dataContext.Table<BusinessUnit>().QueryRecords("Name").ToArray();
-    ViewBag.BUCounts = dataContext.Table<BusinessUnit>().QueryRecordCount();
+    ViewBag.BUNames = dataContext.Table<BusinessUnit>().QueryRecords("Name", restriction: new RecordRestriction("IsDeleted = 0")).ToArray();
+    ViewBag.BUCounts = dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
 }
 @helper BUFilter()
 {
@@ -425,6 +425,12 @@
                 });
             });
             
+            $("#addNewEditDialog").on("shown.bs.modal", function() {
+                $('#editRecordButton').attr('disabled', 'disabled');
+                    
+               
+            });
+
 
             $("#pageHeader").append("@Html.Raw(BUFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
         

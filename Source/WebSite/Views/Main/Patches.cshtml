@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using GSF
+@using GSF.Data.Model
 @using GSF.Web.Model
 @using openSPM.Model
 @model AppModel
@@ -107,7 +108,7 @@
                 @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
             </div>
             <div class="form-control" id="vendorName" style="display: none"></div>
-            @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name"))
+            @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name", restriction: new RecordRestriction("IsDeleted = 0")))
             @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
             @*<div style="border-style: solid; border-color: red">*@
             @Html.Raw(dataContext.AddDateField<Patch>("EvaluationDeadline"))
@@ -285,7 +286,8 @@
                 dismissButtons.invisible();
 
                 $('#dateVendorReleaseDate').datepicker().on("changeDate", function (e) {
-                    $('#dateEvaluationDeadline').datepicker('update', (new Date(new Date().setDate(e.date.getDate() + 35))));
+                    console.log(new Date(new Date().setTime(e.date.getTime() + 35*86400000)));
+                    $('#dateEvaluationDeadline').datepicker('update', (new Date(new Date().setTime(e.date.getTime() + 35 * 86400000))));
                 });
 
 
@@ -306,7 +308,8 @@
                 //    });
                 //}); 
 
-                $('select#selectVendorID').on("change", function(event, handler) {
+                $('select#selectVendorID').on("change", function (event, handler) {
+                    //console.log($('select#selectVendorID').val());
                     dataHub.queryPlatformsByVendor($('select#selectVendorID').val()).done(function(data) {
                         $('#selectPlatformID').children().remove();
                         $.each(data, function (key, val) {
@@ -319,5 +322,12 @@
             });
 
         });
+        
+        function Truncate(string) {
+            if (string.length > 30)
+                return string.slice(0, 27) + '...';
+            else
+                return string;
+        }
     </script>
 }

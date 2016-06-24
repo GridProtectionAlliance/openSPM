@@ -258,9 +258,11 @@
             //openManageDocumentsWindow(record);
             $("#assessmentDialog").modal("show");
             $('#patchDocuments').on('click', function(){ openManageDocumentsModal(record); })
+            $('#saveAssessmentButton').off('click');
             $('#saveAssessmentButton').one('click', function() { if (viewModel.dataHubIsConnected) {
                                                                     viewModel.currentRecord(record);
                                                                     viewModel.saveNewRecord();
+                                                                    $('#saveAssessmentButton').off('click');
                                                                   }
             });
 
@@ -408,7 +410,7 @@
             $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
 
             $("#assessmentDialog").on("shown.bs.modal", function() {
-
+                
                 $('#uploadFiles').fileinput('reset');
 
                 $("#uploadFiles").fileinput({

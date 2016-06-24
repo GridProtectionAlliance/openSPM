@@ -105,7 +105,7 @@
 {
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
-    <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchMnemonic, click: $parent.viewPageRecord"></button></td>
+    <td width="15%" class="text-center valign-middle" data-bind="text: PatchMnemonic"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorName"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
@@ -120,7 +120,7 @@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.View ">
+    @*<div class="row" data-bind="visible: $parent.recordMode()==RecordMode.View ">
         <div class="col-md-12">
             @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PatchMnemonic"))
             @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("VendorName"))
@@ -129,7 +129,7 @@
             @Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("EvaluationDeadline"))
             @Html.Raw(dataContext.AddTextAreaField<PatchPatchStatusDetail>("Summary"))
         </div>
-    </div>
+    </div>*@
     
 }
 @Html.Partial("PagedViewModel")

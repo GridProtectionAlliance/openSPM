@@ -2045,10 +2045,22 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.AddNewRecord)]
         public void AddNewAssessmentMitigateViewMitigate(AssessmentMitigateView record)
         {
+            int themeID = MiPlanContext.Connection.ExecuteScalar<int?>("Select ID FROM Theme WHERE Name = {0}", m_appmodel.Global.CompanyAcronym) ?? -1;
+            ++record.PatchStatusKey;
+            if (record.AssessmentResultKey > 2)
+                ++record.PatchStatusKey;
+
+            UpdatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey);
+            MiPlanContext.Table<MiPlan>().AddNewRecord(DeriveMiPlan(record, themeID));
+
             MitigationPlan result = DeriveMitigate(record);
+            result.MiPlanID =  GetLastMitigationPlanID();
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
+            result.UpdatedOn = result.CreatedOn;
+            result.UpdatedByID = result.CreatedByID;
             m_dataContext.Table<MitigationPlan>().AddNewRecord(result);
+
         }
 
         [AuthorizeHubRole("Administrator, Owner, SME")]
@@ -2063,7 +2075,7 @@ namespace openSPM
             return new MitigationPlan()
             {
                 PatchStatusID = record.PatchStatusID,
-                Summary = record.Summary,
+                Summary = record.Summary + ' ',
                 MiPlanID = record.MiPlanID,
                 CreatedOn = DateTime.UtcNow,
                 CreatedByID = GetCurrentUserID(),
@@ -2089,6 +2101,23 @@ namespace openSPM
                 IsAssessed = true
 
             };
+        }
+
+        private MiPlan DeriveMiPlan(AssessmentMitigateView record, int themeID)
+        {
+            MiPlan miPlan = new MiPlan();
+            miPlan.Title = record.VendorPatchName;
+            miPlan.ThemeID = themeID;
+            miPlan.BusinessUnitID = record.BusinessUnitID;
+            miPlan.Field2 = record.PlatformName;
+            miPlan.Field3 = record.Summary;
+            miPlan.Description = "";
+            miPlan.StatusNotes = "";
+            miPlan.CreatedByID = GetCurrentUserID();
+            miPlan.CreatedOn = DateTime.UtcNow;
+            miPlan.UpdatedByID = miPlan.CreatedByID;
+            miPlan.UpdatedOn = miPlan.CreatedOn;
+            return miPlan;
         }
 
 

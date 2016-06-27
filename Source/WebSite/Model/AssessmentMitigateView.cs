@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using GSF.Data.Model;
@@ -25,6 +26,8 @@ namespace openSPM.Model
         public int MiPlanID { get; set; }
         public string PlanURL { get; set; }
         public string Justification { get; set; }
+
+        [Required]
         public string Summary { get; set; }
         public string Risk { get; set; }
         public string Detail { get; set; }

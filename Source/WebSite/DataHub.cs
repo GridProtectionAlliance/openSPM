@@ -2045,7 +2045,7 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.AddNewRecord)]
         public void AddNewAssessmentMitigateViewMitigate(AssessmentMitigateView record)
         {
-            int themeID = MiPlanContext.Connection.ExecuteScalar<int?>("Select ID FROM Theme WHERE Name = {0}", m_appmodel.Global.CompanyAcronym) ?? -1;
+            int themeID = MiPlanContext.Connection.ExecuteScalar<int?>("Select ID FROM Theme WHERE IsDefault = 1") ?? -1;
             ++record.PatchStatusKey;
             if (record.AssessmentResultKey > 2)
                 ++record.PatchStatusKey;

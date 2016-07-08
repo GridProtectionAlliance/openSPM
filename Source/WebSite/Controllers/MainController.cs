@@ -154,7 +154,7 @@ namespace openSPM.Controllers
 
         public ActionResult Patches()
         {
-            m_appModel.ConfigureView<Patch>(Url.RequestContext, "Patches", ViewBag);
+            m_appModel.ConfigureView<PatchView>(Url.RequestContext, "Patches", ViewBag);
             return View();
         }
 

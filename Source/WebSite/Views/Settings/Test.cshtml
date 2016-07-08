@@ -1,0 +1,66 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+	<meta charset="utf-8" />
+    <meta name="application-name" content="openSPM" />
+    <meta name="description" content="open Security Patch Management" />
+    <meta name="keywords" content="open source, utility, software, patch, management" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <link href="/Content/bootstrap.min.css" rel="stylesheet">
+    <link href="/Content/bootstrap-theme-united.css" rel="stylesheet">
+    <link href="/Content/bootstrap-datepicker3.css" rel="stylesheet" />
+    <link href="/Content/bootstrap-sidebar.css" rel="stylesheet" />
+    <link href="/Content/jquery-ui.css" rel="stylesheet" />
+    <link href="/Content/primeui-theme.css" rel="stylesheet" />
+    <link href="/Content/font-awesome.css" rel="stylesheet" />
+    <link href="/Content/primeui.css" rel="stylesheet" />
+    <link href="/Content/Site.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="form-group">
+        <label for="dateEvaluationDeadline">Evaluation Deadline Date:</label>
+        <div class="input-group date" data-provide="datepicker">
+            <input type="text" class="form-control" id="dateEvaluationDeadline"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+            <span class="glyphicon glyphicon-remove form-control-feedback" style="right: 36px" data-bind="visible: isEmpty(VendorReleaseDate())"></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="dateEvaluationStuff">Evaluation Stuff Date:</label>
+        <div class="input-group date" data-provide="datepicker">
+            <input type="text" class="form-control" id="dateEvaluationStuff"><span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
+            <span class="glyphicon glyphicon-remove form-control-feedback" style="right: 36px" data-bind="visible: isEmpty(VendorReleaseDate())"></span>
+        </div>
+    </div>
+
+    <script src="/Scripts/jquery-2.2.1.js"></script>
+    <script src="/Scripts/jquery-ui.js"></script>
+    <script src="/Scripts/bootstrap.js"></script>
+    <script src="/Scripts/ie10-viewport-bug-workaround.js"></script>
+    <script src="/Scripts/respond.js"></script>
+    <script src="/Scripts/bootstrap-datepicker.js"></script>
+    <script src="/Scripts/bootstrap-toolkit.js"></script>
+    <script src="/Scripts/jquery.signalR-2.2.0.js"></script>
+    <script src="/Scripts/gsf.web.client.js"></script>
+
+    <script>
+        $(function () {
+            $('.input-group.date').datepicker({
+                todayBtn: "linked",
+                enableOnReadonly: false,
+                autoclose: true
+            });
+
+            console.log("About to attach to changeDate event...");
+
+            //$('#dateEvaluationDeadline').datepicker().on("changeDate", function (e) {
+            //    console.log(new Date(new Date().setTime(e.date.getTime() + 35 * 86400000))); //86,400,000 is the number of milliseconds in a day.
+            //    $('#dateEvaluationStuff').datepicker('update', (new Date(new Date().setTime(e.date.getTime() + 35 * 86400000))));
+            //});
+        });
+
+    </script>
+
+</body>
+</html>

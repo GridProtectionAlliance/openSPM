@@ -37,7 +37,8 @@
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "VendorPatchName", "Patch ID", "text-center" },
         new[] { "Title", "Patch Title", "text-left"},
-        new[] { null , "Vendor", "text-left valign-middle" },
+        new[] { "VendorName" , "Vendor", "text-left" },
+        new[] { "ProductName" , "Product", "text-left" },
         new[] { "VendorReleaseDate", "Release&nbsp;Date", "text-center" },
         new[] { "EvaluationDeadline", "Deadline", "text-center"},
         //new[] { "IsExpedited", "Action", "text-center" },
@@ -54,12 +55,30 @@
 @helper PatchFilter()
 {
     <div class='row'>
-        <div class='col-md-12'>
+        <div class='col-md-4'>
             <div class='form-group'>
                 <label for='patchfilter'>Patch ID Filter:</label>
                 <div class='right-inner-addon'>
                     <i class='glyphicon glyphicon-search'></i>
                     <input class='form-control' type='search' id='patchfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+        <div class='col-md-4'>
+            <div class='form-group'>
+                <label for='vendorfilter'>Vendor Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+        <div class='col-md-4'>
+            <div class='form-group'>
+                <label for='platformfilter'>Product Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='platformfilter' placeholder='Search' />
                 </div>
             </div>
         </div>
@@ -71,10 +90,11 @@
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" data-bind="visible: PatchClassKey !== 2"><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" data-bind="visible: PatchClassKey === 2"></td>
+    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" title="Security Patch" data-bind="visible: PatchClassKey !== 2" ><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" title="Not A Security Patch" data-bind="visible: PatchClassKey === 2"></td>
     <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
-    <td width="20%" class="text-left valign-middle" data-bind="text: Title"></td>
-    <td width="20%" class="text-left valign-middle" data-bind="text: lookupVendorName(VendorID)"></td>
+    <td width="15%" class="text-left valign-middle" data-bind="text: Title"></td>
+    <td width="15%" class="text-left valign-middle" data-bind="text: VendorName"></td>
+    <td width="15%"class="text-left valign-middle" data-bind="text: ProductName"></td>
     <td width="20%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: updatePatchStatus.bind($data), visible: !(IsInitiated)">Initiate</button></td>*@
@@ -103,43 +123,31 @@
 
     <div class="row">
         <div class="col-md-6">
-            @Html.Raw(Model.AddValueListSelectField<Patch>("PatchClassKey", "patchClass"))
+            @Html.Raw(Model.AddValueListSelectField<PatchView>("PatchClassKey", "patchClass"))
             <div data-bind="visible: $parent.recordMode()==RecordMode.Edit || $parent.recordMode()==RecordMode.View ">
-                @Html.Raw(dataContext.AddInputField<Patch>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+                @Html.Raw(dataContext.AddInputField<PatchView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
             </div>
             <div class="form-control" id="vendorName" style="display: none"></div>
-            @Html.Raw(dataContext.AddSelectField<Patch, Vendor>("VendorID", "ID", "Name", "Name", restriction: new RecordRestriction("IsDeleted = 0")))
-            @Html.Raw(dataContext.AddDateField<Patch>("VendorReleaseDate"))
-            @*<div style="border-style: solid; border-color: red">*@
-            @Html.Raw(dataContext.AddDateField<Patch>("EvaluationDeadline"))
-            @*</div>*@
-
-            @Html.Raw(Model.AddValueListSelectField<Patch>("ImpactKey", "impact"))
-            @*<div data-bind="visible: $parent.recordMode()==RecordMode.View ">*@
-                @Html.Raw(dataContext.AddSelectField<Patch, Platform>("PlatformID", "ID", "Name", "Name"))
-            @*</div>
-            <div data-bind="visible: $parent.recordMode()==RecordMode.Edit || $parent.recordMode()==RecordMode.AddNew ">
-
-                <div class="form-group">
-                    <label for="platformIDSelction">Target Product:</label>
-                    <select class="form-control" id="platformIDSelction"></select>
-                </div>
-            </div>*@
+            @Html.Raw(dataContext.AddSelectField<PatchView, Vendor>("VendorID", "ID", "Name", "Name", restriction: new RecordRestriction("IsDeleted = 0")))
+            @Html.Raw(dataContext.AddDateField<PatchView>("VendorReleaseDate"))
+            @Html.Raw(dataContext.AddDateField<PatchView>("EvaluationDeadline"))
+            @Html.Raw(Model.AddValueListSelectField<PatchView>("ImpactKey", "impact"))
+                @Html.Raw(dataContext.AddSelectField<PatchView, Platform>("PlatformID", "ID", "Name", "Name"))
         </div>
 
         <div class="col-md-6">
-            @Html.Raw(dataContext.AddInputField<Patch>("Link", "url"))
-            @Html.Raw(dataContext.AddTextAreaField<Patch>("Title"))
-            @Html.Raw(dataContext.AddTextAreaField<Patch>("Detail", 3))
-            @Html.Raw(dataContext.AddTextAreaField<Patch>("Citations"))
-            @Html.Raw(dataContext.AddInputField<Patch>("AlarmCriticalDays"))
+            @Html.Raw(dataContext.AddInputField<PatchView>("Link", "url"))
+            @Html.Raw(dataContext.AddTextAreaField<PatchView>("Title"))
+            @Html.Raw(dataContext.AddTextAreaField<PatchView>("Detail", 3))
+            @Html.Raw(dataContext.AddTextAreaField<PatchView>("Citations"))
+            @Html.Raw(dataContext.AddInputField<PatchView>("AlarmCriticalDays"))
             @{
                 dataContext.AddPageDefinedFieldInitialization("AlarmCriticalDays",
                     /* Initial Value: */ defaultCriticalAlarmDays.ToString(),
                     /* RegEx Pattern: */ $"^[{defaultCriticalAlarmDays}-9]+$",
                     /* Error Message: */ $"Cannot be less than {defaultCriticalAlarmDays} or greater than 9.");
             }
-            @Html.Raw(dataContext.AddCheckBoxField<Patch>("IsExpedited"))
+            @Html.Raw(dataContext.AddCheckBoxField<PatchView>("IsExpedited"))
         </div>
     </div>
     <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
@@ -166,7 +174,7 @@
 @section Scripts {
     @Scripts.Render("~/js.bundle/fileinput")
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<Patch>(ViewBag, "-IsExpedited"))
+        @Html.Raw(Model.RenderViewModelConfiguration<PatchView>(ViewBag, "-IsExpedited"))
         @Html.Raw(Model.RenderValueListClientLookupFunction("impact"))
         @Html.Raw(Model.RenderAbstract<Platform>("Name"))
         @Html.Raw(Model.RenderAbstract<Platform>("Version"))
@@ -267,7 +275,31 @@
                     viewModel.filterText = '%';
                     viewModel.filterPageRecords();
                 } else {
-                    viewModel.filterText = $('#patchfilter').val();
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
+                    viewModel.filterPageRecords();
+
+                }
+
+            });
+
+            $('#platformfilter').on('keyup', function (e) {
+                if ($('#platformfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
+                    viewModel.filterPageRecords();
+
+                }
+
+            });
+
+            $('#vendorfilter').on('keyup', function (e) {
+                if ($('#vendorfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
                     viewModel.filterPageRecords();
 
                 }

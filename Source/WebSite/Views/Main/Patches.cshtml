@@ -285,9 +285,14 @@
                 dismissButtons.prop("disabled", true);
                 dismissButtons.invisible();
 
-                $('#dateVendorReleaseDate').datepicker().on("changeDate", function (e) {
-                    console.log(new Date(new Date().setTime(e.date.getTime() + 35*86400000)));
-                    $('#dateEvaluationDeadline').datepicker('update', (new Date(new Date().setTime(e.date.getTime() + 35 * 86400000))));
+                //$('#dateVendorReleaseDate').datepicker().on("changeDate", function (e) {
+                //    //console.log("I changed the date...");
+                //});
+
+                $('#dateVendorReleaseDate').change(function () {
+                    var date = new Date($('#dateVendorReleaseDate').val());
+                    console.log(new Date(new Date().setTime(date.getTime() + 35 * 86400000))); //86,400,000 is the number of milliseconds in a day.
+                    $('#dateEvaluationDeadline').datepicker('update', (new Date(new Date().setTime(date.getTime() + 35 * 86400000))));
                 });
 
 

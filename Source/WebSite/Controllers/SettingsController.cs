@@ -115,6 +115,11 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult Test()
+        {
+            return View();
+        }
+
         #endregion
     }
 }

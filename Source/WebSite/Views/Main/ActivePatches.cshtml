@@ -170,12 +170,13 @@
                             <div class="form-control" id="businessunit"></div>
                             <label for="productname">Product</label>
                             <div class="form-control" id="productname"></div>
+                            <label for="vendorname">Vendor</label>
+                            <div class="form-control" id="vendorname"></div>
                             <label for="patchclass">Patch Class</label>
                             <div class="form-control" id="patchclass"></div>
                             <label for="releasedate">Release Date</label>
                             <div class="form-control" id="releasedate"></div>
-                            <label for="deadline">Evaluation Deadline</label>
-                            <div class="form-control" id="deadline"></div>
+
                         </div>
                         <div class="col-md-6">
                             <label for="impactkey">Impact Status</label>
@@ -188,6 +189,8 @@
                             <div class="form-control" id="patchcitation"></div>
                             <label for="patchlink">Link</label>
                             <div class="form-control" id="patchlink"></div>
+                            <label for="deadline">Evaluation Deadline</label>
+                            <div class="form-control" id="deadline"></div>
                         </div>
                         @*<div class="row" style="padding-left: 13px">
                             <iframe style="border: none" id="manageDocumentsWindowFrame" marginwidth="0" marginheight="0"></iframe>
@@ -245,6 +248,7 @@
             $('#patchname').html(record.PatchMnemonic);
             $('#businessunit').html(lookupNameValue(record.BusinessUnitID).toString());
             $('#productname').html(record.PlatformName + " / Version: " + record.PlatformVersion);
+            $('#vendorname').html(record.VendorName);
             $('#patchclass').html(lookupPatchclassValue(record.PatchClassKey));
             $('#releasedate').html(record.VendorReleaseDate.formatDate(DateFormat));
             $('#deadline').html(record.EvaluationDeadline.formatDate(DateFormat));

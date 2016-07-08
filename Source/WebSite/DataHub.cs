@@ -2260,7 +2260,7 @@ namespace openSPM
             miPlan.Title = record.VendorPatchName;
             miPlan.ThemeID = themeID;
             miPlan.BusinessUnitID = record.BusinessUnitID;
-            miPlan.Field2 = record.PlatformName;
+            miPlan.Field1 = record.PlatformName;
             miPlan.Field3 = record.Summary;
             miPlan.Description = "";
             miPlan.StatusNotes = "";

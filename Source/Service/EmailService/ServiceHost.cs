@@ -134,6 +134,12 @@ namespace EmailService
             using (AdoDataConnection connection = new AdoDataConnection("openSPM"))
             {
                 connection.ExecuteNonQuery("UPDATE EmailService SET TimeStamp = {0}", DateTime.Now);
+                bool flag = connection.ExecuteScalar<bool>("Select TOP 1 Push FROM EmailService");
+                if (flag)
+                {
+                    m_emailOperation.TryRunOnce();
+                    connection.ExecuteNonQuery("UPDATE EmailService SET Push = 'False'");
+                }
             }
         }
 

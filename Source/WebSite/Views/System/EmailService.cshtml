@@ -29,7 +29,18 @@
     DateTime timeStamp = dataContext.Connection.ExecuteScalar<DateTime>("Select TOP 1 TimeStamp FROM EmailService");
 }
 <p>
-    Last Timestamp: @timeStamp
+    <table>
+        <tr>
+            <td style="padding-right: 5%"> Last Timestamp: @timeStamp     </td><td><button class="btn btn-default" onclick="pushNotifications()">Push Notifications</button></td>
+        </tr>
+    </table>
 </p>
 
+<script>
+    function pushNotification() {
+        @{
+            dataContext.Connection.ExecuteNonQuery("UPDATE EmailService SET Push = 'True'");
+        }
+    }
 
+</script>

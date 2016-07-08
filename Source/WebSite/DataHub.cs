@@ -166,6 +166,7 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.QueryRecordCount)]
         public int QueryPatchCount(bool showDeleted, string filterText = "%")
         {
+
             if (filterText == null) filterText = "%";
             else
             {
@@ -267,6 +268,156 @@ namespace openSPM
         }
 
         #endregion
+
+        #region [ PatchView Table Operations ]
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(PatchView), RecordOperation.QueryRecordCount)]
+        public int QueryPatchViewCount(bool showDeleted, string filterText = "%")
+        {
+            string patchFilter = "%";
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if(filterText != "%")
+            {
+                string[] filters = filterText.Split(';');
+                if(filters.Length == 3)
+                {
+                    patchFilter += filters[0] + '%';
+                    productFilter += filters[1] += '%';
+                    vendorFilter += filters[2] += '%';
+                }
+            }
+
+            if (showDeleted)
+                return m_dataContext.Table<PatchView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return m_dataContext.Table<PatchView>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(PatchView), RecordOperation.QueryRecords)]
+        public IEnumerable<PatchView> QueryPatchViewes(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        {
+            string patchFilter = "%";
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if (filterText != "%")
+            {
+                string[] filters = filterText.Split(';');
+                if (filters.Length == 3)
+                {
+                    patchFilter += filters[0] + '%';
+                    productFilter += filters[1] += '%';
+                    vendorFilter += filters[2] += '%';
+                }
+            }
+
+
+
+            if (showDeleted)
+                return m_dataContext.Table<PatchView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return m_dataContext.Table<PatchView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+        }
+
+        public PatchView QueryAPatchView(int id)
+        {
+
+            return m_dataContext.Table<PatchView>().LoadRecord(id);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, SME")]
+        [RecordOperation(typeof(PatchView), RecordOperation.DeleteRecord)]
+        public void DeletePatchView(int id)
+        {
+            IEnumerable<PatchStatus> records = m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("PatchID = {0}", id));
+            foreach (PatchStatus ps in records)
+            {
+                m_dataContext.Table<PatchStatus>().DeleteRecord(ps.ID);
+            }
+
+            // For Patches, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, SME")]
+        public void UpdatePatchViewInitatedFlag(int id)
+        {
+            // For PatchViewViewes, we only "mark" a record as deleted
+            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsInitiated=1 WHERE ID={0}", id);
+        }
+
+        [RecordOperation(typeof(PatchView), RecordOperation.CreateNewRecord)]
+        public PatchView NewPatchView()
+        {
+            return new PatchView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
+        [RecordOperation(typeof(PatchView), RecordOperation.AddNewRecord)]
+        public void AddNewPatchView(PatchView record)
+        {
+            string companyname = m_appmodel.Global.CompanyAcronym.ToString();
+            string year = DateTime.UtcNow.Year.ToString();
+            string month = DateTime.UtcNow.Month.ToString().PadLeft(2, '0');
+            string count = m_appmodel.GetNextCounterValue().ToString().PadLeft(4, '0');
+            record.VendorPatchName = companyname + '-' + year + '-' + month + '-' + count;
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            record.IsInitiated = false;
+            m_dataContext.Table<Patch>().AddNewRecord(BuildPatch(record));
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
+        public int GetLastPatchViewID()
+        {
+            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Patch')") ?? 0;
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
+        [RecordOperation(typeof(PatchView), RecordOperation.UpdateRecord)]
+        public void UpdatePatchView(PatchView record)
+        {
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Patch>().UpdateRecord(BuildPatch(record));
+
+
+        }
+
+        private Patch BuildPatch(PatchView record)
+        {
+            Patch patch = new Patch();
+            patch.ID = record.ID;
+            patch.ParentID = record.ParentID;
+            patch.VendorID = record.VendorID;
+            patch.PlatformID = record.PlatformID;
+            patch.PatchClassKey = record.PatchClassKey;
+            patch.VendorPatchName = record.VendorPatchName;
+            patch.VendorReleaseDate = record.VendorReleaseDate;
+            patch.ImpactKey = record.ImpactKey;
+            patch.Summary = record.Summary;
+            patch.Detail = record.Detail;
+            patch.Citations = record.Citations;
+            patch.AlarmCriticalDays = record.AlarmCriticalDays;
+            patch.CloseOutNotes = record.CloseOutNotes;
+            patch.Vulnerability = record.Vulnerability;
+            patch.EvaluationDeadline = record.EvaluationDeadline;
+            patch.CreatedByID = record.CreatedByID;
+            patch.CreatedOn = record.CreatedOn;
+            patch.UpdatedOn = record.UpdatedOn;
+            patch.UpdatedByID = record.UpdatedByID;
+            patch.IsDeleted = record.IsDeleted;
+            patch.IsInitiated = record.IsInitiated;
+            patch.IsExpedited = record.IsExpedited;
+            patch.Title = record.Title;
+            return patch;
+        }
+
+        #endregion
+
 
         #region [ PatchStatus Table Operations ]
 

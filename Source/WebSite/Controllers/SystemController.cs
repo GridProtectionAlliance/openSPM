@@ -126,6 +126,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult EmailService()
+        {
+            m_appModel.ConfigureView(Url.RequestContext, "System.EmailService", ViewBag);
+            return View();
+        }
+
         #endregion
     }
 }

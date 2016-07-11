@@ -297,7 +297,7 @@ namespace openSPM
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchView), RecordOperation.QueryRecords)]
-        public IEnumerable<PatchView> QueryPatchViewes(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
+        public IEnumerable<PatchView> QueryPatchViews(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             string patchFilter = "%";
             string productFilter = "%";
@@ -1972,26 +1972,40 @@ namespace openSPM
         [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecordCount)]
         public int QueryHistoryViewCount(string filterText)
         {
-            if (filterText == null) filterText = "%";
-            else
+            string patchFilter = "%";
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if (filterText != "%")
             {
-                // Build your filter string here!
-                filterText += "%";
+                string[] filters = filterText.Split(';');
+                if (filters.Length == 3)
+                {
+                    patchFilter += filters[0] + '%';
+                    productFilter += filters[1] += '%';
+                    vendorFilter += filters[2] += '%';
+                }
             }
-            return m_dataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return m_dataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(HistoryView), RecordOperation.QueryRecords)]
         public IEnumerable<HistoryView> QueryHistoryViews(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            if (filterText == null) filterText = "%";
-            else
+            string patchFilter = "%";
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if (filterText != "%")
             {
-                // Build your filter string here!
-                filterText += "%";
+                string[] filters = filterText.Split(';');
+                if (filters.Length == 3)
+                {
+                    patchFilter += filters[0] + '%';
+                    productFilter += filters[1] += '%';
+                    vendorFilter += filters[2] += '%';
+                }
             }
-            return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
         }
 
         #endregion

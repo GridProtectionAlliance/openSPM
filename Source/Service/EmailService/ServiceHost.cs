@@ -60,6 +60,7 @@ namespace EmailService
         private string m_smtpPassword;
         private readonly ConcurrentDictionary<Guid, string> m_emailAddressCache;
         private readonly LongSynchronizedOperation m_emailOperation;
+        private readonly LongSynchronizedOperation m_timeStampUpdate;
         private string userEmail;
 
         #endregion
@@ -85,6 +86,7 @@ namespace EmailService
 
             m_emailAddressCache = new ConcurrentDictionary<Guid, string>();
             m_emailOperation = new LongSynchronizedOperation(ProcessEmails, LogException);
+            m_timeStampUpdate = new LongSynchronizedOperation(TimeStampUpdate, LogException);
         }
 
         public ServiceHost(IContainer container) : this()
@@ -101,6 +103,8 @@ namespace EmailService
             // The primary process runs once per minute
 
             int dailyEmailTime = int.Parse(ConfigurationFile.Current.Settings["systemSettings"]["DailyEmailTime"].Value);
+            m_timeStampUpdate.TryRunOnce();
+           
             //    if (DateTime.UtcNow.Minute % 5 == 0)
             //    {
             //        // This task will run every five minutes
@@ -123,6 +127,20 @@ namespace EmailService
         {
             ProcessOpenSPMEmails();
             ProcessMiPlanEmails();
+        }
+
+        private void TimeStampUpdate()
+        {
+            using (AdoDataConnection connection = new AdoDataConnection("openSPM"))
+            {
+                connection.ExecuteNonQuery("UPDATE EmailService SET TimeStamp = {0}", DateTime.Now);
+                bool flag = connection.ExecuteScalar<bool>("Select TOP 1 Push FROM EmailService");
+                if (flag)
+                {
+                    m_emailOperation.TryRunOnce();
+                    connection.ExecuteNonQuery("UPDATE EmailService SET Push = 'False'");
+                }
+            }
         }
 
         private void ProcessOpenSPMEmails()

@@ -35,6 +35,8 @@
         //    { "Field", "Label", "Classes" }
         new[] { "VendorPatchName", "Patch ID", "text-center" },
         new[] { "BusinessUnitID", "Business Unit", "text-left"},
+        new[] { "VendorName", "Vendor", "text-left"},
+        new[] { "ProductName", "Product", "text-left"},
         new[] { null, "AssessmentID", "text-left valign-middle"},
         new[] { null, "Action Taken", "text-left valign-middle"},
         new[] { null, "Assessment Date", "text-center valign-middle" },
@@ -88,7 +90,9 @@
 
 
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: viewPatch.bind($data)"></button></td>
-    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
+    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
+    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: VendorName"></div></td>
+    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: ProductName"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: AssessmentID, click: viewAssessment.bind($data)"></button></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: AssessmentDate.formatDate(DateFormat)"></div></td>
@@ -96,7 +100,7 @@
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(InstallDate)"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: MitigationPlanID, visible: checkNull(MitigationPlanID),click: viewMitigation.bind($data)"></button></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(MitigationPlanCreatedDate)"></div></td>
-        <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(ClosedDate)"></div></td>
+    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(ClosedDate)"></div></td>
 
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>

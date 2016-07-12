@@ -13,6 +13,8 @@ namespace openSPM.Model
         [PrimaryKey(true)]
         public int PatchStatusID { get; set; }
         public int PatchID { get; set; }
+        public string VendorName { get; set; }
+        public string ProductName { get; set; }
         public string VendorPatchName { get; set; }
         public int BusinessUnitID { get; set; }
         public int AssessmentID { get; set; }

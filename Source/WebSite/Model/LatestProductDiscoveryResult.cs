@@ -94,7 +94,7 @@ namespace openSPM.Model
         [StringLength(20)]
         public string ContactPhoneCell2 { get; set; }
         [Required]
-        [Label("Security Patch Search Result")]
+        [Label("Patch Search Result")]
         public int ResultKey { get; set; }
 
         public string VendorNotes { get; set; }

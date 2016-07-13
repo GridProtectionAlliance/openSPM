@@ -227,6 +227,7 @@
     <Compile Include="Model\Install.cs" />
     <Compile Include="Model\InstallDocument.cs" />
     <Compile Include="Model\InstallHistoryView.cs" />
+    <Compile Include="Model\LatestProductDiscoveryResult.cs" />
     <Compile Include="Model\MenuItem.cs" />
     <Compile Include="Model\MiPlan.cs" />
     <Compile Include="Model\MitigationPlan.cs" />

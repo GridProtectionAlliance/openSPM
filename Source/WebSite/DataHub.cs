@@ -1910,6 +1910,100 @@ namespace openSPM
 
         #endregion
 
+        #region [ LatestProductDiscoveryResult View Operations ]
+
+        [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.QueryRecordCount)]
+        public int QueryLatestProductDiscoveryResultCount(string filterText)
+        {
+
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if (filterText != "%")
+            {
+                string[] filters = filterText.Split(';');
+                if (filters.Length == 2)
+                {
+                    productFilter = filters[0] + '%';
+                    vendorFilter = filters[1] + '%';
+                }
+            }
+
+            return m_dataContext.Table<LatestProductDiscoveryResult>().QueryRecordCount(new RecordRestriction("ProductName LIKE {0} AND Company LIKE {1}", productFilter, vendorFilter));
+        }
+
+        [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.QueryRecords)]
+        public IEnumerable<LatestProductDiscoveryResult> QueryLatestProductDiscoveryResults(string sortField, bool ascending, int page, int pageSize, string filterText)
+        {
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if (filterText != "%")
+            {
+                string[] filters = filterText.Split(';');
+                if (filters.Length == 2)
+                {
+                    productFilter = filters[0] + '%';
+                    vendorFilter = filters[1] + '%';
+                }
+            }
+
+            return m_dataContext.Table<LatestProductDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("ProductName LIKE {0} AND Company LIKE {1}", productFilter, vendorFilter));
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.DeleteRecord)]
+        public void DeleteLatestProductDiscoveryResult(int id)
+        {
+            // Delete associated DiscoveryResult record
+            m_dataContext.Table<DiscoveryResult>().DeleteRecord(id);
+        }
+
+        [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.CreateNewRecord)]
+        public LatestProductDiscoveryResult NewLatestProductDiscoveryResult()
+        {
+            return new LatestProductDiscoveryResult();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.AddNewRecord)]
+        public void AddNewLatestProductDiscoveryResult(LatestProductDiscoveryResult record)
+        {
+            DiscoveryResult result = DeriveDiscoveryResult(record);
+            result.CreatedByID = GetCurrentUserID();
+            result.CreatedOn = DateTime.UtcNow;
+            m_dataContext.Table<DiscoveryResult>().AddNewRecord(result);
+        }
+
+        //[AuthorizeHubRole("Administrator, Owner, PIC")]
+        //public int GetLastDiscoveryResultID()
+        //{
+        //    return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('DiscoveryResult')") ?? 0;
+        //}
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.UpdateRecord)]
+        public void UpdateLatestProductDiscoveryResult(LatestProductDiscoveryResult record)
+        {
+            m_dataContext.Table<DiscoveryResult>().UpdateRecord(DeriveDiscoveryResult(record));
+        }
+
+        private DiscoveryResult DeriveDiscoveryResult(LatestProductDiscoveryResult record)
+        {
+            return new DiscoveryResult
+            {
+                ID = record.DiscoveryResultID,
+                VendorID = record.VendorID,
+                ProductID = record.ProductID,
+                ReviewDate = record.ReviewDate,
+                ResultKey = record.ResultKey,
+                Notes = record.Notes,
+                CreatedByID = record.CreatedByID,
+                CreatedOn = record.CreatedOn
+            };
+        }
+
+        #endregion
+
+
         #region [ PatchStatusAssessmentView View Operations ]
 
         [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.QueryRecordCount)]

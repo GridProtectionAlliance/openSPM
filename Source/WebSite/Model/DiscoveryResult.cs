@@ -36,6 +36,7 @@ namespace openSPM.Model
         public int ID { get; set; }
 
         public int VendorID { get; set; }
+        public int ProductID { get; set; }
 
         [Required]
         [Label("Result")]

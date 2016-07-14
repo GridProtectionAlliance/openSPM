@@ -41,5 +41,7 @@ namespace openSPM.Model
 
         public string PlatformName { get; set; }
 
+  
+
     }
 }

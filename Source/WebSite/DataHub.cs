@@ -850,6 +850,21 @@ namespace openSPM
 
         #endregion
 
+        #region [ UserAccountPlatformBusinessUnitDetail Table Operations ]
+
+        public int QueryUserAccountPlatformBusinessUnitDetailCount(int platformID)
+        {
+            return m_dataContext.Table<UserAccountPlatformBusinessUnitDetail>().QueryRecordCount(new RecordRestriction("PlatformID = {0}", platformID));
+        }
+
+        public IEnumerable<UserAccountPlatformBusinessUnitDetail> QueryUserAccountPlatformBusinessUnitDetails(int platformID)
+        {
+            return m_dataContext.Table<UserAccountPlatformBusinessUnitDetail>().QueryRecords(restriction: new RecordRestriction("PlatformID = {0}", platformID));
+        }
+
+        #endregion
+
+
         #region [ BusinessUnit Table Operations ]
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecordCount)]

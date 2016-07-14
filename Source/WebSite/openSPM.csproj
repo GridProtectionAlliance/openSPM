@@ -254,6 +254,7 @@
     <Compile Include="Model\UserAccountPlatform.cs" />
     <Compile Include="Model\Settings.cs" />
     <Compile Include="Model\BusinessUnitUserAccount.cs" />
+    <Compile Include="Model\UserAccountPlatformBusinessUnitDetail.cs" />
     <Compile Include="Model\UserAccountPlatformDetail.cs" />
     <Compile Include="Model\ValueList.cs" />
     <Compile Include="Model\ValueListGroup.cs" />

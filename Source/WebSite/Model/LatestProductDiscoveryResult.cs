@@ -1,44 +1,24 @@
-//******************************************************************************************************
-//  LatestVendorDiscoveryResult.cs - Gbtc
-//
-//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
-//
-//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
-//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may
-//  not use this file except in compliance with the License. You may obtain a copy of the License at:
-//
-//      http://opensource.org/licenses/MIT
-//
-//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
-//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
-//  License for the specific language governing permissions and limitations.
-//
-//  Code Modification History:
-//  ----------------------------------------------------------------------------------------------------
-//  03/03/2016 - J. Ritchie Carroll
-//       Generated original version of source code.
-//
-//******************************************************************************************************
-
-using System;
+ï»¿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Web;
 using GSF.Data.Model;
 
 namespace openSPM.Model
 {
-    /// <summary>
-    /// Model for openSPM.LatestVendorDiscoveryResult view.
-    /// </summary>
-    [PrimaryLabel("ReviewDate")]
-    public class LatestVendorDiscoveryResult
+    [System.Web.DynamicData.TableName("LatestProductDiscoveryResult")]
+    public class LatestProductDiscoveryResult
     {
+        
+        [PrimaryKey]
+        public int ProductID { get; set; }
+        public string ProductName { get; set; }
         public int VendorID { get; set; }
 
-        [PrimaryKey]
-        public int DiscoveryResultID{ get; set;}
+        public int DiscoveryResultID { get; set; }
 
-        public int VendorTypeKey{ get; set; }
+        public int VendorTypeKey { get; set; }
 
         [StringLength(200)]
         public string Name { get; set; }
@@ -114,8 +94,8 @@ namespace openSPM.Model
         [StringLength(20)]
         public string ContactPhoneCell2 { get; set; }
         [Required]
-        [Label("Security Patch Search Result")]
-        public int ResultKey { get; set;}
+        [Label("Patch Search Result")]
+        public int ResultKey { get; set; }
 
         public string VendorNotes { get; set; }
         [Label("Discovery Notes")]
@@ -136,5 +116,6 @@ namespace openSPM.Model
         public DateTime CreatedOn { get; set; }
 
         public Guid CreatedByID { get; set; }
+
     }
 }

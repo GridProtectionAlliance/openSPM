@@ -61,6 +61,7 @@ namespace EmailService
         private readonly ConcurrentDictionary<Guid, string> m_emailAddressCache;
         private readonly LongSynchronizedOperation m_emailOperation;
         private readonly LongSynchronizedOperation m_timeStampUpdate;
+        private readonly LongSynchronizedOperation m_emailNewItems;
         private string userEmail;
 
         #endregion
@@ -87,6 +88,7 @@ namespace EmailService
             m_emailAddressCache = new ConcurrentDictionary<Guid, string>();
             m_emailOperation = new LongSynchronizedOperation(ProcessEmails, LogException);
             m_timeStampUpdate = new LongSynchronizedOperation(TimeStampUpdate, LogException);
+            m_emailNewItems = new LongSynchronizedOperation(EmailNewItems, LogException);
         }
 
         public ServiceHost(IContainer container) : this()
@@ -103,7 +105,9 @@ namespace EmailService
             // The primary process runs once per minute
 
             int dailyEmailTime = int.Parse(ConfigurationFile.Current.Settings["systemSettings"]["DailyEmailTime"].Value);
+
             m_timeStampUpdate.TryRunOnce();
+            m_emailNewItems.TryRunOnce();
            
             //    if (DateTime.UtcNow.Minute % 5 == 0)
             //    {
@@ -141,6 +145,92 @@ namespace EmailService
                     connection.ExecuteNonQuery("UPDATE EmailService SET Push = 'False'");
                 }
             }
+        }
+
+        private void EmailNewItems()
+        {
+            using (AdoDataConnection connection = new AdoDataConnection("openSPM"))
+            {
+                TableOperations<NewPatchesView> newPatches = new TableOperations<NewPatchesView>(connection);
+                TableOperations<NoticeLog> logs = new TableOperations<NoticeLog>(connection);
+
+                IEnumerable<NewPatchesView> patches = newPatches.QueryRecords();
+
+                foreach (NewPatchesView patch in patches)
+                {
+                    string emailBody = "NOTIFICATION:" + "<br/>" +
+                    "The following patch was just entered..." + "<br/>" +
+                     "Patch: " + patch.VendorPatchName + "<br/>" +
+                    "Business Unit: " + patch.BUName + "<br/>" +
+                    "Platform: " + patch.PlatformName + "<br/>" +
+                    "Deadline: " + patch.EvaluationDeadline;
+                    string emailSubject = "New Patch: " + patch.VendorPatchName;
+
+                    try
+                    {
+                        SendEmail(patch.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                        NoticeLog log = new NoticeLog();
+                        log.CreatedOn = DateTime.UtcNow;
+                        log.SentOn = DateTime.UtcNow;
+                        log.PatchID = patch.PatchStatusID;
+                        log.NoticeMethodKey = 1;
+                        log.NoticeLevelKey = 2;
+                        log.Text = emailBody;
+                        log.ToUsers = userEmail;
+                        logs.AddNewRecord(log);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        LogException(ex);
+                    }
+
+
+                }
+
+
+            }
+
+            using (AdoDataConnection connection = new AdoDataConnection("miPlan"))
+            {
+                TableOperations<NewPlanView> newPlans = new TableOperations<NewPlanView>(connection);
+                TableOperations<NoticeLog> logs = new TableOperations<NoticeLog>(connection);
+
+                IEnumerable<NewPlanView> plans = newPlans.QueryRecords();
+
+                foreach (NewPlanView plan in plans)
+                {
+                    string emailBody = "NOTIFICATION: <br/>" +
+                                        "The following plan was just created...<br/>" +
+                                         "Plan: " + plan.Title + "<br/>" +
+                                         "Business Unit: " + plan.Name + "<br/>";
+
+                    string emailSubject = "New plan submitted: " + plan.Title;
+
+                    try
+                    {
+                        SendEmail(plan.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
+                        NoticeLog log = new NoticeLog();
+                        log.CreatedOn = DateTime.UtcNow;
+                        log.SentOn = DateTime.UtcNow;
+                        log.PatchID = plan.ID;
+                        log.NoticeMethodKey = 1;
+                        log.NoticeLevelKey = 1;
+                        log.Text = emailBody;
+                        log.ToUsers = userEmail;
+                        logs.AddNewRecord(log);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        LogException(ex);
+                    }
+
+
+                }
+
+            }
+
         }
 
         private void ProcessOpenSPMEmails()

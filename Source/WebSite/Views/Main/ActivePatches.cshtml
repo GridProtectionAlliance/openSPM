@@ -415,7 +415,7 @@
 
             $("#assessmentDialog").on("shown.bs.modal", function() {
                 
-                $('#uploadFiles').fileinput('reset');
+                $('#uploadFiles').fileinput('destroy');
 
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,
@@ -429,6 +429,9 @@
                         return {SourceID: assessmentID};
                     }
                 });
+                
+                $('#uploadFiles').val("");
+
             });
             
             $("#addNewEditDialog").on("shown.bs.modal", function() {

@@ -132,7 +132,11 @@
             @Html.Raw(dataContext.AddDateField<PatchView>("VendorReleaseDate"))
             @Html.Raw(dataContext.AddDateField<PatchView>("EvaluationDeadline"))
             @Html.Raw(Model.AddValueListSelectField<PatchView>("ImpactKey", "impact"))
-                @Html.Raw(dataContext.AddSelectField<PatchView, Platform>("PlatformID", "ID", "Name", "Name"))
+            @Html.Raw(dataContext.AddSelectField<PatchView, Platform>("PlatformID", "ID", "Name", "Name"))
+            <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
+                <label for="smeSelect">Available SMEs:</label>
+                <select class="form-control" id="smeSelect"></select>
+            </div>
         </div>
 
         <div class="col-md-6">
@@ -353,9 +357,30 @@
                             $('#selectPlatformID').append(new Option(val.Name, val.ID));
                             //console.log(val.ID);
                         });
+                        $('select#selectPlatformID').trigger("change");
                     }); 
                     
                 });
+                
+                $('select#selectPlatformID').on("change", function (event, handler) {
+                    console.log($('select#selectPlatformID').val());
+                    dataHub.queryUserAccountPlatformBusinessUnitDetails($('select#selectPlatformID').val()).done(function (data) {
+                        if (data.length === 0)
+                        {
+                            $('select#smeSelect').children().remove();
+                            $('select#smeSelect').append(new Option("Warning! No SMEs are listed for this product."));
+                        }
+                        else {
+                            $('select#smeSelect').children().remove();
+                            $.each(data, function (key, val) {
+                                $('select#smeSelect').append(new Option(val.BUName + ' - ' + val.FirstName + ' ' + val.LastName, val.UserAccountID));
+                                //console.log(val.ID);
+                            });
+                        }
+                    });
+
+                });
+
             });
 
         });

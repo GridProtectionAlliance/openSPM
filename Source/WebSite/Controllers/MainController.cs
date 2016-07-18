@@ -172,7 +172,7 @@ namespace openSPM.Controllers
 
         public ActionResult DiscoverPatches()
         {
-            m_appModel.ConfigureView<LatestVendorDiscoveryResult>(Url.RequestContext, "Check", ViewBag);
+            m_appModel.ConfigureView<LatestProductDiscoveryResult>(Url.RequestContext, "Check", ViewBag);
             return View();
         }
 

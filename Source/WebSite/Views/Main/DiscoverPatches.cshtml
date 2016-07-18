@@ -57,8 +57,8 @@
     ViewBag.HeaderColumns = new[]
 {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
-        new[] { "Abbreviation", "Vendor", "text-center" },
-        new[] { "Company", "Full Corporate Name", "text-left" },
+        new[] { "ProductName", "Product", "text-cent"},
+        new[] { "Company", "Vendor", "text-left" },
         new[] { "ReviewDate", "Last&nbsp;Review&nbsp;Date", "text-center" },
         new[] { null, "", ""},
         new[] { null, "Documents", "text-center valign-middle" }
@@ -69,18 +69,28 @@
 
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
-    ViewBag.AddNewEditTitle = "Vendor Details";
+    ViewBag.AddNewEditTitle = "Product Details";
     ViewBag.CanEdit = false;
 }
 @helper VendorFilter()
 {
     <div class='row'>
-        <div class='col-md-12'>
+        <div class='col-md-6'>
+            <div class='form-group'>
+                <label for='platformfilter'>Product Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='platformfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+
+        <div class='col-md-6'>
             <div class='form-group'>
                 <label for='vendorfilter'>Vendor Name Filter:</label>
                 <div class='right-inner-addon'>
                     <i class='glyphicon glyphicon-search'></i>
-                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search' />
+                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search'/>
                 </div>
             </div>
         </div>
@@ -92,58 +102,53 @@
 @helper BodyRows()
 {
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getDiscoveryStatusImage($($element), $data)}"></td>
-    <td width="30%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Abbreviation, click: $parent.viewPageRecord"></button></td>
+    <td width="15%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: ProductName, click: $parent.viewPageRecord"></button></td>
     <td width="40%" class="text-left table-cell-hard-wrap"><div data-bind="text: $($element.parentElement).truncateToWidth(Company, 1.5), attr: {title: Company}"></div></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: ReviewDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: addNewDiscoveryResult.bind($data), enable: $parent.canAddNew() && $parent.dataHubIsConnected()">Update...</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(DiscoveryResultID, $($element)), attr: {id: 'documentCount' + DiscoveryResultID}">0</span></button></td>
-    
-    @*<td width="5%" class="text-center valign-middle" nowrap>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
-        <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()" title="Only the latest discovered patch will be deleted..."><span class="glyphicon glyphicon-remove"></span></button>
-    </td>*@
-    
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.View">
-        <div class="col-md-4">
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Name", initialFocus: true))
-            @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("VendorTypeKey", "vendorType"))
-            @Html.Raw(dataContext.AddInputField<Vendor>("PatchCadence"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Abbreviation"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Company"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Link", "url"))
-            @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Description", 5))
-            @Html.Raw(dataContext.AddCheckBoxField<LatestVendorDiscoveryResult>("Enabled"))
+    <div class="row">
+        <div data-bind="css: ($parent.recordMode()==RecordMode.View? 'col-md-4' : 'col-md-12')">
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ProductName", initialFocus: true, fieldLabel: "Product", customDataBinding: "enable: false"))
+            <div data-bind="visible: $parent.recordMode()==RecordMode.View ">
+                @Html.Raw(Model.AddValueListSelectField<LatestProductDiscoveryResult>("VendorTypeKey", "vendorType", fieldLabel: "Vendor Type"))
+                @Html.Raw(dataContext.AddInputField<Vendor>("PatchCadence"))
+                @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Abbreviation"))
+            </div>
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Company", customDataBinding: "enable: false"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Link", "url", customDataBinding: "html: renderHotLinks(notNull(Link())), enable: false"))
+            @Html.Raw(dataContext.AddTextAreaField<LatestProductDiscoveryResult>("Description", 5, customDataBinding: "html: renderHotLinks(notNull(Description())), enable: false"))
         </div>
-        <div class="col-md-4">
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Address1"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("Address2"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("City"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("State"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ZIP"))
-            @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("NoticeMethodKey", "noticeMethod"))
-            @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("VendorNotes", 4))
+        <div class="col-md-4" data-bind="visible: $parent.recordMode()==RecordMode.View ">
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Address1"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Address2"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("City"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("State"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ZIP"))
+            @Html.Raw(Model.AddValueListSelectField<LatestProductDiscoveryResult>("NoticeMethodKey", "noticeMethod"))
+            @Html.Raw(dataContext.AddTextAreaField<LatestProductDiscoveryResult>("VendorNotes", 4))
         </div>
-        <div class="col-md-4">
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactName1"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactEmail1"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneOfc1"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneCell1"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactName2"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactEmail2"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneOfc2"))
-            @Html.Raw(dataContext.AddInputField<LatestVendorDiscoveryResult>("ContactPhoneCell2"))
+        <div class="col-md-4" data-bind="visible: $parent.recordMode()==RecordMode.View ">
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactName1"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactEmail1"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactPhoneOfc1"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactPhoneCell1"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactName2"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactEmail2"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactPhoneOfc2"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ContactPhoneCell2"))
         </div>
 
        
     </div>
     <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
         <div class="col-md-12">
-            @Html.Raw(dataContext.AddDateField<LatestVendorDiscoveryResult>("ReviewDate"))
-            @Html.Raw(Model.AddValueListSelectField<LatestVendorDiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
-            @Html.Raw(dataContext.AddTextAreaField<LatestVendorDiscoveryResult>("Notes", 4))
+            @Html.Raw(dataContext.AddDateField<LatestProductDiscoveryResult>("ReviewDate"))
+            @Html.Raw(Model.AddValueListSelectField<LatestProductDiscoveryResult>("ResultKey", "discoveryResult", initialFocus: true))
+            @Html.Raw(dataContext.AddTextAreaField<LatestProductDiscoveryResult>("Notes", 4))
         </div>
         <div class="col-md-12">
             <div class="form-group">
@@ -172,19 +177,34 @@
 @section Scripts {
     @Scripts.Render("~/js.bundle/fileinput")
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<LatestVendorDiscoveryResult>(ViewBag, "-ReviewDate"))
+        @Html.Raw(Model.RenderViewModelConfiguration<LatestProductDiscoveryResult>(ViewBag, "-ReviewDate"))
 
         var currentVendorID = 0;
+        var currentProductID = 0;
+        var currentProductName ="";
+        var currentProductLink = "";
+        var currentProductDetails = "";
+        var currentVendorName = "";
       
 
         function addNewDiscoveryResult(record) {
             currentVendorID = record.VendorID;
+            currentProductID = record.ProductID;
+            currentProductName = record.ProductName;
+            currentProductLink = record.Link;
+            currentProductDetails = record.Description;
+            currentVendorName = record.Company;
             viewModel.addPageRecord();
         }
 
         $(viewModel).on("newRecord", function (event, newRecord) {
             // Make sure new records get assigned current vendor ID
             newRecord.VendorID = currentVendorID;
+            newRecord.ProductID = currentProductID;
+            newRecord.Link = currentProductLink;
+            newRecord.ProductName = currentProductName;
+            newRecord.Company = currentVendorName;
+            newRecord.Description = currentProductDetails;
         });
         var discoveryDays = @Html.Raw(ViewBag.discoveryDayLimits);
 
@@ -289,17 +309,36 @@
                     viewModel.filterText = '%';
                     viewModel.filterPageRecords();
                 } else {
-                    viewModel.filterText = $('#vendorfilter').val();
+                    viewModel.filterText = $('#platformfilter').val() + ';' + $('#vendorfilter').val();
+                    viewModel.filterPageRecords();
+
+                }
+
+            });
+            
+            $('#platformfilter').on('keyup', function (e) {
+                if ($('#platformfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText =  $('#platformfilter').val() + ';' + $('#vendorfilter').val();
                     viewModel.filterPageRecords();
 
                 }
 
             });
 
+
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#addNewEditDialog").on("shown.bs.modal", function() {
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
                
+                if(viewModel.recordMode() === RecordMode.AddNew){
+                    $('#inputLink').hide();
+                    $('#readonlyinputLink').show();
+                    $('#textDescription').hide();
+                    $('#readonlytextDescription').show();
+                }
 
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,

@@ -109,7 +109,7 @@
         <div data-bind="visible: $root.recordMode()===RecordMode.AddNew">
             <em>SMEs can be added after record is saved...</em>
         </div>
-</div>
+    </div>
 }
 @Html.Partial("PagedViewModel")
 <div id="editSMEPlatformsDialog" class="modal fade" role="dialog">
@@ -380,7 +380,7 @@
                             }
                         }
                     });
-
+                    
                     businessSMEs.find("table > thead").hide();
                     businessUnitSMETableInitialized = true;
                 });

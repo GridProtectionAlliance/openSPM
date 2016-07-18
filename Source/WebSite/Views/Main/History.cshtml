@@ -91,10 +91,10 @@
 
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: viewPatch.bind($data)"></button></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
-    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: VendorName"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: VendorName"></div></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: ProductName"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: AssessmentID, click: viewAssessment.bind($data)"></button></td>
-    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: AssessmentDate.formatDate(DateFormat)"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: InstallID, visible: checkNull(InstallID),click: viewInstall.bind($data)"></button></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(InstallDate)"></div></td>

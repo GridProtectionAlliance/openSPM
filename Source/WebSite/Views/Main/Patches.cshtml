@@ -271,7 +271,7 @@
             $("#pageHeader").append("@Html.Raw(PatchFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
             
             $('#patchfilter').on('keyup', function (e) {
-                if ($('#patchfilter').val().length == 0) {
+                if ($('#patchfilter').val().length + $('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
                     viewModel.filterPageRecords();
                 } else {
@@ -283,7 +283,7 @@
             });
 
             $('#platformfilter').on('keyup', function (e) {
-                if ($('#platformfilter').val().length == 0) {
+                if ($('#patchfilter').val().length + $('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
                     viewModel.filterPageRecords();
                 } else {
@@ -295,7 +295,7 @@
             });
 
             $('#vendorfilter').on('keyup', function (e) {
-                if ($('#vendorfilter').val().length == 0) {
+                if ($('#patchfilter').val().length + $('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
                     viewModel.filterPageRecords();
                 } else {

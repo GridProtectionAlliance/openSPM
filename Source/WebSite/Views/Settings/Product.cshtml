@@ -30,9 +30,8 @@
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "VendorID", "Vendor", "text-left" },
-        new[] { "Abbreviation", "Name", "text-left" },
-        new[] { "Version", "Version", "text-left"}
+        new[] { "VendorName", "Vendor", "text-left" },
+        new[] { "Abbreviation", "Product", "text-left" },
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -57,10 +56,19 @@
             }
     </style>
 }
-@helper PlatformFilter()
+@helper Filters()
 {
     <div class='row'>
-        <div class='col-md-12'>
+        <div class='col-md-6'>
+            <div class='form-group'>
+                <label for='vendorfilter'>Vendor Name Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search' />
+                </div>
+            </div>
+        </div>
+        <div class='col-md-6'>
             <div class='form-group'>
                 <label for='platformfilter'>Product Name Filter:</label>
                 <div class='right-inner-addon'>
@@ -74,10 +82,9 @@
 }
 @helper BodyRows()
 {
-    <td width="10%" class="text-left valign-middle" data-bind="text: lookupAbbreviationValue(VendorID)"></td>
+    <td width="10%" class="text-left valign-middle" data-bind="text: VendorAbbreviation"></td>
 
     <td width="55%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
-    <td width="30%" class="text-left valign-middle" data-bind="text: Version"></td>
 
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -87,35 +94,200 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        @Html.Raw(dataContext.AddSelectField<Platform, Vendor>("VendorID", "ID", "Name"))
-        @Html.Raw(dataContext.AddInputField<Platform>("Name", initialFocus: true))
-        @Html.Raw(dataContext.AddInputField<Platform>("Abbreviation"))
-        @Html.Raw(dataContext.AddInputField<Platform>("Version"))
-        @Html.Raw(dataContext.AddTextAreaField<Platform>("Notes", 4))
+        @Html.Raw(dataContext.AddSelectField<PlatformView, Vendor>("VendorID", "ID", "Name"))
+        @Html.Raw(dataContext.AddInputField<PlatformView>("Name", initialFocus: true))
+        @Html.Raw(dataContext.AddInputField<PlatformView>("Abbreviation"))
+        @Html.Raw(dataContext.AddInputField<PlatformView>("Version"))
+        @Html.Raw(dataContext.AddTextAreaField<PlatformView>("Notes", 4))
+        
+
+        <div data-bind="visible: $root.recordMode()!==RecordMode.AddNew">
+            <label for="inputNewSME">Add SME to Product:</label>
+            <div class="input-group">
+                <input type="text" class="form-control" data-bind="attr: {'readonly': ($root.recordMode()===RecordMode.View ? true : undefined)}" id="inputNewSME" required>
+                <span id="inputNewSMEAdd" class="input-group-addon" data-bind="style: {'cursor': ($root.recordMode()===RecordMode.View ? 'not-allowed' : 'pointer')}"><i class="glyphicon glyphicon-plus"></i></span>
+            </div>
+
+            <div id="productSMEs">
+                <div id="loadingProductSMEs">
+                    Loading&nbsp;&nbsp;<span class="glyphicon glyphicon-refresh glyphicon-spin"></span>
+                </div>
+            </div>
+        </div>
     </div>
 }
 @Html.Partial("PagedViewModel")
 @section Scripts {
     <script>
-        @Html.Raw(Model.RenderViewModelConfiguration<Platform>(ViewBag))
-        @Html.Raw(Model.RenderAbstract<Vendor>("Abbreviation"))
         
-        $(function () {
+        "use strict";
+        @Html.Raw(Model.RenderViewModelConfiguration<PlatformView>(ViewBag))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
+        
+        var productSMETableInitialized = false;
 
-            $("#pageHeader").append("@Html.Raw(PlatformFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+        $(viewModel).on("recordModeChanged", function (event, oldMode, newMode) {
+            // When transitioning from View to Edit mode, redraw table elements to apply enabled buttons
+            if (oldMode === RecordMode.View && newMode === RecordMode.Edit)
+                refreshProductSMETable();
+        });
+
+        function refreshProductSMETable() {
+            if (!productSMETableInitialized)
+                return;
+
+            const productSMEs = $("#productSMEs");
+            productSMEs.puidatatable("reload");
             
+        }
 
-            $('#platformfilter').on('keyup', function (e) {
-                if ($('#platformfilter').val().length == 0) {
+        function deleteProductSME(userAccountID, userAccountName) {
+            if (!viewModel.canEdit() || viewModel.recordMode() === RecordMode.View)
+                return;
+
+            if (viewModel.dataHubIsConnected() && confirm("Are you sure you want to remove user '" + userAccountName + "' from '" + viewModel.currentRecord().Name() + "' SMEs?")) {
+                dataHub.deleteUserAccountPlatform(userAccountID, viewModel.currentRecord().ID()).done(function () {
+                    refreshProductSMETable();
+                });
+            }
+        }
+
+        function initializeProductSMETable() {
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryPlatformSMECount(viewModel.currentRecord().ID()).done(function (count) {
+                    const productSMEs = $("#productSMEs");
+
+                    productSMEs.puidatatable({
+                        lazy: true,
+                        caption: "Product SME's",
+                        paginator: false,
+                        columns: [
+                            {
+                                field: "Name",
+                                headerText: "Name",
+                                bodyStyle: "width: 100%"
+                            },
+                            {
+                                content: function (record) {
+                                    dataHub.queryUserBusinessUnits(record.UserAccountID).done(function (queryResults) {
+                                        var businessUnits = "";
+                                        if (queryResults.length > 0) {
+                                            businessUnits += lookupAbbreviationValue(queryResults[0].BusinessUnitID);
+                                            for (var i = 1; i < queryResults.length; i++) {
+                                                businessUnits += ", " + lookupAbbreviationValue(queryResults[i].BusinessUnitID);
+                                            }
+                                        }
+                                        $('#' + record.Name.replace(' ', '')).html(businessUnits);
+                                    });
+                                    // Return a span with the name of the SME so that the queryBusinessUnits
+                                    // function can select it and change the html content of the span
+                                    return '<span id="'+ record.Name.replace(' ', '') + '"></span>';
+                                },
+                                headerText: "SME Business Units",
+                                bodyStyle: "width: 100%",
+                            },
+                            {
+                                content: function (record) {
+                                    const userName = record.Name;
+                                    const cursorStyle = !viewModel.canEdit() || viewModel.recordMode() === RecordMode.View ? "not-allowed" : "pointer";
+                                    return "<button type=\"button\" class=\"btn btn-xs\" onclick=\"deleteProductSME('" + record.UserAccountID + "', '" + userName.replace("\\", "\\\\") + "')\" title=\"Delete '" + userName + "'...\" style=\"cursor: " + cursorStyle + "\"><span class=\"glyphicon glyphicon-remove\"></span></button>";
+                                },
+                                headerText: "",
+                                bodyStyle: "width: 50px; padding: 1px",
+                                bodyClass: "text-center"
+                            }
+                        ],
+                        datasource: function (callback, ui) {
+                            const self = this;
+
+                            if (viewModel.dataHubIsConnected()) {
+                                dataHub.queryPlatformSMEs(viewModel.currentRecord().ID()).done(function (productSMEs) {
+                                    callback.call(self, productSMEs);
+                                    $("#loadingProductSMEs").hide();
+                                });
+                            }
+                        }
+                    });
+
+                    productSMETableInitialized = true;
+                });
+            }
+        }
+
+        $(function () {
+            var selectedUserAccountID;
+
+            $("#pageHeader").append("@Html.Raw(Filters().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+
+
+            $('#vendorfilter').on('keyup', function (e) {
+                if ($('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
                     viewModel.filterPageRecords();
                 } else {
-                    viewModel.filterText = $('#platformfilter').val();
+                    viewModel.filterText = $('#platformfilter').val() + ';' + $('#vendorfilter').val();
                     viewModel.filterPageRecords();
 
                 }
-    
+
             });
+
+            $('#platformfilter').on('keyup', function (e) {
+                if ($('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
+                    viewModel.filterText = '%';
+                    viewModel.filterPageRecords();
+                } else {
+                    viewModel.filterText = $('#platformfilter').val() + ';' + $('#vendorfilter').val();
+                    viewModel.filterPageRecords();
+
+                }
+
+            });
+
+            $("#addNewEditDialog").on("shown.bs.modal", function () {
+
+                initializeAutoCompleteLookupField("NewSME", securityHub.searchUserAccounts, false);
+                
+                initializeProductSMETable();
+
+                $("#inputNewSME").puiautocomplete({
+                    select: function (event, item) {
+                        selectedUserAccountID = item.data("id");
+                    }
+                });
+
+
+                //Initialize add new SME button
+                $("#inputNewSMEAdd").click(function () {
+                    if (!viewModel.canEdit() || viewModel.recordMode() == RecordMode.View)
+                        return;
+                    const newSME = $("#inputNewSME").val();
+
+                    if (newSME && newSME.length > 0) {
+                        if (viewModel.dataHubIsConnected()) {
+                            //Create a new instance of the UserAccountPlatform model
+                            dataHub.newUserAccountPlatform().done(function (userAccountPlatform) {
+                                // Assign current user account
+                                userAccountPlatform.UserAccountID = selectedUserAccountID;
+
+                                // Assign current product to UserAccountPlatform model
+                                userAccountPlatform.PlatformID = viewModel.currentRecord().ID();
+
+                                //Add new UserAccountPlatform model instance to database
+                                dataHub.addNewUserAccountPlatform(userAccountPlatform).done(function () {
+                                    // Refresh the data table
+                                     refreshProductSMETable();
+                                     //selectedUserAccountID = null;
+                                     $("inputNewSME").val("");
+                                });
+                            });
+                        }
+                    }
+                });
+            });
+
         });
+
+
     </script>
 }

@@ -166,6 +166,8 @@
                         <div class="col-md-6">
                             <label for="patchname">Patch Name</label>
                             <div class="form-control" id="patchname"></div>
+                            <label for="patchmnemonic">Patch ID</label>
+                            <div class="form-control" id="patchmnemonic"></div>
                             <label for="businessunit">Business Unit</label>
                             <div class="form-control" id="businessunit"></div>
                             <label for="productname">Product</label>
@@ -174,8 +176,7 @@
                             <div class="form-control" id="vendorname"></div>
                             <label for="patchclass">Patch Class</label>
                             <div class="form-control" id="patchclass"></div>
-                            <label for="releasedate">Release Date</label>
-                            <div class="form-control" id="releasedate"></div>
+                            
 
                         </div>
                         <div class="col-md-6">
@@ -189,6 +190,8 @@
                             <div class="form-control" id="patchcitation"></div>
                             <label for="patchlink">Link</label>
                             <div class="form-control" id="patchlink"></div>
+                            <label for="releasedate">Release Date</label>
+                            <div class="form-control" id="releasedate"></div>
                             <label for="deadline">Evaluation Deadline</label>
                             <div class="form-control" id="deadline"></div>
                         </div>
@@ -245,7 +248,8 @@
 
         function beginAssessment(record) {
             $('#patchid').html(record.PatchStatusID);
-            $('#patchname').html(record.PatchMnemonic);
+            $('#patchname').html(record.PatchTitle);
+            $('#patchmnemonic').html(record.PatchMnemonic);
             $('#businessunit').html(lookupNameValue(record.BusinessUnitID).toString());
             $('#productname').html(record.PlatformName + " / Version: " + record.PlatformVersion);
             $('#vendorname').html(record.VendorName);

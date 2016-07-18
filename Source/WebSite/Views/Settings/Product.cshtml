@@ -94,7 +94,7 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="col-md-12">
-        @Html.Raw(dataContext.AddSelectField<PlatformView, Vendor>("VendorID", "ID", "Name"))
+        @Html.Raw(dataContext.AddSelectField<PlatformView, Vendor>("VendorID", "ID", "Name", restriction: new GSF.Data.Model.RecordRestriction("IsDeleted = 0")))
         @Html.Raw(dataContext.AddInputField<PlatformView>("Name", initialFocus: true))
         @Html.Raw(dataContext.AddInputField<PlatformView>("Abbreviation"))
         @Html.Raw(dataContext.AddInputField<PlatformView>("Version"))

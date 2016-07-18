@@ -18,6 +18,7 @@ namespace openSPM.Model
 
         [PrimaryKey]
         public int PatchStatusID { get; set; }
+        public string PatchTitle { get; set; }
         public string PatchMnemonic { get; set; }
         public int ImpactKey { get; set; }
         public DateTime VendorReleaseDate { get; set; }

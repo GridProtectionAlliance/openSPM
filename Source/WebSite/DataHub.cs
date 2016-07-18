@@ -413,6 +413,7 @@ namespace openSPM
             patch.IsInitiated = record.IsInitiated;
             patch.IsExpedited = record.IsExpedited;
             patch.Title = record.Title;
+            patch.Link = record.Link;
             return patch;
         }
 

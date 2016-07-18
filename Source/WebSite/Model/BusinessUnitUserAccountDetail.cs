@@ -34,6 +34,10 @@ namespace openSPM.Model
         [PrimaryKey]
         public int BusinessUnitID { get; set; }
 
+        public string BusinessUnitName { get; set; }
+
+        public string BusinessUnitAbbreviation { get; set; }
+
         [PrimaryKey]
         public Guid UserAccountID { get; set; }
 

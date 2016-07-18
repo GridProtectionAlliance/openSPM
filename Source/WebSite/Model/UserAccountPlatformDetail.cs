@@ -34,6 +34,10 @@ namespace openSPM.Model
         [PrimaryKey]
         public Guid UserAccountID { get; set; }
 
+        public string Name { get; set; }
+
+        public string UserName { get; set; }
+
         [PrimaryKey]
         public int PlatformID { get; set; }
 

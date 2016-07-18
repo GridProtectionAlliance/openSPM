@@ -818,6 +818,182 @@ namespace openSPM
 
         #endregion
 
+        #region [ PlatformView Table Operations ]
+
+        [RecordOperation(typeof(PlatformView), RecordOperation.QueryRecordCount)]
+        public int QueryPlatformViewCount(bool showDeleted, string filterText)
+        {
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if (filterText != "%")
+            {
+                string[] filters = filterText.Split(';');
+                if (filters.Length == 2)
+                {
+                    productFilter += filters[0] += '%';
+                    vendorFilter += filters[1] += '%';
+                }
+            }
+
+            if (showDeleted)
+                return m_dataContext.Table<PlatformView>().QueryRecordCount(new RecordRestriction("Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+            return m_dataContext.Table<PlatformView>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+        }
+
+        [RecordOperation(typeof(PlatformView), RecordOperation.QueryRecords)]
+        public IEnumerable<PlatformView> QueryPlatformViews(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText)
+        {
+            string productFilter = "%";
+            string vendorFilter = "%";
+            if (filterText != "%")
+            {
+                string[] filters = filterText.Split(';');
+                if (filters.Length == 2)
+                {
+                    productFilter += filters[0] += '%';
+                    vendorFilter += filters[1] += '%';
+                }
+            }
+
+
+
+            if (showDeleted)
+                return m_dataContext.Table<PlatformView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+            return m_dataContext.Table<PlatformView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+        }
+
+        public IEnumerable<PlatformView> QueryPlatformViewsByVendor(int parentID)
+        {
+            return m_dataContext.Table<PlatformView>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", parentID));
+        }
+
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(PlatformView), RecordOperation.DeleteRecord)]
+        public void DeletePlatformView(int id)
+        {
+            // For PlatformViews, we only "mark" a record as deleted
+            PlatformView PlatformView = m_dataContext.Table<PlatformView>().LoadRecord(id);
+            if (PlatformView.IsDeleted == false)
+            {
+                PlatformView.DeletedByID = GetCurrentUserID();
+                PlatformView.DeletedON = DateTime.UtcNow;
+                PlatformView.IsDeleted = true;
+                m_dataContext.Table<PlatformView>().UpdateRecord(PlatformView);
+            }
+        }
+
+        [RecordOperation(typeof(PlatformView), RecordOperation.CreateNewRecord)]
+        public PlatformView NewPlatformView()
+        {
+            return new PlatformView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
+        [RecordOperation(typeof(PlatformView), RecordOperation.AddNewRecord)]
+        public void AddNewPlatformView(PlatformView record)
+        {
+            record.CreatedByID = GetCurrentUserID();
+            record.CreatedOn = DateTime.UtcNow;
+            record.UpdatedByID = record.CreatedByID;
+            record.UpdatedOn = record.CreatedOn;
+            record.DatePlatformEnrolled = record.CreatedOn;
+            m_dataContext.Table<PlatformView>().AddNewRecord(record);
+        }
+
+        [AuthorizeHubRole("Administrator, Owner")]
+        [RecordOperation(typeof(PlatformView), RecordOperation.UpdateRecord)]
+        public void UpdatePlatformView(PlatformView record)
+        {
+            record.UpdatedByID = GetCurrentUserID();
+            record.UpdatedOn = DateTime.UtcNow;
+            m_dataContext.Table<Platform>().UpdateRecord(BuildPlatform(record));
+        }
+
+
+        /// <summary>
+        /// Filters PlatformViews by name with no limit on total returned records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <param name="showDeleted">Show deleted or not</param>
+        /// <param name="sortField">Field to sort query</param>
+        /// <param name="ascending">Bool for ascending sort</param>
+        /// <param name="page">Page to return</param>
+        /// <param name="pageSize">Size of pages to return</param>
+        /// <returns>Filtered results as Vendor Table records.</returns>
+        public IEnumerable<PlatformView> FilterPlatformViews(string searchText, bool showDeleted, string sortField, bool ascending, int page, int pageSize)
+        {
+            if (showDeleted)
+            {
+                return m_dataContext
+                    .Table<PlatformView>()
+                    .QueryRecords(sortField, ascending, page, pageSize)
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
+
+            }
+            return m_dataContext
+                .Table<PlatformView>()
+                .QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"))
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
+        }
+
+        /// <summary>
+        /// Searches PlatformViews by name with no limit on total returned records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <returns>Search results as "IDLabel" values - serialized as JSON [{ id: "value", label : "name" }, ...]; useful for dynamic lookup lists.</returns>
+        public IEnumerable<IDLabel> SearchPlatformViews(string searchText)
+        {
+            return SearchPlatformViews(searchText, -1);
+        }
+
+        /// <summary>
+        /// Searches PlatformViews by name limited to the specified number of records.
+        /// </summary>
+        /// <param name="searchText">Search text to lookup.</param>
+        /// <param name="limit">Limit of number of record to return.</param>
+        /// <returns>Search results as "IDLabel" values - serialized as JSON [{ id: "value", label : "name" }, ...]; useful for dynamic lookup lists.</returns>
+        public IEnumerable<IDLabel> SearchPlatformViews(string searchText, int limit)
+        {
+            if (limit < 1)
+                return m_dataContext
+                    .Table<PlatformView>()
+                    .QueryRecords()
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
+                    .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+
+            return m_dataContext
+                .Table<PlatformView>()
+                .QueryRecords()
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
+                .Take(limit)
+                .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+        }
+
+        public Platform BuildPlatform(PlatformView record)
+        {
+            Platform platform = new Platform();
+            platform.ID = record.ID;
+            platform.VendorID = record.VendorID;
+            platform.Name = record.Name;
+            platform.IsDeleted = record.IsDeleted;
+            platform.UpdatedOn = record.UpdatedOn;
+            platform.UpdatedByID = record.UpdatedByID;
+            platform.CreatedOn = record.CreatedOn;
+            platform.CreatedByID = record.CreatedByID;
+            platform.Version = record.Version;
+            platform.DatePlatformEnrolled = record.DatePlatformEnrolled;
+            platform.DatePlatformRetired = record.DatePlatformRetired;
+            platform.Notes = record.Notes;
+            platform.DeletedON = record.DeletedON;
+            platform.DeletedByID = record.DeletedByID;
+            platform.Abbreviation = record.Abbreviation;
+
+            return platform;
+        }
+
+        #endregion
+
         #region [ UserAccountPlatform Table Operations ]
 
         public int QueryUserAccountPlatformCount(Guid userAccountID)
@@ -846,6 +1022,20 @@ namespace openSPM
         {
             if (m_dataContext.Table<UserAccountPlatform>().QueryRecordCount(new RecordRestriction("UserAccountID = {0} AND PlatformID = {1}", record.UserAccountID, record.PlatformID)) == 0)
                 m_dataContext.Table<UserAccountPlatform>().AddNewRecord(record);
+        }
+
+        #endregion
+
+        #region [ UserAccountPlatformDetail Table Operations ]
+
+        public IEnumerable<UserAccountPlatformDetail> QueryPlatformSMEs(int platformID)
+        {
+            return m_dataContext.Table<UserAccountPlatformDetail>().QueryRecords(restriction: new RecordRestriction("PlatformID = {0}", platformID));
+        }
+
+        public int QueryPlatformSMECount(int platformID)
+        {
+            return m_dataContext.Table<UserAccountPlatformDetail>().QueryRecordCount(restriction: new RecordRestriction("PlatformID = {0}", platformID));
         }
 
         #endregion
@@ -987,6 +1177,16 @@ namespace openSPM
             //    resolvedAccountRecords = resolvedAccountRecords.OrderByDescending(key => key.UserAccountName);
 
             //return resolvedAccountRecords.ToPagedList(page, pageSize);
+        }
+
+        public int QueryUserBusinessUnitCount(Guid userID)
+        {
+            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", userID));
+        }
+
+        public IEnumerable<BusinessUnitUserAccount> QueryUserBusinessUnits(Guid userID)
+        {
+            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecords(restriction: new RecordRestriction("UserAccountID = {0}", userID));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]

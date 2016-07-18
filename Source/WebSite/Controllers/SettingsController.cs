@@ -105,7 +105,7 @@ namespace openSPM.Controllers
 
         public ActionResult Product()
         {
-            m_appModel.ConfigureView<Platform>(Url.RequestContext, "Settings.Products", ViewBag);
+            m_appModel.ConfigureView<PlatformView>(Url.RequestContext, "Settings.Products", ViewBag);
             return View();
         }
 

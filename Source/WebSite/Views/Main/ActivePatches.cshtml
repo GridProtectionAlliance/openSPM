@@ -105,7 +105,7 @@
 {
 
     <td width="5%" class="text-center valign-middle"><img src="~/Images/StatusLights/Small/greenlight.png" alt="OK" title="OK" data-bind="attr: {'update-attr': getStatusImage($($element), $data)}"></td>
-    <td width="15%" class="text-center valign-middle" data-bind="text: PatchMnemonic"></td>
+    <td width="15%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: PatchMnemonic, click: $parent.viewPageRecord, enable: $parent.dataHubIsConnected()"></button></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorName"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
@@ -120,16 +120,17 @@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    @*<div class="row" data-bind="visible: $parent.recordMode()==RecordMode.View ">
+    <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.View ">
         <div class="col-md-12">
-            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PatchMnemonic"))
-            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("VendorName"))
-            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PlatformName"))
-            @Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("VendorReleaseDate"))
-            @Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("EvaluationDeadline"))
-            @Html.Raw(dataContext.AddTextAreaField<PatchPatchStatusDetail>("Summary"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PatchTitle", fieldLabel: "Patch Title"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PatchMnemonic", fieldLabel: "Patch ID"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("VendorName", fieldLabel: "Vendor"))
+            @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PlatformName", fieldLabel: "Product"))
+            @Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("VendorReleaseDate", fieldLabel: "Vendor Release Date"))
+            @Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("EvaluationDeadline", fieldLabel: "Evaluation Deadline"))
+            @Html.Raw(dataContext.AddTextAreaField<PatchPatchStatusDetail>("Detail", fieldLabel: "Patch Details"))
         </div>
-    </div>*@
+    </div>
     
 }
 @Html.Partial("PagedViewModel")
@@ -164,8 +165,8 @@
                     <label for="patchdetails"><h3><u>Patch Details</u></h3></label>
                     <div id="patchdetails"class="row">
                         <div class="col-md-6">
-                            <label for="patchname">Patch Name</label>
-                            <div class="form-control" id="patchname"></div>
+                            <label for="patchtitle">Patch Title</label>
+                            <div class="form-control" id="patchtitle"></div>
                             <label for="patchmnemonic">Patch ID</label>
                             <div class="form-control" id="patchmnemonic"></div>
                             <label for="businessunit">Business Unit</label>
@@ -248,7 +249,7 @@
 
         function beginAssessment(record) {
             $('#patchid').html(record.PatchStatusID);
-            $('#patchname').html(record.PatchTitle);
+            $('#patchtitle').html(record.PatchTitle);
             $('#patchmnemonic').html(record.PatchMnemonic);
             $('#businessunit').html(lookupNameValue(record.BusinessUnitID).toString());
             $('#productname').html(record.PlatformName + " / Version: " + record.PlatformVersion);

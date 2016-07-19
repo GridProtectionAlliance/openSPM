@@ -34,6 +34,10 @@ namespace openSPM.Model
 
         public bool IsInstalled { get; set; }
         public string Title { get; set; }
+        public string VendorName { get; set; }
+        public string ProductName { get; set; }
+        public DateTime EvaluationDeadline { get; set; }
+        public string PatchDetails { get; set; }
 
     }
 }

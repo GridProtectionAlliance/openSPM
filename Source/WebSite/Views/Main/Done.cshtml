@@ -86,9 +86,13 @@
 {
     <div class="row">
         <div class="col-md-12">
-        
+            
+            @Html.Raw(dataContext.AddInputField<ClosingReviewView>("Title", fieldLabel: "Patch Title"))                    
             @Html.Raw(dataContext.AddInputField<ClosingReviewView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            @Html.Raw(dataContext.AddInputField<ClosingReviewView>("VendorName", fieldLabel: "Vendor"))
+            @Html.Raw(dataContext.AddInputField<ClosingReviewView>("PlatformName", fieldLabel: "Product"))
             @Html.Raw(dataContext.AddInputField<ClosingReviewView>("BusinessUnitName", fieldLabel: "Business Unit"))
+            @Html.Raw(dataContext.AddTextAreaField<ClosingReviewView>("PatchDetails", fieldLabel: "Patch Details"))
             @Html.Raw(Model.AddValueListSelectField<ClosingReviewView>("AssessmentResultKey", "assessAction", fieldLabel: "Assessment Result"))
             @Html.Raw(dataContext.AddDateField<ClosingReviewView>("CompletionDate", fieldLabel: "Completion Date"))
             <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
@@ -190,7 +194,10 @@
                     }
                 });
 
+                $('#inputTitle').prop('disabled', true);
                 $('#inputVendorPatchName').prop('disabled', true);
+                $('#inputVendorName').prop('disabled', true);
+                $('#inputPlatformName').prop('disabled', true);
                 $('#inputBusinessUnitName').prop('disabled', true);
                 $('#selectAssessmentResultKey').prop('disabled', true);
                 $('#dateCompletionDate').prop('disabled', true);

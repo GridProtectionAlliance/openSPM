@@ -87,8 +87,6 @@
 
 @helper BodyRows()
 {
-
-
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: viewPatch.bind($data)"></button></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: VendorName"></div></td>
@@ -238,16 +236,18 @@
             </div>
             <div class="modal-body auto-height modal-readonly">
                 <form role="form">
-                    <label for="patchidpatch">PatchID</label>
+                    <label for="patchtitlepatch">Patch Title</label>
+                    <div id="patchtitlepatch" class="form-control"></div>
+                    <label for="patchidpatch">Patch ID</label>
                     <div id="patchidpatch" class="form-control"></div>
-                    <label for="patchnamepatch">Patch Name</label>
-                    <div class="form-control" id="patchnamepatch"></div>
+                    <label for="patchnumberpatch">Patch Number</label>
+                    <div class="form-control" id="patchnumberpatch"></div>
                     <label for="vendoridpatch">Vendor</label>
                     <div class="form-control" id="vendoridpatch"></div>
-                    <label for="vendorreleasedatepatch">Vendor Release Date</label>
-                    <div class="form-control" id="vendorreleasedatepatch"></div>
                     <label for="platformpatch">Platform</label>
                     <div class="form-control" id="platformpatch"></div>
+                    <label for="vendorreleasedatepatch">Vendor Release Date</label>
+                    <div class="form-control pre-scrollable" id="vendorreleasedatepatch"></div>
                     <label for="detailspatch">Details/Notes</label>
                     <div id="detailspatch" class="form-control"></div>
                 </form>
@@ -312,8 +312,9 @@
         function viewPatch(record) {
             if (viewModel.dataHubIsConnected) {
                 dataHub.queryPatchVendorPlatformViews(record.PatchID, null).done(function (data) {
-                    $('#patchidpatch').html(data[0].ID);
-                    $('#patchnamepatch').html(data[0].VendorPatchName);
+                    $('#patchtitlepatch').html(data[0].Title);
+                    $('#patchidpatch').html(data[0].VendorPatchName);
+                    $('#patchnumberpatch').html(data[0].ID);
                     $('#vendoridpatch').html(data[0].VendorName);
                     $('#vendorreleasedatepatch').html((data[0].VendorReleaseDate).formatDate(DateFormat));
                     $('#platformpatch').html(data[0].PlatformName);

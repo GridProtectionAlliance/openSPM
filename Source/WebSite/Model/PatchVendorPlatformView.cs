@@ -17,5 +17,6 @@ namespace openSPM.Model
         public string PlatformName { get; set; }
         public string Detail { get; set; }
         public string VendorName { get; set; }
+        public string Title { get; set; }
     }
 }

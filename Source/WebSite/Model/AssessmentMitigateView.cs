@@ -22,6 +22,8 @@ namespace openSPM.Model
         public DateTime CreatedOn { get; set; }
         public int PlatformID { get; set; }
         public string PlatformName { get; set; }
+        public string VendorName { get; set; }
+        public string PatchDetails { get; set; }
 
         public int MiPlanID { get; set; }
         public string PlanURL { get; set; }

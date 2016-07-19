@@ -116,8 +116,12 @@
 {
     <div class="row" >
         <div class="col-md-12">
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("Title", fieldLabel: "Patch Title"))
             @Html.Raw(dataContext.AddInputField<AssessmentInstallView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("VendorName", fieldLabel: "Vendor"))
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("ProductName", fieldLabel: "Product"))
             @Html.Raw(dataContext.AddInputField<AssessmentInstallView>("Name", fieldLabel: "Business Unit"))
+            @Html.Raw(dataContext.AddTextAreaField<AssessmentInstallView>("PatchDetails", fieldLabel: "Patch Details"))
             <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
                 @Html.Raw(dataContext.AddInputField<AssessmentInstallView>("WorkManagementID"))
                 @Html.Raw(dataContext.AddTextAreaField<AssessmentInstallView>("Summary"))
@@ -138,7 +142,7 @@
     <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.Edit">
         <div class="col-md-12">
             @Html.Raw(Model.AddValueListSelectField<AssessmentInstallView>("AssessmentResultKey", "assessAction", fieldLabel: "Assessment Result"))
-            @Html.Raw(dataContext.AddTextAreaField<AssessmentInstallView>("Details"))
+            @Html.Raw(dataContext.AddTextAreaField<AssessmentInstallView>("Details", fieldLabel: "Assessment Details"))
         </div>
     </div>
 }
@@ -199,6 +203,9 @@
                 });
             
                 $('#inputVendorPatchName').prop('disabled', true);
+                $('#inputTitle').prop('disabled', true);
+                $('#inputVendorName').prop('disabled', true);
+                $('#inputProductName').prop('disabled', true);
                 $('#inputName').prop('disabled', true);
 
 

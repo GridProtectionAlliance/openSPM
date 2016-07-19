@@ -115,9 +115,12 @@
 {
     <div class="row">
         <div class="col-md-12">
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("Title", fieldLabel: "Patch Title"))
             @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("VendorName", fieldLabel: "Vendor"))
+            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("PlatformName", fieldLabel: "Product"))
             @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("Name", fieldLabel: "Business Unit"))
-            @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("PlatformName"))
+            @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("PatchDetails", fieldLabel: "Patch Details"))
             <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
                 @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("Summary"))
             </div>
@@ -173,7 +176,9 @@
 
             
             $('#addNewEditDialog').on("shown.bs.modal",function(){
+                $('#inputTitle').prop('disabled', true);
                 $('#inputVendorPatchName').prop('disabled', true);
+                $('#inputVendorName').prop('disabled', true);
                 $('#inputName').prop('disabled', true);
                 $('#inputPlatformName').prop('disabled', true);
             });

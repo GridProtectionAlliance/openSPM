@@ -106,13 +106,13 @@ namespace EmailService
 
             int dailyEmailTime = int.Parse(ConfigurationFile.Current.Settings["systemSettings"]["DailyEmailTime"].Value);
 
-            m_timeStampUpdate.TryRunOnce();
             m_emailNewItems.TryRunOnce();
-           
-            //    if (DateTime.UtcNow.Minute % 5 == 0)
-            //    {
-            //        // This task will run every five minutes
-            //    }
+            m_timeStampUpdate.TryRunOnce();
+
+
+            //if (DateTime.UtcNow.Minute % 5 == 0)
+            //{
+            //}
 
             //    if (DateTime.UtcNow.Minute == 0)
             //    {
@@ -152,9 +152,11 @@ namespace EmailService
             using (AdoDataConnection connection = new AdoDataConnection("openSPM"))
             {
                 TableOperations<NewPatchesView> newPatches = new TableOperations<NewPatchesView>(connection);
+                TableOperations<NewAssessmentsView> newAssessments = new TableOperations<NewAssessmentsView>(connection);
                 TableOperations<NoticeLog> logs = new TableOperations<NoticeLog>(connection);
 
                 IEnumerable<NewPatchesView> patches = newPatches.QueryRecords();
+                IEnumerable<NewAssessmentsView> assessments = newAssessments.QueryRecords();
 
                 foreach (NewPatchesView patch in patches)
                 {
@@ -162,7 +164,7 @@ namespace EmailService
                     "The following patch was just entered..." + "<br/>" +
                      "Patch: " + patch.VendorPatchName + "<br/>" +
                     "Business Unit: " + patch.BUName + "<br/>" +
-                    "Platform: " + patch.PlatformName + "<br/>" +
+                    "Product: " + patch.PlatformName + "<br/>" +
                     "Deadline: " + patch.EvaluationDeadline;
                     string emailSubject = "New Patch: " + patch.VendorPatchName;
 
@@ -187,6 +189,42 @@ namespace EmailService
 
 
                 }
+
+                foreach (NewAssessmentsView assessment in assessments)
+                {
+                    if (assessment.AssessmentResultKey < 3)
+                    {
+                        string emailBody = "NOTIFICATION:" + "<br/>" +
+                        "Assessment Complete..." + "<br/>" +
+                         "Patch: " + assessment.VendorPatchName + "<br/>" +
+                        "Business Unit: " + assessment.BusinessUnit + "<br/>" +
+                        "Product: " + assessment.Product + "<br/>" +
+                        "Assessment Result: " + assessment.Result;
+                        string emailSubject = "Assessment Complete: " + assessment.VendorPatchName;
+
+                        try
+                        {
+                            SendEmail(assessment.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                            NoticeLog log = new NoticeLog();
+                            log.CreatedOn = DateTime.UtcNow;
+                            log.SentOn = DateTime.UtcNow;
+                            log.PatchID = assessment.PatchStatusID;
+                            log.NoticeMethodKey = 1;
+                            log.NoticeLevelKey = 2;
+                            log.Text = emailBody;
+                            log.ToUsers = userEmail;
+                            logs.AddNewRecord(log);
+
+                        }
+                        catch (Exception ex)
+                        {
+                            LogException(ex);
+                        }
+                    }
+
+
+                }
+
 
 
             }
@@ -273,29 +311,29 @@ namespace EmailService
                                         "Business Unit: " + pav.BUName + "<br/>" +
                                         "Platform: " + pav.PlatformName + "<br/>" +
                                         "Deadline: " + pav.EvaluationDeadline;
-                    if ((DateTime.Now - pav.CreatedOn).Days < 1)
-                    {
-                        emailSubject = "New Patch: " + pav.VendorPatchName;
-                        try
-                        {
-                            SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                            NoticeLog log = new NoticeLog();
-                            log.CreatedOn = DateTime.UtcNow;
-                            log.SentOn = DateTime.UtcNow;
-                            log.PatchID = pav.ID;
-                            log.NoticeMethodKey = 1;
-                            log.NoticeLevelKey = 1;
-                            log.Text = emailBody;
-                            log.ToUsers = userEmail;
-                            logs.AddNewRecord(log);
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(ex);
-                        }
+                    //if ((DateTime.Now - pav.CreatedOn).Days < 1)
+                    //{
+                    //    emailSubject = "New Patch: " + pav.VendorPatchName;
+                    //    try
+                    //    {
+                    //        SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                    //        NoticeLog log = new NoticeLog();
+                    //        log.CreatedOn = DateTime.UtcNow;
+                    //        log.SentOn = DateTime.UtcNow;
+                    //        log.PatchID = pav.ID;
+                    //        log.NoticeMethodKey = 1;
+                    //        log.NoticeLevelKey = 1;
+                    //        log.Text = emailBody;
+                    //        log.ToUsers = userEmail;
+                    //        logs.AddNewRecord(log);
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        LogException(ex);
+                    //    }
 
-                    }
-                    else if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
+                    //}
+                    if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
                     {
                         emailSubject = "Warning: " + pav.VendorPatchName + " approaching Evaluation Deadline";
                         try
@@ -400,31 +438,31 @@ namespace EmailService
                                         "Business Unit: " + rows.BUName + "<br/>" +
                                         "Platform: " + rows.PlatformName + "<br/>" +
                                         "Deadline: " + rows.DueDate;
-                    if ((DateTime.Now - rows.CreatedOn).Days < 1)
-                    {
-                        emailSubject = "Assessment Complete: " + rows.VendorPatchName;
-                        try
-                        {
-                            SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                            NoticeLog log = new NoticeLog();
-                            log.CreatedOn = DateTime.UtcNow;
-                            log.SentOn = DateTime.UtcNow;
-                            log.PatchID = rows.ID;
-                            log.NoticeMethodKey = 1;
-                            log.NoticeLevelKey = 1;
-                            log.Text = emailBody;
-                            log.ToUsers = userEmail;
-                            logs.AddNewRecord(log);
+                    //if ((DateTime.Now - rows.CreatedOn).Days < 1)
+                    //{
+                    //    emailSubject = "Assessment Complete: " + rows.VendorPatchName;
+                    //    try
+                    //    {
+                    //        SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                    //        NoticeLog log = new NoticeLog();
+                    //        log.CreatedOn = DateTime.UtcNow;
+                    //        log.SentOn = DateTime.UtcNow;
+                    //        log.PatchID = rows.ID;
+                    //        log.NoticeMethodKey = 1;
+                    //        log.NoticeLevelKey = 1;
+                    //        log.Text = emailBody;
+                    //        log.ToUsers = userEmail;
+                    //        logs.AddNewRecord(log);
 
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(ex);
-                        }
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        LogException(ex);
+                    //    }
 
-                    }
+                    //}
 
-                    else if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
+                    if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
                     {
                         emailSubject = "Warning: " + rows.VendorPatchName + " approaching Deadline";
                         try

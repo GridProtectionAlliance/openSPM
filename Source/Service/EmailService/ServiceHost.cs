@@ -195,11 +195,10 @@ namespace EmailService
                     if (assessment.AssessmentResultKey < 3)
                     {
                         string emailBody = "NOTIFICATION:" + "<br/>" +
-                        "Assessment Complete..." + "<br/>" +
+                        (assessment.AssessmentResultKey == 1 ? "Patch ready for Installation..." : "Mitigation Plan needed...") + "<br/>" +
                          "Patch: " + assessment.VendorPatchName + "<br/>" +
                         "Business Unit: " + assessment.BusinessUnit + "<br/>" +
-                        "Product: " + assessment.Product + "<br/>" +
-                        "Assessment Result: " + assessment.Result;
+                        "Product: " + assessment.Product + "<br/>";
                         string emailSubject = "Assessment Complete: " + assessment.VendorPatchName;
 
                         try
@@ -333,29 +332,29 @@ namespace EmailService
                     //    }
 
                     //}
-                    if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
-                    {
-                        emailSubject = "Warning: " + pav.VendorPatchName + " approaching Evaluation Deadline";
-                        try
-                        {
-                            SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                            NoticeLog log = new NoticeLog();
-                            log.CreatedOn = DateTime.UtcNow;
-                            log.SentOn = DateTime.UtcNow;
-                            log.PatchID = pav.PatchStatusID;
-                            log.NoticeMethodKey = 1;
-                            log.NoticeLevelKey = 2;
-                            log.Text = emailBody;
-                            log.ToUsers = userEmail;
-                            logs.AddNewRecord(log);
+                    //if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
+                    //{
+                    //    emailSubject = "Warning: " + pav.VendorPatchName + " approaching Evaluation Deadline";
+                    //    try
+                    //    {
+                    //        SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                    //        NoticeLog log = new NoticeLog();
+                    //        log.CreatedOn = DateTime.UtcNow;
+                    //        log.SentOn = DateTime.UtcNow;
+                    //        log.PatchID = pav.PatchStatusID;
+                    //        log.NoticeMethodKey = 1;
+                    //        log.NoticeLevelKey = 2;
+                    //        log.Text = emailBody;
+                    //        log.ToUsers = userEmail;
+                    //        logs.AddNewRecord(log);
 
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(ex);
-                        }
-                    }
-                    else if (pav.DaysTilViolation <= alarm && pav.DaysTilViolation > criticalAlarm)
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        LogException(ex);
+                    //    }
+                    //}
+                     if (pav.DaysTilViolation == alarm)
                     {
                         emailSubject = "Alarm: " + pav.VendorPatchName + " approaching Evaluation Deadline";
                         try
@@ -462,30 +461,30 @@ namespace EmailService
 
                     //}
 
-                    if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
-                    {
-                        emailSubject = "Warning: " + rows.VendorPatchName + " approaching Deadline";
-                        try
-                        {
-                            SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                            NoticeLog log = new NoticeLog();
-                            log.CreatedOn = DateTime.UtcNow;
-                            log.SentOn = DateTime.UtcNow;
-                            log.PatchID = rows.ID;
-                            log.NoticeMethodKey = 1;
-                            log.NoticeLevelKey = 2;
-                            log.Text = emailBody;
-                            log.ToUsers = userEmail;
-                            logs.AddNewRecord(log);
+                    //if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
+                    //{
+                    //    emailSubject = "Warning: " + rows.VendorPatchName + " approaching Deadline";
+                    //    try
+                    //    {
+                    //        SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
+                    //        NoticeLog log = new NoticeLog();
+                    //        log.CreatedOn = DateTime.UtcNow;
+                    //        log.SentOn = DateTime.UtcNow;
+                    //        log.PatchID = rows.ID;
+                    //        log.NoticeMethodKey = 1;
+                    //        log.NoticeLevelKey = 2;
+                    //        log.Text = emailBody;
+                    //        log.ToUsers = userEmail;
+                    //        logs.AddNewRecord(log);
 
 
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(ex);
-                        }
-                    }
-                    else if (rows.DaysTilViolation <= alarm && rows.DaysTilViolation > criticalAlarm)
+                    //    }
+                    //    catch (Exception ex)
+                    //    {
+                    //        LogException(ex);
+                    //    }
+                    //}
+                   if (rows.DaysTilViolation == alarm )
                     {
                         emailSubject = "Alarm: " + rows.VendorPatchName + " approaching Deadline";
                         try
@@ -633,7 +632,7 @@ namespace EmailService
 
                     }
 
-                    else if (row.DaysLeft <= due && row.DaysLeft >= pastDue)
+                    else if (row.DaysLeft == due )
                     {
                         emailSubject = "Due: " + row.Title + " approaching Deadline";
                         try

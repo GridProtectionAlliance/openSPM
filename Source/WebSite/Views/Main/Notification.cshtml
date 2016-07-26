@@ -74,8 +74,7 @@
         @Html.Raw(Model.AddValueListSelectField<NoticeLogView>("NoticeMethodKey", "noticeMethod", fieldLabel: "Notice Method"))
         @Html.Raw(Model.AddValueListSelectField<NoticeLogView>("NoticeLevelKey", "noticeLevel", fieldLabel: "Notice Level"))
         @Html.Raw(dataContext.AddTextAreaField<NoticeLogView>("ToUsers"))
-        @Html.Raw(dataContext.AddTextAreaField<NoticeLogView>("XcUsers"))
-        @Html.Raw(dataContext.AddTextAreaField<NoticeLogView>("Text"))
+        @Html.Raw(dataContext.AddTextAreaField<NoticeLogView>("Text", 6))
         @Html.Raw(dataContext.AddDateField<NoticeLogView>("SentOn"))
 
 

@@ -106,7 +106,6 @@ namespace EmailService
 
             int dailyEmailTime = int.Parse(ConfigurationFile.Current.Settings["systemSettings"]["DailyEmailTime"].Value);
 
-            m_emailNewItems.TryRunOnce();
             m_timeStampUpdate.TryRunOnce();
 
 
@@ -114,10 +113,10 @@ namespace EmailService
             //{
             //}
 
-            //    if (DateTime.UtcNow.Minute == 0)
-            //    {
-            //        // This task will run every hour
-            //    }
+            if (DateTime.UtcNow.Minute == 0)
+            {
+                m_emailNewItems.TryRunOnce();
+            }
 
             if (DateTime.Now.Hour == dailyEmailTime && DateTime.Now.Minute == 0)
                 {

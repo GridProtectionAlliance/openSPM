@@ -53,7 +53,7 @@
 
     // Hide the add new button
     bool hideAddNewButton = ViewBag.HideAddNewButton ?? false;
-
+    bool hideExportCSVButton = ViewBag.HideExportCSVButton ?? false;
     // Hide unauthorized controls as disallowed by Edit/AddNew/Delete roles - otherwise unauthorized controls will be disabled
     bool hideUnauthorizedControls = ViewBag.HideUnauthorizedControls ?? false;
 
@@ -157,12 +157,17 @@
         </div>
     </div>
     <div class="pull-right" id="pageControlsRow">
-        @if (!hideAddNewButton && (canAddNew || !hideUnauthorizedControls)) {
+        @if (!hideExportCSVButton)
+        {
+            <button class="btn btn-sm btn-primary" onclick="viewModel.exportCSV()" id="exportBtn" style="margin-left: 4px;"><span class="glyphicon glyphicon-download"></span>&nbsp;&nbsp;Export&nbsp;CSV</button>
+        }
+        @if (!hideAddNewButton && (canAddNew || !hideUnauthorizedControls))
+        {
             <button type="button" class="btn btn-sm btn-primary pull-right" id="addRecordButton" @Html.Raw(canAddNew ? "data-bind=\"enable: dataHubIsConnected\"" : "disabled")>
                 <span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;Add&nbsp;New
             </button>
-            <br />
-            <hr class="half-break" />
+            <br/>
+            <hr class="half-break"/>
         }
         <div class="btn-group btn-group-sm">
             <button type="button" class="btn btn-default" id="firstPageButton" data-bind="css: {'disabled': onFirstPage()}, enable: dataHubIsConnected() && !onFirstPage()"><span class="glyphicon glyphicon-backward"></span></button>

@@ -283,9 +283,9 @@ namespace openSPM
                 string[] filters = filterText.Split(';');
                 if(filters.Length == 3)
                 {
-                    patchFilter += filters[0] + '%';
-                    productFilter += filters[1] += '%';
-                    vendorFilter += filters[2] += '%';
+                    patchFilter = filters[0] + '%';
+                    productFilter = filters[1] += '%';
+                    vendorFilter = filters[2] += '%';
                 }
             }
 
@@ -307,9 +307,9 @@ namespace openSPM
                 string[] filters = filterText.Split(';');
                 if (filters.Length == 3)
                 {
-                    patchFilter += filters[0] + '%';
-                    productFilter += filters[1] += '%';
-                    vendorFilter += filters[2] += '%';
+                    patchFilter = filters[0] + '%';
+                    productFilter = filters[1] += '%';
+                    vendorFilter = filters[2] += '%';
                 }
             }
 
@@ -831,8 +831,8 @@ namespace openSPM
                 string[] filters = filterText.Split(';');
                 if (filters.Length == 2)
                 {
-                    productFilter += filters[0] += '%';
-                    vendorFilter += filters[1] += '%';
+                    productFilter = filters[0] += '%';
+                    vendorFilter = filters[1] += '%';
                 }
             }
 
@@ -851,8 +851,8 @@ namespace openSPM
                 string[] filters = filterText.Split(';');
                 if (filters.Length == 2)
                 {
-                    productFilter += filters[0] += '%';
-                    vendorFilter += filters[1] += '%';
+                    productFilter = filters[0] += '%';
+                    vendorFilter = filters[1] += '%';
                 }
             }
 
@@ -2291,9 +2291,9 @@ namespace openSPM
                 string[] filters = filterText.Split(';');
                 if (filters.Length == 3)
                 {
-                    patchFilter += filters[0] + '%';
-                    productFilter += filters[1] += '%';
-                    vendorFilter += filters[2] += '%';
+                    patchFilter = filters[0] + '%';
+                    productFilter = filters[1] += '%';
+                    vendorFilter = filters[2] += '%';
                 }
             }
             return m_dataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
@@ -2311,9 +2311,9 @@ namespace openSPM
                 string[] filters = filterText.Split(';');
                 if (filters.Length == 3)
                 {
-                    patchFilter += filters[0] + '%';
-                    productFilter += filters[1] += '%';
-                    vendorFilter += filters[2] += '%';
+                    patchFilter = filters[0] + '%';
+                    productFilter = filters[1] += '%';
+                    vendorFilter = filters[2] += '%';
                 }
             }
             return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));

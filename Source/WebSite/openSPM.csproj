@@ -52,20 +52,20 @@
       <HintPath>..\packages\ExpressionEvaluator.2.0.4.0\lib\net40\ExpressionEvaluator.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="GSF.Core, Version=2.1.262.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GSF.Core.2.1.262-beta\lib\net46\GSF.Core.dll</HintPath>
+    <Reference Include="GSF.Core, Version=2.1.280.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GSF.Core.2.1.280-beta\lib\net46\GSF.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="GSF.Security, Version=2.1.262.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GSF.Security.2.1.262-beta\lib\net46\GSF.Security.dll</HintPath>
+    <Reference Include="GSF.Security, Version=2.1.280.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GSF.Security.2.1.280-beta\lib\net46\GSF.Security.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="GSF.ServiceModel, Version=2.1.262.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GSF.ServiceModel.2.1.262-beta\lib\net46\GSF.ServiceModel.dll</HintPath>
+    <Reference Include="GSF.ServiceModel, Version=2.1.280.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GSF.ServiceModel.2.1.280-beta\lib\net46\GSF.ServiceModel.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="GSF.Web, Version=2.1.262.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\GSF.Web.2.1.262-beta\lib\net46\GSF.Web.dll</HintPath>
+    <Reference Include="GSF.Web, Version=2.1.280.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\GSF.Web.2.1.280-beta\lib\net46\GSF.Web.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.AspNet.SignalR.Core, Version=2.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -197,6 +197,9 @@
     <Compile Include="Controllers\SystemController.cs" />
     <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
+    <Compile Include="CSVDownloadHandler.ashx.cs">
+      <DependentUpon>CSVDownloadHandler.ashx</DependentUpon>
+    </Compile>
     <Compile Include="DataHub.cs" />
     <Compile Include="FileDownloadHandler.ashx.cs">
       <DependentUpon>FileDownloadHandler.ashx</DependentUpon>
@@ -233,6 +236,8 @@
     <Compile Include="Model\MitigationPlan.cs" />
     <Compile Include="Model\MitigationPlanHistoryView.cs" />
     <Compile Include="Model\MyAssessmentsView.cs" />
+    <Compile Include="Model\NewPatchesView.cs" />
+    <Compile Include="Model\NewPlanView.cs" />
     <Compile Include="Model\NoticeLog.cs" />
     <Compile Include="Model\NoticeLogView.cs" />
     <Compile Include="Model\PatchPatchStatusDetail.cs" />
@@ -418,6 +423,7 @@
     <Content Include="fonts\FontAwesome.otf" />
     <Content Include="FileUploadHandler.ashx" />
     <Content Include="FileDownloadHandler.ashx" />
+    <Content Include="CSVDownloadHandler.ashx" />
     <None Include="Properties\PublishProfiles\Deploy to GPAWeb.pubxml" />
     <None Include="Properties\PublishProfiles\Deploy to Package File.pubxml" />
     <Content Include="Scripts\fileinput.js" />

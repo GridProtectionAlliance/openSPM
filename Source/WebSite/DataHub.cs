@@ -880,7 +880,7 @@ namespace openSPM
                 PlatformView.DeletedByID = GetCurrentUserID();
                 PlatformView.DeletedON = DateTime.UtcNow;
                 PlatformView.IsDeleted = true;
-                m_dataContext.Table<PlatformView>().UpdateRecord(PlatformView);
+                m_dataContext.Table<Platform>().UpdateRecord(BuildPlatform(PlatformView));
             }
         }
 
@@ -899,7 +899,7 @@ namespace openSPM
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
             record.DatePlatformEnrolled = record.CreatedOn;
-            m_dataContext.Table<PlatformView>().AddNewRecord(record);
+            m_dataContext.Table<Platform>().AddNewRecord(BuildPlatform(record));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]

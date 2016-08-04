@@ -16,7 +16,9 @@
 
         protected override void OnStart(string[] args)
         {
-            m_serviceHelper.OnStart(args);
+            {
+                m_serviceHelper.OnStart(args);
+            }
         }
 
         protected override void OnStop()

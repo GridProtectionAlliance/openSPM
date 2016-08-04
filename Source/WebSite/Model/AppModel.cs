@@ -27,6 +27,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Web.Routing;
+using System.Web.Script.Serialization;
 using GSF;
 using GSF.Data.Model;
 using GSF.Web;

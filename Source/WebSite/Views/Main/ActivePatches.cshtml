@@ -126,8 +126,13 @@
             @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PatchMnemonic", fieldLabel: "Patch ID"))
             @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("VendorName", fieldLabel: "Vendor"))
             @Html.Raw(dataContext.AddInputField<PatchPatchStatusDetail>("PlatformName", fieldLabel: "Product"))
-            @Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("VendorReleaseDate", fieldLabel: "Vendor Release Date"))
-            @Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("EvaluationDeadline", fieldLabel: "Evaluation Deadline"))
+            @*@Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("VendorReleaseDate", fieldLabel: "Vendor Release Date"))*@
+            <label for="vendorReleaseDate">Vendor Release Date</label>
+            <div id="vendorReleaseDate" class="form-control readonly inputtext"></div>
+            @*@Html.Raw(dataContext.AddDateField<PatchPatchStatusDetail>("EvaluationDeadline", fieldLabel: "Evaluation Deadline"))*@
+            <label for="evaluationDeadline">Evaluation Deadline</label>
+            <div id="evaluationDeadline" class="form-control readonly inputtext"></div>
+
             @Html.Raw(dataContext.AddTextAreaField<PatchPatchStatusDetail>("Detail", fieldLabel: "Patch Details"))
         </div>
     </div>
@@ -248,6 +253,7 @@
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
         function beginAssessment(record) {
+            viewModel.recordMode(RecordMode.Edit);
             $('#patchid').html(record.PatchStatusID);
             $('#patchtitle').html(record.PatchTitle);
             $('#patchmnemonic').html(record.PatchMnemonic);
@@ -384,6 +390,7 @@
         $(viewModel).on("beforeSave", function(event, observableRecord){
             observableRecord.ImpactKey = $('#assessmentSelect').val(); //high jack ImpactKey to save assessment key
             observableRecord.Detail = $('#details').val();
+
         });
 
 
@@ -440,6 +447,9 @@
             });
             
             $("#addNewEditDialog").on("shown.bs.modal", function() {
+                $('#vendorReleaseDate').html(new Date(viewModel.currentRecord().VendorReleaseDate()).formatDate(DateFormat));
+                $('#evaluationDeadline').html(new Date(viewModel.currentRecord().EvaluationDeadline()).formatDate(DateFormat));
+
                 $('#editRecordButton').attr('disabled', 'disabled');
                     
                
@@ -464,10 +474,10 @@
             setTimeout(function() {viewModel.calculatePageSize(true);}, 100);
         });
         
-        //$(viewModel).on("beforeEdit", function(event, observableRecord) {
-        //    observableRecord.VendorReleaseDate = observableRecord.VendorReleaseDate.formatDate(DateFormat);
-        //    $('#readonlyinputVendorReleaseDate').val($('#readonlyinputVendorReleaseDate').val().formatDate(DateTimeFormat));
-        //});
+        $(viewModel).on("beforeEdit", function(event, observableRecord) {
+            //observableRecord.VendorReleaseDate(observableRecord.VendorReleaseDate);
+            //$('#readonlyinputVendorReleaseDate').val($('#readonlyinputVendorReleaseDate').val().formatDate(DateTimeFormat));
+        });
 
 
         function filterBU() {

@@ -27,6 +27,7 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Web;
+using System.Web.Hosting;
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -36,6 +37,7 @@ using GSF.Data;
 using GSF.Data.Model;
 using GSF.Identity;
 using GSF.Security;
+using GSF.Web.Embedded;
 using GSF.Web.Model;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
@@ -67,6 +69,9 @@ namespace openSPM
             FilterConfig.RegisterGlobalFilters(GlobalFilters.Filters);
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
+
+            // Add additional virtual path provider to allow access to embedded resources
+            HostingEnvironment.RegisterVirtualPathProvider(new EmbeddedResourceProvider());
 
             GlobalSettings global = DefaultModel.Global;
 

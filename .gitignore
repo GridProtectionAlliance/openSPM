@@ -238,3 +238,4 @@ _Pvt_Extensions
 /Source/WebSite/ConfigurationCache/AdoSecurityCache.bin
 /Source/WebSite/UserRoleCache.bin
 *.DotSettings
+/Documentation/Copy of Vendor Enrollment Spreadsheet.xlsx

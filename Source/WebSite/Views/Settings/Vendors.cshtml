@@ -20,12 +20,12 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using GSF
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
 @{
-    DataContext dataContext = Model.DataContext;
+    DataContext dataContext = ViewBag.DataContext;
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -38,6 +38,7 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Patch Source";
+    ViewBag.ShowSearchFilter = true;
 }
 @section StyleSheets{
     <style>
@@ -57,25 +58,6 @@
             }
     </style>
 }
-@helper VendorFilter()
-{
-    <div class='row'>
-        <div class='col-md-12'>
-            <div class='form-group'>
-                <label for='vendorfilter'>Vendor Name Filter:</label>
-                <div class='right-inner-addon'>
-                    <i class='glyphicon glyphicon-search'></i>
-                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search' />
-                </div>
-            </div>
-        </div>
-    </div>
-
-}
-
-
-
-
 @helper BodyRows()
 {
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Abbreviation, click: $parent.viewPageRecord"></button></td>
@@ -119,28 +101,9 @@
         @Html.Raw(dataContext.AddInputField<Vendor>("ContactPhoneCell2"))
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Vendor>(ViewBag))
-
-        $(function () {
-            $("#pageHeader").append("@Html.Raw(VendorFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
-
-
-            $('#vendorfilter').on('keyup', function (e) {
-                if ($('#vendorfilter').val().length == 0) {
-                    viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
-                } else {
-                    viewModel.filterText = $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
-
-                }
-
-            });
-
-
-        });
     </script>
 }

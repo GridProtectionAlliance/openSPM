@@ -20,12 +20,12 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using GSF
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
 @{
-    DataContext dataContext = Model.DataContext;
+    DataContext dataContext = ViewBag.DataContext;
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -38,6 +38,7 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Product";
+    ViewBag.ShowSearchFilter = true;
 }
 @section StyleSheets{
     <style>
@@ -56,21 +57,6 @@
                 pointer-events: none;
             }
     </style>
-}
-@helper PlatformFilter()
-{
-    <div class='row'>
-        <div class='col-md-12'>
-            <div class='form-group'>
-                <label for='platformfilter'>Platform Name Filter:</label>
-                <div class='right-inner-addon'>
-                    <i class='glyphicon glyphicon-search'></i>
-                    <input class='form-control' type='search' id='platformfilter' placeholder='Search' />
-                </div>
-            </div>
-        </div>
-    </div>
-
 }
 @helper BodyRows()
 {
@@ -92,33 +78,10 @@
         @Html.Raw(dataContext.AddInputField<Platform>("Version"))
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Platform>(ViewBag))
         @Html.Raw(Model.RenderAbstract<Vendor>("Name"))
-
-
-        $(function () {
-
-            $("#pageHeader").append("@Html.Raw(PlatformFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
-            $('#platformfilter').on('keyup', function (e) {
-                if (viewModel.dataHubIsConnected()) {
-                    dataHub.filterPlatforms($('#platformfilter').val(), @ViewBag.ShowDeleted.ToString().ToLower(), viewModel.sortField(), viewModel.sortAscending(), viewModel.currentPage(), viewModel.currentPageSize()).done(function (data) {
-                        $(viewModel).trigger("pageRecordsQueried", [data]);
-                        viewModel.pageRecords.removeAll();
-                        viewModel.recordCount(data.length);
-                        viewModel.pageRecords(data);
-
-                        refreshHubDependentControlState();
-                        $("[id='recordRow']").css("visibility", "visible");
-                        $("#loadingDataLabel").hide();
-
-                    }).fail(function (error) {
-                        showErrorMessage(error);
-                    });
-                }
-            });
-        });
     </script>
 }

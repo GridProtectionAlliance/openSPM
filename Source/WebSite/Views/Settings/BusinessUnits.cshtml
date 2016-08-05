@@ -21,11 +21,12 @@
 //
 //*****************************************************************************************************@
 @using GSF
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @model AppModel
 @{
-    DataContext dataContext = Model.DataContext;
+    DataContext dataContext = ViewBag.DataContext;
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -70,10 +71,7 @@
             </div>
         </div>
     </div>
-
 }
-
-
 @helper BodyRows()
 {
     <td width="25%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Name, click: $parent.viewPageRecord"></button></td>
@@ -111,7 +109,7 @@
         </div>
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 <div id="editSMEPlatformsDialog" class="modal fade" role="dialog">
     <div class="modal-vertical-align-container">
         <div class="modal-dialog modal-md modal-vertical-align-center">

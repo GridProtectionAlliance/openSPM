@@ -21,11 +21,12 @@
     //
     //*****************************************************************************************************@
 @using GSF
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
 @{
-    DataContext dataContext = Model.DataContext;
+    DataContext dataContext = ViewBag.DataContext;
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
@@ -116,7 +117,7 @@
         </div>
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
     <script>
         

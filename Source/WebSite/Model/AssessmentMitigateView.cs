@@ -29,7 +29,6 @@ namespace openSPM.Model
         public string PlanURL { get; set; }
         public string Justification { get; set; }
 
-        [Required]
         public string Summary { get; set; }
         public string Risk { get; set; }
         public string Detail { get; set; }

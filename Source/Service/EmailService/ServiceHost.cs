@@ -113,7 +113,7 @@ namespace EmailService
             //{
             //}
 
-            if (DateTime.UtcNow.Minute == 0)
+            if (DateTime.UtcNow.Minute == 37)
             {
                 m_emailNewItems.TryRunOnce();
             }
@@ -129,7 +129,7 @@ namespace EmailService
         private void ProcessEmails()
         {
             ProcessOpenSPMEmails();
-            ProcessMiPlanEmails();
+            //ProcessMiPlanEmails();
         }
 
         private void TimeStampUpdate()
@@ -226,47 +226,6 @@ namespace EmailService
 
 
             }
-
-            using (AdoDataConnection connection = new AdoDataConnection("miPlan"))
-            {
-                TableOperations<NewPlanView> newPlans = new TableOperations<NewPlanView>(connection);
-                TableOperations<NoticeLog> logs = new TableOperations<NoticeLog>(connection);
-
-                IEnumerable<NewPlanView> plans = newPlans.QueryRecords();
-
-                foreach (NewPlanView plan in plans)
-                {
-                    string emailBody = "NOTIFICATION: <br/>" +
-                                        "The following plan was just created...<br/>" +
-                                         "Plan: " + plan.Title + "<br/>" +
-                                         "Business Unit: " + plan.Name + "<br/>";
-
-                    string emailSubject = "New plan submitted: " + plan.Title;
-
-                    try
-                    {
-                        SendEmail(plan.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
-                        NoticeLog log = new NoticeLog();
-                        log.CreatedOn = DateTime.UtcNow;
-                        log.SentOn = DateTime.UtcNow;
-                        log.PatchID = plan.ID;
-                        log.NoticeMethodKey = 1;
-                        log.NoticeLevelKey = 1;
-                        log.Text = emailBody;
-                        log.ToUsers = userEmail;
-                        logs.AddNewRecord(log);
-
-                    }
-                    catch (Exception ex)
-                    {
-                        LogException(ex);
-                    }
-
-
-                }
-
-            }
-
         }
 
         private void ProcessOpenSPMEmails()
@@ -309,50 +268,6 @@ namespace EmailService
                                         "Business Unit: " + pav.BUName + "<br/>" +
                                         "Platform: " + pav.PlatformName + "<br/>" +
                                         "Deadline: " + pav.EvaluationDeadline;
-                    //if ((DateTime.Now - pav.CreatedOn).Days < 1)
-                    //{
-                    //    emailSubject = "New Patch: " + pav.VendorPatchName;
-                    //    try
-                    //    {
-                    //        SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                    //        NoticeLog log = new NoticeLog();
-                    //        log.CreatedOn = DateTime.UtcNow;
-                    //        log.SentOn = DateTime.UtcNow;
-                    //        log.PatchID = pav.ID;
-                    //        log.NoticeMethodKey = 1;
-                    //        log.NoticeLevelKey = 1;
-                    //        log.Text = emailBody;
-                    //        log.ToUsers = userEmail;
-                    //        logs.AddNewRecord(log);
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        LogException(ex);
-                    //    }
-
-                    //}
-                    //if (pav.DaysTilViolation <= warning && pav.DaysTilViolation > alarm)
-                    //{
-                    //    emailSubject = "Warning: " + pav.VendorPatchName + " approaching Evaluation Deadline";
-                    //    try
-                    //    {
-                    //        SendEmail(pav.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                    //        NoticeLog log = new NoticeLog();
-                    //        log.CreatedOn = DateTime.UtcNow;
-                    //        log.SentOn = DateTime.UtcNow;
-                    //        log.PatchID = pav.PatchStatusID;
-                    //        log.NoticeMethodKey = 1;
-                    //        log.NoticeLevelKey = 2;
-                    //        log.Text = emailBody;
-                    //        log.ToUsers = userEmail;
-                    //        logs.AddNewRecord(log);
-
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        LogException(ex);
-                    //    }
-                    //}
                      if (pav.DaysTilViolation == alarm)
                     {
                         emailSubject = "Alarm: " + pav.VendorPatchName + " approaching Evaluation Deadline";
@@ -436,53 +351,6 @@ namespace EmailService
                                         "Business Unit: " + rows.BUName + "<br/>" +
                                         "Platform: " + rows.PlatformName + "<br/>" +
                                         "Deadline: " + rows.DueDate;
-                    //if ((DateTime.Now - rows.CreatedOn).Days < 1)
-                    //{
-                    //    emailSubject = "Assessment Complete: " + rows.VendorPatchName;
-                    //    try
-                    //    {
-                    //        SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                    //        NoticeLog log = new NoticeLog();
-                    //        log.CreatedOn = DateTime.UtcNow;
-                    //        log.SentOn = DateTime.UtcNow;
-                    //        log.PatchID = rows.ID;
-                    //        log.NoticeMethodKey = 1;
-                    //        log.NoticeLevelKey = 1;
-                    //        log.Text = emailBody;
-                    //        log.ToUsers = userEmail;
-                    //        logs.AddNewRecord(log);
-
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        LogException(ex);
-                    //    }
-
-                    //}
-
-                    //if (rows.DaysTilViolation <= warning && rows.DaysTilViolation > alarm)
-                    //{
-                    //    emailSubject = "Warning: " + rows.VendorPatchName + " approaching Deadline";
-                    //    try
-                    //    {
-                    //        SendEmail(rows.SME, emailSubject, emailBody, "openSPM@tva.gov", "openSPM");
-                    //        NoticeLog log = new NoticeLog();
-                    //        log.CreatedOn = DateTime.UtcNow;
-                    //        log.SentOn = DateTime.UtcNow;
-                    //        log.PatchID = rows.ID;
-                    //        log.NoticeMethodKey = 1;
-                    //        log.NoticeLevelKey = 2;
-                    //        log.Text = emailBody;
-                    //        log.ToUsers = userEmail;
-                    //        logs.AddNewRecord(log);
-
-
-                    //    }
-                    //    catch (Exception ex)
-                    //    {
-                    //        LogException(ex);
-                    //    }
-                    //}
                    if (rows.DaysTilViolation == alarm )
                     {
                         emailSubject = "Alarm: " + rows.VendorPatchName + " approaching Deadline";
@@ -572,114 +440,6 @@ namespace EmailService
             }
         }
 
-        private void ProcessMiPlanEmails()
-        {
-            using (AdoDataConnection connection = new AdoDataConnection("miPlan"))
-            {
-                TableOperations<MitigationPlanActionsDue> mpad = new TableOperations<MitigationPlanActionsDue>(connection);
-                int groupID = connection.ExecuteScalar<int?>("SELECT ID FROM ValueListGroup WHERE Name = 'alarmLimits'") ?? 0;
-                TableOperations<ValueList> valueList = new TableOperations<ValueList>(connection);
-                TableOperations<NoticeLog> logs = new TableOperations<NoticeLog>(connection);
-                int due, pastDue;
-                ValueList[] alarms = valueList.QueryRecords("[Key]", restriction: new RecordRestriction("GroupID = {0}", groupID)).ToArray();
-                if (groupID == 0)
-                {
-                    pastDue = 0;
-                    due = 7;
-
-                }
-                else
-                {
-                    pastDue = alarms[0].Value;
-                    due = alarms[1].Value;
-                }
-
-                IEnumerable<MitigationPlanActionsDue> table = mpad.QueryRecords();
-                string emailSubject = "";
-
-                foreach (MitigationPlanActionsDue row in table)
-                {
-                    Debug.WriteLine(row.Title + " SME:" + row.UserAccountID + " days left:" + row.DaysLeft);
-
-                    string emailBody = "NOTIFICATION: <br/>" +
-                                        "The following plan has actions nearing the deadline...<br/>" +
-                                         "Plan: " + row.Title + "<br/>" +
-                                         "Business Unit: " + row.Name + "<br/>" +
-                                         "Deadline: " + row.ScheduledEndDate;
-
-                    if ((DateTime.Now - row.CreatedOn).Days < 1)
-                    {
-                        emailSubject = "New plan submitted: " + row.Title;
-                        try
-                        {
-                            SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
-                            NoticeLog log = new NoticeLog();
-                            log.CreatedOn = DateTime.UtcNow;
-                            log.SentOn = DateTime.UtcNow;
-                            log.PatchID = row.ID;
-                            log.NoticeMethodKey = 1;
-                            log.NoticeLevelKey = 1;
-                            log.Text = emailBody;
-                            log.ToUsers = userEmail;
-                            logs.AddNewRecord(log);
-
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(ex);
-                        }
-
-                    }
-
-                    else if (row.DaysLeft == due )
-                    {
-                        emailSubject = "Due: " + row.Title + " approaching Deadline";
-                        try
-                        {
-                            SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
-                            NoticeLog log = new NoticeLog();
-                            log.CreatedOn = DateTime.UtcNow;
-                            log.SentOn = DateTime.UtcNow;
-                            log.PatchID = row.ID;
-                            log.NoticeMethodKey = 1;
-                            log.NoticeLevelKey = 2;
-                            log.Text = emailBody;
-                            log.ToUsers = userEmail;
-                            logs.AddNewRecord(log);
-
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(ex);
-                        }
-                    }
-                    else if (row.DaysLeft <= pastDue)
-                    {
-                        emailSubject = "Past Due: " + row.Title + " approaching Deadline";
-                        try
-                        {
-                            SendEmail(row.UserAccountID, emailSubject, emailBody, "MiPlan@tva.gov", "miPlan");
-                            NoticeLog log = new NoticeLog();
-                            log.CreatedOn = DateTime.UtcNow;
-                            log.SentOn = DateTime.UtcNow;
-                            log.PatchID = row.ID;
-                            log.NoticeMethodKey = 1;
-                            log.NoticeLevelKey = 3;
-                            log.Text = emailBody;
-                            log.ToUsers = userEmail;
-                            logs.AddNewRecord(log);
-
-                        }
-                        catch (Exception ex)
-                        {
-                            LogException(ex);
-                        }
-                    }
-
-                }
-
-            }
-        }
 
         private void HeartbeatProcess(string processName, object[] processArguments)
         {

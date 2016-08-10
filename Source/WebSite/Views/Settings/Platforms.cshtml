@@ -23,7 +23,7 @@
 @using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = ViewBag.DataContext;
 
@@ -39,24 +39,6 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Product";
     ViewBag.ShowSearchFilter = true;
-}
-@section StyleSheets{
-    <style>
-        .right-inner-addon {
-            position: relative;
-        }
-
-            .right-inner-addon input {
-                padding-right: 30px;
-            }
-
-            .right-inner-addon i {
-                position: absolute;
-                right: 0px;
-                padding: 10px 12px;
-                pointer-events: none;
-            }
-    </style>
 }
 @helper BodyRows()
 {

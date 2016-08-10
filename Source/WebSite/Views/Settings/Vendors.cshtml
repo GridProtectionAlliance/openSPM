@@ -40,24 +40,6 @@
     ViewBag.AddNewEditTitle = "Patch Source";
     ViewBag.ShowSearchFilter = true;
 }
-@section StyleSheets{
-    <style>
-        .right-inner-addon {
-            position: relative;
-        }
-
-            .right-inner-addon input {
-                padding-right: 30px;
-            }
-
-            .right-inner-addon i {
-                position: absolute;
-                right: 0px;
-                padding: 10px 12px;
-                pointer-events: none;
-            }
-    </style>
-}
 @helper BodyRows()
 {
     <td width="15%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: Abbreviation, click: $parent.viewPageRecord"></button></td>

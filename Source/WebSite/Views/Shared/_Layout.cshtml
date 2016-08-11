@@ -223,10 +223,10 @@
     @Scripts.Render("~/js.bundle/jqueryui")
     @Scripts.Render("~/js.bundle/bootstrap")
     @Scripts.Render("~/js.bundle/signalR")
-    <script src="@("/@GSF/Web/Model/Scripts/gsf.web.client.js")"></script>
+    <script src="@("@GSF/Web/Model/Scripts/gsf.web.client.js")"></script>
     <script src="@Url.Content("~/signalr/hubs")"></script>
     @Scripts.Render("~/js.bundle/primeui")
-    <script src="@("/@GSF/Web/Model/Scripts/gsf.web.primeui.js")"></script>
+    <script src="@("@GSF/Web/Model/Scripts/gsf.web.primeui.js")"></script>
     @Scripts.Render("~/js.bundle/site")
     @Html.Raw(ViewBag.PageControlScripts?.ToString())
     @RenderSection("Scripts", false)

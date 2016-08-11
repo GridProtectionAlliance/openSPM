@@ -24,9 +24,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Web;
+using System.Web.Compilation;
 using System.Web.Hosting;
 using System.Web.Mvc;
 using System.Web.Optimization;
@@ -71,7 +73,7 @@ namespace openSPM
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
             // Add additional virtual path provider to allow access to embedded resources
-            HostingEnvironment.RegisterVirtualPathProvider(new EmbeddedResourceProvider());
+            EmbeddedResourceProvider.Register();
 
             GlobalSettings global = DefaultModel.Global;
 

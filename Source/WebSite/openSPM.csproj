@@ -465,7 +465,6 @@
     <Content Include="Scripts\ko.observableDictionary.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\mustache.min.js" />
-    <Content Include="Scripts\pagedViewModel.js" />
     <Content Include="Scripts\plugins-all.js" />
     <Content Include="Scripts\primeui.js" />
     <Content Include="Scripts\primeui.min.js" />
@@ -492,7 +491,6 @@
     <Content Include="Views\Main\Contact.cshtml" />
     <Content Include="Views\Main\Home.cshtml" />
     <Content Include="Scripts\knockout.validation.min.js.map" />
-    <Content Include="Views\Shared\PagedViewModel.cshtml" />
     <Content Include="Views\System\Pages.cshtml" />
     <Content Include="Views\System\Home.cshtml" />
     <Content Include="Views\System\MenuItems.cshtml" />

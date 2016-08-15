@@ -40,18 +40,15 @@
 
 <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
 
-<script src="~/Scripts/gsf.web.client.js"></script>
-
-
 <script src="~/signalr/hubs"></script>
 <script src="~/Scripts/Site.js"></script>
 
 <script src="~/Scripts/knockout-3.4.0.debug.js"></script>
 <script src="~/Scripts/knockout.mapping-latest.debug.js"></script>
 <script src="~/Scripts/knockout.validation.min.js"></script>
-<script src="~/Scripts/ko-reactor.min.js"></script>
-<script src="~/Scripts/ko.observableDictionary.js"></script>
-<script src="~/Scripts/js.cookie.js"></script>
+<script src="@("@GSF/Web/Model/Scripts/ko-reactor.min.js")"></script>
+<script src="@("@GSF/Web/Model/Scripts/ko.observableDictionary.js")"></script>
+<script src="@("@GSF/Web/Model/Scripts/js.cookie.js")"></script>
 <div  data-bind="with: vendorRecord">
    
     <div class="col-md-4">

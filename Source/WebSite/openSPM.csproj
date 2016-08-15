@@ -432,8 +432,6 @@
     <None Include="Properties\PublishProfiles\Deploy to Package File.pubxml" />
     <Content Include="Scripts\fileinput.js" />
     <Content Include="Scripts\fileinput.min.js" />
-    <Content Include="Scripts\gsf.web.client.js" />
-    <Content Include="Scripts\gsf.web.primeui.js" />
     <Content Include="Scripts\ie10-viewport-bug-workaround.js" />
     <Content Include="Scripts\jquery-2.2.1.js" />
     <Content Include="Scripts\jquery-2.2.1.min.js" />
@@ -453,16 +451,12 @@
     <Content Include="Scripts\jquery.validate.min.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.js" />
     <Content Include="Scripts\jquery.validate.unobtrusive.min.js" />
-    <Content Include="Scripts\js.cookie.js" />
     <Content Include="Scripts\knockout-3.4.0.debug.js" />
     <Content Include="Scripts\knockout-3.4.0.js" />
     <Content Include="Scripts\knockout.mapping-latest.debug.js" />
     <Content Include="Scripts\knockout.mapping-latest.js" />
     <Content Include="Scripts\knockout.validation.js" />
     <Content Include="Scripts\knockout.validation.min.js" />
-    <Content Include="Scripts\ko-reactor.js" />
-    <Content Include="Scripts\ko-reactor.min.js" />
-    <Content Include="Scripts\ko.observableDictionary.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
     <Content Include="Scripts\mustache.min.js" />
     <Content Include="Scripts\plugins-all.js" />

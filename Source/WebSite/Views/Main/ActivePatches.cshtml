@@ -460,13 +460,13 @@
         
             if ($('#bufilter').val() == 'none') {
                 viewModel.filterText =  "Action=0; Filter=%";
-                viewModel.filterPageRecords();
+                viewModel.queryPageRecords();
             }else if($('#bufilter').val() == 'mine'){
                 viewModel.filterText = "Action=1; Filter=%";
-                viewModel.filterPageRecords();
+                viewModel.queryPageRecords();
             } else {
                 viewModel.filterText = "Action=0; Filter=" + $('#bufilter').val();
-                viewModel.filterPageRecords();
+                viewModel.queryPageRecords();
 
             }
             
@@ -484,13 +484,13 @@
         
             if ($('#bufilter').val() == 'none') {
                 viewModel.filterText =  "Action=0; Filter=%";
-                viewModel.filterPageRecords();
+                viewModel.queryPageRecords();
             }else if($('#bufilter').val() == 'mine'){
                 viewModel.filterText = "Action=1; Filter=%";
-                viewModel.filterPageRecords();
+                viewModel.queryPageRecords();
             } else {
                 viewModel.filterText = "Action=0; Filter=" + $('#bufilter').val();
-                viewModel.filterPageRecords();
+                viewModel.queryPageRecords();
 
             }
             

@@ -187,7 +187,7 @@
         @Html.Raw(dataContext.AddTextAreaField<Assessment>("Details"))
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">

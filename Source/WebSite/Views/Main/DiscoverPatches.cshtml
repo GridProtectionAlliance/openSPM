@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using GSF
+@using GSF.Web
 @using GSF.Data.Model
 @using GSF.Web.Model
 @using openSPM.Model
@@ -160,7 +161,7 @@
 
 
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
@@ -307,10 +308,10 @@
             $('#vendorfilter').on('keyup', function (e) {
                 if ($('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 
@@ -319,10 +320,10 @@
             $('#platformfilter').on('keyup', function (e) {
                 if ($('#platformfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText =  $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 

@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
@@ -57,7 +58,7 @@
         @Html.Raw(dataContext.AddCheckBoxField<ValueListGroup>("Enabled"))
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 <div id="editValueListItemDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">

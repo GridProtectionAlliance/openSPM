@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @using GSF
@@ -121,7 +122,7 @@
 
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">

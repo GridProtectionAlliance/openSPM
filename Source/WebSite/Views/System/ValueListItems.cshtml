@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using System.Collections.Specialized
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @model openSPM.Model.AppModel
@@ -71,7 +72,7 @@
         @Html.Raw(dataContext.AddCheckBoxField<ValueList>("Enabled"))
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
     <script>
         "use strict";

@@ -22,6 +22,7 @@
 //*****************************************************************************************************@
 @using GSF.Web.Model
 @using GSF
+@using GSF.Web
 @using GSF.Security.Model
 @using GSF.Web.Security
 @using openSPM.Model
@@ -43,20 +44,7 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Notification Details";
     ViewBag.HideAddNewButton = true;
-}
-@helper PlanFilter()
-{
-    <div class='row'>
-        <div class='col-md-12'>
-            <div class='form-group'>
-                <label for='planfilter'>Patch Filter:</label>
-                <div class='right-inner-addon'>
-                    <i class='glyphicon glyphicon-search'></i>
-                    <input class='form-control' type='search' id='planfilter' placeholder='Search' />
-                </div>
-            </div>
-        </div>
-    </div>
+    ViewBag.ShowSearchFilter = true;
 }
 
 
@@ -76,34 +64,17 @@
         @Html.Raw(dataContext.AddTextAreaField<NoticeLogView>("ToUsers"))
         @Html.Raw(dataContext.AddTextAreaField<NoticeLogView>("Text", 6))
         @Html.Raw(dataContext.AddDateField<NoticeLogView>("SentOn"))
-
-
-
     </div>
 
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<NoticeLogView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("noticeMethod"))
         
         $(function () {
-
-            $("#pageHeader").append("@Html.Raw(PlanFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
             $('#pageControlsRow').prepend('<button class="btn btn-sm btn-primary" onclick="exportCSV()" id="exportBtn" style="margin-left: 4px;"><span class="glyphicon glyphicon-download"></span>&nbsp;&nbsp;Export&nbsp;CSV</button>');
-
-            $('#planfilter').on('keyup', function (e) {
-                if ($('#planfilter').val().length == 0) {
-                    viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
-                } else {
-                    viewModel.filterText = $('#planfilter').val();
-                    viewModel.filterPageRecords();
-
-                }
-
-            });
 
         });
 

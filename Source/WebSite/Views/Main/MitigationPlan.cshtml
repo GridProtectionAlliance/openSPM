@@ -20,6 +20,7 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @model AppModel
@@ -136,7 +137,7 @@
         @Html.Raw(dataContext.AddInputField<MitigationPlan>("ApprovedByName"))
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 
 <div id="closedDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">

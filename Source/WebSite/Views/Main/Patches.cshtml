@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 @using GSF
+@using GSF.Web
 @using GSF.Data.Model
 @using GSF.Web.Model
 @using openSPM.Model
@@ -163,7 +164,7 @@
         </div>
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -277,10 +278,10 @@
             $('#patchfilter').on('keyup', function (e) {
                 if ($('#patchfilter').val().length + $('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 
@@ -289,10 +290,10 @@
             $('#platformfilter').on('keyup', function (e) {
                 if ($('#patchfilter').val().length + $('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 
@@ -301,10 +302,10 @@
             $('#vendorfilter').on('keyup', function (e) {
                 if ($('#patchfilter').val().length + $('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 

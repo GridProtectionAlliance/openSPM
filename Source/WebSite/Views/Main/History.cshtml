@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @using GSF
@@ -111,7 +112,7 @@
 {
 
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 
 @*<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
@@ -270,10 +271,10 @@
             $('#patchfilter').on('keyup', function (e) {
                 if ($('#patchfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 
@@ -282,10 +283,10 @@
             $('#platformfilter').on('keyup', function (e) {
                 if ($('#platformfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 
@@ -294,10 +295,10 @@
             $('#vendorfilter').on('keyup', function (e) {
                 if ($('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 

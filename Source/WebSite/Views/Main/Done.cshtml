@@ -21,6 +21,7 @@
 //
 //*****************************************************************************************************@
 
+@using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
 @using GSF
@@ -47,21 +48,7 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.HideAddNewButton = true;
-}
-
-@helper PatchFilter()
-{
-    <div class='row'>
-        <div class='col-md-12'>
-            <div class='form-group'>
-                <label for='patchfilter'>Patch ID Filter:</label>
-                <div class='right-inner-addon'>
-                    <i class='glyphicon glyphicon-search'></i>
-                    <input class='form-control' type='search' id='patchfilter' placeholder='Search' />
-                </div>
-            </div>
-        </div>
-    </div>
+    ViewBag.ShowSearchFilter = true;
 }
 
 
@@ -110,7 +97,7 @@
     </div>
 }
 
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
 @Scripts.Render("~/js.bundle/fileinput")
     <script>
@@ -162,20 +149,6 @@
         });
      
         $(function () {
-            
-            $("#pageHeader").append("@Html.Raw(PatchFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
-            
-            $('#patchfilter').on('keyup', function (e) {
-                if ($('#patchfilter').val().length == 0) {
-                    viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
-                } else {
-                    viewModel.filterText = $('#patchfilter').val();
-                    viewModel.filterPageRecords();
-
-                }
-
-            });
 
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
  

@@ -40,7 +40,7 @@
 
     if (string.IsNullOrEmpty(sourceTable) || string.IsNullOrEmpty(sourceField) || sourceID < 1)
     {
-        throw new ArgumentException("Expected source document page parameters are missing or invalid");
+        //throw new ArgumentException("Expected source document page parameters are missing or invalid");
     }
 
     ViewBag.CustomTitle = titleStart + " \"" + parameters["Name"] + "\" " + sourceTable + " Documents";
@@ -72,7 +72,7 @@
         <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
     </div>
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 
 @section Scripts {
     @Scripts.Render("~/js.bundle/fileinput")

@@ -228,10 +228,10 @@
             $('#vendorfilter').on('keyup', function (e) {
                 if ($('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 
@@ -240,10 +240,10 @@
             $('#platformfilter').on('keyup', function (e) {
                 if ($('#platformfilter').val().length + $('#vendorfilter').val().length == 0) {
                     viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
                 } else {
                     viewModel.filterText = $('#platformfilter').val() + ';' + $('#vendorfilter').val();
-                    viewModel.filterPageRecords();
+                    viewModel.queryPageRecords();
 
                 }
 

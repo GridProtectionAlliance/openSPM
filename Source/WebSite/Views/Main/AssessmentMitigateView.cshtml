@@ -76,22 +76,8 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Assessment";
     ViewBag.HideAddNewButton = true;
+    ViewBag.ShowSearchFilter = true;
 }
-@helper PatchFilter()
-{
-    <div class='row'>
-        <div class='col-md-12'>
-            <div class='form-group'>
-                <label for='patchfilter'>Patch ID Filter:</label>
-                <div class='right-inner-addon'>
-                    <i class='glyphicon glyphicon-search'></i>
-                    <input class='form-control' type='search' id='patchfilter' placeholder='Search' />
-                </div>
-            </div>
-        </div>
-    </div>
-}
-
 
 
 
@@ -136,7 +122,7 @@
     </div>
 
 }
-@Html.Partial("PagedViewModel")
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
@@ -156,21 +142,6 @@
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
 
         $(function() {
-            
-            $("#pageHeader").append("@Html.Raw(PatchFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
-            
-            $('#patchfilter').on('keyup', function (e) {
-                if ($('#patchfilter').val().length == 0) {
-                    viewModel.filterText = '%';
-                    viewModel.filterPageRecords();
-                } else {
-                    viewModel.filterText = $('#patchfilter').val();
-                    viewModel.filterPageRecords();
-
-                }
-
-            });
-
 
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
 

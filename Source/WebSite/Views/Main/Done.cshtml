@@ -20,22 +20,18 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-
 @using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
-@using GSF
-@model openSPM.Model.AppModel
+@model AppModel
 @section StyleSheets {
     @Styles.Render("~/css.bundle/fileinput")
 }
-
-
 @{
     DataContext dataContext = Model.DataContext;
 
     ViewBag.HeaderColumns = new[]
-{
+    {
         //    { "Field", "Label", "Classes" }
         new[] { "PatchStatusID", "Patch ID", "text-left" },
         new[] { "BusinessUnitID", "Business Unit", "text-left"},
@@ -50,12 +46,8 @@
     ViewBag.HideAddNewButton = true;
     ViewBag.ShowSearchFilter = true;
 }
-
-
 @helper BodyRows()
 {
-
-
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: BusinessUnitName"></div></td>
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
@@ -68,12 +60,10 @@
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>*@
 }
-
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="row">
-        <div class="col-md-12">
-            
+        <div class="col-md-12">           
             @Html.Raw(dataContext.AddInputField<ClosingReviewView>("Title", fieldLabel: "Patch Title"))                    
             @Html.Raw(dataContext.AddInputField<ClosingReviewView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
             @Html.Raw(dataContext.AddInputField<ClosingReviewView>("VendorName", fieldLabel: "Vendor"))
@@ -96,10 +86,9 @@
         </div>
     </div>
 }
-
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
-@Scripts.Render("~/js.bundle/fileinput")
+    @Scripts.Render("~/js.bundle/fileinput")
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<ClosingReviewView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
@@ -178,4 +167,3 @@
         });
     </script>
 }
-

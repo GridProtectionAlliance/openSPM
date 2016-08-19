@@ -22,9 +22,8 @@
 //*****************************************************************************************************@
 @using GSF.Web
 @using GSF.Web.Model
-@using GSF
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -100,7 +99,6 @@
        
     </tbody>
 </table>
-
 @helper BodyRows()
 {
     <td width="95%" class="text-center valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: PatchStatusID, click: $parent.viewPageRecord"></button></td>

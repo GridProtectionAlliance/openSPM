@@ -138,7 +138,6 @@
     </div>
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
-
 <div id="closedDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -171,72 +170,70 @@
     </div>
 </div>
 @section Scripts {
-            <script>
-                @Html.Raw(Model.RenderViewModelConfiguration<MitigationPlan>(ViewBag))
-                @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
-                @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
-                @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
-                @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
-                @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
+    <script>
+        @Html.Raw(Model.RenderViewModelConfiguration<MitigationPlan>(ViewBag))
+        @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction"))
+        @Html.Raw(Model.RenderAbstract<Patch>("VendorPatchName"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("PatchID"))
+        @Html.Raw(Model.RenderAbstract<PatchStatus>("BusinessUnitID"))
+        @Html.Raw(Model.RenderAbstract<BusinessUnit>("Name"))
 
-                $(function () {
-                    $("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
+        $(function () {
+            $("#closeDialog").modal({ show: false, backdrop: "static", keyboard: false });
 
-                    $(window).on("initiatedInstall", function () {
-                        viewModel.queryPageRecords();
-                    });
+            $(window).on("initiatedInstall", function () {
+                viewModel.queryPageRecords();
+            });
 
-                });
+        });
 
-                function closePatch(record) {
-                    $('#patchidclose').html(record.PatchStatusID);
-                    $('#patchnameclose').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
-                    $('#businessunitclose').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
-                    $('#assessmentkeyclose').html(lookupAssessactionValue(2));
-                    $('#detailsclose').val("");
-                    $('#closeddate').val("");
-                    $('#closeddate').datepicker({
-                        todayBtn: "linked",
-                        autoclose: true,
-                        todayHighlight: true
-                    });
-                    $("#closedDialog").modal("show");
-                    $('#saveCloseButton').one("click", function () { addClose(record) });
-                }
-
-                function addClose(data) {
-                    var record = { 'PatchStatusID': data.PatchStatusID, 'ClosedDate': (new Date($('#closeddate').val())), 'ActionKey': 2, 'Details': $('#detailsclose').val() };
-
-
-                    if (viewModel.dataHubIsConnected) {
-                        dataHub.addNewClosedPatch(record).done(function () {
-                            data.IsMitigated = true;
-                            dataHub.updateMitigationPlan(data).done(function () {
-                                dataHub.updatePatchStatusKey(data.PatchStatusID, 4);
-                                $(window).trigger("initiatedInstall");
-                            });
-                            
-
-                        });
-
-                    }
-                }
-
-                $(viewModel).on("beforeEdit", function (event, observableRecord) {
-                    observableRecord.patches = ko.observableArray();
-
-                    if (viewModel.dataHubIsConnected()) {
-                        dataHub.queryPatchPatchStatusDetails().done(function (records) {
-                            observableRecord.patches.removeAll();
-                            observableRecord.patches(records);
-                        });
-                    }
-                });
-
-                $(viewModel).on("beforeSave", function (event, observableRecord) {
-                    delete observableRecord.patches;
-                });
-
-             </script>
+        function closePatch(record) {
+            $('#patchidclose').html(record.PatchStatusID);
+            $('#patchnameclose').html(lookupVendorPatchNameValue(lookupPatchIDValue(record.PatchStatusID)));
+            $('#businessunitclose').html(lookupNameValue(lookupBusinessUnitIDValue(record.PatchStatusID)));
+            $('#assessmentkeyclose').html(lookupAssessactionValue(2));
+            $('#detailsclose').val("");
+            $('#closeddate').val("");
+            $('#closeddate').datepicker({
+                todayBtn: "linked",
+                autoclose: true,
+                todayHighlight: true
+            });
+            $("#closedDialog").modal("show");
+            $('#saveCloseButton').one("click", function () { addClose(record) });
         }
 
+        function addClose(data) {
+            var record = { 'PatchStatusID': data.PatchStatusID, 'ClosedDate': (new Date($('#closeddate').val())), 'ActionKey': 2, 'Details': $('#detailsclose').val() };
+
+
+            if (viewModel.dataHubIsConnected) {
+                dataHub.addNewClosedPatch(record).done(function () {
+                    data.IsMitigated = true;
+                    dataHub.updateMitigationPlan(data).done(function () {
+                        dataHub.updatePatchStatusKey(data.PatchStatusID, 4);
+                        $(window).trigger("initiatedInstall");
+                    });
+                            
+
+                });
+
+            }
+        }
+
+        $(viewModel).on("beforeEdit", function (event, observableRecord) {
+            observableRecord.patches = ko.observableArray();
+
+            if (viewModel.dataHubIsConnected()) {
+                dataHub.queryPatchPatchStatusDetails().done(function (records) {
+                    observableRecord.patches.removeAll();
+                    observableRecord.patches(records);
+                });
+            }
+        });
+
+        $(viewModel).on("beforeSave", function (event, observableRecord) {
+            delete observableRecord.patches;
+        });
+    </script>
+}

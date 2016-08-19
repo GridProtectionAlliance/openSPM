@@ -23,8 +23,7 @@
 @using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
-@using GSF
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
     // TODO: Add examples of how to get to settings
@@ -73,11 +72,9 @@
 
     </tbody>
 </table>*@
-
-
 @{
     ViewBag.HeaderColumns = new[]
-{
+    {
         //    { "Field", "Label", "Classes" }
         new[] { "PatchID", "SPM Reference", "text-left" },
         new[] { "BusinessUnitID", "Business Unit", "text-left"},
@@ -108,22 +105,17 @@
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-
 @helper AddNewEditDialog(DataContext dataContext)
 {
-
     <div class="col-md-12">
         <label for="editPatchID">PatchID:</label>
         <div id="editPatchID" data-bind="text: ID"></div><br/>
         @Html.Raw(dataContext.AddTextAreaField<Install>("Summary"))
         @Html.Raw(dataContext.AddTextAreaField<Install>("CompletedNotes"))
         @Html.Raw(dataContext.AddDateField<Install>("CompletedOn"))
-
-
     </div>
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
-
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -167,7 +159,6 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<Install>(ViewBag))
@@ -264,5 +255,3 @@
 
     </script>
 }
-
-

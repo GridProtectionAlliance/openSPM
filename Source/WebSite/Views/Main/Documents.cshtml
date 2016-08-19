@@ -38,8 +38,7 @@
 
     int sourceID = int.Parse(parameters["SourceID"] ?? "0");
 
-    if (string.IsNullOrEmpty(sourceTable) || string.IsNullOrEmpty(sourceField) || sourceID < 1)
-    {
+    if (string.IsNullOrEmpty(sourceTable) || string.IsNullOrEmpty(sourceField) || sourceID < 1) {
         //throw new ArgumentException("Expected source document page parameters are missing or invalid");
     }
 
@@ -47,7 +46,7 @@
     ViewBag.AddNewEditTitle = "Documents for \"" + parameters["Name"] + "\" " + sourceTable;
     ViewBag.PageHasMenu = false;
     ViewBag.HeaderColumns = new[]
-{   //    { "Field", "Label", "Classes" }
+    {   //    { "Field", "Label", "Classes" }
         new[] { "Filename", "File Name", "text-left" },
         new[] { null, "Document Type", "text-center" }
     };
@@ -73,7 +72,6 @@
     </div>
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
-
 @section Scripts {
     @Scripts.Render("~/js.bundle/fileinput")
     <script>

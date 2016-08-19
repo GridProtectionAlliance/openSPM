@@ -20,20 +20,16 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-
+@using GSF
 @using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
-@using GSF
-
-
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
 
     ViewBag.HeaderColumns = new[]
-{
-        //    { "Field", "Label", "Classes" }
+    {   //    { "Field", "Label", "Classes" }
         new[] { "VendorPatchName", "Patch ID", "text-center" },
         new[] { "BusinessUnitID", "Business Unit", "text-left"},
         new[] { "VendorName", "Vendor", "text-left"},
@@ -84,8 +80,6 @@
         </div>
     </div>
 }
-
-
 @helper BodyRows()
 {
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: viewPatch.bind($data)"></button></td>
@@ -100,20 +94,16 @@
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: MitigationPlanID, visible: checkNull(MitigationPlanID),click: viewMitigation.bind($data)"></button></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(MitigationPlanCreatedDate)"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(ClosedDate)"></div></td>
-
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
             <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
             <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
-        </td>*@
+      </td>*@
 }
-
 @helper AddNewEditDialog(DataContext dataContext)
 {
-
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
-
 @*<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -383,4 +373,3 @@
         }
     </script>
 }
-

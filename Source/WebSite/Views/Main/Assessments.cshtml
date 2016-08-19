@@ -1,35 +1,30 @@
 ﻿@*******************************************************************************************************
-    //  Platforms.cshtml - Gbtc
-    //
-    //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
-    //
-    //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
-    //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-    //  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
-    //  file except in compliance with the License. You may obtain a copy of the License at:
-    //
-    //      http://opensource.org/licenses/MIT
-    //
-    //  Unless agreed to in writing, the subject software distributed under the License is distributed on an
-    //  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
-    //  License for the specific language governing permissions and limitations.
-    //
-    //  Code Modification History:
-    //  ----------------------------------------------------------------------------------------------------
-    //  02/29/2016 - Ritchie Carroll
-    //       Generated original version of source code.
-    //
-    //*****************************************************************************************************@
-@using System.Security.AccessControl
-@using GSF.Data.Model
-@using GSF.Security.Model
-@using GSF.Web.Model
+//  Platforms.cshtml - Gbtc
+//
+//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+//  file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  02/29/2016 - Ritchie Carroll
+//       Generated original version of source code.
+//
+//*****************************************************************************************************@
 @using openSPM.Model
-@using GSF.Web
 @using GSF
-@using RazorEngine.Templating
-@model openSPM.Model.AppModel
-
+@using GSF.Web
+@using GSF.Web.Model
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
@@ -45,30 +40,25 @@
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays))
-    {
+    if (!appSettings.TryGetValue("discoveryWarningDays", out setting) || !int.TryParse(setting, out discoveryWarningDays)) {
         discoveryWarningDays = 7;
     }
 
-    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays))
-    {
+    if (!appSettings.TryGetValue("discoveryAlarmDays", out setting) || !int.TryParse(setting, out discoveryAlarmDays)) {
         discoveryAlarmDays = 14;
     }
 
-    if (!appSettings.TryGetValue("discoveryCriticalAlarmDays", out setting) || !int.TryParse(setting, out discoveryCriticalAlarmDays))
-    {
+    if (!appSettings.TryGetValue("discoveryCriticalAlarmDays", out setting) || !int.TryParse(setting, out discoveryCriticalAlarmDays)) {
         discoveryCriticalAlarmDays = 21;
     }
 
-    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays))
-    {
+    if (!appSettings.TryGetValue("discoveryViolationDays", out setting) || !int.TryParse(setting, out discoveryViolationDays)) {
         discoveryViolationDays = 35;
     }
 
-
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
-{   //    { "Field", "Label", "Classes" }
+    {   //    { "Field", "Label", "Classes" }
         new[] { null, "Alarm", "text-center valign-middle" },
         new[] { "ID", "SPM Reference", "text-left" },
         new[] { null, "Business Unit", "text-left valign-middle"},
@@ -85,7 +75,6 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Assessment";
 }
-
 @*<p>&nbsp;</p>
 
 <p>
@@ -174,10 +163,8 @@
         <button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>
     </td>
 }
-
 @helper AddNewEditDialog(DataContext dataContext)
 {
-
     <div class="col-md-12">
         <div class="form-group">
             <label for="selectPatchStatusID">Patch:</label>
@@ -188,7 +175,6 @@
     </div>
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
-
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -516,10 +502,3 @@
         });
     </script>
 }
-
-
-
-
-
-
-

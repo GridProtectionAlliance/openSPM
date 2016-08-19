@@ -20,18 +20,15 @@
     //       Generated original version of source code.
     //
     //*****************************************************************************************************@
-@using System.Security.AccessControl
 @using GSF
 @using GSF.Data.Model
 @using GSF.Web
 @using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
 @section StyleSheets {
     @Styles.Render("~/css.bundle/fileinput")
 }
-
-
 @{
     DataContext dataContext = Model.DataContext;
     Dictionary<string, string> appSettings = Model.Global.ApplicationSettings;
@@ -62,7 +59,7 @@
 
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
-{   //    { "Field", "Label", "Classes" }
+    {   //    { "Field", "Label", "Classes" }
         new[] { null, "Status", "text-center valign-middle" },
         new[] { "PatchID", "Patch ID", "text-center" },
         new[] { "BusinessUnitID", "Business Unit", "text-center"},

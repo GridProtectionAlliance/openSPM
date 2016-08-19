@@ -20,13 +20,10 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
-@using GSF.Web.Model
-@using GSF
 @using GSF.Web
-@using GSF.Security.Model
-@using GSF.Web.Security
+@using GSF.Web.Model
 @using openSPM.Model
-@model openSPM.Model.AppModel
+@model AppModel
 @{
     DataContext dataContext = Model.DataContext;
 
@@ -46,8 +43,6 @@
     ViewBag.HideAddNewButton = true;
     ViewBag.ShowSearchFilter = true;
 }
-
-
 @helper BodyRows()
 {
     <td width="25%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
@@ -65,7 +60,6 @@
         @Html.Raw(dataContext.AddTextAreaField<NoticeLogView>("Text", 6))
         @Html.Raw(dataContext.AddDateField<NoticeLogView>("SentOn"))
     </div>
-
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 @section Scripts {
@@ -77,12 +71,5 @@
             $('#pageControlsRow').prepend('<button class="btn btn-sm btn-primary" onclick="exportCSV()" id="exportBtn" style="margin-left: 4px;"><span class="glyphicon glyphicon-download"></span>&nbsp;&nbsp;Export&nbsp;CSV</button>');
 
         });
-
     </script>
 }
-
-
-
-
-
-

@@ -22,57 +22,43 @@
 //******************************************************************************************************
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
-using System.Web.Mvc;
-using System.Web.Security;
 using GSF;
 using GSF.Data.Model;
 using GSF.Identity;
 using GSF.Web.Model;
 using GSF.Web.Hubs;
 using GSF.Web.Security;
-using Microsoft.AspNet.SignalR;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using openSPM.Model;
 using openSPM.Models;
 
 namespace openSPM
 {
     [AuthorizeHubRole]
-    public class DataHub : Hub, IRecordOperationsHub
+    public class DataHub : RecordOperationsHub<DataHub>
     {
         #region [ Members ]
 
         // Fields
-        private readonly DataContext m_dataContext;
         private DataContext m_miPlanContext;
-        private AppModel m_appmodel;
+        private readonly AppModel m_appmodel;
         private bool m_disposed;
 
         #endregion
 
         #region [ Constructors ]
 
-        public DataHub()
+        public DataHub() : base(MvcApplication.LogStatusMessage, MvcApplication.LogException)
         {
-            m_dataContext = new DataContext(exceptionHandler: MvcApplication.LogException);
-            m_appmodel = new AppModel(m_dataContext);
+            m_appmodel = new AppModel(DataContext);
         }
 
         #endregion
 
         #region [ Properties ]
-
-        /// <summary>
-        /// Gets <see cref="GSF.Web.Model.RecordOperationsCache"/> for SignalR hub.
-        /// </summary>
-        public RecordOperationsCache RecordOperationsCache => s_recordOperationsCache;
 
         // Gets reference to MiPlan context, creating it if needed
         private DataContext MiPlanContext => m_miPlanContext ?? (m_miPlanContext = new DataContext("miPlanDB", exceptionHandler: MvcApplication.LogException));
@@ -93,7 +79,6 @@ namespace openSPM
                 {
                     if (disposing)
                     {
-                        m_dataContext?.Dispose();
                         m_miPlanContext?.Dispose();
                     }
                 }
@@ -103,58 +88,6 @@ namespace openSPM
                     base.Dispose(disposing);    // Call base class Dispose().
                 }
             }
-        }
-
-        public override Task OnConnected()
-        {
-            // Store the current connection ID for this thread
-            s_connectionID.Value = Context.ConnectionId;
-            s_connectCount++;
-
-            //MvcApplication.LogStatusMessage($"DataHub connect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
-            return base.OnConnected();
-        }
-
-        public override Task OnDisconnected(bool stopCalled)
-        {
-            if (stopCalled)
-            {
-                s_connectCount--;
-                //MvcApplication.LogStatusMessage($"DataHub disconnect by {Context.User?.Identity?.Name ?? "Undefined User"} [{Context.ConnectionId}] - count = {s_connectCount}");
-            }
-
-            return base.OnDisconnected(stopCalled);
-        }
-
-        #endregion
-
-        #region [ Static ]
-
-        // Static Properties
-
-        /// <summary>
-        /// Gets the hub connection ID for the current thread.
-        /// </summary>
-        public static string CurrentConnectionID => s_connectionID.Value;
-
-        // Static Fields
-        private static volatile int s_connectCount;
-        private static readonly ThreadLocal<string> s_connectionID = new ThreadLocal<string>();
-        private static readonly RecordOperationsCache s_recordOperationsCache;
-
-        // Static Methods
-
-        /// <summary>
-        /// Gets statically cached instance of <see cref="RecordOperationsCache"/> for <see cref="DataHub"/> instances.
-        /// </summary>
-        /// <returns>Statically cached instance of <see cref="RecordOperationsCache"/> for <see cref="DataHub"/> instances.</returns>
-        public static RecordOperationsCache GetRecordOperationsCache() => s_recordOperationsCache;
-
-        // Static Constructor
-        static DataHub()
-        {
-            // Analyze and cache record operations of security hub
-            s_recordOperationsCache = new RecordOperationsCache(typeof(DataHub));
         }
 
         #endregion
@@ -168,18 +101,20 @@ namespace openSPM
         public int QueryPatchCount(bool showDeleted, string filterText = "%")
         {
 
-            if (filterText == null) filterText = "%";
+            if (filterText == null)
+            {
+                filterText = "%";
+            }
             else
             {
                 // Build your filter string here!
                 filterText += "%";
             }
 
-
-
             if (showDeleted)
-                return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
-            return m_dataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
+                return DataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+
+            return DataContext.Table<Patch>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
             
         }
 
@@ -197,35 +132,35 @@ namespace openSPM
 
 
             if (showDeleted)
-               return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
-            return m_dataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
+               return DataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<Patch>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0}", filterText));
         }
 
         public Patch QueryAPatch(int id)
         {
            
-            return m_dataContext.Table<Patch>().LoadRecord(id);
+            return DataContext.Table<Patch>().LoadRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(Patch), RecordOperation.DeleteRecord)]
         public void DeletePatch(int id)
         {
-            IEnumerable<PatchStatus> records = m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("PatchID = {0}", id));
+            IEnumerable<PatchStatus> records = DataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("PatchID = {0}", id));
             foreach (PatchStatus ps in records)
             {
-                m_dataContext.Table<PatchStatus>().DeleteRecord(ps.ID);
+                DataContext.Table<PatchStatus>().DeleteRecord(ps.ID);
             }
 
             // For Patches, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
+            DataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, SME")]
         public void UpdatePatchInitatedFlag(int id)
         {
             // For Patches, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsInitiated=1 WHERE ID={0}", id);
+            DataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsInitiated=1 WHERE ID={0}", id);
         }
 
         [RecordOperation(typeof(Patch), RecordOperation.CreateNewRecord)]
@@ -238,7 +173,7 @@ namespace openSPM
         [RecordOperation(typeof(Patch), RecordOperation.AddNewRecord)]
         public void AddNewPatch(Patch record)
         {
-            string companyname = m_appmodel.Global.CompanyAcronym.ToString();
+            string companyname = m_appmodel.Global.CompanyAcronym;
             string year = DateTime.UtcNow.Year.ToString();
             string month = DateTime.UtcNow.Month.ToString().PadLeft(2,'0');
             string count = m_appmodel.GetNextCounterValue().ToString().PadLeft(4,'0');
@@ -248,13 +183,13 @@ namespace openSPM
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
             record.IsInitiated = false;
-            m_dataContext.Table<Patch>().AddNewRecord(record);
+            DataContext.Table<Patch>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastPatchID()
         {
-            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Patch')") ?? 0;
+            return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Patch')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -263,7 +198,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Patch>().UpdateRecord(record);
+            DataContext.Table<Patch>().UpdateRecord(record);
 
 
         }
@@ -291,8 +226,8 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<PatchView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
-            return m_dataContext.Table<PatchView>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+                return DataContext.Table<PatchView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return DataContext.Table<PatchView>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
 
         }
 
@@ -317,35 +252,35 @@ namespace openSPM
 
 
             if (showDeleted)
-                return m_dataContext.Table<PatchView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
-            return m_dataContext.Table<PatchView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+                return DataContext.Table<PatchView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return DataContext.Table<PatchView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
         }
 
         public PatchView QueryAPatchView(int id)
         {
 
-            return m_dataContext.Table<PatchView>().LoadRecord(id);
+            return DataContext.Table<PatchView>().LoadRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(PatchView), RecordOperation.DeleteRecord)]
         public void DeletePatchView(int id)
         {
-            IEnumerable<PatchStatus> records = m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("PatchID = {0}", id));
+            IEnumerable<PatchStatus> records = DataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("PatchID = {0}", id));
             foreach (PatchStatus ps in records)
             {
-                m_dataContext.Table<PatchStatus>().DeleteRecord(ps.ID);
+                DataContext.Table<PatchStatus>().DeleteRecord(ps.ID);
             }
 
             // For Patches, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
+            DataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsDeleted=1 WHERE ID={0}", id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, SME")]
         public void UpdatePatchViewInitatedFlag(int id)
         {
             // For PatchViewViewes, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsInitiated=1 WHERE ID={0}", id);
+            DataContext.Connection.ExecuteNonQuery("UPDATE Patch SET IsInitiated=1 WHERE ID={0}", id);
         }
 
         [RecordOperation(typeof(PatchView), RecordOperation.CreateNewRecord)]
@@ -358,7 +293,7 @@ namespace openSPM
         [RecordOperation(typeof(PatchView), RecordOperation.AddNewRecord)]
         public void AddNewPatchView(PatchView record)
         {
-            string companyname = m_appmodel.Global.CompanyAcronym.ToString();
+            string companyname = m_appmodel.Global.CompanyAcronym;
             string year = DateTime.UtcNow.Year.ToString();
             string month = DateTime.UtcNow.Month.ToString().PadLeft(2, '0');
             string count = m_appmodel.GetNextCounterValue().ToString().PadLeft(4, '0');
@@ -368,13 +303,13 @@ namespace openSPM
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
             record.IsInitiated = false;
-            m_dataContext.Table<Patch>().AddNewRecord(BuildPatch(record));
+            DataContext.Table<Patch>().AddNewRecord(BuildPatch(record));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastPatchViewID()
         {
-            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Patch')") ?? 0;
+            return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Patch')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -383,7 +318,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Patch>().UpdateRecord(BuildPatch(record));
+            DataContext.Table<Patch>().UpdateRecord(BuildPatch(record));
 
 
         }
@@ -426,20 +361,20 @@ namespace openSPM
         [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecordCount)]
         public int QueryPatchStatusCount(string filterText = "%")
         {
-            return m_dataContext.Table<PatchStatus>().QueryRecordCount();
+            return DataContext.Table<PatchStatus>().QueryRecordCount();
         }
 
         [RecordOperation(typeof(PatchStatus), RecordOperation.QueryRecords)]
         public IEnumerable<PatchStatus> QueryPatchStatus(int parentID, string filterText = "%")
         {
-            return m_dataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("ID = {0}", parentID));
+            return DataContext.Table<PatchStatus>().QueryRecords(restriction: new RecordRestriction("ID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(PatchStatus), RecordOperation.DeleteRecord)]
         public void DeletePatchStatus(int id)
         {
-            m_dataContext.Table<PatchStatus>().DeleteRecord(id);
+            DataContext.Table<PatchStatus>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -456,7 +391,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.CreatedByID = GetCurrentUserID();
             record.StatusChangeOn = record.CreatedOn;
-            m_dataContext.Table<PatchStatus>().AddNewRecord(record);
+            DataContext.Table<PatchStatus>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -464,7 +399,7 @@ namespace openSPM
         public void UpdatePatchStatus(PatchStatus record)
         {
             record.StatusChangeOn = DateTime.UtcNow;
-            m_dataContext.Table<PatchStatus>().UpdateRecord(record);
+            DataContext.Table<PatchStatus>().UpdateRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -472,7 +407,7 @@ namespace openSPM
         public void UpdatePatchStatusKey(int id, int key)
         {
             // For Vendors, we only "mark" a record as deleted
-            m_dataContext.Connection.ExecuteNonQuery("UPDATE PatchStatus SET PatchStatusKey={0} WHERE ID={1}",key, id);
+            DataContext.Connection.ExecuteNonQuery("UPDATE PatchStatus SET PatchStatusKey={0} WHERE ID={1}",key, id);
         }
 
         #endregion
@@ -482,26 +417,26 @@ namespace openSPM
         [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecordCount)]
         public int QueryClosedPatchCount(string filterText = "%")
         {
-            return m_dataContext.Table<ClosedPatch>().QueryRecordCount();
+            return DataContext.Table<ClosedPatch>().QueryRecordCount();
         }
 
         [RecordOperation(typeof(ClosedPatch), RecordOperation.QueryRecords)]
         public IEnumerable<ClosedPatch> QueryClosedPatch(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<ClosedPatch>().QueryRecords(sortField, ascending, page, pageSize);
+            return DataContext.Table<ClosedPatch>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastClosedPatchID()
         {
-            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('ClosedPatch')") ?? 0;
+            return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('ClosedPatch')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.DeleteRecord)]
         public void DeleteClosedPatch(int id)
         {
-            m_dataContext.Table<ClosedPatch>().DeleteRecord(id);
+            DataContext.Table<ClosedPatch>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -515,14 +450,14 @@ namespace openSPM
         [RecordOperation(typeof(ClosedPatch), RecordOperation.AddNewRecord)]
         public void AddNewClosedPatch(ClosedPatch record)
         {
-            m_dataContext.Table<ClosedPatch>().AddNewRecord(record);
+            DataContext.Table<ClosedPatch>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(ClosedPatch), RecordOperation.UpdateRecord)]
         public void UpdateClosedPatch(ClosedPatch record)
         {
-            m_dataContext.Table<ClosedPatch>().UpdateRecord(record);
+            DataContext.Table<ClosedPatch>().UpdateRecord(record);
         }
 
         #endregion
@@ -542,9 +477,9 @@ namespace openSPM
 
 
             if (showDeleted)
-                return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
+                return DataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
 
-            return m_dataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
+            return DataContext.Table<Vendor>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(Vendor), RecordOperation.QueryRecords)]
@@ -558,19 +493,19 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
+                return DataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
 
-            return m_dataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
+            return DataContext.Table<Vendor>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         public IEnumerable<Vendor> QueryVendorsNonPaged()
         {
-           return m_dataContext.Table<Vendor>().QueryRecords("Name", new RecordRestriction("IsDeleted = 0"));
+           return DataContext.Table<Vendor>().QueryRecords("Name", new RecordRestriction("IsDeleted = 0"));
         }
 
         public IEnumerable<Vendor> QueryOneVendor(int id)
         {
-           return m_dataContext.Table<Vendor>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
+           return DataContext.Table<Vendor>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -578,13 +513,13 @@ namespace openSPM
         public void DeleteVendor(int id)
         {
             // For Vendors, we only "mark" a record as deleted
-            Vendor v = m_dataContext.Table<Vendor>().LoadRecord(id);
+            Vendor v = DataContext.Table<Vendor>().LoadRecord(id);
             if (v.IsDeleted == false)
             {
                 v.DeletedByID = GetCurrentUserID();
                 v.DeletedON = DateTime.UtcNow;
                 v.IsDeleted = true;
-                m_dataContext.Table<Vendor>().UpdateRecord(v);
+                DataContext.Table<Vendor>().UpdateRecord(v);
             }
         }
 
@@ -602,7 +537,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
-            m_dataContext.Table<Vendor>().AddNewRecord(record);
+            DataContext.Table<Vendor>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -611,7 +546,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Vendor>().UpdateRecord(record);
+            DataContext.Table<Vendor>().UpdateRecord(record);
         }
 
         /// <summary>
@@ -628,13 +563,13 @@ namespace openSPM
         {
             if (showDeleted)
             {
-                return m_dataContext
+                return DataContext
                     .Table<Vendor>()
                     .QueryRecords(sortField, ascending, page, pageSize)
                     .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
 
             }
-            return m_dataContext
+            return DataContext
                 .Table<Vendor>()
                 .QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"))
                 .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
@@ -660,13 +595,13 @@ namespace openSPM
         public IEnumerable<IDLabel> SearchVendors(string searchText, int limit)
         {
             if (limit < 1)
-                return m_dataContext
+                return DataContext
                     .Table<Vendor>()
                     .QueryRecords()
                     .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
                     .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
 
-            return m_dataContext
+            return DataContext
                 .Table<Vendor>()
                 .QueryRecords()
                 .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0)
@@ -689,9 +624,9 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
+                return DataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
 
-            return m_dataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
+            return DataContext.Table<Platform>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(Platform), RecordOperation.QueryRecords)]
@@ -705,14 +640,14 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
+                return DataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
 
-            return m_dataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
+            return DataContext.Table<Platform>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         public IEnumerable<Platform> QueryPlatformsByVendor(int parentID)
         {
-            return m_dataContext.Table<Platform>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", parentID));
+            return DataContext.Table<Platform>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", parentID));
         }
 
     
@@ -721,13 +656,13 @@ namespace openSPM
         public void DeletePlatform(int id)
         {
             // For Platforms, we only "mark" a record as deleted
-            Platform platform = m_dataContext.Table<Platform>().LoadRecord(id);
+            Platform platform = DataContext.Table<Platform>().LoadRecord(id);
             if (platform.IsDeleted == false)
             {
                 platform.DeletedByID = GetCurrentUserID();
                 platform.DeletedON = DateTime.UtcNow;
                 platform.IsDeleted = true;
-                m_dataContext.Table<Platform>().UpdateRecord(platform);
+                DataContext.Table<Platform>().UpdateRecord(platform);
             }
         }
 
@@ -746,7 +681,7 @@ namespace openSPM
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
             record.DatePlatformEnrolled = record.CreatedOn;
-            m_dataContext.Table<Platform>().AddNewRecord(record);
+            DataContext.Table<Platform>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -755,7 +690,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Platform>().UpdateRecord(record);
+            DataContext.Table<Platform>().UpdateRecord(record);
         }
 
 
@@ -773,13 +708,13 @@ namespace openSPM
         {
             if (showDeleted)
             {
-                return m_dataContext
+                return DataContext
                     .Table<Platform>()
                     .QueryRecords(sortField, ascending, page, pageSize)
                     .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
 
             }
-            return m_dataContext
+            return DataContext
                 .Table<Platform>()
                 .QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"))
                 .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
@@ -804,16 +739,16 @@ namespace openSPM
         public IEnumerable<IDLabel> SearchPlatforms(string searchText, int limit)
         {
             if (limit < 1)
-                return m_dataContext
+                return DataContext
                     .Table<Platform>()
                     .QueryRecords()
-                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record?.IsDeleted == false)
                     .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
 
-            return m_dataContext
+            return DataContext
                 .Table<Platform>()
                 .QueryRecords()
-                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record?.IsDeleted == false)
                 .Take(limit)
                 .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
         }
@@ -838,8 +773,8 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<PlatformView>().QueryRecordCount(new RecordRestriction("Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
-            return m_dataContext.Table<PlatformView>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+                return DataContext.Table<PlatformView>().QueryRecordCount(new RecordRestriction("Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+            return DataContext.Table<PlatformView>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
         }
 
         [RecordOperation(typeof(PlatformView), RecordOperation.QueryRecords)]
@@ -860,13 +795,13 @@ namespace openSPM
 
 
             if (showDeleted)
-                return m_dataContext.Table<PlatformView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
-            return m_dataContext.Table<PlatformView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+                return DataContext.Table<PlatformView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
+            return DataContext.Table<PlatformView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0} AND VendorName LIKE {1}", productFilter, vendorFilter));
         }
 
         public IEnumerable<PlatformView> QueryPlatformViewsByVendor(int parentID)
         {
-            return m_dataContext.Table<PlatformView>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", parentID));
+            return DataContext.Table<PlatformView>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", parentID));
         }
 
 
@@ -875,13 +810,13 @@ namespace openSPM
         public void DeletePlatformView(int id)
         {
             // For PlatformViews, we only "mark" a record as deleted
-            PlatformView PlatformView = m_dataContext.Table<PlatformView>().LoadRecord(id);
+            PlatformView PlatformView = DataContext.Table<PlatformView>().LoadRecord(id);
             if (PlatformView.IsDeleted == false)
             {
                 PlatformView.DeletedByID = GetCurrentUserID();
                 PlatformView.DeletedON = DateTime.UtcNow;
                 PlatformView.IsDeleted = true;
-                m_dataContext.Table<Platform>().UpdateRecord(BuildPlatform(PlatformView));
+                DataContext.Table<Platform>().UpdateRecord(BuildPlatform(PlatformView));
             }
         }
 
@@ -900,7 +835,7 @@ namespace openSPM
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
             record.DatePlatformEnrolled = record.CreatedOn;
-            m_dataContext.Table<Platform>().AddNewRecord(BuildPlatform(record));
+            DataContext.Table<Platform>().AddNewRecord(BuildPlatform(record));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -909,7 +844,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Platform>().UpdateRecord(BuildPlatform(record));
+            DataContext.Table<Platform>().UpdateRecord(BuildPlatform(record));
         }
 
 
@@ -927,13 +862,13 @@ namespace openSPM
         {
             if (showDeleted)
             {
-                return m_dataContext
+                return DataContext
                     .Table<PlatformView>()
                     .QueryRecords(sortField, ascending, page, pageSize)
                     .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
 
             }
-            return m_dataContext
+            return DataContext
                 .Table<PlatformView>()
                 .QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"))
                 .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
@@ -958,16 +893,16 @@ namespace openSPM
         public IEnumerable<IDLabel> SearchPlatformViews(string searchText, int limit)
         {
             if (limit < 1)
-                return m_dataContext
+                return DataContext
                     .Table<PlatformView>()
                     .QueryRecords()
-                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
+                    .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record?.IsDeleted == false)
                     .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
 
-            return m_dataContext
+            return DataContext
                 .Table<PlatformView>()
                 .QueryRecords()
-                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record.IsDeleted == false)
+                .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0 && record?.IsDeleted == false)
                 .Take(limit)
                 .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
         }
@@ -1000,18 +935,18 @@ namespace openSPM
 
         public int QueryUserAccountPlatformCount(Guid userAccountID)
         {
-            return m_dataContext.Table<UserAccountPlatform>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", userAccountID));
+            return DataContext.Table<UserAccountPlatform>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", userAccountID));
         }
 
         public IEnumerable<UserAccountPlatformDetail> QueryUserAccountPlatforms(Guid userAccountID, string sortField, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<UserAccountPlatformDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", userAccountID));
+            return DataContext.Table<UserAccountPlatformDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", userAccountID));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
         public void DeleteUserAccountPlatform(Guid userAccountID, int platformID)
         {
-            m_dataContext.Table<UserAccountPlatform>().DeleteRecord(userAccountID, platformID);
+            DataContext.Table<UserAccountPlatform>().DeleteRecord(userAccountID, platformID);
         }
 
         public UserAccountPlatform NewUserAccountPlatform()
@@ -1022,8 +957,8 @@ namespace openSPM
         [AuthorizeHubRole("Administrator, Owner")]
         public void AddNewUserAccountPlatform(UserAccountPlatform record)
         {
-            if (m_dataContext.Table<UserAccountPlatform>().QueryRecordCount(new RecordRestriction("UserAccountID = {0} AND PlatformID = {1}", record.UserAccountID, record.PlatformID)) == 0)
-                m_dataContext.Table<UserAccountPlatform>().AddNewRecord(record);
+            if (DataContext.Table<UserAccountPlatform>().QueryRecordCount(new RecordRestriction("UserAccountID = {0} AND PlatformID = {1}", record.UserAccountID, record.PlatformID)) == 0)
+                DataContext.Table<UserAccountPlatform>().AddNewRecord(record);
         }
 
         #endregion
@@ -1032,12 +967,12 @@ namespace openSPM
 
         public IEnumerable<UserAccountPlatformDetail> QueryPlatformSMEs(int platformID)
         {
-            return m_dataContext.Table<UserAccountPlatformDetail>().QueryRecords(restriction: new RecordRestriction("PlatformID = {0}", platformID));
+            return DataContext.Table<UserAccountPlatformDetail>().QueryRecords(restriction: new RecordRestriction("PlatformID = {0}", platformID));
         }
 
         public int QueryPlatformSMECount(int platformID)
         {
-            return m_dataContext.Table<UserAccountPlatformDetail>().QueryRecordCount(restriction: new RecordRestriction("PlatformID = {0}", platformID));
+            return DataContext.Table<UserAccountPlatformDetail>().QueryRecordCount(restriction: new RecordRestriction("PlatformID = {0}", platformID));
         }
 
         #endregion
@@ -1047,12 +982,12 @@ namespace openSPM
 
         public int QueryUserAccountPlatformBusinessUnitDetailCount(int platformID)
         {
-            return m_dataContext.Table<UserAccountPlatformBusinessUnitDetail>().QueryRecordCount(new RecordRestriction("PlatformID = {0}", platformID));
+            return DataContext.Table<UserAccountPlatformBusinessUnitDetail>().QueryRecordCount(new RecordRestriction("PlatformID = {0}", platformID));
         }
 
         public IEnumerable<UserAccountPlatformBusinessUnitDetail> QueryUserAccountPlatformBusinessUnitDetails(int platformID)
         {
-            return m_dataContext.Table<UserAccountPlatformBusinessUnitDetail>().QueryRecords(restriction: new RecordRestriction("PlatformID = {0}", platformID));
+            return DataContext.Table<UserAccountPlatformBusinessUnitDetail>().QueryRecords(restriction: new RecordRestriction("PlatformID = {0}", platformID));
         }
 
         #endregion
@@ -1071,9 +1006,9 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
+                return DataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("Name LIKE {0}", filterText));
 
-            return m_dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
+            return DataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(BusinessUnit), RecordOperation.QueryRecords)]
@@ -1087,9 +1022,9 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
+                return DataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Name LIKE {0}", filterText));
 
-            return m_dataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
+            return DataContext.Table<BusinessUnit>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Name LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -1097,13 +1032,13 @@ namespace openSPM
         public void DeleteBusinessUnit(int id)
         {
             // For BusinessUnits, we only "mark" a record as deleted
-            BusinessUnit bu = m_dataContext.Table<BusinessUnit>().LoadRecord(id);
+            BusinessUnit bu = DataContext.Table<BusinessUnit>().LoadRecord(id);
             if (bu.IsDeleted == false)
             {
                 bu.DeletedByID = GetCurrentUserID();
                 bu.DeletedON = DateTime.UtcNow;
                 bu.IsDeleted = true;
-                m_dataContext.Table<BusinessUnit>().UpdateRecord(bu);
+                DataContext.Table<BusinessUnit>().UpdateRecord(bu);
             }
         }
 
@@ -1122,7 +1057,7 @@ namespace openSPM
             record.CreatedOn = DateTime.UtcNow;
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
-            m_dataContext.Table<BusinessUnit>().AddNewRecord(record);
+            DataContext.Table<BusinessUnit>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -1131,7 +1066,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<BusinessUnit>().UpdateRecord(record);
+            DataContext.Table<BusinessUnit>().UpdateRecord(record);
         }
 
         /// <summary>
@@ -1148,13 +1083,13 @@ namespace openSPM
         {
             if (showDeleted)
             {
-                return m_dataContext
+                return DataContext
                     .Table<BusinessUnit>()
                     .QueryRecords(sortField, ascending, page, pageSize)
                     .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
 
             }
-            return m_dataContext
+            return DataContext
                 .Table<BusinessUnit>()
                 .QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0"))
                 .Where(record => (record?.Name?.IndexOf(searchText, StringComparison.OrdinalIgnoreCase) ?? -1) >= 0);
@@ -1165,12 +1100,12 @@ namespace openSPM
 
         public int QueryBusinessUnitUserAccountCount(int businessUnitID)
         {
-            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
+            return DataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0}", businessUnitID));
         }
 
         public IEnumerable<BusinessUnitUserAccountDetail> QueryBusinessUnitUserAccounts(int businessUnitID, bool ascending, int page, int pageSize)
         {
-            return m_dataContext.Table<BusinessUnitUserAccountDetail>().QueryRecords("UserAccountName", true, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
+            return DataContext.Table<BusinessUnitUserAccountDetail>().QueryRecords("UserAccountName", true, page, pageSize, new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
                 Select(account =>
                 {
                     account.UserAccountName = UserInfo.SIDToAccountName(account.UserAccountName);
@@ -1181,7 +1116,7 @@ namespace openSPM
             // resolution of a large list of users could be slow - note that entire list needs to be resolved at
             // each query to ensure proper sort. Caching full list at client side might help...
 
-            //IEnumerable<BusinessUnitUserAccountDetail> resolvedAccountRecords = m_dataContext.Table<BusinessUnitUserAccountDetail>().
+            //IEnumerable<BusinessUnitUserAccountDetail> resolvedAccountRecords = DataContext.Table<BusinessUnitUserAccountDetail>().
             //    QueryRecords(restriction: new RecordRestriction("BusinessUnitID = {0}", businessUnitID)).
             //    Select(account =>
             //    {
@@ -1199,18 +1134,18 @@ namespace openSPM
 
         public int QueryUserBusinessUnitCount(Guid userID)
         {
-            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", userID));
+            return DataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", userID));
         }
 
         public IEnumerable<BusinessUnitUserAccount> QueryUserBusinessUnits(Guid userID)
         {
-            return m_dataContext.Table<BusinessUnitUserAccount>().QueryRecords(restriction: new RecordRestriction("UserAccountID = {0}", userID));
+            return DataContext.Table<BusinessUnitUserAccount>().QueryRecords(restriction: new RecordRestriction("UserAccountID = {0}", userID));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
         public void DeleteBusinessUnitUserAccount(int businessUnitID, Guid userAccountID)
         {
-            m_dataContext.Table<BusinessUnitUserAccount>().DeleteRecord(businessUnitID, userAccountID);
+            DataContext.Table<BusinessUnitUserAccount>().DeleteRecord(businessUnitID, userAccountID);
         }
 
         public BusinessUnitUserAccount NewBusinessUnitUserAccount()
@@ -1221,8 +1156,8 @@ namespace openSPM
         [AuthorizeHubRole("Administrator, Owner")]
         public void AddNewBusinessUnitUserAccount(BusinessUnitUserAccount record)
         {
-            if (m_dataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0} AND UserAccountID = {1}", record.BusinessUnitID, record.UserAccountID)) == 0)
-                m_dataContext.Table<BusinessUnitUserAccount>().AddNewRecord(record);
+            if (DataContext.Table<BusinessUnitUserAccount>().QueryRecordCount(new RecordRestriction("BusinessUnitID = {0} AND UserAccountID = {1}", record.BusinessUnitID, record.UserAccountID)) == 0)
+                DataContext.Table<BusinessUnitUserAccount>().AddNewRecord(record);
         }
 
         #endregion
@@ -1231,13 +1166,13 @@ namespace openSPM
 
         public int QueryPatchUserAccountPlatformBusinessUnitUserAccountViewCount(int platformID)
         {
-            return m_dataContext.Table<PatchUserAccountPlatformBusinessUnitUserAccountView>().QueryRecordCount(new RecordRestriction("PlatformID = {0}", platformID));
+            return DataContext.Table<PatchUserAccountPlatformBusinessUnitUserAccountView>().QueryRecordCount(new RecordRestriction("PlatformID = {0}", platformID));
         }
 
         public IEnumerable<PatchUserAccountPlatformBusinessUnitUserAccountView>
             QueryPatchUserAccountPlatformBusinessUnitUserAccountViews(int platformID)
         {
-            return m_dataContext.Table<PatchUserAccountPlatformBusinessUnitUserAccountView>().QueryRecords("PlatformID", new RecordRestriction("PlatformID = {0}", platformID));
+            return DataContext.Table<PatchUserAccountPlatformBusinessUnitUserAccountView>().QueryRecords("PlatformID", new RecordRestriction("PlatformID = {0}", platformID));
         }
 
         #endregion
@@ -1247,25 +1182,25 @@ namespace openSPM
         [RecordOperation(typeof(Document), RecordOperation.QueryRecordCount)]
         public int QueryDocumentCount(string filterText = "%")
         {
-            return m_dataContext.Table<Document>().QueryRecordCount();
+            return DataContext.Table<Document>().QueryRecordCount();
         }
 
         //[RecordOperation(typeof(Document), RecordOperation.QueryRecords)]
         //public IEnumerable<Document> QueryDocuments(int sourceID, string sourceField, string tableName)
         //{
         //    IEnumerable<int> documentIDs =
-        //        m_dataContext.Connection.RetrieveData($"SELECT DocumentID FROM {tableName} WHERE {sourceField} = {{0}}", sourceID)
+        //        DataContext.Connection.RetrieveData($"SELECT DocumentID FROM {tableName} WHERE {sourceField} = {{0}}", sourceID)
         //            .AsEnumerable()
         //            .Select(row => row.ConvertField<int>("DocumentID", 0));            
 
-        //    return m_dataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})"));
+        //    return DataContext.Table<Document>().QueryRecords("Filename", new RecordRestriction($"ID IN ({string.Join(", ", documentIDs)})"));
         //}
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(Document), RecordOperation.DeleteRecord)]
         public void DeleteDocument(int id, string filterText = "%")
         {
-            m_dataContext.Table<Document>().DeleteRecord(id);
+            DataContext.Table<Document>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
@@ -1280,14 +1215,14 @@ namespace openSPM
         public void AddNewDocument(Document record)
         {
             record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Document>().AddNewRecord(record);
+            DataContext.Table<Document>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(Document), RecordOperation.UpdateRecord)]
         public void UpdateDocument(Document record)
         {
-            m_dataContext.Table<Document>().UpdateRecord(record);
+            DataContext.Table<Document>().UpdateRecord(record);
         }
 
         #endregion
@@ -1297,21 +1232,21 @@ namespace openSPM
         [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecordCount)]
         public int QueryDocumentDetailCount(string sourceTable, int sourceID, string filterText)
         {
-            return m_dataContext.Table<DocumentDetail>().QueryRecordCount(new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
+            return DataContext.Table<DocumentDetail>().QueryRecordCount(new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
         }
 
         [RecordOperation(typeof(DocumentDetail), RecordOperation.QueryRecords)]
         public IEnumerable<DocumentDetail> QueryDocumentDetailResults(string sourceTable, int sourceID, string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            return m_dataContext.Table<DocumentDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
+            return DataContext.Table<DocumentDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("SourceTable = {0} AND SourceID = {1}", sourceTable, sourceID));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
         [RecordOperation(typeof(DocumentDetail), RecordOperation.DeleteRecord)]
         public void DeleteDocumentDetail(string sourceTable, int sourceID, int documentID)
         {
-            m_dataContext.Connection.ExecuteNonQuery($"DELETE FROM {sourceTable}Document WHERE {sourceTable}ID = {{0}} AND DocumentID = {{1}}", sourceID, documentID);
-            m_dataContext.Table<Document>().DeleteRecord(documentID);
+            DataContext.Connection.ExecuteNonQuery($"DELETE FROM {sourceTable}Document WHERE {sourceTable}ID = {{0}} AND DocumentID = {{1}}", sourceID, documentID);
+            DataContext.Table<Document>().DeleteRecord(documentID);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
@@ -1405,21 +1340,21 @@ namespace openSPM
         [RecordOperation(typeof(Page), RecordOperation.QueryRecordCount)]
         public int QueryPageCount(string filterText = "%")
         {
-            return m_dataContext.Table<Page>().QueryRecordCount();
+            return DataContext.Table<Page>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Page), RecordOperation.QueryRecords)]
         public IEnumerable<Page> QueryPages(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<Page>().QueryRecords(sortField, ascending, page, pageSize);
+            return DataContext.Table<Page>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Page), RecordOperation.DeleteRecord)]
         public void DeletePage(int id)
         {
-            m_dataContext.Table<Page>().DeleteRecord(id);
+            DataContext.Table<Page>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1434,14 +1369,14 @@ namespace openSPM
         public void AddNewPage(Page record)
         {
             record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Page>().AddNewRecord(record);
+            DataContext.Table<Page>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Page), RecordOperation.UpdateRecord)]
         public void UpdatePage(Page record)
         {
-            m_dataContext.Table<Page>().UpdateRecord(record);
+            DataContext.Table<Page>().UpdateRecord(record);
         }
 
         #endregion
@@ -1452,21 +1387,21 @@ namespace openSPM
         [RecordOperation(typeof(Menu), RecordOperation.QueryRecordCount)]
         public int QueryMenuCount(string filterText = "%")
         {
-            return m_dataContext.Table<Menu>().QueryRecordCount();
+            return DataContext.Table<Menu>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Menu), RecordOperation.QueryRecords)]
         public IEnumerable<Menu> QueryMenus(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<Menu>().QueryRecords(sortField, ascending, page, pageSize);
+            return DataContext.Table<Menu>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Menu), RecordOperation.DeleteRecord)]
         public void DeleteMenu(int id)
         {
-            m_dataContext.Table<Menu>().DeleteRecord(id);
+            DataContext.Table<Menu>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1481,14 +1416,14 @@ namespace openSPM
         public void AddNewMenu(Menu record)
         {
             record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Menu>().AddNewRecord(record);
+            DataContext.Table<Menu>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Menu), RecordOperation.UpdateRecord)]
         public void UpdateMenu(Menu record)
         {
-            m_dataContext.Table<Menu>().UpdateRecord(record);
+            DataContext.Table<Menu>().UpdateRecord(record);
         }
 
         #endregion
@@ -1499,21 +1434,21 @@ namespace openSPM
         [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecordCount)]
         public int QueryMenuItemCount(int parentID, string filterText = "%")
         {
-            return m_dataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction("MenuID = {0}", parentID));
+            return DataContext.Table<MenuItem>().QueryRecordCount(new RecordRestriction("MenuID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(MenuItem), RecordOperation.QueryRecords)]
         public IEnumerable<MenuItem> QueryMenuItems(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("MenuID = {0}", parentID));
+            return DataContext.Table<MenuItem>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("MenuID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(MenuItem), RecordOperation.DeleteRecord)]
         public void DeleteMenuItem(int id)
         {
-            m_dataContext.Table<MenuItem>().DeleteRecord(id);
+            DataContext.Table<MenuItem>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1531,7 +1466,7 @@ namespace openSPM
             if (string.IsNullOrEmpty(record.Text))
                 record.Text = " ";
 
-            m_dataContext.Table<MenuItem>().AddNewRecord(record);
+            DataContext.Table<MenuItem>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1542,7 +1477,7 @@ namespace openSPM
             if (string.IsNullOrEmpty(record.Text))
                 record.Text = " ";
 
-            m_dataContext.Table<MenuItem>().UpdateRecord(record);
+            DataContext.Table<MenuItem>().UpdateRecord(record);
         }
 
         #endregion
@@ -1553,21 +1488,21 @@ namespace openSPM
         [RecordOperation(typeof(ValueListGroup), RecordOperation.QueryRecordCount)]
         public int QueryValueListGroupCount(string filterText = "%")
         {
-            return m_dataContext.Table<ValueListGroup>().QueryRecordCount();
+            return DataContext.Table<ValueListGroup>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueListGroup), RecordOperation.QueryRecords)]
         public IEnumerable<ValueListGroup> QueryValueListGroups(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<ValueListGroup>().QueryRecords(sortField, ascending, page, pageSize);
+            return DataContext.Table<ValueListGroup>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueListGroup), RecordOperation.DeleteRecord)]
         public void DeleteValueListGroup(int id)
         {
-            m_dataContext.Table<ValueListGroup>().DeleteRecord(id);
+            DataContext.Table<ValueListGroup>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1582,14 +1517,14 @@ namespace openSPM
         public void AddNewValueListGroup(ValueListGroup record)
         {
             record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<ValueListGroup>().AddNewRecord(record);
+            DataContext.Table<ValueListGroup>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueListGroup), RecordOperation.UpdateRecord)]
         public void UpdateValueListGroup(ValueListGroup record)
         {
-            m_dataContext.Table<ValueListGroup>().UpdateRecord(record);
+            DataContext.Table<ValueListGroup>().UpdateRecord(record);
         }
 
         #endregion
@@ -1601,21 +1536,21 @@ namespace openSPM
         [RecordOperation(typeof(ValueList), RecordOperation.QueryRecordCount)]
         public int QueryValueListCount(int parentID, string filterText = "%")
         {
-            return m_dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
+            return DataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.QueryRecords)]
         public IEnumerable<ValueList> QueryValueListItems(int parentID, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
+            return DataContext.Table<ValueList>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("GroupID = {0}", parentID));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.DeleteRecord)]
         public void DeleteValueList(int id)
         {
-            m_dataContext.Table<ValueList>().DeleteRecord(id);
+            DataContext.Table<ValueList>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator")]
@@ -1630,14 +1565,14 @@ namespace openSPM
         public void AddNewValueList(ValueList record)
         {
             record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<ValueList>().AddNewRecord(record);
+            DataContext.Table<ValueList>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(ValueList), RecordOperation.UpdateRecord)]
         public void UpdateValueList(ValueList record)
         {
-            m_dataContext.Table<ValueList>().UpdateRecord(record);
+            DataContext.Table<ValueList>().UpdateRecord(record);
         }
 
         #endregion
@@ -1647,26 +1582,26 @@ namespace openSPM
         [RecordOperation(typeof(Assessment), RecordOperation.QueryRecordCount)]
         public int QueryAssessmentCount(string filterText = "%")
         {
-            return m_dataContext.Table<Assessment>().QueryRecordCount();
+            return DataContext.Table<Assessment>().QueryRecordCount();
         }
 
         [RecordOperation(typeof(Assessment), RecordOperation.QueryRecords)]
         public IEnumerable<Assessment> QueryAssessments(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<Assessment>().QueryRecords(sortField, ascending, page, pageSize);
+            return DataContext.Table<Assessment>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastAssessmentID()
         {
-            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Assessment')") ?? 0;
+            return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Assessment')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         [RecordOperation(typeof(Assessment), RecordOperation.DeleteRecord)]
         public void DeleteAssessment(int id)
         {
-            m_dataContext.Table<Assessment>().DeleteRecord(id);
+            DataContext.Table<Assessment>().DeleteRecord(id);
         }
         
 
@@ -1687,7 +1622,7 @@ namespace openSPM
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
             record.IsAssessed = true;
-            m_dataContext.Table<Assessment>().AddNewRecord(record);
+            DataContext.Table<Assessment>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -1696,7 +1631,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Assessment>().UpdateRecord(record);
+            DataContext.Table<Assessment>().UpdateRecord(record);
         }
 
         #endregion
@@ -1706,26 +1641,26 @@ namespace openSPM
         [RecordOperation(typeof(Install), RecordOperation.QueryRecordCount)]
         public int QueryInstallCount(string filterText = "%")
         {
-            return m_dataContext.Table<Install>().QueryRecordCount( new RecordRestriction("IsInstalled = 0"));
+            return DataContext.Table<Install>().QueryRecordCount( new RecordRestriction("IsInstalled = 0"));
         }
 
         [RecordOperation(typeof(Install), RecordOperation.QueryRecords)]
         public IEnumerable<Install> QueryInstalls(string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-            return m_dataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInstalled = 0"));
+            return DataContext.Table<Install>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsInstalled = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastInstallID()
         {
-            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Install')") ?? 0;
+            return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('Install')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(Install), RecordOperation.DeleteRecord)]
         public void DeleteInstall(int id)
         {
-            m_dataContext.Table<Install>().DeleteRecord(id);
+            DataContext.Table<Install>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -1744,7 +1679,7 @@ namespace openSPM
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
             record.IsInstalled = false;
-            m_dataContext.Table<Install>().AddNewRecord(record);
+            DataContext.Table<Install>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -1753,7 +1688,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Install>().UpdateRecord(record);
+            DataContext.Table<Install>().UpdateRecord(record);
         }
 
         #endregion
@@ -1764,30 +1699,30 @@ namespace openSPM
         public int QueryMitigationPlanCount(bool showDeleted, string filterText = "%")
         {
             if (showDeleted)
-                return m_dataContext.Table<MitigationPlan>().QueryRecordCount();
+                return DataContext.Table<MitigationPlan>().QueryRecordCount();
 
-            return m_dataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
+            return DataContext.Table<MitigationPlan>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
         }
 
         [RecordOperation(typeof(MitigationPlan), RecordOperation.QueryRecords)]
         public IEnumerable<MitigationPlan> QueryMitigationPlans(bool showDeleted, string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
             if (showDeleted)
-                return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize);
+                return DataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize);
 
-            return m_dataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
+            return DataContext.Table<MitigationPlan>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND IsMitigated = 0"));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public int GetLastMitigationPlanID()
         {
-            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('MitigationPlan')") ?? 0;
+            return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('MitigationPlan')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
         public MitigationPlan GetMitigationPlan(int id)
         {
-            return m_dataContext.Table<MitigationPlan>().LoadRecord(id);
+            return DataContext.Table<MitigationPlan>().LoadRecord(id);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -1795,13 +1730,13 @@ namespace openSPM
         public void DeleteMitigationPlan(int id)
         {
             // For MitigationPlanes, we only "mark" a record as deleted
-            MitigationPlan mp = m_dataContext.Table<MitigationPlan>().LoadRecord(id);
+            MitigationPlan mp = DataContext.Table<MitigationPlan>().LoadRecord(id);
             if(mp.IsDeleted == false)
             {
                 mp.DeletedByID = GetCurrentUserID();
                 mp.DeletedON = DateTime.UtcNow;
                 mp.IsDeleted = true;
-                m_dataContext.Table<MitigationPlan>().UpdateRecord(mp);
+                DataContext.Table<MitigationPlan>().UpdateRecord(mp);
             }
             
         }
@@ -1821,7 +1756,7 @@ namespace openSPM
             record.UpdatedByID = record.CreatedByID;
             record.UpdatedOn = record.CreatedOn;
             record.IsMitigated = false;
-            m_dataContext.Table<MitigationPlan>().AddNewRecord(record);
+            DataContext.Table<MitigationPlan>().AddNewRecord(record);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME")]
@@ -1830,7 +1765,7 @@ namespace openSPM
         {
             record.UpdatedByID = GetCurrentUserID();
             record.UpdatedOn = DateTime.UtcNow;
-            m_dataContext.Table<MitigationPlan>().UpdateRecord(record);
+            DataContext.Table<MitigationPlan>().UpdateRecord(record);
         }
 
         #endregion
@@ -1858,7 +1793,7 @@ namespace openSPM
             else if(action == 1)
             {
                 // Do this (action 1)
-                return m_dataContext.Table<MyAssessmentsView>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+                return DataContext.Table<MyAssessmentsView>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
             }
             else
             {
@@ -1867,7 +1802,7 @@ namespace openSPM
                 filter += "%";
             }
 
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("BusinessUnitID LIKE {0}", filter));
+            return DataContext.Table<PatchPatchStatusDetail>().QueryRecordCount(new RecordRestriction("BusinessUnitID LIKE {0}", filter));
         }
 
         [AuthorizeHubRole("*")]
@@ -1890,7 +1825,7 @@ namespace openSPM
             else if (action == 1)
             {
                 // Do this (action 1)
-                return m_dataContext.Table<MyAssessmentsView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+                return DataContext.Table<MyAssessmentsView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
 
             }
             else
@@ -1900,14 +1835,14 @@ namespace openSPM
                 filter += "%";
             }
 
-            return m_dataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID LIKE {0}", filter));
+            return DataContext.Table<PatchPatchStatusDetail>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("BusinessUnitID LIKE {0}", filter));
         }
 
         [AuthorizeHubRole("Administrator, BUC, PIC")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.DeleteRecord)]
         public void DeletePatchPatchStatus(int id)
         {
-            m_dataContext.Table<PatchStatus>().DeleteRecord(id);
+            DataContext.Table<PatchStatus>().DeleteRecord(id);
         }
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.CreateNewRecord)]
         public PatchPatchStatusDetail NewPatchPatchStatusDetail()
@@ -1922,14 +1857,14 @@ namespace openSPM
             Assessment result = DeriveAssessment(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Assessment>().AddNewRecord(result);
+            DataContext.Table<Assessment>().AddNewRecord(result);
         }
 
         [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(PatchPatchStatusDetail), RecordOperation.UpdateRecord)]
         public void UpdatePatchPatchStatusDetailInstallTable(PatchPatchStatusDetail record)
         {
-            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+            DataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
         }
 
         private Assessment DeriveAssessment(PatchPatchStatusDetail record)
@@ -1956,28 +1891,28 @@ namespace openSPM
         [RecordOperation(typeof(MyAssessmentsView), RecordOperation.QueryRecordCount)]
         public int QueryMyAssessmentsViewCount(string filterText)
         {
-            if (filterText == null) filterText = "%";
-            else
-            {
-                // Build your filter string here!
-                filterText += "%";
-            }
+            //if (filterText == null) filterText = "%";
+            //else
+            //{
+            //    // Build your filter string here!
+            //    filterText += "%";
+            //}
 
-            return m_dataContext.Table<MyAssessmentsView>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+            return DataContext.Table<MyAssessmentsView>().QueryRecordCount(new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(MyAssessmentsView), RecordOperation.QueryRecords)]
         public IEnumerable<MyAssessmentsView> QueryMyAssessmentsViews(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            if (filterText == null) filterText = "%";
-            else
-            {
-                // Build your filter string here!
-                filterText += "%";
-            }
+            //if (filterText == null) filterText = "%";
+            //else
+            //{
+            //    // Build your filter string here!
+            //    filterText += "%";
+            //}
 
-            return m_dataContext.Table<MyAssessmentsView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
+            return DataContext.Table<MyAssessmentsView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("UserAccountID = {0}", GetCurrentUserID()));
         }
 
         [RecordOperation(typeof(MyAssessmentsView), RecordOperation.CreateNewRecord)]
@@ -1993,14 +1928,14 @@ namespace openSPM
             Assessment result = DeriveAssessment(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Assessment>().AddNewRecord(result);
+            DataContext.Table<Assessment>().AddNewRecord(result);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(MyAssessmentsView), RecordOperation.UpdateRecord)]
         public void UpdateMyAssessmentsViewInstallTable(MyAssessmentsView record)
         {
-            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+            DataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
         }
 
         private Assessment DeriveAssessment(MyAssessmentsView record)
@@ -2026,12 +1961,12 @@ namespace openSPM
 
         public int QueryPatchStatusAssessmentDetailCount()
         {
-            return m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecordCount();
+            return DataContext.Table<PatchStatusAssessmentDetail>().QueryRecordCount();
         }
 
         public IEnumerable<PatchStatusAssessmentDetail> QueryPatchStatusAssessmentDetails()
         {
-            return m_dataContext.Table<PatchStatusAssessmentDetail>().QueryRecords("PatchMnemonic");
+            return DataContext.Table<PatchStatusAssessmentDetail>().QueryRecords("PatchMnemonic");
         }
 
         public PatchStatusAssessmentDetail NewPatchStatusAssessmentDetail()
@@ -2054,9 +1989,9 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("Abbreviation LIKE {0}", filterText));
+                return DataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("Abbreviation LIKE {0}", filterText));
 
-            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Abbreviation LIKE {0}", filterText));
+            return DataContext.Table<LatestVendorDiscoveryResult>().QueryRecordCount(new RecordRestriction("IsDeleted = 0 AND Abbreviation LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.QueryRecords)]
@@ -2070,9 +2005,9 @@ namespace openSPM
             }
 
             if (showDeleted)
-                return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+                return DataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
 
-            return m_dataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Abbreviation LIKE {0}", filterText));
+            return DataContext.Table<LatestVendorDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("IsDeleted = 0 AND Abbreviation LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -2080,7 +2015,7 @@ namespace openSPM
         public void DeleteLatestVendorDiscoveryResult(int id)
         {
             // Delete associated DiscoveryResult record
-            m_dataContext.Table<DiscoveryResult>().DeleteRecord(id);
+            DataContext.Table<DiscoveryResult>().DeleteRecord(id);
         }
 
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.CreateNewRecord)]
@@ -2096,20 +2031,20 @@ namespace openSPM
             DiscoveryResult result = DeriveDiscoveryResult(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<DiscoveryResult>().AddNewRecord(result);
+            DataContext.Table<DiscoveryResult>().AddNewRecord(result);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         public int GetLastDiscoveryResultID()
         {
-            return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('DiscoveryResult')") ?? 0;
+            return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('DiscoveryResult')") ?? 0;
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(LatestVendorDiscoveryResult), RecordOperation.UpdateRecord)]
         public void UpdateLatestVendorDiscoveryResult(LatestVendorDiscoveryResult record)
         {
-            m_dataContext.Table<DiscoveryResult>().UpdateRecord(DeriveDiscoveryResult(record));
+            DataContext.Table<DiscoveryResult>().UpdateRecord(DeriveDiscoveryResult(record));
         }
 
         private DiscoveryResult DeriveDiscoveryResult(LatestVendorDiscoveryResult record)
@@ -2146,7 +2081,7 @@ namespace openSPM
                 }
             }
 
-            return m_dataContext.Table<LatestProductDiscoveryResult>().QueryRecordCount(new RecordRestriction("ProductName LIKE {0} AND Company LIKE {1}", productFilter, vendorFilter));
+            return DataContext.Table<LatestProductDiscoveryResult>().QueryRecordCount(new RecordRestriction("ProductName LIKE {0} AND Company LIKE {1}", productFilter, vendorFilter));
         }
 
         [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.QueryRecords)]
@@ -2164,7 +2099,7 @@ namespace openSPM
                 }
             }
 
-            return m_dataContext.Table<LatestProductDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("ProductName LIKE {0} AND Company LIKE {1}", productFilter, vendorFilter));
+            return DataContext.Table<LatestProductDiscoveryResult>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("ProductName LIKE {0} AND Company LIKE {1}", productFilter, vendorFilter));
         }
 
         [AuthorizeHubRole("Administrator, Owner")]
@@ -2172,7 +2107,7 @@ namespace openSPM
         public void DeleteLatestProductDiscoveryResult(int id)
         {
             // Delete associated DiscoveryResult record
-            m_dataContext.Table<DiscoveryResult>().DeleteRecord(id);
+            DataContext.Table<DiscoveryResult>().DeleteRecord(id);
         }
 
         [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.CreateNewRecord)]
@@ -2188,20 +2123,20 @@ namespace openSPM
             DiscoveryResult result = DeriveDiscoveryResult(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<DiscoveryResult>().AddNewRecord(result);
+            DataContext.Table<DiscoveryResult>().AddNewRecord(result);
         }
 
         //[AuthorizeHubRole("Administrator, Owner, PIC")]
         //public int GetLastDiscoveryResultID()
         //{
-        //    return m_dataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('DiscoveryResult')") ?? 0;
+        //    return DataContext.Connection.ExecuteScalar<int?>("SELECT IDENT_CURRENT('DiscoveryResult')") ?? 0;
         //}
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(LatestProductDiscoveryResult), RecordOperation.UpdateRecord)]
         public void UpdateLatestProductDiscoveryResult(LatestProductDiscoveryResult record)
         {
-            m_dataContext.Table<DiscoveryResult>().UpdateRecord(DeriveDiscoveryResult(record));
+            DataContext.Table<DiscoveryResult>().UpdateRecord(DeriveDiscoveryResult(record));
         }
 
         private DiscoveryResult DeriveDiscoveryResult(LatestProductDiscoveryResult record)
@@ -2227,14 +2162,14 @@ namespace openSPM
         [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.QueryRecordCount)]
         public int QueryPatchStatusAssessmentViewCount(string filterText = "%")
         {
-                return m_dataContext.Table<PatchStatusAssessmentView>().QueryRecordCount();
+                return DataContext.Table<PatchStatusAssessmentView>().QueryRecordCount();
 
         }
 
         [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.QueryRecords)]
         public IEnumerable<PatchStatusAssessmentView> QueryPatchStatusAssessmentViews( string sortField, bool ascending, int page, int pageSize, string filterText = "%")
         {
-                return m_dataContext.Table<PatchStatusAssessmentView>().QueryRecords(sortField, ascending, page, pageSize);
+                return DataContext.Table<PatchStatusAssessmentView>().QueryRecords(sortField, ascending, page, pageSize);
         }
 
 
@@ -2251,14 +2186,14 @@ namespace openSPM
             Install result = DeriveInstall(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Install>().AddNewRecord(result);
+            DataContext.Table<Install>().AddNewRecord(result);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(PatchStatusAssessmentView), RecordOperation.UpdateRecord)]
         public void UpdatePatchStatusAssessmentViewInstallTable(PatchStatusAssessmentView record)
         {
-            m_dataContext.Table<Install>().UpdateRecord(DeriveInstall(record));
+            DataContext.Table<Install>().UpdateRecord(DeriveInstall(record));
         }
 
         private Install DeriveInstall(PatchStatusAssessmentView record)
@@ -2297,7 +2232,7 @@ namespace openSPM
                     vendorFilter = filters[2] += '%';
                 }
             }
-            return m_dataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return DataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
         }
 
         [AuthorizeHubRole("*")]
@@ -2317,7 +2252,7 @@ namespace openSPM
                     vendorFilter = filters[2] += '%';
                 }
             }
-            return m_dataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return DataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
         }
 
         #endregion
@@ -2328,14 +2263,14 @@ namespace openSPM
         [RecordOperation(typeof(PatchVendorPlatformView), RecordOperation.QueryRecordCount)]
         public int QueryPatchVendorPlatformViewCount(string filterText = "%")
         {
-            return m_dataContext.Table<PatchVendorPlatformView>().QueryRecordCount();
+            return DataContext.Table<PatchVendorPlatformView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(PatchVendorPlatformView), RecordOperation.QueryRecords)]
         public IEnumerable<PatchVendorPlatformView> QueryPatchVendorPlatformViews(int id, string filterText = "%")
         {
-            return m_dataContext.Table<PatchVendorPlatformView>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
+            return DataContext.Table<PatchVendorPlatformView>().QueryRecords(restriction: new RecordRestriction("ID = {0}", id));
         }
 
         #endregion
@@ -2346,14 +2281,14 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentHistoryView), RecordOperation.QueryRecordCount)]
         public int QueryAssessmentHistoryViewCount(string filterText = "%")
         {
-            return m_dataContext.Table<AssessmentHistoryView>().QueryRecordCount();
+            return DataContext.Table<AssessmentHistoryView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentHistoryView), RecordOperation.QueryRecords)]
         public IEnumerable<AssessmentHistoryView> QueryAssessmentHistoryViews(int id, string filterText = "%")
         {
-            return m_dataContext.Table<AssessmentHistoryView>().QueryRecords(restriction: new RecordRestriction("AssessmentID = {0}", id));
+            return DataContext.Table<AssessmentHistoryView>().QueryRecords(restriction: new RecordRestriction("AssessmentID = {0}", id));
         }
 
         #endregion
@@ -2364,14 +2299,14 @@ namespace openSPM
         [RecordOperation(typeof(InstallHistoryView), RecordOperation.QueryRecordCount)]
         public int QueryInstallHistoryViewCount(string filterText = "%")
         {
-            return m_dataContext.Table<InstallHistoryView>().QueryRecordCount();
+            return DataContext.Table<InstallHistoryView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(InstallHistoryView), RecordOperation.QueryRecords)]
         public IEnumerable<InstallHistoryView> QueryInstallHistoryViews(int id, string filterText = "%")
         {
-            return m_dataContext.Table<InstallHistoryView>().QueryRecords(restriction: new RecordRestriction("InstallID = {0}", id));
+            return DataContext.Table<InstallHistoryView>().QueryRecords(restriction: new RecordRestriction("InstallID = {0}", id));
         }
 
         #endregion
@@ -2382,14 +2317,14 @@ namespace openSPM
         [RecordOperation(typeof(MitigationPlanHistoryView), RecordOperation.QueryRecordCount)]
         public int QueryMitigationPlanHistoryViewCount(string filterText = "%")
         {
-            return m_dataContext.Table<MitigationPlanHistoryView>().QueryRecordCount();
+            return DataContext.Table<MitigationPlanHistoryView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(MitigationPlanHistoryView), RecordOperation.QueryRecords)]
         public IEnumerable<MitigationPlanHistoryView> QueryMitigationPlanHistoryViews(int id, string filterText = "%")
         {
-            return m_dataContext.Table<MitigationPlanHistoryView>().QueryRecords(restriction: new RecordRestriction("MitigationPlanID = {0}", id));
+            return DataContext.Table<MitigationPlanHistoryView>().QueryRecords(restriction: new RecordRestriction("MitigationPlanID = {0}", id));
         }
 
         #endregion
@@ -2406,7 +2341,7 @@ namespace openSPM
                 // Build your filter string here!
                 filterText += "%";
             }
-            return m_dataContext.Table<AssessmentInstallView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<AssessmentInstallView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
@@ -2419,7 +2354,7 @@ namespace openSPM
                 // Build your filter string here!
                 filterText += "%";
             }
-            return m_dataContext.Table<AssessmentInstallView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<AssessmentInstallView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.CreateNewRecord)]
@@ -2435,14 +2370,14 @@ namespace openSPM
             Install result = DeriveInstall(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<Install>().AddNewRecord(result);
+            DataContext.Table<Install>().AddNewRecord(result);
         }
 
         [AuthorizeHubRole("Administrator, Owner, SME")]
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.UpdateRecord)]
         public void UpdateAssessmentInstallViewInstallTable(AssessmentInstallView record)
         {
-            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+            DataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
         }
 
         private Install DeriveInstall(AssessmentInstallView record)
@@ -2495,7 +2430,7 @@ namespace openSPM
                 filterText += "%";
             }
 
-            return m_dataContext.Table<AssessmentMitigateView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<AssessmentMitigateView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
@@ -2509,7 +2444,7 @@ namespace openSPM
                 filterText += "%";
             }
 
-            return m_dataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.CreateNewRecord)]
@@ -2536,7 +2471,7 @@ namespace openSPM
             result.CreatedOn = DateTime.UtcNow;
             result.UpdatedOn = result.CreatedOn;
             result.UpdatedByID = result.CreatedByID;
-            m_dataContext.Table<MitigationPlan>().AddNewRecord(result);
+            DataContext.Table<MitigationPlan>().AddNewRecord(result);
 
         }
 
@@ -2544,7 +2479,7 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.UpdateRecord)]
         public void UpdateAssessmentMitigateView(AssessmentMitigateView record)
         {
-            m_dataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
+            DataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
         }
 
         private MitigationPlan DeriveMitigate(AssessmentMitigateView record)
@@ -2613,7 +2548,7 @@ namespace openSPM
                 filterText += "%";
             }
 
-            return m_dataContext.Table<ClosingReviewView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<ClosingReviewView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
@@ -2626,7 +2561,7 @@ namespace openSPM
                 // Build your filter string here!
                 filterText += "%";
             }
-            return m_dataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<ClosingReviewView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
@@ -2641,14 +2576,14 @@ namespace openSPM
         public void AddNewClosingReviewViewMitigate(ClosingReviewView record)
         {
             ClosedPatch result = DeriveClosedPatch(record);
-            m_dataContext.Table<ClosedPatch>().AddNewRecord(result);
+            DataContext.Table<ClosedPatch>().AddNewRecord(result);
         }
 
         [AuthorizeHubRole("Administrator, Owner, PIC")]
         [RecordOperation(typeof(ClosingReviewView), RecordOperation.UpdateRecord)]
         public void UpdateClosingReviewView(ClosingReviewView record)
         {
-            m_dataContext.Table<ClosedPatch>().UpdateRecord(DeriveClosedPatch(record));
+            DataContext.Table<ClosedPatch>().UpdateRecord(DeriveClosedPatch(record));
         }
 
         private ClosedPatch DeriveClosedPatch(ClosingReviewView record)
@@ -2672,14 +2607,14 @@ namespace openSPM
         [RecordOperation(typeof(VendorPlatformView), RecordOperation.QueryRecordCount)]
         public int QueryVendorPlatformViewCount(string filterText = "%")
         {
-            return m_dataContext.Table<VendorPlatformView>().QueryRecordCount();
+            return DataContext.Table<VendorPlatformView>().QueryRecordCount();
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(VendorPlatformView), RecordOperation.QueryRecords)]
         public IEnumerable<VendorPlatformView> QueryVendorPlatformViews(int id, string filterText = "%")
         {
-            return m_dataContext.Table<VendorPlatformView>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", id));
+            return DataContext.Table<VendorPlatformView>().QueryRecords(restriction: new RecordRestriction("IsDeleted = 0 AND VendorID = {0}", id));
         }
 
         #endregion
@@ -2697,14 +2632,14 @@ namespace openSPM
                 // Build your filter string here!
                 filterText += "%";
             }
-            return m_dataContext.Table<NoticeLog>().QueryRecordCount(new RecordRestriction("Title LIKE {0}", filterText));
+            return DataContext.Table<NoticeLog>().QueryRecordCount(new RecordRestriction("Title LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
         public IEnumerable<NoticeLog> QueryNoticeLogs()
         {
 
-            return m_dataContext.Table<NoticeLog>().QueryRecords();
+            return DataContext.Table<NoticeLog>().QueryRecords();
         }
 
         [AuthorizeHubRole("*")]
@@ -2717,14 +2652,14 @@ namespace openSPM
                 // Build your filter string here!
                 filterText += "%";
             }
-            return m_dataContext.Table<NoticeLog>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Title LIKE {0}", filterText));
+            return DataContext.Table<NoticeLog>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("Title LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(NoticeLog), RecordOperation.DeleteRecord)]
         public void DeleteNoticeLog(int id)
         {
-            m_dataContext.Table<NoticeLog>().DeleteRecord(id);
+            DataContext.Table<NoticeLog>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("*")]
@@ -2739,7 +2674,7 @@ namespace openSPM
         public void AddNewNoticeLog(NoticeLog record)
         {
             record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<NoticeLog>().AddNewRecord(record);
+            DataContext.Table<NoticeLog>().AddNewRecord(record);
         }
 
         #endregion
@@ -2757,13 +2692,13 @@ namespace openSPM
                 // Build your filter string here!
                 filterText += "%";
             }
-            return m_dataContext.Table<NoticeLogView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<NoticeLogView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("*")]
         public IEnumerable<NoticeLogView> QueryNoticeLogViews()
         {
-            return m_dataContext.Table<NoticeLogView>().QueryRecords();
+            return DataContext.Table<NoticeLogView>().QueryRecords();
         }
 
         [AuthorizeHubRole("*")]
@@ -2776,14 +2711,14 @@ namespace openSPM
                 // Build your filter string here!
                 filterText += "%";
             }
-            return m_dataContext.Table<NoticeLogView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<NoticeLogView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
         }
 
         [AuthorizeHubRole("Administrator")]
         [RecordOperation(typeof(NoticeLogView), RecordOperation.DeleteRecord)]
         public void DeleteNoticeLogView(int id)
         {
-            m_dataContext.Table<NoticeLogView>().DeleteRecord(id);
+            DataContext.Table<NoticeLogView>().DeleteRecord(id);
         }
 
         [AuthorizeHubRole("*")]
@@ -2798,7 +2733,7 @@ namespace openSPM
         public void AddNewNoticeLogView(NoticeLogView record)
         {
             record.CreatedOn = DateTime.UtcNow;
-            m_dataContext.Table<NoticeLogView>().AddNewRecord(record);
+            DataContext.Table<NoticeLogView>().AddNewRecord(record);
         }
 
         #endregion
@@ -2912,7 +2847,7 @@ namespace openSPM
         /// <returns>Page setting for specified page.</returns>
         public string GetPageSetting(int pageID, string key, string defaultValue)
         {
-            Page page = m_dataContext.Table<Page>().LoadRecord(pageID);
+            Page page = DataContext.Table<Page>().LoadRecord(pageID);
             Dictionary<string, string> pageSettings = (page?.ServerConfiguration ?? "").ParseKeyValuePairs();
             AppModel model = MvcApplication.DefaultModel;
             return model.GetPageSetting(pageSettings, model.Global.PageDefaults, key, defaultValue);

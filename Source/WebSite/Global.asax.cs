@@ -149,28 +149,17 @@ namespace openSPM
         /// <param name="type">Type of message to log.</param>
         public static void LogStatusMessage(string message, UpdateType type = UpdateType.Information)
         {
+            // TODO: Write message to log with log4net, etc.
+#if DEBUG
             ThreadPool.QueueUserWorkItem(state =>
             {
-                string connectionID = state as string;
-
-                if (!string.IsNullOrEmpty(connectionID))
-                {
-                    if (type == UpdateType.Information)
-                        HubClients.Client(connectionID).sendInfoMessage(message, 3000);
-                    else
-                        HubClients.Client(connectionID).sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
-                }
-#if DEBUG
+                Thread.Sleep(1500);
+                if (type == UpdateType.Information)
+                    HubClients.All.sendInfoMessage(message, 3000);
                 else
-                {
-                    Thread.Sleep(1500);
-                    if (type == UpdateType.Information)
-                        HubClients.All.sendInfoMessage(message, 3000);
-                    else
-                        HubClients.All.sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
-                }
+                    HubClients.All.sendErrorMessage(message, type == UpdateType.Alarm ? -1 : 3000);
+            });
 #endif
-            }, DataHub.CurrentConnectionID);
         }
 
         /// <summary>
@@ -179,22 +168,14 @@ namespace openSPM
         /// <param name="ex">Exception to log.</param>
         public static void LogException(Exception ex)
         {
+            // TODO: Write exception to log with log4net, etc.
+#if DEBUG
             ThreadPool.QueueUserWorkItem(state =>
             {
-                string connectionID = state as string;
-
-                if (!string.IsNullOrEmpty(connectionID))
-                {
-                    HubClients.Client(connectionID).sendErrorMessage(ex.Message, -1);
-                }
-#if DEBUG
-                else
-                {
-                    Thread.Sleep(1500);
-                    HubClients.All.sendErrorMessage(ex.Message, -1);
-                }
+                Thread.Sleep(1500);
+                HubClients.All.sendErrorMessage(ex.Message, -1);
+            });
 #endif
-            }, DataHub.CurrentConnectionID);
         }
 
         private static void ValidateTimeIntervalCounters(AdoDataConnection database)

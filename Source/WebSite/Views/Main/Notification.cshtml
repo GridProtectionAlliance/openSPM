@@ -66,10 +66,5 @@
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<NoticeLogView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("noticeMethod"))
-        
-        $(function () {
-            $('#pageControlsRow').prepend('<button class="btn btn-sm btn-primary" onclick="exportCSV()" id="exportBtn" style="margin-left: 4px;"><span class="glyphicon glyphicon-download"></span>&nbsp;&nbsp;Export&nbsp;CSV</button>');
-
-        });
     </script>
 }

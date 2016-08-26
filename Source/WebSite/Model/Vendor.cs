@@ -24,6 +24,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
+using GSF.Web.Model;
 
 namespace openSPM.Model
 {
@@ -78,7 +79,7 @@ namespace openSPM.Model
 
         [Label("Web Site")]
         [StringLength(512)]
-        //[RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
+        [RegularExpression(DataContext.UrlValidation, ErrorMessage = "Invalid URL.")]
         public string Link { get; set; }
 
         [Label("Patch Notification Method")]

@@ -925,6 +925,7 @@ namespace openSPM
             platform.DeletedON = record.DeletedON;
             platform.DeletedByID = record.DeletedByID;
             platform.Abbreviation = record.Abbreviation;
+            platform.Link = record.Link;
 
             return platform;
         }

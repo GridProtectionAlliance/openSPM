@@ -24,6 +24,7 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using GSF.Data.Model;
+using GSF.Web.Model;
 
 namespace openSPM.Model
 {
@@ -48,6 +49,10 @@ namespace openSPM.Model
         [StringLength(12)]
         [Label("Product Abbreviation")]
         public string Abbreviation { get; set; }
+
+        [StringLength(512)]
+        [RegularExpression(DataContext.UrlValidation, ErrorMessage ="Invalid URL")]
+        public string Link { get; set; }
 
         public string Version { get; set; }
 

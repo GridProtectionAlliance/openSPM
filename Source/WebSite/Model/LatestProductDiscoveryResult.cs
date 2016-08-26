@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
 using GSF.Data.Model;
+using GSF.Web.Model;
 
 namespace openSPM.Model
 {
@@ -52,10 +53,15 @@ namespace openSPM.Model
         [StringLength(10)]
         public string ZIP { get; set; }
 
-        [Label("Web Site")]
+        [Label("Vendor Web Site")]
         [StringLength(512)]
-        [RegularExpression(@"^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w \.-]*)*\/?$", ErrorMessage = "Invalid URL.")]
-        public string Link { get; set; }
+        [RegularExpression(DataContext.UrlValidation, ErrorMessage = "Invalid URL.")]
+        public string VendorLink { get; set; }
+
+        [Label("Product Web Site")]
+        [StringLength(512)]
+        [RegularExpression(DataContext.UrlValidation, ErrorMessage ="Invalid URL.")]
+        public string ProductLink { get; set; }
 
         [Label("Patch Notification Method")]
         public int NoticeMethodKey { get; set; }

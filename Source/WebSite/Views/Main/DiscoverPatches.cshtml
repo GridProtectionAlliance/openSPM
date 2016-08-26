@@ -115,10 +115,10 @@
             <div data-bind="visible: $parent.recordMode()==RecordMode.View ">
                 @Html.Raw(Model.AddValueListSelectField<LatestProductDiscoveryResult>("VendorTypeKey", "vendorType", fieldLabel: "Vendor Type"))
                 @Html.Raw(dataContext.AddInputField<Vendor>("PatchCadence"))
-                @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Abbreviation"))
             </div>
             @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Company", customDataBinding: "enable: false"))
-            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Link", "url", customDataBinding: "html: renderHotLinks(notNull(Link())), enable: false"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Abbreviation"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ProductLink", "url", customDataBinding: "html: renderHotLinks(notNull(ProductLink())), enable: false"))
             @Html.Raw(dataContext.AddTextAreaField<LatestProductDiscoveryResult>("Description", 5, customDataBinding: "html: renderHotLinks(notNull(Description())), enable: false"))
         </div>
         <div class="col-md-4" data-bind="visible: $parent.recordMode()==RecordMode.View ">
@@ -127,6 +127,7 @@
             @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("City"))
             @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("State"))
             @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ZIP"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("VendorLink", "url", customDataBinding: "html: renderHotLinks(notNull(VendorLink())), enable: false"))
             @Html.Raw(Model.AddValueListSelectField<LatestProductDiscoveryResult>("NoticeMethodKey", "noticeMethod"))
             @Html.Raw(dataContext.AddTextAreaField<LatestProductDiscoveryResult>("VendorNotes", 4))
         </div>

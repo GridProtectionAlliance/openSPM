@@ -140,7 +140,6 @@
 
             const productSMEs = $("#productSMEs");
             productSMEs.puidatatable("reload");
-            
         }
 
         function deleteProductSME(userAccountID, userAccountName) {
@@ -251,7 +250,7 @@
 
             $("#addNewEditDialog").on("shown.bs.modal", function () {
 
-                initializeAutoCompleteLookupField("NewSME", securityHub.searchUserAccounts, false);
+                initializeAutoCompleteLookupField("NewSME", securityHub.searchUserAccounts, false, false);
                 
                 initializeProductSMETable();
 

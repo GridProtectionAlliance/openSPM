@@ -456,7 +456,7 @@
                 // we need to re-initialize auto-complete lookup fields and data table each time the window is shown
                 initializeAutoCompleteLookupField("CoordinatorID", securityHub.searchUserAccounts);
                 initializeAutoCompleteLookupField("BackupCoordinatorID", securityHub.searchUserAccounts);
-                initializeAutoCompleteLookupField("NewSME", securityHub.searchUserAccounts, false);
+                initializeAutoCompleteLookupField("NewSME", securityHub.searchUserAccounts, false, false);
 
                 // Initialize SME table
                 initializeBusinessUnitSMETable();
@@ -531,7 +531,7 @@
                 }
             });
 
-            initializeAutoCompleteLookupField("NewPlatform", dataHub.searchPlatforms, false);
+            initializeAutoCompleteLookupField("NewPlatform", dataHub.searchPlatforms, false, false);
 
             $("#inputNewPlatform").puiautocomplete({
                 select: function (event, item) {

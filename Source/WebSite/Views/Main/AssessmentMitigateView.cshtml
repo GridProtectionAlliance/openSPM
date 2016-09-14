@@ -1,25 +1,25 @@
 ﻿@*******************************************************************************************************
-//  AssessmentMitigateView.cshtml - Gbtc
-//
-//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
-//
-//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
-//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
-//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
-//  file except in compliance with the License. You may obtain a copy of the License at:
-//
-//      http://opensource.org/licenses/MIT
-//
-//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
-//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
-//  License for the specific language governing permissions and limitations.
-//
-//  Code Modification History:
-//  ----------------------------------------------------------------------------------------------------
-//  02/29/2016 - Ritchie Carroll
-//       Generated original version of source code.
-//
-//*****************************************************************************************************@
+    //  AssessmentMitigateView.cshtml - Gbtc
+    //
+    //  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+    //
+    //  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+    //  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+    //  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+    //  file except in compliance with the License. You may obtain a copy of the License at:
+    //
+    //      http://opensource.org/licenses/MIT
+    //
+    //  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+    //  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+    //  License for the specific language governing permissions and limitations.
+    //
+    //  Code Modification History:
+    //  ----------------------------------------------------------------------------------------------------
+    //  02/29/2016 - Ritchie Carroll
+    //       Generated original version of source code.
+    //
+    //*****************************************************************************************************@
 @using openSPM.Model
 @using GSF
 @using GSF.Data.Model
@@ -72,7 +72,75 @@
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Assessment";
     ViewBag.HideAddNewButton = true;
-    ViewBag.ShowSearchFilter = true;
+    ViewBag.StatusNames = dataContext.Table<ValueList>().QueryRecords("ID", restriction: new RecordRestriction("GroupID = 1")).ToArray();
+    ViewBag.StatusCounts = dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = 1"));
+    ViewBag.BUNames = dataContext.Table<BusinessUnit>().QueryRecords("Name", restriction: new RecordRestriction("IsDeleted = 0")).ToArray();
+    ViewBag.BUCounts = dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
+}
+@helper Filters()
+{
+    <div class='row'>
+        <div class='col-md-4'>
+            <div class='form-group'>
+                <label for='patchidfilter'>Patch ID Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='patchidfilter' placeholder='Search' onkeyup='filter()' />
+                </div>
+            </div>
+        </div>
+        <div class='col-md-4'>
+            <div class='form-group'>
+                <label for='productfilter'>Product Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='productfilter' placeholder='Search' onkeyup='filter()' />
+                </div>
+            </div>
+        </div>
+        <div class='col-md-4'>
+            <div class='form-group'>
+                <label for='vendorfilter'>Vendor Filter:</label>
+                <div class='right-inner-addon'>
+                    <i class='glyphicon glyphicon-search'></i>
+                    <input class='form-control' type='search' id='vendorfilter' placeholder='Search' onkeyup='filter()' />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class='row'>
+        <div class='col-md-4'>
+            <label for='statusfilter'>Status Filter:</label>
+            <select class='form-control' id='statusfilter' onchange='filter()'>
+                <option value='all'>All</option>
+                @for (int i = 0; i < ViewBag.StatusCounts; ++i)
+                {
+                    var str = "<option value='" + ViewBag.StatusNames[i].ID + "'>" + ViewBag.StatusNames[i].Text + "</option>";
+                    @Html.Raw(str)
+                }
+            </select>
+        </div>
+        <div class='col-md-4'>
+            <label for='bufilter'>Business Unit Filter:</label>
+            <select class='form-control' id='bufilter' onchange='filter()'>
+                <option value='none' selected>None</option>
+                <option value='mine'>My Assessments</option>
+                @for (int i = 0; i < ViewBag.BUCounts; ++i)
+                {
+                    var str = "<option value='" + ViewBag.BUNames[i].Abbreviation + "'>" + ViewBag.BUNames[i].Name + "</option>";
+                    @Html.Raw(str)
+                }
+            </select>
+        </div>
+        <div class='col-md-2'>
+            <label for='startdate'>Start Date Filter:</label>
+            <input type='text' id='startdate' onchange='filter()' />
+        </div>
+        <div class='col-md-2'>
+            <label for='enddate'>End Date Filter:</label>
+            <input type='text' id='enddate' onchange='filter()' />
+        </div>
+    </div>
 }
 @helper BodyRows()
 {
@@ -83,7 +151,7 @@
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
     <td width="30%" class="text-center valign-middle">
-        <button type="button" data-bind="click: $parent.addPageRecord.bind($data), visible: $parent.canAddNew() && $parent.dataHubIsConnected() && false" class="btn btn-danger btn-sm">Create Plan</button>
+        <button type="button" data-bind="click: $parent.addPageRecord.bind($data), visible: $parent.canAddNew() && $parent.dataHubIsConnected() " class="btn btn-danger btn-sm">Create Plan</button>
         <button type="button" data-bind="click: $parent.editPageRecord.bind($data), visible: $parent.canEdit() && $parent.dataHubIsConnected()" class="btn btn-danger btn-sm">Reassess</button>
     </td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
@@ -132,9 +200,19 @@
 
         $(function() {
 
+            $("#pageHeader").append("@Html.Raw(Filters().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+            
+            $( function() {
+                $( "#startdate" ).datepicker();
+            } );
+
+            $( function() {
+                $( "#enddate" ).datepicker();
+            } );
+
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
 
-            
+
             $('#addNewEditDialog').on("shown.bs.modal",function(){
                 $('#inputTitle').prop('disabled', true);
                 $('#inputVendorPatchName').prop('disabled', true);
@@ -222,9 +300,9 @@
                 "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.VendorPatchName),
                 "height": ($(document).height() - 150) + "px",
                 "width": "100%"
-        });
+            });
 
-        $("#manageDocumentsDialog").modal("show");
+            $("#manageDocumentsDialog").modal("show");
         }
 
         $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
@@ -234,7 +312,7 @@
             // Clear frame page
             $("#manageDocumentsFrame").attr("src", "about:blank");
         });
-        
+
         $(viewModel).on("newRecord", function(event, newRecord, oldRecord){
             newRecord.PatchStatusID = oldRecord.PatchStatusID;
             newRecord.VendorPatchName = oldRecord.VendorPatchName;
@@ -243,7 +321,33 @@
             newRecord.BusinessUnitID = oldRecord.BusinessUnitID;
             newRecord.PatchStatusKey = oldRecord.PatchStatusKey;
         });
-        
+
+        function filter() {
+
+            if ($('#patchidfilter').val().length + $('#productfilter').val().length + $('#vendorfilter').val().length + $('#startdate').val().length + $('#enddate').val().length == 0 && $('#statusfilter').val() == 'all' && $('#bufilter').val() == 'none' ) {
+                viewModel.filterText =  "%";
+                viewModel.queryPageRecords();
+            }else {
+                var MyMitPlans = false;
+                var filterStatus = false;
+                var buFilter = '%';
+
+                if($('#statusfilter').val() != 'all'){
+                    filterStatus = true;
+                }
+                if($('#bufilter').val() == 'mine'){
+                    MyMitPlans = true;
+                }else{
+                    buFilter = $('#bufilter').val();
+                }
+
+                viewModel.filterText = "FilterStatus=" + filterStatus.toString() + "; MyMitPlans=" + MyMitPlans.toString() +  "; Filter=" + $('#patchidfilter').val() + ',' + $('#productfilter').val() + ',' + $('#vendorfilter').val() + ',' + $('#statusfilter').val() + ',' +buFilter + ',' + $('#startdate').val() + ',' + $('#enddate').val();
+                viewModel.queryPageRecords();
+            }
+
+        }
+
+
         //$(viewModel).on("recordSaved", function(event, record, newRecord){
         //    // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
         //    if (viewModel.dataHubIsConnected()) {
@@ -256,7 +360,7 @@
         //                            data.MiPlanID = miPlanID;
         //                            dataHub.updateMitigationPlan(data);
         //                        });
-                            
+
         //                    });
 
         //                });
@@ -265,8 +369,8 @@
         //            dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
         //                viewModel.queryPageRecords();
         //            });
-                    
-                   
+
+
         //        }
         //        else{
         //            if(record.AssessmentResultKey >2 ) ++record.PatchStatusKey;

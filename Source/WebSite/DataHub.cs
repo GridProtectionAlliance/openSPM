@@ -244,8 +244,8 @@ namespace openSPM
                 if (filters.Length == 3)
                 {
                     patchFilter = filters[0] + '%';
-                    productFilter = filters[1] += '%';
-                    vendorFilter = filters[2] += '%';
+                    productFilter = filters[1] + '%';
+                    vendorFilter = filters[2] + '%';
                 }
             }
 
@@ -2420,32 +2420,76 @@ namespace openSPM
 
         #region [AssessmentMitigateView Table Operations]
 
+        private RecordRestriction GetAssessmentMitigateViewRecordRestriction(string filterText)
+        {
+            Dictionary<string, string> parameters = filterText.ParseKeyValuePairs();
+
+            string filterStatusTemp;
+            bool filterStatus;
+            string MyMitPlansTemps;
+            bool MyMitPlans;
+            string filter;
+
+            if (!parameters.TryGetValue("FilterStatus", out filterStatusTemp) || !bool.TryParse(filterStatusTemp, out filterStatus))
+                filterStatus = false;
+
+            if (!parameters.TryGetValue("MyMitPlans", out MyMitPlansTemps) || !bool.TryParse(MyMitPlansTemps, out MyMitPlans))
+                MyMitPlans = false;
+
+            if (!parameters.TryGetValue("Filter", out filter))
+                filter = "%";
+
+            string patchIDFilter = "%";
+            string productFilter = "%";
+            string vendorFilter = "%";
+            string statusFilter = "%";
+            string BUFilter = "%";
+            DateTime startDateFilter = new DateTime(1900, 1, 1);
+            DateTime endDateFilter = DateTime.Now;
+
+            if (filter != "%")
+            {
+                string[] filters = filter.Split(',');
+                if (filters.Length == 7)
+                {
+                    patchIDFilter = filters[0] + "%";
+                    productFilter = filters[1] + "%";
+                    vendorFilter = filters[2] + "%";
+                    if (filterStatus)
+                        statusFilter = filters[3];
+                    if (!MyMitPlans)
+                        BUFilter = filters[4];
+                    else
+                    {
+                        BUFilter = "%"; //TODO: Figure out how to get a users' mit plans
+                    }
+
+                    if (!DateTime.TryParse(filters[5], out startDateFilter))
+                        startDateFilter = new DateTime(1900, 1, 1);
+                    if (!DateTime.TryParse(filters[6], out endDateFilter))
+                        endDateFilter = DateTime.Now;
+                }
+            }
+
+            return new RecordRestriction("VendorPatchName LIKE {0} AND PlatformName LIKE {1} AND VendorName LIKE {2} AND Name LIKE {3} AND CreatedOn BETWEEN {4} AND {5}", patchIDFilter, productFilter, vendorFilter, BUFilter, startDateFilter.ToShortDateString(), endDateFilter.ToShortDateString());
+        }
+
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecordCount)]
         public int QueryAssessmentMitigateViewCount(string filterText)
         {
-            if (filterText == null) filterText = "%";
-            else
-            {
-                // Build your filter string here!
-                filterText += "%";
-            }
+            RecordRestriction queryParams = GetAssessmentMitigateViewRecordRestriction(filterText);
 
-            return DataContext.Table<AssessmentMitigateView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<AssessmentMitigateView>().QueryRecordCount(queryParams);
         }
 
         [AuthorizeHubRole("*")]
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.QueryRecords)]
         public IEnumerable<AssessmentMitigateView> QueryAssessmentMitigateViews(string sortField, bool ascending, int page, int pageSize, string filterText)
         {
-            if (filterText == null) filterText = "%";
-            else
-            {
-                // Build your filter string here!
-                filterText += "%";
-            }
+            RecordRestriction queryParams = GetAssessmentMitigateViewRecordRestriction(filterText);
 
-            return DataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+            return DataContext.Table<AssessmentMitigateView>().QueryRecords(sortField, ascending, page, pageSize, queryParams);
         }
 
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.CreateNewRecord)]

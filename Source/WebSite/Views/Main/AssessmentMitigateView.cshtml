@@ -338,9 +338,10 @@
                 if($('#bufilter').val() == 'mine'){
                     MyMitPlans = true;
                 }else{
-                    buFilter = $('#bufilter').val();
+                    if ($('#bufilter').val() != 'none'){
+                        buFilter = $('#bufilter').val();
+                    }
                 }
-
                 viewModel.filterText = "FilterStatus=" + filterStatus.toString() + "; MyMitPlans=" + MyMitPlans.toString() +  "; Filter=" + $('#patchidfilter').val() + ',' + $('#productfilter').val() + ',' + $('#vendorfilter').val() + ',' + $('#statusfilter').val() + ',' +buFilter + ',' + $('#startdate').val() + ',' + $('#enddate').val();
                 viewModel.queryPageRecords();
             }

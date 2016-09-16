@@ -2445,7 +2445,7 @@ namespace openSPM
             string statusFilter = "%";
             string BUFilter = "%";
             DateTime startDateFilter = new DateTime(1900, 1, 1);
-            DateTime endDateFilter = DateTime.Now;
+            DateTime endDateFilter = DateTime.Now.AddDays(1);
 
             if (filter != "%")
             {
@@ -2467,7 +2467,7 @@ namespace openSPM
                     if (!DateTime.TryParse(filters[5], out startDateFilter))
                         startDateFilter = new DateTime(1900, 1, 1);
                     if (!DateTime.TryParse(filters[6], out endDateFilter))
-                        endDateFilter = DateTime.Now;
+                        endDateFilter = DateTime.Now.AddDays(1);
                 }
             }
 

@@ -42,6 +42,7 @@ using GSF.Security;
 using GSF.Web.Embedded;
 using GSF.Web.Hubs;
 using GSF.Web.Model;
+using GSF.Web.Model.Handlers;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.AspNet.SignalR.Json;
@@ -100,6 +101,9 @@ namespace openSPM
             global.DateTimeFormat = $"{global.DateFormat} {global.TimeFormat}";
             global.PasswordRequirementsRegex = securityProvider["PasswordRequirementsRegex"].Value;
             global.PasswordRequirementsError = securityProvider["PasswordRequirementsError"].Value;
+
+            // Define exception logger CSV downloader
+            CsvDownloadHandler.LogExceptionHandler = LogException;
 
             // Load database driven model settings
             using (DataContext dataContext = new DataContext(exceptionHandler: LogException))

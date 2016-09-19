@@ -21,7 +21,7 @@
 //
 //*****************************************************************************************************@
 @model openSPM.Model.AppModel
-<p>
+@*<p>
     By clicking on the menu items to the left, the following lists can be maintained:
 </p>
 <ul>
@@ -54,5 +54,51 @@
 </ul>
 <p>
     <img src="~/Images/patchexplosion2.png" width="600"/>
-</p>
+</p>*@
 
+<p>
+    By clicking on the menu items to the left, the three key prerequiste configuration items can be maintained.  These are "products requiring patches"
+    (Products), "Business Units" (BUs) responsible for discovering and handling security patches, and establishing one or more "Subject Matter Experts" (SMEs) that are responsible for
+    secific Products within a BU.
+
+</p>
+<ul>
+    <li>
+        <b>Users</b> (or Security Users) Users should be added to the system first.  Users may have one or more openSPM roles. openSPM user roles are:
+        <ul>
+            <li>Administrator, the IT Professionals responsible for the system
+            <li>Owner, (or Process Owner), the individuals responsible for assuring corporate CIP-007-R2 compliance
+            <li>BUC, Business Unit Coordinator, the approval authority for Mitigation Plans
+            <li>PIC, Patch Input Coordinator, those responsible for maintaining configuration of openSPM, especially the Products List
+            <li>SME, Subject Matter Expert, the individuals in each BU that are responsible for discovering, assessing, installing (or overseeing installation) patches and for developing mitigation plans.
+            <li>Viewer, users with read-only assess to openSPM
+        </ul><br />
+    </li>
+    <li>
+        <b>Groups</b> (or Security Groups) Used to assign roles in openSPM to previously established Active Directory groups.<br /><br />
+    </li>
+
+    <li>
+        <b>Vendor List</b> This is the list of "patch sources" that is updated routinely by the PIC based on the products that are contained within critical infrastructure.<br /><br />
+    </li>
+    <li>
+        <b>Product List</b>  This the controlled list of products within the corporation where patches must be tracked for CIP-007-R2 compliance.
+        As new patches are added to the system, they must be assigned to a Target Product. Multiple Products may exist for each vendor.<br /><br />
+        <u>Requirement</u>: As Products are added they must be: (1) associated with a single "Vendor" and (2) they must be
+        assigned to individual SMEs -- at least one per BU responsible for this product.<br /><br />
+    </li>
+    <li>
+        <b>Business Unit</b> A Business Unit (BU) is an arbitrary corporate organizational unit that contains SMEs who are accountable for conducting assessments, applying patches, and developing remediation plans
+        on specific Products. Each BU has also has designated BU Coordinator (BUC) who is accountable for one or more Products within his or her BU.<br /><br />
+        While BUs generally align with corporate organization structure, virtual BUs can be created
+        as necessary to correctly represent technical approval authority of the BUC relative to the SME.<br /><br />
+        <u>Requirement</u>: The BUC must be added to the system as a user prior to creation of a new BU.<br /><br />
+        Importantly: After the Business Unit is created, it is EDITED to associate one or more existing users to the BU as an SME and to associate SMEs with one or more Products. See the diagram below.<br /><br />
+    </li>
+    <li>
+        <b>System Settings</b> This allows Administrators to change the openSPM labeling and change other high-level openSPM settings.<br /><br />
+    </li>
+</ul>
+<p align="center">
+    <img src="~/Images/patchexplosion3-framed.png" width="800" />
+</p>

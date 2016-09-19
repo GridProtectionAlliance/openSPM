@@ -2371,6 +2371,7 @@ namespace openSPM
             Install result = DeriveInstall(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
+            DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 4 WHERE ID = {0}", record.PatchStatusID);
             DataContext.Table<Install>().AddNewRecord(result);
         }
 
@@ -2502,16 +2503,12 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.AddNewRecord)]
         public void AddNewAssessmentMitigateViewMitigate(AssessmentMitigateView record)
         {
-            int themeID = MiPlanContext.Connection.ExecuteScalar<int?>("Select ID FROM Theme WHERE IsDefault = 1") ?? -1;
-            ++record.PatchStatusKey;
-            if (record.AssessmentResultKey > 2)
-                ++record.PatchStatusKey;
-
-            UpdatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey);
-            MiPlanContext.Table<MiPlan>().AddNewRecord(DeriveMiPlan(record, themeID));
+            //int themeID = MiPlanContext.Connection.ExecuteScalar<int?>("Select ID FROM Theme WHERE IsDefault = 1") ?? -1;
+            DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 4 WHERE ID = {0}", record.PatchStatusID);
+            //MiPlanContext.Table<MiPlan>().AddNewRecord(DeriveMiPlan(record, themeID));
 
             MitigationPlan result = DeriveMitigate(record);
-            result.MiPlanID =  GetLastMitigationPlanID();
+            //result.MiPlanID =  GetLastMitigationPlanID();
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
             result.UpdatedOn = result.CreatedOn;

@@ -130,7 +130,7 @@
             <label for="evaluationDeadline">Evaluation Deadline</label>
             <div id="evaluationDeadline" class="form-control readonly inputtext"></div>
 
-            @Html.Raw(dataContext.AddTextAreaField<PatchPatchStatusDetail>("Detail", fieldLabel: "Patch Details"))
+            @*@Html.Raw(dataContext.AddTextAreaField<PatchPatchStatusDetail>("Detail", fieldLabel: "Patch Details"))*@
         </div>
     </div>
     
@@ -189,8 +189,8 @@
                             <div class="form-control pre-scrollable" id="patchdetail"></div>
                             <label for="patchsummary">Patch Summary</label>
                             <div class="form-control pre-scrollable" id="patchsummary"></div>
-                            <label for="patchcitation">Patch Citations</label>
-                            <div class="form-control" id="patchcitation"></div>
+                            @*<label for="patchcitation">Patch Citations</label>
+                            <div class="form-control" id="patchcitation"></div>*@
                             <label for="patchlink">Link</label>
                             <div class="form-control pre-scrollable" id="patchlink"></div>
                             <label for="releasedate">Release Date</label>
@@ -263,7 +263,7 @@
             $('#impactkey').html(lookupImpactValue(record.ImpactKey));
             $('#patchdetail').html(record.Detail);
             $('#patchsummary').html(record.Summary);
-            $('#patchcitation').html(record.Citations);
+            //$('#patchcitation').html(record.Citations);
             $('#patchlink').html(record.Link);
             $('#details').val("");
             $('#assessmentSelect').prop('selectedIndex', 0);

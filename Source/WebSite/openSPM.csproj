@@ -201,9 +201,6 @@
     <Compile Include="Controllers\SystemController.cs" />
     <Compile Include="Controllers\SecurityController.cs" />
     <Compile Include="Controllers\SettingsController.cs" />
-    <Compile Include="CSVDownloadHandler.ashx.cs">
-      <DependentUpon>CSVDownloadHandler.ashx</DependentUpon>
-    </Compile>
     <Compile Include="DataHub.cs" />
     <Compile Include="FileDownloadHandler.ashx.cs">
       <DependentUpon>FileDownloadHandler.ashx</DependentUpon>

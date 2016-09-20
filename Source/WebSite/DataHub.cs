@@ -1299,6 +1299,18 @@ namespace openSPM
 
         #endregion
 
+        #region [ MitigationPlanDocument Table Operations ]
+
+        [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]
+        [RecordOperation(typeof(MitigationPlanDocument), RecordOperation.UpdateRecord)]
+        public void UpdateMitigationPlanDocument(MitigationPlanDocument record)
+        {
+            // Stub function exists to assign rights to file upload operations
+            throw new NotImplementedException();
+        }
+
+        #endregion
+
         #region [ AssessmentDocument Table Operations ]
 
         [AuthorizeHubRole("Administrator, Owner, PIC, SME, BUC")]

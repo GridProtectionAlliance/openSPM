@@ -243,6 +243,7 @@
     <Compile Include="Model\MenuItem.cs" />
     <Compile Include="Model\MiPlan.cs" />
     <Compile Include="Model\MitigationPlan.cs" />
+    <Compile Include="Model\MitigationPlanDocument.cs" />
     <Compile Include="Model\MitigationPlanHistoryView.cs" />
     <Compile Include="Model\MyAssessmentsView.cs" />
     <Compile Include="Model\NewPatchesView.cs" />
@@ -433,6 +434,7 @@
     <Content Include="fonts\FontAwesome.otf" />
     <Content Include="FileUploadHandler.ashx" />
     <Content Include="FileDownloadHandler.ashx" />
+    <Content Include="Docs\MitigationPlanTemplate.dotx" />
     <None Include="Properties\PublishProfiles\Deploy to GPAWeb.pubxml" />
     <None Include="Properties\PublishProfiles\Deploy to Package File.pubxml" />
     <Content Include="Scripts\fileinput.js" />

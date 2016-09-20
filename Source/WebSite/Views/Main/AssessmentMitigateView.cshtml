@@ -77,6 +77,21 @@
     ViewBag.BUNames = dataContext.Table<BusinessUnit>().QueryRecords("Name", restriction: new RecordRestriction("IsDeleted = 0")).ToArray();
     ViewBag.BUCounts = dataContext.Table<BusinessUnit>().QueryRecordCount(new RecordRestriction("IsDeleted = 0"));
 }
+@section StyleSheets{
+@Styles.Render("~/css.bundle/fileinput")
+
+
+<style>
+    .actions {
+        border-style: solid;
+        border-width: 1.5px;
+        border-color:darkgrey;
+        border-radius: 2px;
+        width: 100%;
+        height: fit-content;
+    }
+</style>
+}
 @helper Filters()
 {
     <div class='row'>
@@ -159,16 +174,84 @@
 @helper AddNewEditDialog(DataContext dataContext)
 {
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-6">
             @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("Title", fieldLabel: "Patch Title"))
             @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier"))
             @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("VendorName", fieldLabel: "Vendor"))
+        </div>
+        <div class="col-md-6">
             @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("PlatformName", fieldLabel: "Product"))
             @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("Name", fieldLabel: "Business Unit"))
+        </div>
+        <div class="col-md-12">
             @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("PatchDetails", fieldLabel: "Patch Details"))
             <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
-                @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("Summary"))
+                <button type="submit" class="btn btn-primary" id="template">Get Mitigation Plan Template</button>
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="uploadFiles">Add Mitigation Plan Related Documents:</label>
+                        <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
+                    </div>
+                </div>
+
+                @*<div>
+                    <h4>Mitigation Plan Form</h4>
+                    <div>Mitigation Plan Instructions:
+                        <ol>
+                            <li>SME: complete this form in its entirety. <b>Specific dates are required, and all fields are required in order to meet NERC CIP minimum requirements.</b> Add additional “Action Items” as needed.</li>
+                            <li>SME: E-mail completed document to the SME Supervisor.</li>
+                            <li>SME Supervisor: Document approval in an e-mail and send approval e-mail and completed form to ot-patches@tva.gov.</li>
+                            <li>Patch Intake Coordinator: Attach completed documents to Mitigation Plan in OpenSPM.</li>
+                        </ol>
+                        <div class="col-md-6">
+                            <div class="col-md-6">
+                                <label>Plan Author</label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" id="planAuthor" class="form-control" placeholder="Name"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Plan Approver & Owner</label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" id="planOwner" class="form-control" placeholder="Owner"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label>PAN Reference #</label>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" id="panRef" class="form-control" placeholder="PAN #"/>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="col-md-6">
+                                <label>Approval Date</label>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="input-group date" data-provide="datepicker">
+                                    <input type="text" class="form-control" id="approvalDate" placeholder="Click here to enter a date.">
+                                    <div class="input-group-addon">
+                                        <span class="glyphicon glyphicon-th"></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="col-md-3">
+                                <label>Summary</label>
+                            </div>
+                            <div class="col-md-9">
+                                <textarea id="mitigationSummary" class="form-control" placeholder="Click here to enter text."></textarea>
+                            </div>
+                            <div id="actionWindow"></div>
+                        </div>
+
+                    </div>
+                </div>*@
             </div>
+
         </div>
 
     </div>
@@ -194,14 +277,15 @@
     </div>
 </div>
 @section Scripts {
+@Scripts.Render("~/js.bundle/fileinput")
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<AssessmentMitigateView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
-
+        const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=MitigationPlanDocument&SourceField=MitigationPlanID"))";
         $(function() {
 
             $("#pageHeader").append("@Html.Raw(Filters().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
-            
+
             $( function() {
                 $( "#startdate" ).datepicker();
             } );
@@ -213,14 +297,87 @@
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
 
 
+            var numberOfActions = 0;
             $('#addNewEditDialog').on("shown.bs.modal",function(){
+                
+                $("#uploadFiles").fileinput({
+                    uploadUrl: fileUploadUrl,
+                    uploadAsync: true,
+                    showUpload: false,
+                    showRemove: true,
+                    showPreview: false,
+                    minFileCount: 1,
+                    maxFileCount: 12, 
+                    uploadExtraData: function(){
+                        return {SourceID: MitigationPlanID};
+                    }
+                });
+
                 $('#inputTitle').prop('disabled', true);
                 $('#inputVendorPatchName').prop('disabled', true);
                 $('#inputVendorName').prop('disabled', true);
                 $('#inputName').prop('disabled', true);
                 $('#inputPlatformName').prop('disabled', true);
+                $('#textPatchDetails').prop('disabled', true);
+
+                $('#template').on('click', function(event){
+                    event.preventDefault();
+                    window.open('@Url.Content("~/Docs/MitigationPlanTemplate.dotx")')
+
+                });
+                //$('#addNewEditDialog .modal-footer').prepend('<button class="btn btn-primary" id="addActionButton">Add Action</button>');
+
+                //$('#addActionButton').off('click');
+                //$('#addActionButton').on('click', function(){
+                //    $('#actionWindow').append("<hr><div id='action" + numberOfActions++ +"' class='actions'>"+
+                //                                    "<div class='col-md-3'>"+
+                //                                        "<label>Action Item #" + numberOfActions + "</label>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-9'>"+
+                //                                        "<textarea id='actionItemSummary' class='form-control' placeholder='Please enter a summary.'></textarea>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-3'>"+
+                //                                        "<label>Status</label>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-3'>"+
+                //                                        "<select id='statusSelect' class='form-control'><option>Pending</option><option>Complete</option></select>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-3'>"+
+                //                                        "<label>Scheduled Completion Date</label>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-3'>"+
+                //                                        "<div class='input-group date' data-provide='datepicker'>" +
+                //                                            "<input type='text' class='form-control' id='completionDate' placeholder='click here to enter a date.'>" +
+                //                                            "<div class='input-group-addon'>" +
+                //                                                "<span class='glyphicon glyphicon-th'></span>"+
+                //                                            "</div>"+
+                //                                        "</div>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-12'><div class='col-md-3'>"+
+                //                                        "<label>Action Item Assigned To</label>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-3'>"+
+                //                                        "<input id='actionAssignment' placeholder='Click here to enter text.' class='form-control'/>" +
+                //                                    "</div></div>" +
+                //                                    "<div class='col-md-3'>"+
+                //                                        "<label>Detailed Notes</label>" +
+                //                                    "</div>" +
+                //                                    "<div class='col-md-9'>"+
+                //                                        "<textarea id='detailedNotes' class='form-control' placeholder='Click her to enter text.'></textarea>" +
+                //                                    "</div>" +
+                //                              "</div><hr>");
+                //});
+            });
+
+            $('#addNewEditDialog').on("hidden.bs.modal",function(){
+                $('#addActionButton').off('click');
+                $('#addActionButton').remove();
+                numberOfActions = 0;
             });
         });
+
+        function getTemplate(){
+        }
 
         function getDueDate(day) {
             var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);
@@ -320,6 +477,13 @@
             newRecord.PlatformName = oldRecord.PlatformName;
             newRecord.BusinessUnitID = oldRecord.BusinessUnitID;
             newRecord.PatchStatusKey = oldRecord.PatchStatusKey;
+            newRecord.Title = oldRecord.Title;
+            newRecord.VendorName = oldRecord.VendorName;
+            newRecord.PatchDetails = oldRecord.PatchDetails;
+        });
+        
+        $(viewModel).on("beforeSave", function (event, observableRecord) {
+            selectedFiles = $("#uploadFiles").fileinput("getFileStack");
         });
 
         function filter() {
@@ -348,38 +512,32 @@
 
         }
 
+        var MitigationPlanID;
+        var selectedFiles;
 
-        //$(viewModel).on("recordSaved", function(event, record, newRecord){
-        //    // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
-        //    if (viewModel.dataHubIsConnected()) {
-        //        if (newRecord) {
-        //            var miplan = {'Title': record.VendorPatchName, 'Theme': 13, 'BusinessUnitID': record.BusinessUnitID, 'Field2': record.PlatformName, 'Field3': record.Summary, 'Description': '', 'StatusNotes': ''};
-        //            dataHub.addNewMiPlan(miplan).done(function(){
-        //                dataHub.getLastMiPlanRecord().done(function(miPlanID) {
-        //                    dataHub.getLastMitigationPlanID().done(function(planID) {
-        //                        dataHub.getMitigationPlan(planID).done(function(data){
-        //                            data.MiPlanID = miPlanID;
-        //                            dataHub.updateMitigationPlan(data);
-        //                        });
+        $(viewModel).on("recordSaved", function(event, record, newRecord){
+            // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
+            if (viewModel.dataHubIsConnected()) {
+                if (newRecord) {
+                            dataHub.getLastMitigationPlanID().done(function(planID) {
+                                MitigationPlanID = planID.toString();
+                                $("#uploadFiles").fileinput({
+                                    uploadUrl: fileUploadUrl + "&SourceID=" + planID.toString(),
+                                    uploadAsync: true
+                                });
 
-        //                    });
+                                for (var i = 0; i < selectedFiles.length; i++) {
+                                    $("#uploadFiles").fileinput("addToStack", selectedFiles[i]);
+                                }
 
-        //                });
-        //            });
-        //            ++record.PatchStatusKey;
-        //            dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
-        //                viewModel.queryPageRecords();
-        //            });
+                                $("#uploadFiles").fileinput("upload");
 
 
-        //        }
-        //        else{
-        //            if(record.AssessmentResultKey >2 ) ++record.PatchStatusKey;
-        //            dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
-        //                viewModel.queryPageRecords();
-        //            });
-        //        }
-        //    }
-        //});
+                            });
+
+
+                }
+            }
+        });
     </script>
 }

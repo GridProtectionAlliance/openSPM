@@ -35,7 +35,7 @@
     // Define column headers, use null for field name to make column non-sortable
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { null, "Status", "text-center valign-middle" },
+        //new[] { null, "Status", "text-center valign-middle" },
         new[] { "VendorPatchName", "Patch ID", "text-center" },
         new[] { "Title", "Patch Title", "text-left"},
         new[] { "VendorName" , "Vendor", "text-left" },
@@ -46,7 +46,7 @@
         new[] { null, "Documents", "text-center valign-middle" }
     };
 
-    
+
     ViewBag.HideUnauthorizedControls = true;
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -90,7 +90,7 @@
     string statusLightsImagePath = Model.GetPageSetting(ViewBag, "statusLightsImagePath", "~/Images/StatusLights/Small/");
     statusLightsImagePath = Url.Content(statusLightsImagePath).EnsureEnd('/');
 
-    <td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" title="Security Patch" data-bind="visible: PatchClassKey !== 2" ><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" title="Not A Security Patch" data-bind="visible: PatchClassKey === 2"></td>
+    @*<td width="5%" class="text-center valign-middle"><img src="@(statusLightsImagePath)greenlight.png" alt="Enabled" title="Security Patch" data-bind="visible: PatchClassKey !== 2" ><img src="@(statusLightsImagePath)disabledlight.png" alt="Disabled" title="Not A Security Patch" data-bind="visible: PatchClassKey === 2"></td>*@
     <td width="10%" class="text-left valign-middle" nowrap><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
     <td width="15%" class="text-left valign-middle" data-bind="text: Title"></td>
     <td width="15%" class="text-left valign-middle" data-bind="text: VendorName"></td>

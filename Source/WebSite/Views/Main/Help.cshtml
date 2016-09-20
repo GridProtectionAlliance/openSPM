@@ -47,6 +47,8 @@
 
 <table class="table table-striped">
 
+
+
     <colgroup>
         <col class="col-md-12">
     </colgroup>
@@ -94,11 +96,17 @@
                 <img src="~/Images/ProcessSteps/Small/2check.png" class="image-wrap" />
                 <p class="image-wrap">
                     <div>
-                        From time-to-time (typically weekly) SMEs will review each patch source in openSPM and document that these sources have been
-                        checked for new patch availability. OpenSPM will log the time that this source/vendor was checked and the outcome of this discovery
-                        by clicking on the "Record" button. The SME can optionally attach documents that might be useful to either:
-                        (1) assist in the documentation of compliance or (2) be of value in the creation of "candidate security patches".
+                        <b>Displays the list of products (CCA) on which the availablity of security patches much be checked.</b>
                     </div>
+
+                    <div>
+
+                        <div>
+                            From time-to-time (typically weekly) SMEs will review each patch source in openSPM and document that these sources have been
+                            checked for new patch availability. OpenSPM will log the time that this source/vendor was checked and the outcome of this discovery
+                            by clicking on the "Record" button. The SME can optionally attach documents that might be useful to either:
+                            (1) assist in the documentation of compliance or (2) be of value in the creation of "candidate security patches".
+                        </div>
                 </p>
             </td>
         </tr>
@@ -108,22 +116,12 @@
                 <img src="~/Images/ProcessSteps/Small/3new.png" class="image-wrap" />
                 <p class="image-wrap">
                     <div>
-                        After new candidate security patches are discovered in Step 2, the SME assigns the patch adds (copy and pastes from the vendor's product web site)
-                        the patch information into openSPM by clicking on the "Record" button.  The minimum required information for entry of a new patch is:
+                        <b>Displays the list of patches where an assessment is pending.</b>  The patch information can be edited from this screen.
                     </div>
-                    <ul class="image-wrap small">
-                        <li>Corporate patch tracking number of the form "TVA-yymm-nnn" (to be updated)</li>
-                        <li>Vendor / Source (from a drop-down list)</li>
-                        <li>Vendor patch tracking ID</li>
-                        <li>Patch title (80 characters max)</li>
-                        <li>Vendor patch release date (this is used as the default start date for the 35-day period allowed for assessment)</li>
-                        <li>
-                            A Platform (from a drop-down list) that directs the patch to one or more SMEs for assessment on behalf of their BU. Note: Since the
-                            tracking number is specific
-                            to the SME-BU-Platform association, in the cases where a patch applies to multiple platforms then a new "candidate security patch"
-                            must be created for each applicable platform.
-                        </li>
-                    </ul>
+                    <div>
+                        As new candidate security patches are discovered in Step 2, the SME adds (copy and pastes from the vendor's product web site)
+                        these to openSPM by clicking on the "Add New" button.  The minimum required information for entry of a new patch the patch title.
+                    </div>
 
                     <div>
                         The SME is asked to confirm the start date for compliance timers as part of this process.  The SME will work
@@ -137,7 +135,8 @@
                     </div>
 
                     <div>
-                        Patch Tracking now begins as soon as a new patch is added and the patch "explodes" to each BU as shown in the process diagram below.
+                        A "Patch Availability Notification" (PAN) number is assigned by the system and the patch "explodes"
+                        to each BU as shown in the process diagram below.   Patch Tracking now begins for each BU for this PAN.
                     </div>
                 </p>
             </td>
@@ -145,44 +144,33 @@
 
         <tr>
             <td>
-                <img src="~/Images/ProcessSteps/Small/5assess.png" class="image-wrap" />
+                <img src="~/Images/ProcessSteps/Small/4assess.png" class="image-wrap" />
                 <p class="image-wrap">
                     <div>
-                        Each BU has 35 days (typically from the vendor's patch release date) to "assess" the patch.  This assessment can be
-                        performed by any SME in the BU which is associated with one of the Products linked to the patch.
-                        If multiple SMEs within a BU have been associated with the Product, then all these SMEs have permission to represent the BU in the assessment
-                        of the patch.  Only one assessment is allowed per patch per BU.
+                        <b>Displays the list of patches where an assessment is pending </b> filtered by Business Unit.
                     </div>
+                    <div>
+                        <div>
+                            Each BU has 35 days (typically from the vendor's patch release date) to "assess" the patch.  This assessment can be
+                            performed by any SME in the BU which is associated with one of the Products linked to the patch.
+                            If multiple SMEs within a BU have been associated with the Product, then all these SMEs have permission to represent the BU in the assessment
+                            of the patch.  Only one assessment is allowed per patch per BU.
+                        </div>
 
-                    <div> The minimum required information that must be entered as part of the assessment is one of three “Assessment Results”:</div>
-                    <ul class="image-wrap small">
-                        <li>Install the patch</li>
-                        <li>Develop a mitigation plan (which can include patching some, but not all, devices)</li>
-                        <li>Declaring that patch is NOT an applicable security patch for this BU</li>
-                    </ul>
-                    <div>
-                        If the assessment results in decision to develop a mitigation plan, a dialog box pops up so that the SME must enter a short description
-                        (and/or attach documents) of the basis
-                        for mitigation in lieu of patching.  As this dialog box closes, a new mitigation plan "place-keeper" is created in the MiPlan application.
-                        An SME in the BU has 35 days to develop this plan and have it approved
-                        by the BU Coordinator.
-                    </div>
-                    <div>If the assessment results in a decision to apply the patch(es), the SME is not required to enter a basis for this decision – but may do so.</div>
-                    <div>
-                        Importantly, finishing the assessment starts a new 35-day timer for this business unit for the action of (1) installing the patch
-                        or (2) developing a mitigation plan.
-                    </div>
-                    <div>
-                        <i>
-                            The
-                            corporation is non-compliant if all BU's with Platforms have not assessed the patch within the 35-day assessment period.
-                            Similarly, the corporation is not compliant if any individual BU
-                            takes longer than 35 days to install the patch or development the mitigation plan.
-                            Note since individual BUs can complete assessments on differing dates, the timer for compliance for patch installation or mitigation
-                            plan development is on a BU-by-BU basis.
-                        </i>
-                    </div>
-                    <div>Notifications will be sent to the BU Coordinator and SMEs in this Business Unit (as well as the Owner) as the 35-day compliance date approaches.</div>
+                        <div> The minimum required information that must be entered as part of the assessment is one of four “Assessment Results”:</div>
+                        <ul class="image-wrap small">
+                            <li>The patch is applicable -- Install the patch</li>
+                            <li>The patch is applicable -- Develop a mitigation plan (which can include patching some, but not all, devices)</li>
+                            <li>The patch is NOT applicable -- the patch does not apply to my BU's configuration
+                            <li>The patch is NOT an applicable -- the patch is not security related for my BU</li>
+                        </ul>
+                        <div>
+                            If the assessment results in decision to develop a mitigation plan, the SME should enter the "Assessment Basis".
+
+                            Completing the assessment starts a new 35-day timer for this business unit for the action of (1) installing the patch
+                            or (2) developing a mitigation plan.
+                            Notifications will be sent to the BU Coordinator and SMEs in this Business Unit (as well as the Owner) as the 35-day compliance date approaches.
+                        </div>
 
                 </p>
             </td>
@@ -190,14 +178,21 @@
 
         <tr>
             <td>
-                <img src="~/Images/ProcessSteps/Small/6install.png" class="image-wrap" />
+                <img src="~/Images/ProcessSteps/Small/5install.png" class="image-wrap" />
                 <p class="image-wrap">
                     <div>
-                        Once the patch has been installed on all CCA within the BU, an SME for the Product in the impacted BU must enter the “patch installation
-                        completion” date in openSPM.
+                        <b>Displays the list of patches where installation (applicaiton of the patch) is pending.</b>
                     </div>
-                    <div>An SME in the BU should also enter notes and/or attach documents that provide details and evidence of the installation.</div>
-                    <div>This step ends the required compliance action on this patch for this BU.</div>
+                    <div>
+                        <div>
+                            Once the patch has been installed on all CCA within the BU, an SME for the Product in the impacted BU must enter the “patch installation
+                            completion” date in openSPM. The SME should also enter notes and/or attach documents that provide details and evidence of the installation.
+                        </div>
+                        <div>
+                            By clicking on the "Reassess" button, the SME can change the outcome of the assessment from "Patch" to other assessment options.  Changing the assessment conclusion
+                            does not change the compliance-based date of when the orginial assessment was completed.
+                        </div>
+
 
                 </p>
             </td>
@@ -205,38 +200,37 @@
 
         <tr>
             <td>
-                <img src="~/Images/ProcessSteps/Small/7plan.png" class="image-wrap" />
+                <img src="~/Images/ProcessSteps/Small/6plan.png" class="image-wrap" />
                 <p class="image-wrap">
                     <div>
-                        <b>To be updated.</b>  If an assessment calls for a Mitigation Plan, a "place-keeper" new plan is automatically created in the companion MiPlan application by openSPM.
-                        The MiPlan application is used to (1) house the plan [<i>a piece of compliance evidence</i>] and (2) track the completion of mitigation plan action items
-                        [<i>not currently a factor in patch management compliance</i>].
+                        <b>Displays the list of patches where development of a mitigation plan is pending.</b>
                     </div>
                     <div>
-                        Clicking on this menu item shows the list of mitigation plans that are pending development and approval. Once approved by the BU Coordinator, plans disappear from
-                        this list for this BU and this step ends the required compliance actions for this BU.
-                    </div>
-                    Mitigation Plan development states that are set within the MiPlan application are:
-                    <ul class="image-wrap small">
-                        <li>Pending - The plan is under development by an SME </li>
-                        <li>Submitted - The plan has been submitted for approval by the SME </li>
-                        <li>Approved - The plan has been approved by the BU Coordinator [the last step for compliance]</li>
-                        <li>Started - At least one action on the plan has a state of started or greater</li>
-                        <li>Completed - All action steps have been completed.</li>
-                        <li>Closed - The plan has been reviewed and closed by the BU.</li>
-                    </ul>
-                    <div>Go the <a href="">MiPlan Web Site</a> to learn more about mitigation planning.</div>
+                        <div>
+                            If an assessment calls for a mitigation plan, a "Mitgation Plan Form" is completed by the SME, approved by the BU Coordinator, and
+                            emailed to the PIC for review and entry into the openSPM system.
+                        </div>
+                        <div>
+                            By clicking on the "Reassess" button, the PIC can change the outcome of the assessment from "Develop Mitigation Plan" to other assessment options.  Changing the assessment conclusion
+                            does not change the compliance-based date of when the orginial assessment was completed.
+                        </div>
+
                 </p>
             </td>
         </tr>
 
         <tr>
             <td>
-                <img src="~/Images/ProcessSteps/Small/8done.png" class="image-wrap" />
+                <img src="~/Images/ProcessSteps/Small/7updateplans.png" class="image-wrap" />
                 <p class="image-wrap">
                     <div>
-                        Deprecated step.  Patches are closed and the process terminates upon installation of a patch or attachment of a mitigation plan form.
+                        <b>Displays the list of open mitigation plans.</b>
                     </div>
+                    <div>
+                        <div>
+                            After mitgation plans have been loaded into openSPM by the PIC in Step 6, the PIC must close these plans once they are completed and may update the mitigation plans as needed.
+                        </div>
+
                 </p>
             </td>
         </tr>
@@ -251,16 +245,21 @@
                     </div>
                     <div><b>Candidate Security Patch</b> - These are the patches that SMEs discover that may have security implications to CCA. </div>
                     <div>
+                        <b>Patch Assessment</b>- Assessments are a compliance requirement and are conducted by SMEs to determine if a candidate patch
+                        is an applicable security patch and if so the action required to address it -- either patch or mitigate.
+                    </div>
+                    <div>
+                        <b>Patch Assessment Notification Number</b> (PAN #)- Following patch assessment, if a candidate securtity patch is applicable a "PAN #" is assigned by the
+                        openSPM system so that fucture action for this patch for each BU can be tracked.  (PAN # is also referred to as "Patch ID".)
+                    </div>
+                    <div>
                         <b>Mitigation</b> - Actions taken to minimize risk without complete elimination of a specific vulnerability (e.g. implementing
                         additional process checks, adding access control mechanisms, authoring Intrusion Detection System rules to detect anomalous activities)
                     </div>
-                    <div>
-                        <b>Patch Assessment</b>- Assessments are a compliance requirement and are conducted by SMEs to determine if a candidate patch
-                        is an applicable security patch and if so the action required to address it -- either patch or mitigate or both.
-                    </div>
+
                     <div>
                         <b>Patch Mitigation Plan</b> - The combination of risk assessment and justification for mitigation vs. patching PLUS a set of
-                        action steps that will mitigate the need to install the patch.  Mitigation Plans are documented by attaching form TVAxxx.
+                        action steps that will mitigate the need to install the patch.  The Mitigation Plan is stored in openSPM as an attached document.
                     </div>
                 </p>
             </td>
@@ -302,8 +301,8 @@
                         that business unit.  A BU Coordinator approves Mitigation Plans for their Business Unit.
                     </div>
                     <div>
-                        <b>Patch Input Coordinator</b> (PIC) - Those responsible for maintaining openSPM configuration -- the applicable Product List and the association of Products to Business Units
-                        and SMEs.
+                        <b>Patch Input Coordinator</b> (PIC) - The openSPM process administrators responsible for maintaining openSPM configuration -- the applicable Product List and the association of Products to Business Units
+                        and SMEs -- and for entering Mitgation Plans into openSPM.
 
                         <!-- The individuals responsible for (1) reviewing sources of patch availability,
                         (2) entering candidate security patches into openSPM for assessment by SMEs, and (3) closing patches that been successfully assessed / addressed by the BUs. -->
@@ -315,13 +314,12 @@
                     <div>
                         <b>Subject Matter Expert</b> (SME)- Professional staff within the business unit charged with discovering patches; making assessments
                         on the security applicability and methods; and for developing mitigation plans.
-                        <div>
-                            <b>System Administrator</b> (Admin) - Information Technology personnel authorized to establish users and roles and
-                            set implementation specific configuration parameters (e.g., data base location). Admins have unrestricted access to all pages in the openSPM System.
-                        </div>
-                        <div><b>Viewer</b> - Those authenticated to the domain can view the status of active patches but cannot make any changes within the system.
-                        </div>
                     </div>
+                    <div>
+                        <b>System Administrator</b> (Admin) - Information Technology personnel authorized to establish users and roles and
+                        set implementation specific configuration parameters (e.g., data base location).  Admins have unrestricted access to all pages in the openSPM System.
+                    </div>
+                    <div><b>Viewer</b> - Those authenticated to the domain can view the status of active patches but cannot make any changes within the system. </div>
                 </p>
             </td>
         </tr>
@@ -329,7 +327,7 @@
             <td>
                 <p class="image-wrap">
                     <div><a id="Overview"></a>Process Overview:</div>
-                    <img src="~/Images/patchexplosion3-framed.png" width="800" class="image-wrap" />
+                    <img src="~/Images/patchexplosion3-framed.png" width="900" class="image-wrap" />
                 </p>
             </td>
         </tr>
@@ -337,4 +335,5 @@
             <td colspan="2">&nbsp;</td>
         </tr>
     </tbody>
+
 </table>

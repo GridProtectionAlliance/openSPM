@@ -1,0 +1,147 @@
+﻿@*******************************************************************************************************
+//  OpenPlans.cshtml - Gbtc
+//
+//  Copyright © 2016, Grid Protection Alliance.  All Rights Reserved.
+//
+//  Licensed to the Grid Protection Alliance (GPA) under one or more contributor license agreements. See
+//  the NOTICE file distributed with this work for additional information regarding copyright ownership.
+//  The GPA licenses this file to you under the MIT License (MIT), the "License"; you may not use this
+//  file except in compliance with the License. You may obtain a copy of the License at:
+//
+//      http://opensource.org/licenses/MIT
+//
+//  Unless agreed to in writing, the subject software distributed under the License is distributed on an
+//  "AS-IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. Refer to the
+//  License for the specific language governing permissions and limitations.
+//
+//  Code Modification History:
+//  ----------------------------------------------------------------------------------------------------
+//  03/03/2016 - Russell Robertson
+//       Generated original version of source code.
+//
+//*****************************************************************************************************@
+@using GSF.Web
+@using GSF.Web.Model
+@using GSF.Security.Model
+@using openSPM.Model
+@model AppModel
+@section StyleSheets {
+}
+@{
+    DataContext dataContext = Model.DataContext;
+
+    ViewBag.HeaderColumns = new[]
+    {
+        //    { "Field", "Label", "Classes" }
+        new[] { "VendorPatchName", "Patch ID", "text-left" },
+        new[] { "BusinessUnitName", "Business Unit", "text-left"},
+        new[] { "PlatformName", "Product", "text-left"},
+        new[] { "CreatedOn", "Creation Date", "text-center"},
+        new[] { null, "Product", "text-center valign-middle"},
+    };
+
+    ViewBag.BodyRows = BodyRows().ToString();
+    ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
+    ViewBag.HideAddNewButton = true;
+    ViewBag.ShowSearchFilter = true;
+}
+@helper BodyRows()
+{
+    <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: $parent.viewPageRecord"></button></td>
+    <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: BusinessUnitName"></div></td>
+    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: PlatformName"></div></td>
+    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: CreatedOn.formatDate(DateFormat)"></div></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
+    <td width="5%" class="text-center valign-middle" nowrap>
+        <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
+        @*<button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>*@
+    </td>
+}
+@helper AddNewEditDialog(DataContext dataContext)
+{
+    <div class="row">
+        @Html.Raw(dataContext.AddInputField<MitigationPlanView>("Title", fieldLabel: "Patch Title", customDataBinding: "enable: false"))                    
+        @Html.Raw(dataContext.AddInputField<MitigationPlanView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier", customDataBinding: "enable: false"))
+        @Html.Raw(dataContext.AddInputField<MitigationPlanView>("PlatformName", fieldLabel: "Product", customDataBinding: "enable: false"))
+        @Html.Raw(dataContext.AddInputField<MitigationPlanView>("BusinessUnitName", fieldLabel: "Business Unit", customDataBinding: "enable: false"))
+        @Html.Raw(dataContext.AddDateField<MitigationPlanView>("CreatedOn", fieldLabel: "Created On Date"))
+        @Html.Raw(dataContext.AddSelectField<MitigationPlanView, UserAccount>("CreatedByID", "ID", "Name", fieldLabel: "Author"))
+        @Html.Raw(dataContext.AddInputField<MitigationPlanView>("ApprovedByName", fieldLabel: "Approved By"))
+        @Html.Raw(dataContext.AddCheckBoxField<MitigationPlanView>("IsMitigated", fieldLabel: "Completed?"))
+    </div>
+}
+@Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
+<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <iframe style="border: none" id="manageDocumentsFrame"></iframe>
+                <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        @Html.Raw(Model.RenderViewModelConfiguration<MitigationPlanView>(ViewBag, "VendorPatchName"))
+        
+
+     
+        $(function () {
+
+            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+ 
+            $('#addNewEditDialog').on("shown.bs.modal", function () {
+                $.each($('#selectCreatedByID').children(), function (index, option) {
+                    securityHub.sidToAccountName($(option).text()).done(function (user) {
+                        $(option).text(user);
+                    });
+                });
+            });
+        });
+        
+        function getDocumentCount(sourceID, element) {
+            if (viewModel.dataHubIsConnected()) {
+               
+                dataHub.queryDocumentDetailCount("MitigationPlan", sourceID, null).done(function (count) {
+                    $("#documentCount" + sourceID).text(count.toString());
+                });
+            }
+
+            return element.text();
+        }
+
+        $(window).resize(function () {
+            setTimeout(function () {
+                $("#manageDocumentsFrame").attr("height", ($(document).height() - 150) + "px");
+            }, 500);
+        });
+
+        function openManageDocumentsDialog(record) {
+            const count = parseInt(notNull($("#documentCount" + record.ID).text(), 0));
+            var initialMode = "";
+
+            if (count < 1)
+                initialMode = "/AddNew";
+
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents")" + initialMode + "?SourceTable=MitigationPlan&SourceField=MitigationPlanID&SourceID=" + record.ID + "&Name=" + encodeURIComponent(record.VendorPatchName),
+                "height": ($(document).height() - 150) + "px",
+                "width": "100%"
+        });
+
+        $("#manageDocumentsDialog").modal("show");
+        }
+
+        $("#manageDocumentsDialog").on("hidden.bs.modal", function () {
+            // Refresh page counts after editing tasks
+            viewModel.queryPageRecords();
+
+            // Clear frame page
+            $("#manageDocumentsFrame").attr("src", "about:blank");
+        });
+
+    </script>
+}

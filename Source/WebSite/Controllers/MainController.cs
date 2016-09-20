@@ -247,6 +247,12 @@ namespace openSPM.Controllers
             return View();
         }
 
+        public ActionResult OpenPlans()
+        {
+            m_appModel.ConfigureView<MitigationPlanView>(Url.RequestContext, "OpenPlans", ViewBag);
+            return View();
+        }
+
         public ActionResult Assessments()
         {
             m_appModel.ConfigureView<Assessment>(Url.RequestContext, "Assessments", ViewBag);

@@ -245,6 +245,7 @@
     <Compile Include="Model\MitigationPlan.cs" />
     <Compile Include="Model\MitigationPlanDocument.cs" />
     <Compile Include="Model\MitigationPlanHistoryView.cs" />
+    <Compile Include="Model\MitigationPlanView.cs" />
     <Compile Include="Model\MyAssessmentsView.cs" />
     <Compile Include="Model\NewPatchesView.cs" />
     <Compile Include="Model\NewPlanView.cs" />
@@ -349,6 +350,7 @@
     <Content Include="Images\Icons\mstile-310x150.png" />
     <Content Include="Images\Icons\mstile-310x310.png" />
     <Content Include="Images\Icons\mstile-70x70.png" />
+    <Content Include="Images\Menu\planupdate.png" />
     <Content Include="Images\Menu\settingsDetail.png" />
     <Content Include="Images\Menu\apply.png" />
     <Content Include="Images\Menu\assess.png" />
@@ -388,10 +390,14 @@
     <Content Include="Images\ProcessSteps\Small\1settings.png" />
     <Content Include="Images\ProcessSteps\Small\2check.png" />
     <Content Include="Images\ProcessSteps\Small\3new.png" />
+    <Content Include="Images\ProcessSteps\Small\4assess.png" />
     <Content Include="Images\ProcessSteps\Small\4start.png" />
     <Content Include="Images\ProcessSteps\Small\5assess.png" />
+    <Content Include="Images\ProcessSteps\Small\5install.png" />
     <Content Include="Images\ProcessSteps\Small\6install.png" />
+    <Content Include="Images\ProcessSteps\Small\6plan.png" />
     <Content Include="Images\ProcessSteps\Small\7plan.png" />
+    <Content Include="Images\ProcessSteps\Small\7updateplans.png" />
     <Content Include="Images\ProcessSteps\Small\8done.png" />
     <Content Include="Images\StatusLights\Large\amberlight.png" />
     <Content Include="Images\StatusLights\Large\blacklight.png" />
@@ -528,6 +534,7 @@
     <Content Include="Views\System\SelectTheme.cshtml" />
     <Content Include="Views\Settings\Test.cshtml" />
     <Content Include="Views\System\EmailService.cshtml" />
+    <Content Include="Views\Main\OpenPlans.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

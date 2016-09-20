@@ -71,6 +71,7 @@
     ViewBag.BodyRows = BodyRows().ToString();
     ViewBag.AddNewEditDialog = AddNewEditDialog(dataContext).ToString();
     ViewBag.AddNewEditTitle = "Assessment";
+
     ViewBag.HideAddNewButton = true;
     ViewBag.StatusNames = dataContext.Table<ValueList>().QueryRecords("ID", restriction: new RecordRestriction("GroupID = 1")).ToArray();
     ViewBag.StatusCounts = dataContext.Table<ValueList>().QueryRecordCount(new RecordRestriction("GroupID = 1"));

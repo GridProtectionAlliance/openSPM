@@ -2792,6 +2792,68 @@ namespace openSPM
 
         #endregion
 
+        #region [ MitigationPlanView Table Operations ]
+
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MitigationPlanView), RecordOperation.QueryRecordCount)]
+        public int QueryMitigationPlanViewCount(bool isDeleted, string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return DataContext.Table<MitigationPlanView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MitigationPlanView), RecordOperation.QueryRecords)]
+        public IEnumerable<MitigationPlanView> QueryMitigationPlanViews(bool isDeleted, string sortField, bool ascending, int page, int pageSize, string filterText)
+        {
+            if (filterText == null) filterText = "%";
+            else
+            {
+                // Build your filter string here!
+                filterText += "%";
+            }
+            return DataContext.Table<MitigationPlanView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0}", filterText));
+        }
+
+        [AuthorizeHubRole("Administrator")]
+        [RecordOperation(typeof(MitigationPlanView), RecordOperation.DeleteRecord)]
+        public void DeleteMitigationPlanView(int id)
+        {
+            DataContext.Table<MitigationPlanView>().DeleteRecord(id);
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MitigationPlanView), RecordOperation.CreateNewRecord)]
+        public MitigationPlanView NewMitigationPlanView()
+        {
+            return new MitigationPlanView();
+        }
+
+        [AuthorizeHubRole("Administrator, Owner, PIC")]
+        [RecordOperation(typeof(MitigationPlanView), RecordOperation.UpdateRecord)]
+        public void UpdateMitigationPlanView(MitigationPlanView record)
+        {
+            record.UpdatedOn = DateTime.UtcNow;
+            record.UpdatedByID = GetCurrentUserID();
+            DataContext.Table<MitigationPlan>().UpdateRecord(record);
+        }
+
+        [AuthorizeHubRole("*")]
+        [RecordOperation(typeof(MitigationPlanView), RecordOperation.AddNewRecord)]
+        public void AddNewMitigationPlanView(MitigationPlanView record)
+        {
+            record.CreatedOn = DateTime.UtcNow;
+            DataContext.Table<MitigationPlanView>().AddNewRecord(record);
+        }
+
+        #endregion
+
 
         #region [ MiPlan Table Operations ]
 

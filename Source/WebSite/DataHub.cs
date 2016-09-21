@@ -2384,7 +2384,7 @@ namespace openSPM
             Install result = DeriveInstall(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
-            DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 4 WHERE ID = {0}", record.PatchStatusID);
+            DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 5 WHERE ID = {0}", record.PatchStatusID);
             DataContext.Table<Install>().AddNewRecord(result);
         }
 
@@ -2392,6 +2392,9 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentInstallView), RecordOperation.UpdateRecord)]
         public void UpdateAssessmentInstallViewInstallTable(AssessmentInstallView record)
         {
+            if(record.AssessmentResultKey > 2)
+                DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 5 WHERE ID = {0}", record.PatchStatusID);
+
             DataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
         }
 
@@ -2534,6 +2537,9 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.UpdateRecord)]
         public void UpdateAssessmentMitigateView(AssessmentMitigateView record)
         {
+            if (record.AssessmentResultKey > 2)
+                DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 5 WHERE ID = {0}", record.PatchStatusID);
+
             DataContext.Table<Assessment>().UpdateRecord(DeriveAssessment(record));
         }
 
@@ -3005,7 +3011,7 @@ namespace openSPM
         public IEnumerable<IDLabel> SearchUsers( string role, string searchText, int limit = -1)
         {
 
-            RecordRestriction restriction = new RecordRestriction($"ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = '{role}'))");
+            RecordRestriction restriction = new RecordRestriction("ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = '{0}'))", role);
             if (limit < 1)
                 return DataContext
                     .Table<UserAccount>()
@@ -3044,7 +3050,7 @@ namespace openSPM
         public bool IsSMEOfProductInBU(int productID, int buID)
         {
 
-            RecordRestriction restriction = new RecordRestriction($"ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = 'SME')) AND ID IN(SELECT UserAccountID FROM UserAccountPlatform WHERE UserAccountPlatform.PlatformID = '{productID}' AND UserAccountPlatform.UserAccountID IN(SELECT UserAccountID FROM BusinessUnitUserAccount WHERE BusinessUnitID " + (buID == -1 ? "LIKE '%'))" : $"= {buID}))"));
+            RecordRestriction restriction = new RecordRestriction("ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = 'SME')) AND ID IN(SELECT UserAccountID FROM UserAccountPlatform WHERE UserAccountPlatform.PlatformID = {0} AND UserAccountPlatform.UserAccountID IN(SELECT UserAccountID FROM BusinessUnitUserAccount WHERE BusinessUnitID " + (buID == -1 ? "LIKE '%'))" : "= {1}))"), productID, buID);
             IEnumerable<UserAccount> uas = DataContext.Table<UserAccount>().QueryRecords(restriction: restriction).Where(record => record.ID == GetCurrentUserID());
 
             return (uas.Any());

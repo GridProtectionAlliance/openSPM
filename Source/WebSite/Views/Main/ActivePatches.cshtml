@@ -108,7 +108,7 @@
     <td width="10%" class="text-center valign-middle" data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></td>
     <td width="10%" class="text-center valign-middle" data-bind="text: EvaluationDeadline.formatDate(DateFormat)"></td>
     <td width="5%" class="text-center valign-middle"><span data-bind="visible: IsExpedited" class="glyphicon glyphicon-check"></span></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: beginAssessment.bind($data), enable: $parent.canEdit() && $parent.dataHubIsConnected()">Assess</button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-danger btn-sm" data-bind="click: beginAssessment.bind($data), enable: enableAssessButton($($element), $data)">Assess</button></td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(PatchStatusID, PatchID, $($element)), attr: {id: 'documentCount' + PatchStatusID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         @*<button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>*@
@@ -280,6 +280,16 @@
 
 
 
+        }
+        
+        function enableAssessButton(element, record){
+            if(viewModel.canAddNew() && viewModel.dataHubIsConnected()){
+                dataHub.isSMEOfProductInBU(record.PlatformID, record.BusinessUnitID).done(function(data){
+                    if(data)
+                        element.prop('disabled', false);
+                });
+            }
+            return false;
         }
 
         function getStatusImage(element, record) {

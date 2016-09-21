@@ -82,8 +82,8 @@
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: getDueDate(CreatedOn)"></div></td>
         <td width="30%" class="text-center valign-middle">
-            <button type="button" data-bind="click: $parent.addPageRecord.bind($data), visible: $parent.canAddNew() && $parent.dataHubIsConnected()" class="btn btn-danger btn-sm">Install</button>
-            <button type="button" data-bind="click: $parent.editPageRecord.bind($data), visible: $parent.canEdit() && $parent.dataHubIsConnected()" class="btn btn-danger btn-sm">Reassess</button>
+            <button type="button" data-bind="click: $parent.addPageRecord.bind($data), enable: enableInstallButton($($element), $data)" class="btn btn-danger btn-sm">Install</button>
+            <button type="button" data-bind="click: $parent.editPageRecord.bind($data), enable: enableReassessButton($($element), $data)" class="btn btn-danger btn-sm">Reassess</button>
 
         </td>
     <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
@@ -173,6 +173,27 @@
 
             });
         });
+        
+        function enableInstallButton(element, record){
+            if(viewModel.canAddNew() && viewModel.dataHubIsConnected()){
+                dataHub.isSMEOfProductInBU(record.PlatformID, record.BusinessUnitID).done(function(data){
+                    if(data)
+                        element.prop('disabled', false);
+                });
+            }
+            return false;
+        }
+        
+        function enableReassessButton(element, record){
+            if(viewModel.canAddNew() && viewModel.dataHubIsConnected()){
+                dataHub.isSMEOfProductInBU(record.PlatformID, record.BusinessUnitID).done(function(data){
+                    if(data)
+                        element.prop('disabled', false);
+                });
+            }
+            return false;
+        }
+
 
         function getDueDate(day) {
             var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);

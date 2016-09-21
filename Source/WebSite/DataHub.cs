@@ -2994,6 +2994,13 @@ namespace openSPM
             return userID;
         }
 
+        /// <summary>
+        /// Gets the users for a specific role filtered using primeui autocomplete
+        /// </summary>
+        /// <param name="role">Role that you want users from</param>
+        /// <param name="searchText">primeui search text</param>
+        /// <param name="limit">number of users to return, -1 is default and returns all</param>
+        /// <returns>IENumerable of ID Labels used with primeui autocomplete</returns>
 
         public IEnumerable<IDLabel> SearchUsers( string role, string searchText, int limit = -1)
         {
@@ -3024,6 +3031,26 @@ namespace openSPM
                 .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
 
         }
+
+
+        /// <summary>
+        /// Gets the users for a specific role filtered using primeui autocomplete
+        /// </summary>
+        /// <param name="role">Role that you want users from</param>
+        /// <param name="searchText">primeui search text</param>
+        /// <param name="limit">number of users to return, -1 is default and returns all</param>
+        /// <returns>IENumerable of ID Labels used with primeui autocomplete</returns>
+
+        public bool IsSMEOfProductInBU(int productID, int buID)
+        {
+
+            RecordRestriction restriction = new RecordRestriction($"ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = 'SME')) AND ID IN(SELECT UserAccountID FROM UserAccountPlatform WHERE UserAccountPlatform.PlatformID = '{productID}' AND UserAccountPlatform.UserAccountID IN(SELECT UserAccountID FROM BusinessUnitUserAccount WHERE BusinessUnitID " + (buID == -1 ? "LIKE '%'))" : $"= {buID}))"));
+            IEnumerable<UserAccount> uas = DataContext.Table<UserAccount>().QueryRecords(restriction: restriction).Where(record => record.ID == GetCurrentUserID());
+
+            return (uas.Any());
+        }
+
+
 
         #endregion
     }

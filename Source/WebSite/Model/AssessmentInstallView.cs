@@ -21,6 +21,7 @@ namespace openSPM.Model
         public DateTime CreatedOn { get; set; }
         public Guid CreatedByID { get; set; }
         public string Summary { get; set; }
+        public int PlatformID { get; set; }
         [Required]
         [Label("Completed Date")]
         [InitialValue("new Date()")]

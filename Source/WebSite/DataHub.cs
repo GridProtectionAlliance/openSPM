@@ -3011,7 +3011,7 @@ namespace openSPM
         public IEnumerable<IDLabel> SearchUsers( string role, string searchText, int limit = -1)
         {
 
-            RecordRestriction restriction = new RecordRestriction("ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = '{0}'))", role);
+            RecordRestriction restriction = new RecordRestriction("ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = {0}))", role);
             if (limit < 1)
                 return DataContext
                     .Table<UserAccount>()

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Web;
 using GSF.Data.Model;
 
-namespace EmailService
+namespace openSPM.Model
 {
-    class PendingInstallationViolations
+    public class PendingInstallationViolations
     {
         [PrimaryKey(true)]
         public int PatchStatusID { get; set; }
@@ -15,13 +14,13 @@ namespace EmailService
         [PrimaryKey]
         public Guid SME { get; set; }
 
-        public  int ID { get; set; }
+        public int ID { get; set; }
         public string VendorPatchName { get; set; }
         public DateTime DueDate { get; set; }
         public string PlatformName { get; set; }
         public string BUName { get; set; }
-        public string AssessmentResult { get; set; }
         public int DaysTilViolation { get; set; }
         public DateTime CreatedOn { get; set; }
+
     }
 }

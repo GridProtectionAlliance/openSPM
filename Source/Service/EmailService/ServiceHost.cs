@@ -113,7 +113,7 @@ namespace EmailService
             //{
             //}
 
-            if (DateTime.UtcNow.Minute == 37)
+            if (DateTime.UtcNow.Minute % 5 == 0)
             {
                 m_emailNewItems.TryRunOnce();
             }
@@ -350,6 +350,7 @@ namespace EmailService
                                          "Patch: " + rows.VendorPatchName + "<br/>" +
                                         "Business Unit: " + rows.BUName + "<br/>" +
                                         "Platform: " + rows.PlatformName + "<br/>" +
+                                        "Assessment Result: " + rows.AssessmentResult + "<br/>" +
                                         "Deadline: " + rows.DueDate;
                    if (rows.DaysTilViolation == alarm )
                     {

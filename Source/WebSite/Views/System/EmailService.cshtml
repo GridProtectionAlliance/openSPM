@@ -30,6 +30,7 @@
     DateTime timeStamp = dataContext.Connection.ExecuteScalar<DateTime>("Select TOP 1 TimeStamp FROM EmailService");
     ViewBag.DailyPatchNotifications = dataContext.Table<PendingAssessmentViolations>().QueryRecords();
     ViewBag.HourlyPatchNotifications = dataContext.Table<NewPatchesView>().QueryRecords();
+    ViewBag.InstallMitPlanNotifications = dataContext.Table<PendingInstallationViolations>().QueryRecords();
 }
 @* These script includes likely overlap those defined in layout and should be reduced *@
 <script src="~/Scripts/jquery-2.2.1.js"></script>
@@ -89,6 +90,29 @@
         <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;SME&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
     </tr>
     <tbody data-bind="foreach: newpatches">
+    <tr>
+        <td align="center" data-bind="text: VendorPatchName"></td>
+        <td align="center" data-bind="text: PlatformName"></td>
+        <td align="center" data-bind="text: BUName"></td>
+        <td align="center" data-bind="text: DaysTilViolation"></td>
+        <td align="center" data-bind="text: SME"></td>
+    </tr>
+    </tbody>
+
+</table>
+
+
+<p>&nbsp;</p>
+<table>
+    <tr><td colspan="3" align="left"><b>Coming notifications for Installs/Mitigation Plans</b></td></tr>
+    <tr>
+        <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;&nbsp;&nbsp;ID&nbsp;&nbsp;&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+        <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;Product&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+        <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;BU&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+        <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;Days Left&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+        <td align="center">&nbsp;&nbsp;<u>&nbsp;&nbsp;SME&nbsp;&nbsp;</u>&nbsp;&nbsp;</td>
+    </tr>
+    <tbody data-bind="foreach: installnotifications">
         <tr>
             <td align="center" data-bind="text: VendorPatchName"></td>
             <td align="center" data-bind="text: PlatformName"></td>
@@ -99,12 +123,14 @@
     </tbody>
 
 </table>
+
 <script>
     function HomePageViewModel() {
         var self = this;
 
         self.patches = ko.observableArray(@Html.Raw(Json.Encode(ViewBag.DailyPatchNotifications)));
         self.newpatches = ko.observableArray(@Html.Raw(Json.Encode(ViewBag.HourlyPatchNotifications)));
+        self.installnotifications = ko.observableArray(@Html.Raw(Json.Encode(ViewBag.InstallMitPlanNotifications)));
     }
 
     ko.applyBindings(new HomePageViewModel());

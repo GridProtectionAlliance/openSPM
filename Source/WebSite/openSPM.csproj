@@ -258,6 +258,7 @@
     <Compile Include="Model\PatchVendorPlatformView.cs" />
     <Compile Include="Model\PatchView.cs" />
     <Compile Include="Model\PendingAssessmentViolations.cs" />
+    <Compile Include="Model\PendingInstallationViolations.cs" />
     <Compile Include="Model\PlatformView.cs" />
     <Compile Include="Model\ThemeFields.cs" />
     <Compile Include="Model\TimeIntervalCounters.cs" />

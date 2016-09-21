@@ -29,6 +29,7 @@ using System.Web;
 using GSF;
 using GSF.Data.Model;
 using GSF.Identity;
+using GSF.Security.Model;
 using GSF.Web.Model;
 using GSF.Web.Hubs;
 using GSF.Web.Security;
@@ -2991,6 +2992,37 @@ namespace openSPM
             Guid userID;
             AuthorizationCache.UserIDs.TryGetValue(Thread.CurrentPrincipal.Identity.Name, out userID);
             return userID;
+        }
+
+
+        public IEnumerable<IDLabel> SearchUsers( string role, string searchText, int limit = -1)
+        {
+
+            RecordRestriction restriction = new RecordRestriction($"ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = '{role}'))");
+            if (limit < 1)
+                return DataContext
+                    .Table<UserAccount>()
+                    .QueryRecords(restriction: restriction)
+                    .Select(record =>
+                    {
+                        record.Name = UserInfo.SIDToAccountName(record.Name ?? "");
+                        return record;
+                    })
+                    .Where(record => record.Name?.ToLower().Contains(searchText.ToLower()) ?? false)
+                    .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+
+            return DataContext
+                .Table<UserAccount>()
+                .QueryRecords(restriction: restriction)
+                .Select(record =>
+                {
+                    record.Name = UserInfo.SIDToAccountName(record.Name ?? "");
+                    return record;
+                })
+                .Where(record => record.Name?.ToLower().Contains(searchText.ToLower()) ?? false)
+                .Take(limit)
+                .Select(record => IDLabel.Create(record.ID.ToString(), record.Name));
+
         }
 
         #endregion

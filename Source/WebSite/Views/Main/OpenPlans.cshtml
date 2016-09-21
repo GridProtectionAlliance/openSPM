@@ -20,9 +20,12 @@
 //       Generated original version of source code.
 //
 //*****************************************************************************************************@
+@using System.IdentityModel.Tokens
 @using GSF.Web
 @using GSF.Web.Model
 @using GSF.Security.Model
+@using GSF.Data.Model;
+
 @using openSPM.Model
 @model AppModel
 @section StyleSheets {
@@ -37,7 +40,7 @@
         new[] { "BusinessUnitName", "Business Unit", "text-left"},
         new[] { "PlatformName", "Product", "text-left"},
         new[] { "CreatedOn", "Creation Date", "text-center"},
-        new[] { null, "Product", "text-center valign-middle"},
+        new[] { null, "Documents", "text-center valign-middle"},
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -51,7 +54,7 @@
     <td width="20%" class="text-left valign-middle"><div nowrap data-bind="text: BusinessUnitName"></div></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: PlatformName"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: CreatedOn.formatDate(DateFormat)"></div></td>
-    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
+    <td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable:  $parent.canEdit() && $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>
     <td width="5%" class="text-center valign-middle" nowrap>
         <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
         @*<button type="button" class="btn btn-xs" data-bind="click: $parent.removePageRecord, enable: $parent.canDelete() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-remove"></span></button>*@
@@ -59,13 +62,13 @@
 }
 @helper AddNewEditDialog(DataContext dataContext)
 {
-    <div class="row">
+    <div class="col-lg-12">
         @Html.Raw(dataContext.AddInputField<MitigationPlanView>("Title", fieldLabel: "Patch Title", customDataBinding: "enable: false"))                    
         @Html.Raw(dataContext.AddInputField<MitigationPlanView>("VendorPatchName", fieldLabel: $"{Model.Global.CompanyAcronym} Patch Identifier", customDataBinding: "enable: false"))
         @Html.Raw(dataContext.AddInputField<MitigationPlanView>("PlatformName", fieldLabel: "Product", customDataBinding: "enable: false"))
         @Html.Raw(dataContext.AddInputField<MitigationPlanView>("BusinessUnitName", fieldLabel: "Business Unit", customDataBinding: "enable: false"))
         @Html.Raw(dataContext.AddDateField<MitigationPlanView>("CreatedOn", fieldLabel: "Created On Date"))
-        @Html.Raw(dataContext.AddSelectField<MitigationPlanView, UserAccount>("CreatedByID", "ID", "Name", fieldLabel: "Author"))
+        @Html.Raw(dataContext.AddSelectField<MitigationPlanView, UserAccount>("CreatedByID", "ID", "Name", fieldLabel: "Author", restriction: new RecordRestriction("ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = 'SME'))")))
         @Html.Raw(dataContext.AddInputField<MitigationPlanView>("ApprovedByName", fieldLabel: "Approved By"))
         @Html.Raw(dataContext.AddCheckBoxField<MitigationPlanView>("IsMitigated", fieldLabel: "Completed?"))
     </div>
@@ -84,6 +87,8 @@
 </div>
 
 @section Scripts {
+<script src="@("@GSF/Web/Model/Scripts/gsf.web.primeui.js")"></script>
+
     <script>
         @Html.Raw(Model.RenderViewModelConfiguration<MitigationPlanView>(ViewBag, "VendorPatchName"))
         
@@ -94,11 +99,28 @@
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
  
             $('#addNewEditDialog').on("shown.bs.modal", function () {
-                $.each($('#selectCreatedByID').children(), function (index, option) {
-                    securityHub.sidToAccountName($(option).text()).done(function (user) {
-                        $(option).text(user);
+                if (viewModel.dataHubIsConnected()) {
+                    function searchUsers( searchText, limit) {
+                        return dataHub.searchUsers('BUC', searchText, limit);
+                    }
+
+                    initializeAutoCompleteLookupField("ApprovedByName", searchUsers, false);
+
+                    $('#inputApprovedByName').puiautocomplete({
+                        select: function (event, item) {
+                            var name = item.data("label");
+                            viewModel.currentRecord().ApprovedByName(name);
+                        }
                     });
-                });
+
+                    $.each($('#selectCreatedByID').children(), function (index, option) {
+                        securityHub.sidToAccountName($(option).text()).done(function (user) {
+                            $(option).text(user);
+                        });
+                    });
+
+                }
+
             });
         });
         

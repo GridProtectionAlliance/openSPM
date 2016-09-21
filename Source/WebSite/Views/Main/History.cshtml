@@ -30,18 +30,19 @@
 
     ViewBag.HeaderColumns = new[]
     {   //    { "Field", "Label", "Classes" }
-        new[] { "VendorPatchName", "Patch ID", "text-center" },
-        new[] { "BusinessUnitID", "Business Unit", "text-left"},
-        new[] { "VendorName", "Vendor", "text-left"},
-        new[] { "ProductName", "Product", "text-left"},
-        new[] { null, "AssessmentID", "text-left valign-middle"},
+        new[] { "VendorPatchName", "Patch ID", "text-left" },
+        new[] { "BusinessUnitID", "Bus. Unit", "text-left"},
+        new[] { "VendorReleaseDate", "Release Date", "text-left"},
+        new[] { "DiscoveryDate", "Discovery Date", "text-left"},
+        new[] { "DiscoveryDelta", "&Delta;", "text-center"},
+        new[] { "AssessmentID", "AssessmentID", "text-left valign-middle"},
         new[] { null, "Action Taken", "text-left valign-middle"},
         new[] { null, "Assessment Date", "text-center valign-middle" },
+        new[] { "AssessmentDelta", "&Delta;", "text-center"},
         new[] { null, "InstallID", "text-center valign-middle" },
-        new[] { null, "Install Date", "text-center valign-middle" },
         new[] { null, "Mitigation Plan ID", "text-center valign-middle" },
-        new[] { null, "Mitigation Plan Date", "text-center valign-middle" },
-        new[] { null, "Closed Date", "text-center valign-middle" },
+        new[] { "CompletionDate", "Completion Date", "text-center valign-middle" },
+        new[] { "CompletionDelta", "&Delta;", "text-center"},
     };
 
     ViewBag.BodyRows = BodyRows().ToString();
@@ -51,7 +52,7 @@
 @helper PatchFilter()
 {
     <div class='row'>
-        <div class='col-md-4'>
+        <div class='col-md-3'>
             <div class='form-group'>
                 <label for='patchfilter'>Patch ID Filter:</label>
                 <div class='right-inner-addon'>
@@ -60,7 +61,7 @@
                 </div>
             </div>
         </div>
-        <div class='col-md-4'>
+        <div class='col-md-3'>
             <div class='form-group'>
                 <label for='vendorfilter'>Vendor Name Filter:</label>
                 <div class='right-inner-addon'>
@@ -69,31 +70,57 @@
                 </div>
             </div>
         </div>
-        <div class='col-md-4'>
+        <div class='col-md-3'>
             <div class='form-group'>
                 <label for='platformfilter'>Product Name Filter:</label>
                 <div class='right-inner-addon'>
                     <i class='glyphicon glyphicon-search'></i>
-                    <input class='form-control' type='search' id='platformfilter' placeholder='Search' />
+                    <input class='form-control' type='search' id='platformfilter' placeholder='Search'/>
                 </div>
             </div>
         </div>
+        <div class='col-md-3'>
+            <div class='form-group'>
+                <label for='platformfilter'>Date Range Filter:</label>
+                <div class='row'>
+                    <div class='col-md-6'>
+                        <div class='input-group date' data-provide='datepicker'>
+                            <input type='text' class='form-control' id='startDate' placeholder='Start Date'>
+                            <div class='input-group-addon'>
+                                <span class='glyphicon glyphicon-th'></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class='col-md-6'>
+                        <div class='input-group date' data-provide='datepicker'>
+                            <input type='text' class='form-control' id='endDate' placeholder='End Date'>
+                            <div class='input-group-addon'>
+                                <span class='glyphicon glyphicon-th'></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
     </div>
 }
 @helper BodyRows()
 {
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: viewPatch.bind($data)"></button></td>
     <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
-    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: VendorName"></div></td>
-    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: ProductName"></div></td>
+    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></div></td>
+    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: DiscoveryDate.formatDate(DateFormat)"></div></td>
+    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: DiscoveryDelta"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: AssessmentID, click: viewAssessment.bind($data)"></button></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: AssessmentDate.formatDate(DateFormat)"></div></td>
+    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: AssessmentDelta"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: InstallID, visible: checkNull(InstallID),click: viewInstall.bind($data)"></button></td>
-    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(InstallDate)"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: MitigationPlanID, visible: checkNull(MitigationPlanID),click: viewMitigation.bind($data)"></button></td>
-    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(MitigationPlanCreatedDate)"></div></td>
-    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: dateFixer(ClosedDate)"></div></td>
+    <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: CompletionDate.formatDate(DateFormat)"></div></td>
+    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: CompletionDelta"></div></td>
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
             <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>
@@ -259,40 +286,62 @@
             $("#pageHeader").append("@Html.Raw(PatchFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
 
             $('#patchfilter').on('keyup', function (e) {
-                if ($('#patchfilter').val().length == 0) {
-                    viewModel.filterText = '%';
-                    viewModel.queryPageRecords();
-                } else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
+                //if ($('#patchfilter').val().length == 0) {
+                //    viewModel.filterText = '%';
+                //    viewModel.queryPageRecords();
+                //} else {
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
                     viewModel.queryPageRecords();
 
-                }
+                //}
 
             });
 
             $('#platformfilter').on('keyup', function (e) {
-                if ($('#platformfilter').val().length == 0) {
-                    viewModel.filterText = '%';
-                    viewModel.queryPageRecords();
-                } else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
+                //if ($('#platformfilter').val().length == 0) {
+                //    viewModel.filterText = '%';
+                //    viewModel.queryPageRecords();
+                //} else {
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
                     viewModel.queryPageRecords();
 
-                }
+                //}
 
             });
 
             $('#vendorfilter').on('keyup', function (e) {
-                if ($('#vendorfilter').val().length == 0) {
-                    viewModel.filterText = '%';
-                    viewModel.queryPageRecords();
-                } else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val();
+                //if ($('#vendorfilter').val().length == 0) {
+                //    viewModel.filterText = '%';
+                //    viewModel.queryPageRecords();
+                //} else {
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
                     viewModel.queryPageRecords();
 
-                }
+                //}
 
             });
+            
+            $('#startDate').change(function (e) {
+                //if ($('#vendorfilter').val().length == 0) {
+                //    viewModel.filterText = '%';
+                //    viewModel.queryPageRecords();
+                //} else {
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
+                    viewModel.queryPageRecords();
+
+                //}
+            });
+            $('#endDate').change(function (e) {
+                //if ($('#vendorfilter').val().length == 0) {
+                //    viewModel.filterText = '%';
+                //    viewModel.queryPageRecords();
+                //} else {
+                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
+                    viewModel.queryPageRecords();
+
+                //}
+            });
+
             $("#patchDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#assessmentDialog").modal({ show: false, backdrop: "static", keyboard: false });
             $("#installDialog").modal({ show: false, backdrop: "static", keyboard: false });

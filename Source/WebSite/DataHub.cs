@@ -2236,17 +2236,21 @@ namespace openSPM
             string patchFilter = "%";
             string productFilter = "%";
             string vendorFilter = "%";
+            string startDate = "";
+            string endDate = "";
             if (filterText != "%")
             {
                 string[] filters = filterText.Split(';');
-                if (filters.Length == 3)
+                if (filters.Length == 5)
                 {
                     patchFilter = filters[0] + '%';
                     productFilter = filters[1] += '%';
                     vendorFilter = filters[2] += '%';
+                    startDate = (filters[3] == ""? "1/1/1": filters[3]);
+                    endDate = (filters[4] == "" ? DateTime.UtcNow.ToString() : filters[4]);
                 }
             }
-            return DataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return DataContext.Table<HistoryView>().QueryRecordCount(new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2} AND VendorReleaseDate BETWEEN {3} AND {4}", patchFilter, productFilter, vendorFilter, startDate, endDate));
         }
 
         [AuthorizeHubRole("*")]
@@ -2256,17 +2260,23 @@ namespace openSPM
             string patchFilter = "%";
             string productFilter = "%";
             string vendorFilter = "%";
+            string startDate = "";
+            string endDate = "";
+
             if (filterText != "%")
             {
                 string[] filters = filterText.Split(';');
-                if (filters.Length == 3)
+                if (filters.Length == 5)
                 {
                     patchFilter = filters[0] + '%';
                     productFilter = filters[1] += '%';
                     vendorFilter = filters[2] += '%';
+                    startDate = (filters[3] == "" ? "1/1/1" : filters[3]);
+                    endDate = (filters[4] == "" ? DateTime.UtcNow.ToString() : filters[4]);
+
                 }
             }
-            return DataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}", patchFilter, productFilter, vendorFilter));
+            return DataContext.Table<HistoryView>().QueryRecords(sortField, ascending, page, pageSize, new RecordRestriction("VendorPatchName LIKE {0} AND ProductName LIKE {1} AND VendorName LIKE {2}  AND VendorReleaseDate BETWEEN {3} AND {4}", patchFilter, productFilter, vendorFilter, startDate, endDate));
         }
 
         #endregion

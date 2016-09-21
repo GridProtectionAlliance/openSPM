@@ -131,18 +131,21 @@
 {
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
-@*<div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
+<div id="manageDocumentsDialog" class="modal fade modal-wide" style="z-index: 2000">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-body">
+            <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
                 <iframe style="border: none" id="manageDocumentsFrame"></iframe>
+            </div>
+            <div class="modal-footer">
                 <button type="button" class="btn btn-default pull-right popup-ok-button" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
 </div>
-*@
 
 <div id="installDialog" class="modal fade" role="dialog">
     <div class="modal-dialog modal-lg ">
@@ -170,7 +173,8 @@
                 </form>
             </div>
             <div class="modal-footer modal-readonly">
-                 <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
+                <button class="btn btn-primary" onclick="getInstallDocuments()">Get Install Documents&nbsp;&nbsp;<span class="badge" id="installDocCount">0</span></button>
+                <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
             </div>
         </div>
     </div>
@@ -205,6 +209,7 @@
                 </form>
             </div>
             <div class="modal-footer modal-readonly">
+                <button class="btn btn-primary" onclick="getMitigationPlanDocuments()">Get Mitigation Plan Documents&nbsp;&nbsp;<span class="badge" id="mitigationDocCount">0</span></button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
             </div>
         </div>
@@ -237,6 +242,7 @@
                 </form>
             </div>
             <div class="modal-footer modal-readonly">
+                <button class="btn btn-primary" onclick="getAssessmentDocuments()">Get Assessment Documents&nbsp;&nbsp;<span class="badge" id="assessmentDocCount">0</span></button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
             </div>
         </div>
@@ -271,6 +277,8 @@
                 </form>
             </div>
             <div class="modal-footer modal-readonly">
+                @*<button class="btn btn-primary" onclick="getDiscoveryResultDocuments()">Get Discovery Result Documents</button>*@
+                <button class="btn btn-primary" onclick="getPatchDocuments()">Get Patch Documents&nbsp;&nbsp;<span class="badge" id="patchDocCount">0</span></button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">OK</button>
             </div>
         </div>
@@ -281,65 +289,91 @@
         @Html.Raw(Model.RenderViewModelConfiguration<HistoryView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
         @Html.Raw(Model.RenderAbstract<BusinessUnit>("Abbreviation"))
+        
+        function getPatchDocuments() {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + encodeURIComponent($('#patchnumberpatch').text()) + "&Name=" + encodeURIComponent($('#patchidpatch').text()) + "&HideButton=true" + "&titleStart=View",
+                "height": ($(document).height() - 150) + "px",
+               "width": "100%"
+            });
+            $("#manageDocumentsDialog").modal("show");
+
+        }
+
+        @*function getDiscoveryResultDocuments() {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=DiscoveryResult&SourceField=DiscoveryResultID&SourceID=" + encodeURIComponent($('#patchnumberpatch').text()) + "&Name=" + encodeURIComponent($('#patchidpatch').text()) + "&HideButton=true" + "&titleStart=View",
+                "height": ($(document).height() - 150) + "px",
+               "width": "100%"
+            });
+            $("#manageDocumentsDialog").modal("show");
+        }*@
+        
+        function getAssessmentDocuments() {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=Assessment&SourceField=AssessmentID&SourceID=" + encodeURIComponent($('#assidass').text()) + "&Name=" + encodeURIComponent($('#patchnameass').text()) + "&HideButton=true" + "&titleStart=View",
+                "height": ($(document).height() - 150) + "px",
+               "width": "100%"
+            });
+            $("#manageDocumentsDialog").modal("show");
+
+        }
+        
+        function getInstallDocuments() {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=Install&SourceField=InstallID&SourceID=" + encodeURIComponent($('#patchidinstall').text()) + "&Name=" + encodeURIComponent($('#patchnameinstall').text()) + "&HideButton=true" + "&titleStart=View",
+                "height": ($(document).height() - 150) + "px",
+               "width": "100%"
+            });
+            $("#manageDocumentsDialog").modal("show");
+        }
+        
+        function getMitigationPlanDocuments() {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=MitigationPlan&SourceField=MitigationPlanID&SourceID=" + encodeURIComponent($('#mitigationid').text()) + "&Name=" + encodeURIComponent($('#patchnamemit').text()) + "&HideButton=true" + "&titleStart=View",
+                "height": ($(document).height() - 150) + "px",
+               "width": "100%"
+            });
+            $("#manageDocumentsDialog").modal("show");
+        }
+        
+        function openManageDocumentsModal(record) {
+            $("#manageDocumentsFrame").attr({
+                "src": "@Url.Content("~/Main/Documents/")" + "?SourceTable=Patch&SourceField=PatchID&SourceID=" + record.PatchID + "&Name=" + encodeURIComponent(record.PatchMnemonic) + "&HideButton=true" + "&titleStart=View",
+                "height": ($(document).height() - 150) + "px",
+               "width": "100%"
+            });
+            $("#manageDocumentsDialog").modal("show");
+        }
 
         $(function () {
+            $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
+
             $("#pageHeader").append("@Html.Raw(PatchFilter().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
+            viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
 
             $('#patchfilter').on('keyup', function (e) {
-                //if ($('#patchfilter').val().length == 0) {
-                //    viewModel.filterText = '%';
-                //    viewModel.queryPageRecords();
-                //} else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
-                    viewModel.queryPageRecords();
-
-                //}
-
+                viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
+                viewModel.queryPageRecords();
             });
 
             $('#platformfilter').on('keyup', function (e) {
-                //if ($('#platformfilter').val().length == 0) {
-                //    viewModel.filterText = '%';
-                //    viewModel.queryPageRecords();
-                //} else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
-                    viewModel.queryPageRecords();
-
-                //}
-
+                viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
+                viewModel.queryPageRecords();
             });
 
             $('#vendorfilter').on('keyup', function (e) {
-                //if ($('#vendorfilter').val().length == 0) {
-                //    viewModel.filterText = '%';
-                //    viewModel.queryPageRecords();
-                //} else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
-                    viewModel.queryPageRecords();
-
-                //}
-
+                viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
+                viewModel.queryPageRecords();
             });
             
             $('#startDate').change(function (e) {
-                //if ($('#vendorfilter').val().length == 0) {
-                //    viewModel.filterText = '%';
-                //    viewModel.queryPageRecords();
-                //} else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
-                    viewModel.queryPageRecords();
-
-                //}
+                viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
+                viewModel.queryPageRecords();
             });
             $('#endDate').change(function (e) {
-                //if ($('#vendorfilter').val().length == 0) {
-                //    viewModel.filterText = '%';
-                //    viewModel.queryPageRecords();
-                //} else {
-                    viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
-                    viewModel.queryPageRecords();
-
-                //}
+                viewModel.filterText = $('#patchfilter').val() + ';' + $('#platformfilter').val() + ';' + $('#vendorfilter').val() + ';' + $('#startDate').val() + ';' + $('#endDate').val();
+                viewModel.queryPageRecords();
             });
 
             $("#patchDialog").modal({ show: false, backdrop: "static", keyboard: false });
@@ -359,6 +393,7 @@
                     $('#vendorreleasedatepatch').html((data[0].VendorReleaseDate).formatDate(DateFormat));
                     $('#platformpatch').html(data[0].PlatformName);
                     $('#detailspatch').html(data[0].Detail);
+                    $('#patchDocCount').html(record.PatchDocumentCount);
                     $("#patchDialog").modal("show");
                 });
             }
@@ -367,7 +402,6 @@
 
         function viewAssessment(record) {
             if (viewModel.dataHubIsConnected) {
-                console.log(record);
                 dataHub.queryAssessmentHistoryViews(record.AssessmentID, null).done(function (data) {
                     $('#assidass').html(data[0].AssessmentID);
                     $('#patchnameass').html(data[0].VendorPatchName);
@@ -375,6 +409,7 @@
                     $('#assessmentkeyass').html(data[0].AssessmentResult);
                     $('#closeddateass').html((data[0].CreatedOn).formatDate(DateFormat));
                     $('#detailscloseass').html(data[0].Details);
+                    $('#assessmentDocCount').html(record.AssessmentDocumentCount);
                     $("#assessmentDialog").modal("show");
                 });
             }
@@ -390,6 +425,7 @@
                     $('#workmangamentidinstall').html(data[0].WorkManagementID);
                     $('#completeddateinstall').html((data[0].CompletedOn).formatDate(DateFormat));
                     $('#completednotesinstall').html(data[0].CompletedNotes);
+                    $('#installDocCount').html(record.InstallDocumentCount);
                     $("#installDialog").modal("show");
                 });
             }
@@ -407,6 +443,7 @@
                         $('#approvedonmit').html((data[0].ApprovedOn).formatDate(DateFormat));
                     $('#approvedbymit').html(data[0].ApprovedByName);
                     $('#summarymit').html(data[0].Summary);
+                    $('#mitigationDocCount').html(record.MitigationPlanDocumentCount);
                     $("#mitigationDialog").modal("show");
                 });
             }

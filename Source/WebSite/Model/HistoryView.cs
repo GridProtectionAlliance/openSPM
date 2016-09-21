@@ -13,6 +13,7 @@ namespace openSPM.Model
         [PrimaryKey(true)]
         public int PatchStatusID { get; set; }
         public int PatchID { get; set; }
+        public int PatchDocumentCount { get; set; }
         public DateTime VendorReleaseDate { get; set; }
         public DateTime DiscoveryDate { get; set; }
         public int DiscoveryDelta { get; set; }
@@ -21,13 +22,16 @@ namespace openSPM.Model
         public string VendorPatchName { get; set; }
         public int BusinessUnitID { get; set; }
         public int AssessmentID { get; set; }
+        public int AssessmentDocumentCount { get; set; }
         public int AssessmentResultKey { get; set; }
         public DateTime AssessmentDate { get; set; }
         public int AssessmentDelta { get; set; }
         public int? InstallID { get; set; }
+        public int? InstallDocumentCount { get; set; }
         public DateTime? InstallDate { get; set; }
         public int? MitigationPlanID { get; set; }
         public DateTime? MitigationPlanCreatedDate { get; set; }
+        public int? MitigationPlanDocumentCount { get; set; }
         public DateTime CompletionDate { get; set; }
         public int CompletionDelta { get; set; }
 

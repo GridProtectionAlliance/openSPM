@@ -273,13 +273,15 @@
         function refreshBusinessUnitSMETable() {
             if (!businessUnitSMETableInitialized)
                 return;
-
-            dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
-                const businessSMEs = $("#businessSMEs");
-                businessSMEs.puidatatable('setTotalRecords', count);
-                businessSMEs.puidatatable("getPaginator").puipaginator("setPage", 0);
-                //businessSMEs.puidatatable("reload");
-            });
+            $('#businessSMEs').puidatatable('destroy');
+            $('#businessSMEs').children().remove();
+            initializeBusinessUnitSMETable();
+            //dataHub.queryBusinessUnitUserAccountCount(viewModel.currentRecord().ID()).done(function(count) {
+            //    const businessSMEs = $("#businessSMEs");
+            //    businessSMEs.puidatatable('setTotalRecords', count);
+            //    businessSMEs.puidatatable("getPaginator").puipaginator("setPage", 0);
+            //    //businessSMEs.puidatatable("reload");
+            //});
         }
 
         function deleteBusinessUnitSME(userAccountID, userAccountName) {

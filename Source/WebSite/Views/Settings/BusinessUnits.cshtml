@@ -375,13 +375,16 @@
         }
 
         function refreshSMEPlatformsTable() {
-            if (viewModel.dataHubIsConnected() && selectedBusinessUnitUserAccount != null) {
-                dataHub.queryUserAccountPlatformCount(selectedBusinessUnitUserAccount.UserAccountID).done(function (count) {
-                    const smePlatforms = $("#smePlatforms");
-                    smePlatforms.puidatatable('setTotalRecords', count);
-                    smePlatforms.puidatatable("getPaginator").puipaginator("setPage", 0);
-                });
-            }
+            $('#smePlatforms').puidatatable('destroy');
+            $('#smePlatforms').children().remove();
+            initializeSMEPlatformsTable();
+            //if (viewModel.dataHubIsConnected() && selectedBusinessUnitUserAccount != null) {
+            //    dataHub.queryUserAccountPlatformCount(selectedBusinessUnitUserAccount.UserAccountID).done(function (count) {
+            //        const smePlatforms = $("#smePlatforms");
+            //        smePlatforms.puidatatable('setTotalRecords', count);
+            //        smePlatforms.puidatatable("getPaginator").puipaginator("setPage", 0);
+            //    });
+            //}
         }
 
         function deleteSMEPlatform(userAccountID, platformID, platformName) {

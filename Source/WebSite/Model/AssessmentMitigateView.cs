@@ -34,5 +34,7 @@ namespace openSPM.Model
         public string Detail { get; set; }
         public Guid CreatedByID { get; set; }
 
+        public string ApprovedByName { get; set; }
+        public Guid? Author { get; set; }
     }
 }

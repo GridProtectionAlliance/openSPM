@@ -32,16 +32,17 @@
     {   //    { "Field", "Label", "Classes" }
         new[] { "VendorPatchName", "Patch ID", "text-left" },
         new[] { "BusinessUnitID", "Bus. Unit", "text-left"},
-        new[] { "VendorReleaseDate", "Release Date", "text-left"},
-        new[] { "DiscoveryDate", "Discovery Date", "text-left"},
+        new[] { "VendorReleaseDate", "Release", "text-left"},
+        new[] { "DiscoveryDate", "Discovery", "text-left"},
         new[] { "DiscoveryDelta", "&Delta;", "text-center"},
-        new[] { "AssessmentID", "AssessmentID", "text-left valign-middle"},
-        new[] { null, "Action Taken", "text-left valign-middle"},
-        new[] { null, "Assessment Date", "text-center valign-middle" },
+        new[] { "AssessmentID", "AssessID", "text-center"},
+        new[] { "AssessmentResultKey", "Result", "text-left"},
+        new[] { null, "Assessed", "text-center valign-middle" },
         new[] { "AssessmentDelta", "&Delta;", "text-center"},
         new[] { null, "InstallID", "text-center valign-middle" },
-        new[] { null, "Mitigation Plan ID", "text-center valign-middle" },
-        new[] { "CompletionDate", "Completion Date", "text-center valign-middle" },
+        new[] { null, "MitPlanID", "text-center valign-middle" },
+        new[] { null, "PlanStat", "text-center valign-middle" },
+        new[] { "CompletionDate", "CompDate", "text-center" },
         new[] { "CompletionDelta", "&Delta;", "text-center"},
     };
 
@@ -109,18 +110,19 @@
 @helper BodyRows()
 {
     <td width="15%" class="text-left valign-middle"><button type="button" class="btn btn-link" data-bind="text: VendorPatchName, click: viewPatch.bind($data)"></button></td>
-    <td width="15%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
+    <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAbbreviationValue(BusinessUnitID)"></div></td>
     <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: VendorReleaseDate.formatDate(DateFormat)"></div></td>
     <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: DiscoveryDate.formatDate(DateFormat)"></div></td>
-    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: DiscoveryDelta"></div></td>
+    <td width="2%" class="text-center valign-middle"><div nowrap data-bind="text: DiscoveryDelta"></div></td>
     <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: AssessmentID, click: viewAssessment.bind($data)"></button></td>
     <td width="10%" class="text-left valign-middle"><div nowrap data-bind="text: lookupAssessactionValue(AssessmentResultKey)"></div></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: AssessmentDate.formatDate(DateFormat)"></div></td>
-    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: AssessmentDelta"></div></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: InstallID, visible: checkNull(InstallID),click: viewInstall.bind($data)"></button></td>
-    <td width="10%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: MitigationPlanID, visible: checkNull(MitigationPlanID),click: viewMitigation.bind($data)"></button></td>
+    <td width="2%" class="text-center valign-middle"><div nowrap data-bind="text: AssessmentDelta"></div></td>
+    <td width="6%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: InstallID, visible: checkNull(InstallID),click: viewInstall.bind($data)"></button></td>
+    <td width="6%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: MitigationPlanID, visible: checkNull(MitigationPlanID),click: viewMitigation.bind($data)"></button></td>
+    <td width="6%" class="text-center valign-middle"><button type="button" class="btn btn-link" data-bind="text: (PlanStatus != null ? (PlanStatus ? 'Closed' : 'Open') : '')"></button></td>
     <td width="10%" class="text-center valign-middle"><div nowrap data-bind="text: CompletionDate.formatDate(DateFormat)"></div></td>
-    <td width="5%" class="text-left valign-middle"><div nowrap data-bind="text: CompletionDelta"></div></td>
+    <td width="2%" class="text-center valign-middle"><div nowrap data-bind="text: CompletionDelta"></div></td>
     @*<td width="5%" class="text-center valign-middle"><button type="button" class="btn btn-default btn-sm" data-bind="click: openManageDocumentsDialog.bind($data), enable: $parent.dataHubIsConnected">Docs&nbsp;&nbsp;<span class="badge" data-bind="text: getDocumentCount(ID, $($element)), attr: {id: 'documentCount' + ID}">0</span></button></td>*@
     @*<td width="5%" class="text-center valign-middle" nowrap>
             <button type="button" class="btn btn-xs" data-bind="click: $parent.editPageRecord, enable: $parent.canEdit() && $parent.dataHubIsConnected()"><span class="glyphicon glyphicon-pencil"></span></button>

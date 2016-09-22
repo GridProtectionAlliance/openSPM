@@ -34,6 +34,7 @@ namespace openSPM.Model
         public int? MitigationPlanDocumentCount { get; set; }
         public DateTime CompletionDate { get; set; }
         public int CompletionDelta { get; set; }
+        public int? PlanStatus { get; set; }
 
     }
 }

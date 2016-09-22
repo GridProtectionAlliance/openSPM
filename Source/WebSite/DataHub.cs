@@ -1871,6 +1871,14 @@ namespace openSPM
             Assessment result = DeriveAssessment(record);
             result.CreatedByID = GetCurrentUserID();
             result.CreatedOn = DateTime.UtcNow;
+            if(record.ImpactKey > 2)
+            {
+                DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 5 WHERE ID = {0}", record.PatchStatusID);
+            }
+            else
+            {
+                DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 4 WHERE ID = {0}", record.PatchStatusID);
+            }
             DataContext.Table<Assessment>().AddNewRecord(result);
         }
 
@@ -2529,16 +2537,9 @@ namespace openSPM
         [RecordOperation(typeof(AssessmentMitigateView), RecordOperation.AddNewRecord)]
         public void AddNewAssessmentMitigateViewMitigate(AssessmentMitigateView record)
         {
-            //int themeID = MiPlanContext.Connection.ExecuteScalar<int?>("Select ID FROM Theme WHERE IsDefault = 1") ?? -1;
-            DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 4 WHERE ID = {0}", record.PatchStatusID);
-            //MiPlanContext.Table<MiPlan>().AddNewRecord(DeriveMiPlan(record, themeID));
+            DataContext.Connection.ExecuteNonQuery("Update PatchStatus Set PatchStatusKey = 5 WHERE ID = {0}", record.PatchStatusID);
 
             MitigationPlan result = DeriveMitigate(record);
-            //result.MiPlanID =  GetLastMitigationPlanID();
-            result.CreatedByID = GetCurrentUserID();
-            result.CreatedOn = DateTime.UtcNow;
-            result.UpdatedOn = result.CreatedOn;
-            result.UpdatedByID = result.CreatedByID;
             DataContext.Table<MitigationPlan>().AddNewRecord(result);
 
         }
@@ -2559,9 +2560,9 @@ namespace openSPM
             {
                 PatchStatusID = record.PatchStatusID,
                 Summary = record.Summary + ' ',
-                MiPlanID = record.MiPlanID,
                 CreatedOn = DateTime.UtcNow,
-                CreatedByID = GetCurrentUserID(),
+                CreatedByID = record.Author ?? GetCurrentUserID(),
+                ApprovedByName = record.ApprovedByName,
                 UpdatedOn = DateTime.UtcNow,
                 UpdatedByID = GetCurrentUserID(),
                 IsMitigated = false

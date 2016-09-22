@@ -413,17 +413,6 @@
 
                     });
                 }
-
-                ++record.PatchStatusKey;
-                if ($('#assessmentSelect').val() > 2)
-                    ++record.PatchStatusKey;
-                dataHub.updatePatchStatusKey(record.PatchStatusID, record.PatchStatusKey).done(function(){
-                    viewModel.queryPageRecords();
-                });
-
-
-
-
             }
         });
 

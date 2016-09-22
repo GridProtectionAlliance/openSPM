@@ -117,8 +117,8 @@
                 @Html.Raw(dataContext.AddInputField<Vendor>("PatchCadence"))
             </div>
             @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Company", customDataBinding: "enable: false"))
-            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Abbreviation"))
-            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ProductLink", "url", customDataBinding: "html: renderHotLinks(notNull(ProductLink())), enable: false"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("Abbreviation", customDataBinding: "enable: false"))
+            @Html.Raw(dataContext.AddInputField<LatestProductDiscoveryResult>("ProductLink", "url", customDataBinding: "html: renderHotLinks(notNull(ProductLink()))"))
             @Html.Raw(dataContext.AddTextAreaField<LatestProductDiscoveryResult>("Description", 5, customDataBinding: "html: renderHotLinks(notNull(Description())), enable: false"))
         </div>
         <div class="col-md-4" data-bind="visible: $parent.recordMode()==RecordMode.View ">
@@ -181,6 +181,8 @@
         var currentProductLink = "";
         var currentProductDetails = "";
         var currentVendorName = "";
+        var currentAbbreviation = "";
+        var currentProductLink = "";
       
         function enableDiscoveryButton(element, record){
             if(viewModel.canAddNew() && viewModel.dataHubIsConnected()){
@@ -199,10 +201,12 @@
             currentProductLink = record.Link;
             currentProductDetails = record.Description;
             currentVendorName = record.Company;
+            currentProductLink = record.ProductLink;
+            currentAbbreviation = record.Abbreviation;
             viewModel.addPageRecord();
         }
 
-        $(viewModel).on("newRecord", function (event, newRecord) {
+        $(viewModel).on("newRecord", function (event, newRecord, oldrecord) {
             // Make sure new records get assigned current vendor ID
             newRecord.VendorID = currentVendorID;
             newRecord.ProductID = currentProductID;
@@ -210,6 +214,8 @@
             newRecord.ProductName = currentProductName;
             newRecord.Company = currentVendorName;
             newRecord.Description = currentProductDetails;
+            newRecord.Abbreviation = currentAbbreviation;
+            newRecord.ProductLink = currentProductLink;
         });
         var discoveryDays = @Html.Raw(ViewBag.discoveryDayLimits);
 
@@ -339,8 +345,8 @@
                 // On add/edit dialog shown, disable data-dismiss buttons on parent pop-up
                
                 if(viewModel.recordMode() === RecordMode.AddNew){
-                    $('#inputLink').hide();
-                    $('#readonlyinputLink').show();
+                    $('#inputProductLink').hide();
+                    $('#readonlyinputProductLink').show();
                     $('#textDescription').hide();
                     $('#readonlytextDescription').show();
                 }

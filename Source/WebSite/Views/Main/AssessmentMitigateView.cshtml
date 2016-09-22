@@ -24,6 +24,7 @@
 @using GSF
 @using GSF.Data.Model
 @using GSF.Web
+@using GSF.Security.Model
 @using GSF.Web.Model
 @model AppModel
 @{
@@ -187,74 +188,16 @@
         <div class="col-md-12">
             @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("PatchDetails", fieldLabel: "Patch Details"))
             <div data-bind="visible: $parent.recordMode()==RecordMode.AddNew">
-                <button type="submit" class="btn btn-primary" id="template">Get Mitigation Plan Template</button>
                 <div class="col-md-12">
+                    @Html.Raw(dataContext.AddSelectField<AssessmentMitigateView, UserAccount>("Author", "ID", "Name", fieldLabel: "Author", restriction: new RecordRestriction("ID IN (SELECT UserAccountID FROM ApplicationRoleUserAccount WHERE ApplicationRoleUserAccount.ApplicationRoleID IN (SELECT ID FROM ApplicationRole WHERE Name = 'SME'))")))
+                    @Html.Raw(dataContext.AddInputField<AssessmentMitigateView>("ApprovedByName", fieldLabel: "Approved By"))
                     <div class="form-group">
                         <label for="uploadFiles">Add Mitigation Plan Related Documents:</label>
                         <input id="uploadFiles" name="uploadFiles[]" type="file" multiple class="file-loading">
                     </div>
                 </div>
-
-                @*<div>
-                    <h4>Mitigation Plan Form</h4>
-                    <div>Mitigation Plan Instructions:
-                        <ol>
-                            <li>SME: complete this form in its entirety. <b>Specific dates are required, and all fields are required in order to meet NERC CIP minimum requirements.</b> Add additional “Action Items” as needed.</li>
-                            <li>SME: E-mail completed document to the SME Supervisor.</li>
-                            <li>SME Supervisor: Document approval in an e-mail and send approval e-mail and completed form to ot-patches@tva.gov.</li>
-                            <li>Patch Intake Coordinator: Attach completed documents to Mitigation Plan in OpenSPM.</li>
-                        </ol>
-                        <div class="col-md-6">
-                            <div class="col-md-6">
-                                <label>Plan Author</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="planAuthor" class="form-control" placeholder="Name"/>
-                            </div>
-                            <div class="col-md-6">
-                                <label>Plan Approver & Owner</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="planOwner" class="form-control" placeholder="Owner"/>
-                            </div>
-                            <div class="col-md-6">
-                                <label>PAN Reference #</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="panRef" class="form-control" placeholder="PAN #"/>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="col-md-6">
-                                <label>Approval Date</label>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="input-group date" data-provide="datepicker">
-                                    <input type="text" class="form-control" id="approvalDate" placeholder="Click here to enter a date.">
-                                    <div class="input-group-addon">
-                                        <span class="glyphicon glyphicon-th"></span>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="col-md-3">
-                                <label>Summary</label>
-                            </div>
-                            <div class="col-md-9">
-                                <textarea id="mitigationSummary" class="form-control" placeholder="Click here to enter text."></textarea>
-                            </div>
-                            <div id="actionWindow"></div>
-                        </div>
-
-                    </div>
-                </div>*@
             </div>
-
         </div>
-
     </div>
 
     <div class="row" data-bind="visible: $parent.recordMode()==RecordMode.Edit">
@@ -263,7 +206,6 @@
             @Html.Raw(dataContext.AddTextAreaField<AssessmentMitigateView>("Details"))
         </div>
     </div>
-
 }
 @Html.RenderResource("GSF.Web.Model.Views.PagedViewModel.cshtml")
 <div id="manageDocumentsDialog" class="modal modal-wide fade" role="dialog">
@@ -283,24 +225,41 @@
         @Html.Raw(Model.RenderViewModelConfiguration<AssessmentMitigateView>(ViewBag))
         @Html.Raw(Model.RenderValueListClientLookupFunction("assessAction", "Abbreviation"))
         const fileUploadUrl = "@Html.Raw(Url.Content("~/FileUploadHandler.ashx?SourceTable=MitigationPlanDocument&SourceField=MitigationPlanID"))";
+
         $(function() {
+            $('#addNewEditDialog .modal-footer').prepend('<button type="submit" class="btn btn-primary pull-left" id="template">Get Mitigation Plan Template</button>');
 
             $("#pageHeader").append("@Html.Raw(Filters().ToString().RemoveDuplicateWhiteSpace().Replace("\r\n", ""))");
-
-            $( function() {
-                $( "#startdate" ).datepicker();
-            } );
-
-            $( function() {
-                $( "#enddate" ).datepicker();
-            } );
-
+            $( "#startdate" ).datepicker();
+            $( "#enddate" ).datepicker();
             $("#manageDocumentsDialog").modal({ show: false, backdrop: "static", keyboard: false });
 
 
             var numberOfActions = 0;
             $('#addNewEditDialog').on("shown.bs.modal",function(){
                 
+                if (viewModel.dataHubIsConnected()) {
+                    function searchUsers( searchText, limit) {
+                        return dataHub.searchUsers('BUC', searchText, limit);
+                    }
+
+                    initializeAutoCompleteLookupField("ApprovedByName", searchUsers, false);
+
+                    $('#inputApprovedByName').puiautocomplete({
+                        select: function (event, item) {
+                            var name = item.data("label");
+                            viewModel.currentRecord().ApprovedByName(name);
+                        }
+                    });
+
+                    $.each($('#selectAuthor').children(), function (index, option) {
+                        securityHub.sidToAccountName($(option).text()).done(function (user) {
+                            $(option).text(user);
+                        });
+                    });
+
+                }
+
                 $("#uploadFiles").fileinput({
                     uploadUrl: fileUploadUrl,
                     uploadAsync: true,
@@ -326,59 +285,11 @@
                     window.open('@Url.Content("~/Docs/MitigationPlanTemplate.dotx")')
 
                 });
-                //$('#addNewEditDialog .modal-footer').prepend('<button class="btn btn-primary" id="addActionButton">Add Action</button>');
-
-                //$('#addActionButton').off('click');
-                //$('#addActionButton').on('click', function(){
-                //    $('#actionWindow').append("<hr><div id='action" + numberOfActions++ +"' class='actions'>"+
-                //                                    "<div class='col-md-3'>"+
-                //                                        "<label>Action Item #" + numberOfActions + "</label>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-9'>"+
-                //                                        "<textarea id='actionItemSummary' class='form-control' placeholder='Please enter a summary.'></textarea>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-3'>"+
-                //                                        "<label>Status</label>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-3'>"+
-                //                                        "<select id='statusSelect' class='form-control'><option>Pending</option><option>Complete</option></select>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-3'>"+
-                //                                        "<label>Scheduled Completion Date</label>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-3'>"+
-                //                                        "<div class='input-group date' data-provide='datepicker'>" +
-                //                                            "<input type='text' class='form-control' id='completionDate' placeholder='click here to enter a date.'>" +
-                //                                            "<div class='input-group-addon'>" +
-                //                                                "<span class='glyphicon glyphicon-th'></span>"+
-                //                                            "</div>"+
-                //                                        "</div>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-12'><div class='col-md-3'>"+
-                //                                        "<label>Action Item Assigned To</label>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-3'>"+
-                //                                        "<input id='actionAssignment' placeholder='Click here to enter text.' class='form-control'/>" +
-                //                                    "</div></div>" +
-                //                                    "<div class='col-md-3'>"+
-                //                                        "<label>Detailed Notes</label>" +
-                //                                    "</div>" +
-                //                                    "<div class='col-md-9'>"+
-                //                                        "<textarea id='detailedNotes' class='form-control' placeholder='Click her to enter text.'></textarea>" +
-                //                                    "</div>" +
-                //                              "</div><hr>");
-                //});
             });
 
             $('#addNewEditDialog').on("hidden.bs.modal",function(){
-                $('#addActionButton').off('click');
-                $('#addActionButton').remove();
-                numberOfActions = 0;
             });
         });
-
-        function getTemplate(){
-        }
 
         function getDueDate(day) {
             var newdate = new Date(day.toDate().getTime() + 35 * 24 * 60 * 60 * 1000);
@@ -386,7 +297,6 @@
             var month = newdate.getMonth() + 1;
             var year = newdate.getFullYear();
             var processeddate = month + '/' + date + '/' + year;
-            //console.log(processeddate);
             return processeddate;
         }
 
